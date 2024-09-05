@@ -23,12 +23,11 @@ class ProfileController extends GetxController {
   }
 
   copyPublicKey() async {
-    publicKeyCopied = true;
-
     await Clipboard.setData(
       ClipboardData(text: Repository.to.nostrKey!.public),
     );
 
+    publicKeyCopied = true;
     await Future.delayed(const Duration(seconds: 4));
     publicKeyCopied = false;
   }

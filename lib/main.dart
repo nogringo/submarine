@@ -4,7 +4,6 @@ import 'package:get_storage/get_storage.dart';
 import 'package:submarine/lock/lock_page.dart';
 import 'package:submarine/repository.dart';
 import 'package:system_theme/system_theme.dart';
-import 'package:toastification/toastification.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,18 +25,18 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return SystemThemeBuilder(builder: (context, accent) {
       ThemeData getThemeData(Brightness brightness) {
-        return ThemeData.from(colorScheme: ColorScheme.fromSeed(
-          seedColor: accent.accent,
-          brightness: brightness,
-        ));
+        return ThemeData.from(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: accent.accent,
+            brightness: brightness,
+          ),
+        );
       }
 
-      return ToastificationWrapper(
-        child: GetMaterialApp(
-          theme: getThemeData(Brightness.light),
-          darkTheme: getThemeData(Brightness.dark),
-          home: const LockPage(),
-        ),
+      return GetMaterialApp(
+        theme: getThemeData(Brightness.light),
+        darkTheme: getThemeData(Brightness.dark),
+        home: const LockPage(),
       );
     });
   }

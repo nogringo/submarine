@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_state_manager/src/simple/get_state.dart';
 import 'package:submarine/end_to_end_encryption.dart';
 import 'package:submarine/home/encryptor_controller.dart';
 import 'package:submarine/repository.dart';
-import 'package:flutter/services.dart';
-import 'package:toastification/toastification.dart';
 
 class EncryptorView extends StatelessWidget {
   const EncryptorView({super.key});
@@ -19,51 +18,62 @@ class EncryptorView extends StatelessWidget {
             prefixIcon: Icon(Icons.lock_open_outlined),
             labelText: "Text",
           ),
+          onChanged: (value) {
+            EncryptorController.to.update();
+          },
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            IconButton(
-              onPressed: () async {
-                final encryptedData = await EndToEndEncryption.encryptText(
-                  EncryptorController.to.plainText,
-                  Repository.to.secretKey!,
+        Padding(
+          padding: const EdgeInsets.only(top: 4.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              IconButton(onPressed: null, icon: Container()),
+              GetBuilder<EncryptorController>(builder: (c) {
+                return Visibility(
+                  visible: c.plainText.isNotEmpty,
+                  child: IconButton(
+                    onPressed: c.copyEncryptedPlainText,
+                    icon: Icon(
+                      c.encryptedPlaiTextCopied ? Icons.check : Icons.copy,
+                    ),
+                  ),
                 );
-
-                await Clipboard.setData(ClipboardData(text: encryptedData));
-
-                toastification.show(
-                  style: ToastificationStyle.simple,
-                  title: const Text("Encrypted text copied"),
-                  alignment: Alignment.bottomCenter,
-                  autoCloseDuration: const Duration(seconds: 4),
-                  borderRadius: BorderRadius.circular(12.0),
-                  applyBlurEffect: true,
+              }),
+              GetBuilder<EncryptorController>(builder: (c) {
+                return Visibility(
+                  visible: c.plainText.isNotEmpty,
+                  child: IconButton(
+                    onPressed: () {
+                      EncryptorController.to.plainTextController.text = '';
+                    },
+                    icon: const Icon(Icons.backspace_outlined),
+                  ),
                 );
-              },
-              icon: const Icon(Icons.copy),
-            ),
-            IconButton(
-              onPressed: () {
-                EncryptorController.to.plainTextController.text = '';
-              },
-              icon: const Icon(Icons.backspace_outlined),
-            ),
-          ],
+              }),
+            ],
+          ),
         ),
         TextField(
           controller: EncryptorController.to.encryptedTextController,
           decoration: InputDecoration(
             prefixIcon: const Icon(Icons.lock_outlined),
             labelText: "Encrypted text",
-            suffixIcon: IconButton(
-              onPressed: () {
-                EncryptorController.to.encryptedTextController.text = '';
-              },
-              icon: const Icon(Icons.backspace_outlined),
+            suffixIcon: GetBuilder<EncryptorController>(
+              builder: (c) {
+                return Visibility(
+                  visible: c.encryptedText.isNotEmpty,
+                  child: IconButton(
+                    onPressed: () {
+                      EncryptorController.to.encryptedTextController.text = '';
+                    },
+                    icon: const Icon(Icons.backspace_outlined),
+                  ),
+                );
+              }
             ),
           ),
           onChanged: (value) async {
+            EncryptorController.to.update();
             try {
               final decryptedText = await EndToEndEncryption.decryptText(
                 EncryptorController.to.encryptedText,

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:submarine/home/profile_controller.dart';
 import 'package:submarine/repository.dart';
-import 'package:toastification/toastification.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});

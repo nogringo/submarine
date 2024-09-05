@@ -3,9 +3,11 @@ import 'package:get/get.dart';
 import 'package:submarine/home/encryptor_controller.dart';
 import 'package:submarine/home/home_controller.dart';
 import 'package:submarine/home/profile_controller.dart';
+import 'package:submarine/home/views/document_view.dart';
 import 'package:submarine/home/views/encryptor_view.dart';
 import 'package:submarine/home/views/list_app_bar.dart';
 import 'package:submarine/home/views/profile_view.dart';
+import 'package:submarine/note/note_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -28,7 +30,7 @@ class HomePage extends StatelessWidget {
             ),
           }[c.pageContent],
           body: {
-            PageContent.list: Container(),
+            PageContent.list: const DocumentView(),
             PageContent.encryptor: const EncryptorView(),
             PageContent.profile: const ProfileView(),
           }[c.pageContent],
@@ -44,7 +46,9 @@ class HomePage extends StatelessWidget {
                     icon: const Icon(Icons.list),
                   ),
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Get.to(() => const NotePage());
+                    },
                     icon: const Icon(Icons.add),
                   ),
                   IconButton(

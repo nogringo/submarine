@@ -3,44 +3,28 @@ import 'package:uuid/uuid.dart';
 class Note {
   String id;
   DateTime date;
-  String title;
-  String? content;
-  Note? history;
+  String name;
+  String content;
 
-  // UUID generator
-  static const Uuid _uuid = Uuid();
-
-  // Constructor
-  Note({
-    String? id,
-    DateTime? date,
-    required this.title,
-    this.content,
-    this.history,
-  })  : id = id ?? _uuid.v4(), // Generate UUIDv4 if not provided
+  Note({required this.name, required this.content, String? id, DateTime? date})
+      : id = id ?? const Uuid().v4(),
         date = date ?? DateTime.now();
 
-  // Factory constructor to create from JSON
   factory Note.fromJson(Map<String, dynamic> json) {
     return Note(
       id: json['id'],
       date: DateTime.parse(json['date']),
-      title: json['title'],
+      name: json['name'],
       content: json['content'],
-      history: json['history'] != null ? Note.fromJson(json['history']) : null,
     );
   }
 
-  // Convert Note object to JSON
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'date': date.toIso8601String(),
-      'title': title,
+      'name': name,
       'content': content,
-      'history': history?.toJson(),
     };
   }
-
-  
 }

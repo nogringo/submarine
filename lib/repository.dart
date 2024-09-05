@@ -1,9 +1,12 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:nostr/nostr.dart';
+import 'package:submarine/end_to_end_encryption.dart';
+import 'package:submarine/models/note.dart';
 
 class Repository extends GetxController {
   static Repository get to => Get.find();
@@ -14,6 +17,8 @@ class Repository extends GetxController {
   Keychain? nostrKey;
 
   late List<String> nostrRelays = storedNostrRelays;
+
+  List<Note> notes = [];
 
   int get automaticLockAfter => _automaticLockAfter;
   set automaticLockAfter(int value) {
@@ -32,6 +37,11 @@ class Repository extends GetxController {
             .join(''));
       },
     );
+
+    getNotesFromLocalStorage().then((value) {
+      notes = value;
+      update();
+    });
   }
 
   List<String> get storedNostrRelays {
@@ -41,6 +51,30 @@ class Repository extends GetxController {
 
   set storedNostrRelays(List<String> value) {
     box.write("nostrRelays", value);
+  }
+
+  Future<List<Note>> getNotesFromLocalStorage() async {
+    String? encryptedStoredNotes = box.read("notes");
+    print(encryptedStoredNotes);
+    if (encryptedStoredNotes == null) return [];
+    String storedNotes = await EndToEndEncryption.decryptText(
+      encryptedStoredNotes,
+      secretKey!,
+    );
+    List<dynamic> map = jsonDecode(storedNotes);
+    List<Note> notes = map.map((item) => Note.fromJson(item)).toList();
+    return notes;
+  }
+
+  saveNotes() async {
+    String encodedNotes = jsonEncode(
+      notes.map((note) => note.toJson()).toList(),
+    );
+    String encryptedNotes = await EndToEndEncryption.encryptText(
+      encodedNotes,
+      secretKey!,
+    );
+    box.write("notes", encryptedNotes);
   }
 
   bool addNostrRelay(String newNostrRelay) {
@@ -58,6 +92,12 @@ class Repository extends GetxController {
     nostrRelays.remove(nostrRelay);
     update();
     storedNostrRelays = nostrRelays;
+  }
+
+  void createNote(Note note) {
+    notes.insert(0, note);
+    update();
+    saveNotes();
   }
 }
 

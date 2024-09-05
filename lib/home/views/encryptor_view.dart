@@ -27,7 +27,7 @@ class EncryptorView extends StatelessWidget {
               onPressed: () async {
                 final encryptedData = await EndToEndEncryption.encryptText(
                   EncryptorController.to.plainText,
-                  Repository.to.symmetricKey!,
+                  Repository.to.secretKey!,
                 );
 
                 await Clipboard.setData(ClipboardData(text: encryptedData));
@@ -67,7 +67,7 @@ class EncryptorView extends StatelessWidget {
             try {
               final decryptedText = await EndToEndEncryption.decryptText(
                 EncryptorController.to.encryptedText,
-                Repository.to.symmetricKey!,
+                Repository.to.secretKey!,
               );
 
               EncryptorController.to.plainTextController.text = decryptedText;

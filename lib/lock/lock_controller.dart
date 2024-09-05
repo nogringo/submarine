@@ -37,8 +37,8 @@ class LockController extends GetxController {
       return;
     }
 
-    Repository.to.symmetricKey = await EndToEndEncryption.derivatePassword(password);
+    Repository.to.secretKey = await EndToEndEncryption.derivatePassword(password);
 
-    Get.off(const HomePage());
+    Get.off(() => const HomePage());
   }
 }

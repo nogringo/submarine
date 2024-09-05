@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:submarine/home/encryptor_controller.dart';
 import 'package:submarine/home/home_controller.dart';
+import 'package:submarine/home/profile_controller.dart';
 import 'package:submarine/home/views/encryptor_view.dart';
 import 'package:submarine/home/views/list_app_bar.dart';
+import 'package:submarine/home/views/profile_view.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -12,6 +14,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     Get.put(HomeController());
     Get.put(EncryptorController());
+    Get.put(ProfileController());
     return GetBuilder<HomeController>(
       builder: (c) {
         return Scaffold(
@@ -27,7 +30,7 @@ class HomePage extends StatelessWidget {
           body: {
             PageContent.list: Container(),
             PageContent.encryptor: const EncryptorView(),
-            PageContent.profile: Container(),
+            PageContent.profile: const ProfileView(),
           }[c.pageContent],
           bottomNavigationBar: BottomAppBar(
             child: GetBuilder<HomeController>(builder: (c) {

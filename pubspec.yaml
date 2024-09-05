@@ -15,6 +15,7 @@ dependencies:
   nostr: ^1.5.0
   system_theme: ^3.1.0
   toastification: ^2.2.0
+  uuid: ^4.5.0
 
 dev_dependencies:
   flutter_test:

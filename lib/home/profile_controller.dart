@@ -22,6 +22,43 @@ class ProfileController extends GetxController {
     if (isAdded) newNostrRelayController.text = "";
   }
 
+  void removeNostrRelay(String nostrRelay) {
+    Get.dialog(AlertDialog(
+      title: const Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text("Relay deletion"),
+          CloseButton(),
+        ],
+      ),
+      content: Text.rich(
+        TextSpan(
+          children: [
+            const TextSpan(text: "You are about to delete "),
+            TextSpan(
+              text: nostrRelay,
+              style: TextStyle(color: Get.theme.colorScheme.primary),
+            ),
+            const TextSpan(text: '. Do you want to continue ?'),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: Get.back,
+          child: const Text("Undo"),
+        ),
+        FilledButton(
+          onPressed: () {
+            Repository.to.removeNostrRelay(nostrRelay);
+            Get.back();
+          },
+          child: const Text("Delete"),
+        ),
+      ],
+    ));
+  }
+
   copyPublicKey() async {
     await Clipboard.setData(
       ClipboardData(text: Repository.to.nostrKey!.public),

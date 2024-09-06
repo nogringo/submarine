@@ -162,7 +162,7 @@ class NostrRelays extends StatelessWidget {
                   ),
                   IconButton(
                     onPressed: () {
-                      Repository.to.removeNostrRelay(nostrRelay);
+                      ProfileController.to.removeNostrRelay(nostrRelay);
                     },
                     icon: const Icon(Icons.cancel_outlined),
                   ),

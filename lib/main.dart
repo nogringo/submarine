@@ -4,6 +4,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:submarine/lock/lock_page.dart';
 import 'package:submarine/repository.dart';
 import 'package:system_theme/system_theme.dart';
+import 'package:toastification/toastification.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,15 +34,17 @@ class MainApp extends StatelessWidget {
         );
       }
 
-      return GetMaterialApp(
-        theme: getThemeData(Brightness.light),
-        darkTheme: getThemeData(Brightness.dark),
-        getPages: [
-          GetPage(
-            name: "/",
-            page: () => const LockPage(),
-          ),
-        ],
+      return ToastificationWrapper(
+        child: GetMaterialApp(
+          theme: getThemeData(Brightness.light),
+          darkTheme: getThemeData(Brightness.dark),
+          getPages: [
+            GetPage(
+              name: "/",
+              page: () => const LockPage(),
+            ),
+          ],
+        ),
       );
     });
   }

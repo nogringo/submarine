@@ -11,7 +11,8 @@ class LockController extends GetxController {
 
   TextEditingController passwordController = TextEditingController();
   bool _showPassword = false;
-  int secretKeyError = 0;
+  int _secretKeyError = 0;
+  bool _opening = false;
 
   String get password => passwordController.text;
 
@@ -21,9 +22,20 @@ class LockController extends GetxController {
     update();
   }
 
+  int get secretKeyError => _secretKeyError;
+  set secretKeyError(int value) {
+    _secretKeyError = value;
+    update();
+  }
+
+  bool get opening => _opening;
+  set opening(bool value) {
+    _opening = value;
+    update();
+  }
+
   secretKeyChanged() {
     secretKeyError = 0;
-    update();
   }
 
   togglePasswordVisibility() {
@@ -33,9 +45,10 @@ class LockController extends GetxController {
   open() async {
     if (password.length < passwordMinimumLength) {
       secretKeyError = 1;
-      update();
       return;
     }
+
+    opening = true;
 
     Repository.to.secretKey = await EndToEndEncryption.derivatePassword(password);
 

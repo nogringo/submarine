@@ -15,7 +15,11 @@ class ListAppBar extends StatelessWidget implements PreferredSizeWidget {
                 child: Image.asset("./assets/logo_512_circle.png"),
               ),
               const Expanded(
-                child: TextField(),
+                child: TextField(
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(Icons.search),
+                  ),
+                ),
               ),
               IconButton(
                 onPressed: () {},

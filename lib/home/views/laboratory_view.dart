@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/src/simple/get_state.dart';
 import 'package:submarine/end_to_end_encryption.dart';
-import 'package:submarine/home/encryptor_controller.dart';
+import 'package:submarine/home/laboratory_controller.dart';
 import 'package:submarine/repository.dart';
 
-class EncryptorView extends StatelessWidget {
-  const EncryptorView({super.key});
+class LaboratoryView extends StatelessWidget {
+  const LaboratoryView({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         TextField(
-          controller: EncryptorController.to.plainTextController,
+          controller: LaboratoryController.to.plainTextController,
           maxLines: null,
           decoration: const InputDecoration(
             prefixIcon: Icon(Icons.lock_open_outlined),
             labelText: "Text",
           ),
           onChanged: (value) {
-            EncryptorController.to.update();
+            LaboratoryController.to.update();
           },
         ),
         Padding(
@@ -28,7 +28,7 @@ class EncryptorView extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               IconButton(onPressed: null, icon: Container()),
-              GetBuilder<EncryptorController>(builder: (c) {
+              GetBuilder<LaboratoryController>(builder: (c) {
                 return Visibility(
                   visible: c.plainText.isNotEmpty,
                   child: IconButton(
@@ -39,12 +39,12 @@ class EncryptorView extends StatelessWidget {
                   ),
                 );
               }),
-              GetBuilder<EncryptorController>(builder: (c) {
+              GetBuilder<LaboratoryController>(builder: (c) {
                 return Visibility(
                   visible: c.plainText.isNotEmpty,
                   child: IconButton(
                     onPressed: () {
-                      EncryptorController.to.plainTextController.text = '';
+                      LaboratoryController.to.plainTextController.text = '';
                     },
                     icon: const Icon(Icons.backspace_outlined),
                   ),
@@ -54,17 +54,17 @@ class EncryptorView extends StatelessWidget {
           ),
         ),
         TextField(
-          controller: EncryptorController.to.encryptedTextController,
+          controller: LaboratoryController.to.encryptedTextController,
           decoration: InputDecoration(
             prefixIcon: const Icon(Icons.lock_outlined),
             labelText: "Encrypted text",
-            suffixIcon: GetBuilder<EncryptorController>(
+            suffixIcon: GetBuilder<LaboratoryController>(
               builder: (c) {
                 return Visibility(
                   visible: c.encryptedText.isNotEmpty,
                   child: IconButton(
                     onPressed: () {
-                      EncryptorController.to.encryptedTextController.text = '';
+                      LaboratoryController.to.encryptedTextController.text = '';
                     },
                     icon: const Icon(Icons.backspace_outlined),
                   ),
@@ -73,14 +73,14 @@ class EncryptorView extends StatelessWidget {
             ),
           ),
           onChanged: (value) async {
-            EncryptorController.to.update();
+            LaboratoryController.to.update();
             try {
               final decryptedText = await EndToEndEncryption.decryptText(
-                EncryptorController.to.encryptedText,
+                LaboratoryController.to.encryptedText,
                 Repository.to.secretKey!,
               );
 
-              EncryptorController.to.plainTextController.text = decryptedText;
+              LaboratoryController.to.plainTextController.text = decryptedText;
             } catch (e) {
               //
             }

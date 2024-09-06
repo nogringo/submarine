@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 
-enum PageContent { list, encryptor, profile }
+enum PageContent { list, laboratory, profile }
 
 class HomeController extends GetxController {
   static HomeController get to => Get.find();

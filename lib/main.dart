@@ -36,7 +36,12 @@ class MainApp extends StatelessWidget {
       return GetMaterialApp(
         theme: getThemeData(Brightness.light),
         darkTheme: getThemeData(Brightness.dark),
-        home: const LockPage(),
+        getPages: [
+          GetPage(
+            name: "/",
+            page: () => const LockPage(),
+          ),
+        ],
       );
     });
   }

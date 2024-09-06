@@ -45,28 +45,35 @@ class AutomaticLock extends StatelessWidget {
             "Automatic lock",
             style: Get.textTheme.titleLarge,
           ),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: GetBuilder<Repository>(builder: (c) {
-              return DropdownButton<int>(
-                value: c.automaticLockAfter,
-                borderRadius: BorderRadius.circular(8),
-                underline: Container(),
-                onChanged: (int? automaticLockAfter) {
-                  if (automaticLockAfter == null) return;
-                  c.automaticLockAfter = automaticLockAfter;
-                },
-                items: [1, 2, 5, 30].map<DropdownMenuItem<int>>((int value) {
-                  return DropdownMenuItem<int>(
-                    value: value,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Text("After $value minute${value > 1 ? "s" : ""}"),
-                    ),
-                  );
-                }).toList(),
-              );
-            }),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              GetBuilder<Repository>(builder: (c) {
+                return DropdownButton<int>(
+                  value: c.automaticLockAfter,
+                  borderRadius: BorderRadius.circular(8),
+                  underline: Container(),
+                  onChanged: (int? automaticLockAfter) {
+                    if (automaticLockAfter == null) return;
+                    c.automaticLockAfter = automaticLockAfter;
+                  },
+                  items: [1, 2, 5, 30].map<DropdownMenuItem<int>>((int value) {
+                    return DropdownMenuItem<int>(
+                      value: value,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child:
+                            Text("After $value minute${value > 1 ? "s" : ""}"),
+                      ),
+                    );
+                  }).toList(),
+                );
+              }),
+              IconButton(
+                onPressed: Repository.to.lock,
+                icon: const Icon(Icons.lock_outlined),
+              ),
+            ],
           ),
         ],
       ),
@@ -168,7 +175,7 @@ class NostrRelays extends StatelessWidget {
                 hintText: "wss://new.nostr.relay/",
                 border: InputBorder.none,
               ),
-              onSubmitted: (_) => ProfileController.to.addNostrRelay,
+              onSubmitted: (_) => ProfileController.to.addNostrRelay(),
             ),
           ],
         );

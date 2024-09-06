@@ -6,25 +6,21 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:nostr/nostr.dart';
 import 'package:submarine/end_to_end_encryption.dart';
+import 'package:submarine/lock/lock_page.dart';
 import 'package:submarine/models/note.dart';
 
 class Repository extends GetxController {
   static Repository get to => Get.find();
 
   final box = GetStorage();
-  int _automaticLockAfter = 2;
+  int onUserActivityCallCount = 0;
+
   SecretKey? _secretKey;
   Keychain? nostrKey;
 
   late List<String> nostrRelays = storedNostrRelays;
 
   List<Note> notes = [];
-
-  int get automaticLockAfter => _automaticLockAfter;
-  set automaticLockAfter(int value) {
-    _automaticLockAfter = value;
-    update();
-  }
 
   SecretKey? get secretKey => _secretKey;
   set secretKey(SecretKey? value) {
@@ -53,9 +49,14 @@ class Repository extends GetxController {
     box.write("nostrRelays", value);
   }
 
+  int get automaticLockAfter => box.read("automaticLockAfter") ?? 2;
+  set automaticLockAfter(int value) {
+    box.write("automaticLockAfter", value);
+    update();
+  }
+
   Future<List<Note>> getNotesFromLocalStorage() async {
     String? encryptedStoredNotes = box.read("notes");
-    print(encryptedStoredNotes);
     if (encryptedStoredNotes == null) return [];
     String storedNotes = await EndToEndEncryption.decryptText(
       encryptedStoredNotes,
@@ -99,10 +100,29 @@ class Repository extends GetxController {
     update();
     saveNotes();
   }
+
+  onUserActivity() async {
+    onUserActivityCallCount++;
+    await Future.delayed(Duration(minutes: automaticLockAfter));
+
+    onUserActivityCallCount--;
+    if (onUserActivityCallCount > 0) return;
+
+    bool isSubmarineOpen = _secretKey != null;
+    if (isSubmarineOpen) lock();
+  }
+
+  lock() {
+    _secretKey = null;
+    nostrKey = null;
+
+    Get.offAll(() => const LockPage());
+  }
 }
 
 bool isNostrServer(String url) {
-  final RegExp nostrRegex =
-      RegExp(r'^(ws|wss):\/\/[a-zA-Z0-9.-]+(:[0-9]+)?(\/.*)?$');
+  final RegExp nostrRegex = RegExp(
+    r'^(ws|wss):\/\/[a-zA-Z0-9.-]+(:[0-9]+)?(\/.*)?$',
+  );
   return nostrRegex.hasMatch(url);
 }

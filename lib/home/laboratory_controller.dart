@@ -4,8 +4,8 @@ import 'package:get/get.dart';
 import 'package:submarine/end_to_end_encryption.dart';
 import 'package:submarine/repository.dart';
 
-class EncryptorController extends GetxController {
-  static EncryptorController get to => Get.find();
+class LaboratoryController extends GetxController {
+  static LaboratoryController get to => Get.find();
 
   TextEditingController plainTextController = TextEditingController();
   TextEditingController encryptedTextController = TextEditingController();
@@ -22,7 +22,7 @@ class EncryptorController extends GetxController {
 
   copyEncryptedPlainText() async {
     final encryptedData = await EndToEndEncryption.encryptText(
-      EncryptorController.to.plainText,
+      LaboratoryController.to.plainText,
       Repository.to.secretKey!,
     );
 

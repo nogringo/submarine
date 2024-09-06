@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:submarine/home/encryptor_controller.dart';
+import 'package:submarine/home/laboratory_controller.dart';
 import 'package:submarine/home/home_controller.dart';
 import 'package:submarine/home/profile_controller.dart';
 import 'package:submarine/home/views/document_view.dart';
-import 'package:submarine/home/views/encryptor_view.dart';
+import 'package:submarine/home/views/laboratory_view.dart';
 import 'package:submarine/home/views/list_app_bar.dart';
 import 'package:submarine/home/views/profile_view.dart';
 import 'package:submarine/note/note_page.dart';
@@ -15,15 +15,15 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Get.put(HomeController());
-    Get.put(EncryptorController());
+    Get.put(LaboratoryController());
     Get.put(ProfileController());
     return GetBuilder<HomeController>(
       builder: (c) {
         return Scaffold(
           appBar: {
             PageContent.list: const ListAppBar(),
-            PageContent.encryptor: AppBar(
-              title: const Text("Encryptor"),
+            PageContent.laboratory: AppBar(
+              title: const Text("Laboratory"),
             ),
             PageContent.profile: AppBar(
               title: const Text("Profile"),
@@ -31,7 +31,7 @@ class HomePage extends StatelessWidget {
           }[c.pageContent],
           body: {
             PageContent.list: const DocumentView(),
-            PageContent.encryptor: const EncryptorView(),
+            PageContent.laboratory: const LaboratoryView(),
             PageContent.profile: const ProfileView(),
           }[c.pageContent],
           bottomNavigationBar: BottomAppBar(
@@ -52,10 +52,10 @@ class HomePage extends StatelessWidget {
                     icon: const Icon(Icons.add),
                   ),
                   IconButton(
-                    color: c.pageContent == PageContent.encryptor
+                    color: c.pageContent == PageContent.laboratory
                         ? Get.theme.colorScheme.primary
                         : null,
-                    onPressed: () => c.pageContent = PageContent.encryptor,
+                    onPressed: () => c.pageContent = PageContent.laboratory,
                     icon: const Icon(Icons.shield_outlined),
                   ),
                   const Spacer(),

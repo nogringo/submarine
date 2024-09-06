@@ -58,28 +58,28 @@ class LockPage extends StatelessWidget {
                 );
               }),
               const Spacer(),
-              FilledButton(
-                onPressed: LockController.to.open,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: GetBuilder<LockController>(builder: (c) {
-                    return Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Opacity(
-                          opacity: c.opening ? 0 : 1,
-                          child: const Text("Open"),
-                        ),
-                        Opacity(
-                          opacity: c.opening ? 1 : 0,
-                          child: CircularProgressIndicator(
-                            color: Get.theme.colorScheme.surface,
+              GetBuilder<LockController>(
+                builder: (c) {
+                  return FilledButton(
+                    onPressed: c.opening ? null : LockController.to.open,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Opacity(
+                            opacity: c.opening ? 0 : 1,
+                            child: const Text("Open"),
                           ),
-                        ),
-                      ],
-                    );
-                  }),
-                ),
+                          Opacity(
+                            opacity: c.opening ? 1 : 0,
+                            child: const CircularProgressIndicator(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
             ],
           ),

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:submarine/end_to_end_encryption.dart';
@@ -50,7 +51,8 @@ class LockController extends GetxController {
 
     opening = true;
 
-    Repository.to.secretKey = await EndToEndEncryption.derivatePassword(password);
+    Repository.to.secretKey = await compute(generateKey, password);
+    Repository.to.connectToNostr();
 
     Get.off(() => const HomePage());
   }

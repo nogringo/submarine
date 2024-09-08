@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:get/get_state_manager/src/simple/get_state.dart';
+import 'package:get/get.dart';
 import 'package:submarine/end_to_end_encryption.dart';
-import 'package:submarine/home/laboratory_controller.dart';
+import 'package:submarine/home/controllers/laboratory_controller.dart';
 import 'package:submarine/repository.dart';
 
 class LaboratoryView extends StatelessWidget {
@@ -45,6 +45,7 @@ class LaboratoryView extends StatelessWidget {
                   child: IconButton(
                     onPressed: () {
                       LaboratoryController.to.plainTextController.text = '';
+                      LaboratoryController.to.update();
                     },
                     icon: const Icon(Icons.backspace_outlined),
                   ),
@@ -58,24 +59,24 @@ class LaboratoryView extends StatelessWidget {
           decoration: InputDecoration(
             prefixIcon: const Icon(Icons.lock_outlined),
             labelText: "Encrypted text",
-            suffixIcon: GetBuilder<LaboratoryController>(
-              builder: (c) {
-                return Visibility(
-                  visible: c.encryptedText.isNotEmpty,
-                  child: IconButton(
-                    onPressed: () {
-                      LaboratoryController.to.encryptedTextController.text = '';
-                    },
-                    icon: const Icon(Icons.backspace_outlined),
-                  ),
-                );
-              }
-            ),
+            suffixIcon: GetBuilder<LaboratoryController>(builder: (c) {
+              return Visibility(
+                visible: c.encryptedText.isNotEmpty,
+                child: IconButton(
+                  onPressed: () {
+                    LaboratoryController.to.encryptedTextController.text = '';
+                    LaboratoryController.to.plainTextController.text = '';
+                    LaboratoryController.to.update();
+                  },
+                  icon: const Icon(Icons.backspace_outlined),
+                ),
+              );
+            }),
           ),
           onChanged: (value) async {
             LaboratoryController.to.update();
             try {
-              final decryptedText = await EndToEndEncryption.decryptText(
+              final decryptedText = decryptText(
                 LaboratoryController.to.encryptedText,
                 Repository.to.secretKey!,
               );
@@ -86,6 +87,12 @@ class LaboratoryView extends StatelessWidget {
             }
           },
         ),
+        // TODO add encrypt decrypt files features
+        // IconButton(onPressed: null, icon: Container()),
+        // FilledButton.icon(
+        //   onPressed: LaboratoryController.to.chooseFiles,
+        //   label: const Text("Choose a file"),
+        // ),
       ],
     );
   }

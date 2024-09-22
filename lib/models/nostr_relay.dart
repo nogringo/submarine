@@ -8,10 +8,11 @@ part 'nostr_relay.g.dart';
 class NostrRelay {
   Id id = Isar.autoIncrement;
 
+  String pubkey;
   String encryptedUrl;
 
   @ignore
   String get url => decryptText(encryptedUrl, Repository.to.secretKey!);
 
-  NostrRelay(this.encryptedUrl);
+  NostrRelay(this.pubkey, this.encryptedUrl);
 }

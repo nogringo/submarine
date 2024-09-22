@@ -15,6 +15,7 @@ class NostrEvent {
 
   @ignore
   Event get event => Event.deserialize(jsonDecode(serializedEvent));
+  @Index(unique: true)
   String get id => event.id;
   String get pubkey => event.pubkey;
   int get createdAt => event.createdAt;

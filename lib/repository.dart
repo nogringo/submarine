@@ -7,10 +7,11 @@ import 'package:isar/isar.dart';
 import 'package:nostr/nostr.dart';
 import 'package:submarine/end_to_end_encryption.dart';
 import 'package:submarine/lock/lock_page.dart';
+import 'package:submarine/models/custom_field.dart';
 import 'package:submarine/models/nostr_event.dart';
 import 'package:submarine/models/nostr_relay.dart';
-import 'package:submarine/nostr_relay_manager.dart';
 import 'package:submarine/models/note.dart';
+import 'package:submarine/nostr_relay_manager.dart';
 
 class Repository extends GetxController {
   static Repository get to => Get.find();
@@ -23,6 +24,8 @@ class Repository extends GetxController {
   Uint8List? _secretKey;
   Keychain? nostrKey;
 
+  List items = [];
+
   Isar get isar => Isar.getInstance()!;
 
   Uint8List? get secretKey => _secretKey;
@@ -32,15 +35,8 @@ class Repository extends GetxController {
     nostrKey = Keychain(
       _secretKey!.map((b) => b.toRadixString(16).padLeft(2, '0')).join(''),
     );
-  }
 
-  List<String> get storedNostrRelays {
-    final list = box.read("nostrRelays") ?? [];
-    return List<String>.from(list);
-  }
-
-  set storedNostrRelays(List<String> value) {
-    box.write("nostrRelays", value);
+    listenNostrEvents();
   }
 
   int get automaticLockAfter => box.read("automaticLockAfter") ?? 2;
@@ -49,24 +45,54 @@ class Repository extends GetxController {
     update();
   }
 
+  void listenNostrEvents() {
+    final nostrEventChanged = isar.nostrEvents.watchLazy();
+    nostrEventChanged.listen((_) => fillItems());
+    fillItems();
+  }
+
+  void fillItems() async {
+    final nostrEvents = await Isar.getInstance()!
+        .nostrEvents
+        .filter()
+        .pubkeyEqualTo(nostrKey!.public)
+        .findAll();
+
+    Map<String, dynamic> mergedItems = {};
+    for (NostrEvent e in nostrEvents) {
+      final json = jsonDecode(decryptText(
+        e.content,
+        secretKey!,
+      ));
+
+      if (json['type'] == "Note") {
+        if (mergedItems[json["id"]] == null) {
+          mergedItems[json["id"]] = Note([]);
+        }
+        Note note = mergedItems[json["id"]];
+        note.history.add(NoteVersion.fromJson(json));
+      } else if (json['type'] == "CustomField") {
+        if (mergedItems[json["id"]] == null) {
+          mergedItems[json["id"]] = CustomField([]);
+        }
+        CustomField customField = mergedItems[json["id"]];
+        customField.history.add(CustomFieldVersion.fromJson(json));
+      }
+    }
+
+    items = mergedItems.values.toList();
+    update();
+  }
+
   connectToNostr() async {
-    final nostrRelays = await isar.nostrRelays.where().findAll();
+    final nostrRelays = await isar.nostrRelays
+        .filter()
+        .pubkeyEqualTo(Repository.to.nostrKey!.public)
+        .findAll();
 
     for (NostrRelay nostrRelay in nostrRelays) {
       nostrRelaysManager[nostrRelay.id] = NostrRelayManager(nostrRelay.id);
     }
-  }
-
-  Future<List<Note>> getNotesFromLocalStorage() async {
-    String? encryptedStoredNotes = box.read("notes");
-    if (encryptedStoredNotes == null) return [];
-    String storedNotes = decryptText(
-      encryptedStoredNotes,
-      secretKey!,
-    );
-    List<dynamic> map = jsonDecode(storedNotes);
-    List<Note> notes = map.map((item) => Note.fromJson(item)).toList();
-    return notes;
   }
 
   onUserActivity() async {
@@ -94,7 +120,10 @@ class Repository extends GetxController {
   }
 
   syncWithNostr() async {
-    final nostrRelays = await isar.nostrRelays.where().findAll();
+    final nostrRelays = await isar.nostrRelays
+        .filter()
+        .pubkeyEqualTo(Repository.to.nostrKey!.public)
+        .findAll();
     final nostrEvents = await isar.nostrEvents.where().findAll();
 
     for (NostrRelay nostrRelay in nostrRelays) {

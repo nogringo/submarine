@@ -1,63 +1,116 @@
-import 'package:submarine/models/item.dart';
+import 'package:uuid/uuid.dart';
 
-class CustomField extends Item {
-  Map<String, FieldValue> fields;
+class CustomField {
+  List<CustomFieldVersion> history;
 
-  CustomField({
-    required super.name,
-    required this.fields,
-    super.id,
-    super.date,
-  });
+  bool get wasEdited => history.length > 1;
 
-  factory CustomField.fromJson(Map<String, dynamic> json) {
-    return CustomField(
-      id: json['id'],
-      date: DateTime.parse(json['date']),
-      name: json['name'],
-      fields: (json['content'] as Map<String, dynamic>).map(
-        (key, value) => MapEntry(
-          key,
-          FieldValue.fromJson(value),
-        ),
-      ),
-    );
-  }
+  CustomField(this.history);
 
-  @override
+  String get id => history.last.id;
+  DateTime get date => history.last.date;
+  String get name => history.last.name;
+  List<Field> get fields => history.last.fields;
+
+  // factory CustomField.fromJson(Map<String, dynamic> json) {
+  //   return CustomField(
+  //     (json['history'] as List).map((e) => CustomFieldVersion.fromJson(e)).toList(),
+  //   );
+  // }
+
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'date': date.toIso8601String(),
-      'type': "CustomField",
-      'name': name,
-      'content': fields.map(
-        (key, value) => MapEntry(key, value.toJson()),
-      ),
+      'history': history.map((e) => e.toJson()).toList(),
     };
   }
 }
 
-enum FieldType { text, totp, hidden }
+class CustomFieldVersion {
+  final String id;
+  final DateTime date;
+  final String name;
+  final List<Field> fields;
 
-class FieldValue {
-  FieldType fieldType;
-  String value;
+  CustomFieldVersion({
+    required this.name,
+    required this.fields,
+    String? id,
+    DateTime? date,
+  })  : id = id ?? const Uuid().v4(),
+        date = date ?? DateTime.now();
 
-  FieldValue(this.fieldType, this.value);
-
-  factory FieldValue.fromJson(Map<String, dynamic> json) {
-    return FieldValue(
-      FieldType.values
-          .firstWhere((e) => e.toString() == 'FieldType.${json['fieldType']}'),
-      json['value'],
+  factory CustomFieldVersion.fromJson(Map<String, dynamic> json) {
+    return CustomFieldVersion(
+      id: json['id'],
+      date: DateTime.parse(json['date']),
+      name: json['name'],
+      fields: (json['fields'] as List).map((e) => Field.fromJson(e)).toList(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'fieldType': fieldType.toString().split('.').last,
+      'type': "CustomField",
+      'id': id,
+      'date': DateTime.now().toIso8601String(),
+      'name': name,
+      'fields': fields.map((e) => e.toJson()).toList(),
+    };
+  }
+
+  bool isSameVersion(CustomFieldVersion customFieldVersion) {
+    // Compare names
+    if (name != customFieldVersion.name) {
+      return false;
+    }
+
+    // Compare fields list length
+    if (fields.length != customFieldVersion.fields.length) {
+      return false;
+    }
+
+    // Compare each field
+    for (int i = 0; i < fields.length; i++) {
+      if (!fields[i].isSameField(customFieldVersion.fields[i])) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+}
+
+class Field {
+  bool hidden;
+  String name;
+  String value;
+
+  Field({required this.name, required this.value, this.hidden = false});
+
+  factory Field.fromJson(Map<String, dynamic> json) {
+    return Field(
+      name: json['name'],
+      value: json['value'],
+      hidden: json['hidden'] ?? false,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> json = {
+      'name': name,
       'value': value,
     };
+
+    if (hidden) json['hidden'] = true;
+
+    return json;
+  }
+
+  Field clone() {
+    return Field.fromJson(toJson());
+  }
+
+  bool isSameField(Field other) {
+    return name == other.name && value == other.value && hidden == other.hidden;
   }
 }

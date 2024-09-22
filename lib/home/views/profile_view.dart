@@ -244,7 +244,8 @@ class NostrRelays extends StatelessWidget {
                 return Column(
                   children: Isar.getInstance()!
                       .nostrRelays
-                      .where()
+                      .filter()
+                      .pubkeyEqualTo(Repository.to.nostrKey!.public)
                       .findAllSync()
                       .map(
                         (nostrRelay) => Row(

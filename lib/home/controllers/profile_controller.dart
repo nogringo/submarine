@@ -33,15 +33,18 @@ class ProfileController extends GetxController {
 
     final isar = Isar.getInstance()!;
 
-    final foundRelay = isar.nostrRelays
-        .where()
-        .findAllSync()
+    final foundRelay = (await isar.nostrRelays
+            .filter()
+            .pubkeyEqualTo(Repository.to.nostrKey!.public)
+            .findAll())
         .firstWhereOrNull((element) => element.url == newNostrRelay);
 
     if (foundRelay != null) return;
 
-    NostrRelay nostrRelay =
-        NostrRelay(encryptText(newNostrRelay, Repository.to.secretKey!));
+    NostrRelay nostrRelay = NostrRelay(
+      Repository.to.nostrKey!.public,
+      encryptText(newNostrRelay, Repository.to.secretKey!),
+    );
 
     await isar.writeTxn(() async {
       await isar.nostrRelays.put(nostrRelay);

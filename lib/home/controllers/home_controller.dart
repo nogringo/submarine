@@ -5,12 +5,12 @@ enum PageContent { list, laboratory, profile }
 class HomeController extends GetxController {
   static HomeController get to => Get.find();
 
-  PageContent _pageContent = PageContent.list;
+  int _pageIndex = 0;
 
-  PageContent get pageContent => _pageContent;
-  set pageContent(PageContent value) {
-    if (pageContent == value) return;
-    _pageContent = value;
+  int get pageIndex => _pageIndex;
+  set pageIndex(int value) {
+    if (pageIndex == value) return;
+    _pageIndex = value;
     update();
   }
 }

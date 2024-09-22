@@ -9,6 +9,7 @@ import 'package:submarine/models/nostr_relay.dart';
 import 'package:submarine/repository.dart';
 import 'package:system_theme/system_theme.dart';
 import 'package:toastification/toastification.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -54,6 +55,8 @@ class MainApp extends StatelessWidget {
               page: () => const LockPage(),
             ),
           ],
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
         ),
       );
     });

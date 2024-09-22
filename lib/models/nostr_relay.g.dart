@@ -21,6 +21,11 @@ const NostrRelaySchema = CollectionSchema(
       id: 0,
       name: r'encryptedUrl',
       type: IsarType.string,
+    ),
+    r'pubkey': PropertySchema(
+      id: 1,
+      name: r'pubkey',
+      type: IsarType.string,
     )
   },
   estimateSize: _nostrRelayEstimateSize,
@@ -44,6 +49,7 @@ int _nostrRelayEstimateSize(
 ) {
   var bytesCount = offsets.last;
   bytesCount += 3 + object.encryptedUrl.length * 3;
+  bytesCount += 3 + object.pubkey.length * 3;
   return bytesCount;
 }
 
@@ -54,6 +60,7 @@ void _nostrRelaySerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.encryptedUrl);
+  writer.writeString(offsets[1], object.pubkey);
 }
 
 NostrRelay _nostrRelayDeserialize(
@@ -63,6 +70,7 @@ NostrRelay _nostrRelayDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = NostrRelay(
+    reader.readString(offsets[1]),
     reader.readString(offsets[0]),
   );
   object.id = id;
@@ -77,6 +85,8 @@ P _nostrRelayDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
+      return (reader.readString(offset)) as P;
+    case 1:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -362,6 +372,137 @@ extension NostrRelayQueryFilter
       ));
     });
   }
+
+  QueryBuilder<NostrRelay, NostrRelay, QAfterFilterCondition> pubkeyEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'pubkey',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NostrRelay, NostrRelay, QAfterFilterCondition> pubkeyGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'pubkey',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NostrRelay, NostrRelay, QAfterFilterCondition> pubkeyLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'pubkey',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NostrRelay, NostrRelay, QAfterFilterCondition> pubkeyBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'pubkey',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NostrRelay, NostrRelay, QAfterFilterCondition> pubkeyStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'pubkey',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NostrRelay, NostrRelay, QAfterFilterCondition> pubkeyEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'pubkey',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NostrRelay, NostrRelay, QAfterFilterCondition> pubkeyContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'pubkey',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NostrRelay, NostrRelay, QAfterFilterCondition> pubkeyMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'pubkey',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<NostrRelay, NostrRelay, QAfterFilterCondition> pubkeyIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'pubkey',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<NostrRelay, NostrRelay, QAfterFilterCondition>
+      pubkeyIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'pubkey',
+        value: '',
+      ));
+    });
+  }
 }
 
 extension NostrRelayQueryObject
@@ -381,6 +522,18 @@ extension NostrRelayQuerySortBy
   QueryBuilder<NostrRelay, NostrRelay, QAfterSortBy> sortByEncryptedUrlDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'encryptedUrl', Sort.desc);
+    });
+  }
+
+  QueryBuilder<NostrRelay, NostrRelay, QAfterSortBy> sortByPubkey() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'pubkey', Sort.asc);
+    });
+  }
+
+  QueryBuilder<NostrRelay, NostrRelay, QAfterSortBy> sortByPubkeyDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'pubkey', Sort.desc);
     });
   }
 }
@@ -410,6 +563,18 @@ extension NostrRelayQuerySortThenBy
       return query.addSortBy(r'id', Sort.desc);
     });
   }
+
+  QueryBuilder<NostrRelay, NostrRelay, QAfterSortBy> thenByPubkey() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'pubkey', Sort.asc);
+    });
+  }
+
+  QueryBuilder<NostrRelay, NostrRelay, QAfterSortBy> thenByPubkeyDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'pubkey', Sort.desc);
+    });
+  }
 }
 
 extension NostrRelayQueryWhereDistinct
@@ -418,6 +583,13 @@ extension NostrRelayQueryWhereDistinct
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'encryptedUrl', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<NostrRelay, NostrRelay, QDistinct> distinctByPubkey(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'pubkey', caseSensitive: caseSensitive);
     });
   }
 }
@@ -433,6 +605,12 @@ extension NostrRelayQueryProperty
   QueryBuilder<NostrRelay, String, QQueryOperations> encryptedUrlProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'encryptedUrl');
+    });
+  }
+
+  QueryBuilder<NostrRelay, String, QQueryOperations> pubkeyProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'pubkey');
     });
   }
 }

@@ -1,16 +1,15 @@
-import 'dart:io';
-
 import 'package:isar/isar.dart';
 import 'package:nostr/nostr.dart';
 import 'package:submarine/models/nostr_event.dart';
 import 'package:submarine/models/nostr_relay.dart';
 import 'package:submarine/repository.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 class NostrRelayManager {
   int nostrRelayId;
   NostrRelay? nostrRelay;
 
-  late WebSocket webSocket;
+  late WebSocketChannel webSocket;
 
   NostrRelayManager(this.nostrRelayId) {
     initClass();
@@ -26,14 +25,14 @@ class NostrRelayManager {
     ]);
 
     try {
-      webSocket = await WebSocket.connect(nostrRelay!.url);
+      webSocket = WebSocketChannel.connect(Uri.parse(nostrRelay!.url));
     } catch (e) {
       return;
     }
 
-    webSocket.listen(onMessage);
+    webSocket.stream.listen(onMessage);
 
-    webSocket.add(requestWithFilter.serialize());
+    webSocket.sink.add(requestWithFilter.serialize());
   }
 
   onMessage(eventPayload) async {
@@ -60,15 +59,25 @@ class NostrRelayManager {
       final nostrEventNotFound = nostrEvent == null;
       if (nostrEventNotFound) {
         nostrEvent = NostrEvent(event.serialize());
-        await isar.writeTxn(() async {
-          await isar.nostrEvents.put(nostrEvent!);
-        });
+        // !
+        try {
+          await isar.writeTxn(() async {
+            await isar.nostrEvents.put(nostrEvent!);
+          });
+        } catch (e) {
+          //
+        }
       }
 
       nostrEvent.nostrRelays.add(nostrRelay!);
-      await isar.writeTxn(() async {
-        await nostrEvent!.nostrRelays.save();
-      });
+      // !
+      try {
+        await isar.writeTxn(() async {
+          await nostrEvent!.nostrRelays.save();
+        });
+      } catch (e) {
+        //
+      }
 
       return;
     }
@@ -77,10 +86,18 @@ class NostrRelayManager {
   }
 
   sendItem(String item) {
-    webSocket.add(item);
+    try {
+      webSocket.sink.add(item);
+    } catch (e) {
+      //
+    }
   }
 
   disconnect() async {
-    await webSocket.close();
+    try {
+      await webSocket.sink.close();
+    } catch (e) {
+      //
+    }
   }
 }

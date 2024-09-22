@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -24,7 +26,7 @@ class LaboratoryController extends GetxController {
 
   copyEncryptedPlainText() async {
     final encryptedData = encryptText(
-      LaboratoryController.to.plainText,
+      plainText,
       Repository.to.secretKey!,
     );
 
@@ -52,7 +54,29 @@ class LaboratoryController extends GetxController {
     }
 
     // for (PlatformFile file in result.files) {
-      
+
     // }
+  }
+
+  void encryptedTextChanged(String value) async {
+    LaboratoryController.to.update();
+    try {
+      String decryptedText = decryptText(
+        LaboratoryController.to.encryptedText,
+        Repository.to.secretKey!,
+      );
+
+      try {
+        final jsonObject = jsonDecode(decryptedText);
+        const encoder = JsonEncoder.withIndent('  ');
+        decryptedText = encoder.convert(jsonObject);
+      } catch (e) {
+        // 
+      }
+
+      plainTextController.text = decryptedText;
+    } catch (e) {
+      //
+    }
   }
 }

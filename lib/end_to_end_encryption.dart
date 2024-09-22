@@ -1,68 +1,65 @@
 import 'dart:convert';
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:pointycastle/export.dart';
 
 Uint8List generateRandomIV(int length) {
-  final random = Random.secure();
-  final iv = Uint8List(length);
-
-  for (int i = 0; i < length; i++) {
-    iv[i] = random.nextInt(256);
-  }
-
-  return iv;
-}
-
-Uint8List pad(Uint8List data, int blockSize) {
-  int padding = blockSize - (data.length % blockSize);
-  return Uint8List.fromList(data + List<int>.filled(padding, padding));
-}
-
-Uint8List unpad(Uint8List paddedData) {
-  int padding = paddedData.last;
-  return paddedData.sublist(0, paddedData.length - padding);
+  final rnd = SecureRandom('AES/CTR/AUTO-SEED-PRNG');
+  rnd.seed(KeyParameter(Uint8List(16))); // Seed the PRNG with 16 bytes
+  return rnd.nextBytes(length);
 }
 
 String encryptText(String plaintext, Uint8List key) {
+  // Convert plaintext to bytes
   final plaintextBytes = Uint8List.fromList(utf8.encode(plaintext));
-  final paddedPlaintext = pad(plaintextBytes, 16);
 
-  final iv = generateRandomIV(16);
+  // Generate random IV (nonce)
+  final iv = generateRandomIV(12); // GCM usually uses a 12-byte IV
 
-  final cipher = CBCBlockCipher(AESEngine());
-  final params = ParametersWithIV(KeyParameter(key), iv);
+  // Setup AES GCM Cipher
+  final cipher = GCMBlockCipher(AESEngine());
+  final params = AEADParameters(
+    KeyParameter(key),
+    128,
+    iv,
+    Uint8List(0),
+  ); // 128-bit authentication tag
 
-  cipher.init(true, params);
+  cipher.init(true, params); // true = encryption mode
 
-  final encrypted = Uint8List(paddedPlaintext.length);
-  for (var i = 0; i < paddedPlaintext.length; i += cipher.blockSize) {
-    cipher.processBlock(paddedPlaintext, i, encrypted, i);
-  }
+  // Perform encryption
+  final encrypted = cipher.process(plaintextBytes);
 
+  // Combine IV and encrypted data and return as base64 encoded string
   return base64Encode(iv + encrypted);
 }
 
-String decryptText(String encryptedText, Uint8List key) {
-  final encryptedBytes = base64Decode(encryptedText);
+String decryptText(String encryptedBase64, Uint8List key) {
+  // Decode the base64-encoded input
+  final encryptedBytes = base64Decode(encryptedBase64);
 
-  final iv = encryptedBytes.sublist(0, 16);
-  final encryptedData = encryptedBytes.sublist(16);
+  // Extract the IV from the first 12 bytes (GCM uses a 12-byte IV)
+  final iv = encryptedBytes.sublist(0, 12);
 
-  final cipher = CBCBlockCipher(AESEngine());
-  final params = ParametersWithIV(KeyParameter(key), iv);
+  // Extract the actual encrypted data (ciphertext + tag) from the remaining bytes
+  final ciphertextWithTag = encryptedBytes.sublist(12);
 
-  cipher.init(false, params);
+  // Setup AES GCM Cipher for decryption
+  final cipher = GCMBlockCipher(AESEngine());
+  final params = AEADParameters(
+    KeyParameter(key),
+    128,
+    iv,
+    Uint8List(0),
+  ); // 128-bit authentication tag
 
-  final decrypted = Uint8List(encryptedData.length);
-  for (var i = 0; i < encryptedData.length; i += cipher.blockSize) {
-    cipher.processBlock(encryptedData, i, decrypted, i);
-  }
+  cipher.init(false, params); // false = decryption mode
 
-  final unpaddedDecrypted = unpad(decrypted);
+  // Perform decryption
+  final decryptedBytes = cipher.process(ciphertextWithTag);
 
-  return utf8.decode(unpaddedDecrypted);
+  // Convert decrypted bytes back to a string
+  return utf8.decode(decryptedBytes);
 }
 
 Uint8List generateKey(String password) {

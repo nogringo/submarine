@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:submarine/models/note.dart';
-import 'package:submarine/note/note_controller.dart';
+import 'package:submarine/note/note_editor/note_editor_controller.dart';
 
-class NotePage extends StatelessWidget {
-  final Note? note;
+class NoteEditorPage extends StatelessWidget {
+  final NoteVersion? noteVersion;
 
-  const NotePage({super.key, this.note});
+  const NoteEditorPage({super.key, this.noteVersion});
 
   @override
   Widget build(BuildContext context) {
-    Get.put(NoteController(note: note));
+    Get.put(NoteEditorController(
+      noteVersion: noteVersion,
+    ));
 
     return Scaffold(
       appBar: AppBar(
@@ -22,8 +24,8 @@ class NotePage extends StatelessWidget {
         ),
         actions: [
           FilledButton(
-            onPressed: NoteController.to.save,
-            child: const Text("Save"),
+            onPressed: NoteEditorController.to.save,
+            child: Text(noteVersion == null ? "Create" : "Save"),
           ),
           const SizedBox(width: 8),
         ],
@@ -33,7 +35,7 @@ class NotePage extends StatelessWidget {
         child: Column(
           children: [
             TextField(
-              controller: NoteController.to.nameController,
+              controller: NoteEditorController.to.titleController,
               textCapitalization: TextCapitalization.sentences,
               style: Get.textTheme.headlineMedium,
               decoration: const InputDecoration(
@@ -43,7 +45,7 @@ class NotePage extends StatelessWidget {
             ),
             Expanded(
               child: TextField(
-                controller: NoteController.to.contentController,
+                controller: NoteEditorController.to.contentController,
                 textCapitalization: TextCapitalization.sentences,
                 maxLines: null,
                 expands: true,
@@ -54,6 +56,32 @@ class NotePage extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class TitleView extends StatelessWidget {
+  const TitleView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 16, bottom: 8),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: TextField(
+          controller: NoteEditorController.to.titleController,
+          textCapitalization: TextCapitalization.sentences,
+          style: Get.textTheme.displaySmall,
+          decoration: InputDecoration(
+            contentPadding: const EdgeInsets.all(16),
+            border: InputBorder.none,
+            filled: true,
+            fillColor: Get.theme.colorScheme.secondaryContainer,
+            hintText: "Title",
+          ),
         ),
       ),
     );

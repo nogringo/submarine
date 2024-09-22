@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:submarine/end_to_end_encryption.dart';
 import 'package:submarine/home/controllers/laboratory_controller.dart';
-import 'package:submarine/repository.dart';
 
 class LaboratoryView extends StatelessWidget {
   const LaboratoryView({super.key});
@@ -15,7 +13,6 @@ class LaboratoryView extends StatelessWidget {
           controller: LaboratoryController.to.plainTextController,
           maxLines: null,
           decoration: const InputDecoration(
-            prefixIcon: Icon(Icons.lock_open_outlined),
             labelText: "Text",
           ),
           onChanged: (value) {
@@ -57,7 +54,6 @@ class LaboratoryView extends StatelessWidget {
         TextField(
           controller: LaboratoryController.to.encryptedTextController,
           decoration: InputDecoration(
-            prefixIcon: const Icon(Icons.lock_outlined),
             labelText: "Encrypted text",
             suffixIcon: GetBuilder<LaboratoryController>(builder: (c) {
               return Visibility(
@@ -73,19 +69,7 @@ class LaboratoryView extends StatelessWidget {
               );
             }),
           ),
-          onChanged: (value) async {
-            LaboratoryController.to.update();
-            try {
-              final decryptedText = decryptText(
-                LaboratoryController.to.encryptedText,
-                Repository.to.secretKey!,
-              );
-
-              LaboratoryController.to.plainTextController.text = decryptedText;
-            } catch (e) {
-              //
-            }
-          },
+          onChanged: LaboratoryController.to.encryptedTextChanged,
         ),
         // TODO add encrypt decrypt files features
         // IconButton(onPressed: null, icon: Container()),
@@ -97,3 +81,5 @@ class LaboratoryView extends StatelessWidget {
     );
   }
 }
+
+// TODO add a field forcustom encryption decrytion key

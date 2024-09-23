@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
+import 'package:submarine/constants.dart';
 import 'package:submarine/home/controllers/profile_controller.dart';
 import 'package:submarine/models/nostr_relay.dart';
 import 'package:submarine/repository.dart';
@@ -12,19 +13,35 @@ class ProfileView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 8),
-      children: const [
-        AutomaticLock(),
-        SizedBox(height: 12),
-        NostrRelays(),
-        SizedBox(height: 12),
-        PublicKey(),
-        SizedBox(height: 12),
+      children: [
+        const AutomaticLock(),
+        const SizedBox(height: 12),
+        const NostrRelays(),
+        const SizedBox(height: 12),
+        const PublicKey(),
+        const SizedBox(height: 12),
         // ImportExport(), // TODO add import export features
-        Padding(
+        const Padding(
           padding: EdgeInsets.all(32.0),
           child: Text("1.0.0", textAlign: TextAlign.center),
         ),
-      ],
+      ].map((e) => ItemWrapper(e)).toList(),
+    );
+  }
+}
+
+class ItemWrapper extends StatelessWidget {
+  final Widget child;
+
+  const ItemWrapper(this.child, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: tabletWidth),
+        child: child,
+      ),
     );
   }
 }
@@ -139,7 +156,8 @@ class AutomaticLock extends StatelessWidget {
                     if (automaticLockAfter == null) return;
                     c.automaticLockAfter = automaticLockAfter;
                   },
-                  items: [1, 2, 5, 10, 30].map<DropdownMenuItem<int>>((int value) {
+                  items:
+                      [1, 2, 5, 10, 30].map<DropdownMenuItem<int>>((int value) {
                     return DropdownMenuItem<int>(
                       value: value,
                       child: Padding(
@@ -230,7 +248,7 @@ class NostrRelays extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: const EdgeInsets.only(top : 16, right: 16, left: 16),
+              padding: const EdgeInsets.only(top: 16, right: 16, left: 16),
               child: Text(
                 "Nostr relays",
                 style: Get.textTheme.titleLarge,

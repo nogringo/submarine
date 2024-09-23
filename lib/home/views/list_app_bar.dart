@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:submarine/repository.dart';
 
 class ListAppBar extends StatelessWidget implements PreferredSizeWidget {
   const ListAppBar({super.key});
@@ -14,11 +15,12 @@ class ListAppBar extends StatelessWidget implements PreferredSizeWidget {
                 padding: const EdgeInsets.all(8.0),
                 child: Image.asset("./assets/logo_512_circle.png"),
               ),
-              const Expanded(
+              Expanded(
                 child: TextField(
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     prefixIcon: Icon(Icons.search),
                   ),
+                  onChanged: Repository.to.search,
                 ),
               ),
               // IconButton(

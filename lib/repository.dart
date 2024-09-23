@@ -24,6 +24,7 @@ class Repository extends GetxController {
   Keychain? nostrKey;
 
   List items = [];
+  List filteredItems = [];
 
   Isar get isar => Isar.getInstance()!;
 
@@ -181,5 +182,15 @@ class Repository extends GetxController {
         nostrSendEvent(nostrEvent.serializedEvent, nostrRelay.url);
       }
     }
+  }
+
+  void search(String value) {
+    filteredItems = [];
+
+    for (var item in items) {
+      if (item.search(value)) filteredItems.add(item);
+    }
+
+    update();
   }
 }

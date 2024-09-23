@@ -23,6 +23,10 @@ class Note {
       'history': history.map((e) => e.toJson()).toList(),
     };
   }
+
+  bool search(String part) {
+    return history.last.search(part);
+  }
 }
 
 class NoteVersion {
@@ -70,5 +74,19 @@ class NoteVersion {
     }
 
     return true;
+  }
+
+  bool search(String part) {
+    final partLowerCase = part.toLowerCase();
+
+    if (name.toLowerCase().contains(partLowerCase)) {
+      return true;
+    }
+
+    if (content.toLowerCase().contains(partLowerCase)) {
+      return true;
+    }
+
+    return false;
   }
 }

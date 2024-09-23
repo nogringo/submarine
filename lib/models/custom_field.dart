@@ -23,6 +23,10 @@ class CustomField {
       'history': history.map((e) => e.toJson()).toList(),
     };
   }
+
+  bool search(String part) {
+    return history.last.search(part);
+  }
 }
 
 class CustomFieldVersion {
@@ -77,6 +81,26 @@ class CustomFieldVersion {
     }
 
     return true;
+  }
+
+  bool search(String part) {
+    final partLowerCase = part.toLowerCase();
+
+    if (name.toLowerCase().contains(partLowerCase)) {
+      return true;
+    }
+
+    for (var field in fields) {
+      if (field.name.toLowerCase().contains(partLowerCase)) {
+        return true;
+      }
+
+      if (field.value.toLowerCase().contains(partLowerCase)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }
 

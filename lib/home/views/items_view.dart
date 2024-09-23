@@ -12,10 +12,11 @@ class ItemsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<Repository>(builder: (c) {
+      final itemList = c.filteredItems.isEmpty ? c.items : c.filteredItems;
       return ListView.builder(
-        itemCount: c.items.length,
+        itemCount: itemList.length,
         itemBuilder: (_, i) {
-          final item = c.items[i];
+          final item = itemList[i];
 
           if (item is Note) {
             Note note = item;

@@ -219,7 +219,6 @@ class NostrRelays extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         border: Border.all(
           color: Get.theme.colorScheme.onSurface,
@@ -230,13 +229,19 @@ class NostrRelays extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              "Nostr relays",
-              style: Get.textTheme.titleLarge,
+            Padding(
+              padding: const EdgeInsets.only(top : 16, right: 16, left: 16),
+              child: Text(
+                "Nostr relays",
+                style: Get.textTheme.titleLarge,
+              ),
             ),
-            Text(
-              "Your relays are the place where your encrypted data are stored.",
-              style: Get.textTheme.labelLarge,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text(
+                "Your relays are the place where your encrypted data are stored.",
+                style: Get.textTheme.labelLarge,
+              ),
             ),
             StreamBuilder(
               stream: Isar.getInstance()!.nostrRelays.watchLazy(),
@@ -248,39 +253,35 @@ class NostrRelays extends StatelessWidget {
                       .pubkeyEqualTo(Repository.to.nostrKey!.public)
                       .findAllSync()
                       .map(
-                        (nostrRelay) => Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                nostrRelay.url,
-                                overflow: TextOverflow.clip,
-                              ),
-                            ),
-                            IconButton(
-                              color: Get.theme.colorScheme.primary,
-                              onPressed: () {
-                                ProfileController.to
-                                    .removeNostrRelay(nostrRelay);
-                              },
-                              icon: const Icon(Icons.cancel_outlined),
-                            ),
-                          ],
+                        (nostrRelay) => ListTile(
+                          title: SelectableText(
+                            nostrRelay.url,
+                          ),
+                          trailing: IconButton(
+                            color: Get.theme.colorScheme.primary,
+                            onPressed: () {
+                              ProfileController.to.removeNostrRelay(nostrRelay);
+                            },
+                            icon: const Icon(Icons.cancel_outlined),
+                          ),
                         ),
                       )
                       .toList(),
                 );
               },
             ),
-            TextField(
-              controller: ProfileController.to.newNostrRelayController,
-              autocorrect: false,
-              keyboardType: TextInputType.url,
-              decoration: const InputDecoration(
-                hintText: "wss://new.nostr.relay/",
-                border: InputBorder.none,
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16, right: 16, left: 16),
+              child: TextField(
+                controller: ProfileController.to.newNostrRelayController,
+                autocorrect: false,
+                keyboardType: TextInputType.url,
+                decoration: const InputDecoration(
+                  hintText: "wss://new.nostr.relay/",
+                  border: InputBorder.none,
+                ),
+                onSubmitted: (_) => ProfileController.to.addNostrRelay(),
               ),
-              onSubmitted: (_) => ProfileController.to.addNostrRelay(),
             ),
           ],
         );

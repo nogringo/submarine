@@ -29,14 +29,10 @@ class HomePage extends StatelessWidget {
           ),
           AppBar(
             title: const Text("Profile"),
-          ),
-          AppBar(
-            title: const Text("Profile"),
           )
         ][c.pageIndex],
         body: [
           const ItemsView(),
-          const LaboratoryView(),
           const LaboratoryView(),
           const ProfileView()
         ][c.pageIndex],
@@ -44,7 +40,6 @@ class HomePage extends StatelessWidget {
           selectedIndex: c.pageIndex,
           labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
           onDestinationSelected: (value) => c.pageIndex = value,
-
           destinations: const [
             NavigationDestination(
               icon: Icon(Icons.list),
@@ -53,10 +48,6 @@ class HomePage extends StatelessWidget {
             NavigationDestination(
               icon: Icon(Icons.shield_outlined),
               label: "Laboratory",
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.cloud_sync_outlined),
-              label: "Sync",
             ),
             NavigationDestination(
               icon: Icon(Icons.person_outlined),

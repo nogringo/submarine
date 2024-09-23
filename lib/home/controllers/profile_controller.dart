@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -5,13 +7,13 @@ import 'package:get/get.dart';
 import 'package:isar/isar.dart';
 import 'package:submarine/end_to_end_encryption.dart';
 import 'package:submarine/models/nostr_relay.dart';
-import 'package:submarine/nostr_relay_manager.dart';
 import 'package:submarine/repository.dart';
 import 'package:toastification/toastification.dart';
 
 class ProfileController extends GetxController {
   static ProfileController get to => Get.find();
 
+  Set<String> onlineRelays = {};
   TextEditingController newNostrRelayController = TextEditingController();
   bool _publicKeyCopied = false;
 
@@ -50,9 +52,6 @@ class ProfileController extends GetxController {
       await isar.nostrRelays.put(nostrRelay);
     });
 
-    Repository.to.nostrRelaysManager[nostrRelay.id] =
-        NostrRelayManager(nostrRelay.id);
-
     newNostrRelayController.text = "";
   }
 
@@ -89,9 +88,6 @@ class ProfileController extends GetxController {
             await isar.writeTxn(() async {
               await isar.nostrRelays.delete(nostrRelay.id);
             });
-
-            await Repository.to.nostrRelaysManager[nostrRelay.id]!.disconnect();
-            Repository.to.nostrRelaysManager.remove(nostrRelay.id);
 
             Get.back();
           },

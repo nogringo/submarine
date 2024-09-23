@@ -52,7 +52,7 @@ class LockController extends GetxController {
     opening = true;
 
     Repository.to.secretKey = await compute(generateKey, password);
-    Repository.to.connectToNostr();
+    Repository.to.fetchNostrEvents();
 
     Get.off(() => const HomePage());
   }

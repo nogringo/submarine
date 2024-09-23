@@ -139,7 +139,7 @@ class AutomaticLock extends StatelessWidget {
                     if (automaticLockAfter == null) return;
                     c.automaticLockAfter = automaticLockAfter;
                   },
-                  items: [1, 2, 5, 30].map<DropdownMenuItem<int>>((int value) {
+                  items: [1, 2, 5, 10, 30].map<DropdownMenuItem<int>>((int value) {
                     return DropdownMenuItem<int>(
                       value: value,
                       child: Padding(

@@ -46,17 +46,22 @@ class MainApp extends StatelessWidget {
       }
 
       return ToastificationWrapper(
-        child: GetMaterialApp(
-          theme: getThemeData(Brightness.light),
-          darkTheme: getThemeData(Brightness.dark),
-          getPages: [
-            GetPage(
-              name: "/",
-              page: () => const LockPage(),
-            ),
-          ],
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
+        child: Listener(
+          onPointerDown: (event) {
+            Repository.to.onUserActivity();
+          },
+          child: GetMaterialApp(
+            theme: getThemeData(Brightness.light),
+            darkTheme: getThemeData(Brightness.dark),
+            getPages: [
+              GetPage(
+                name: "/",
+                page: () => const LockPage(),
+              ),
+            ],
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+          ),
         ),
       );
     });

@@ -39,7 +39,7 @@ class HomePage extends StatelessWidget {
         bottomNavigationBar: NavigationBar(
           selectedIndex: c.pageIndex,
           labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-          onDestinationSelected: (value) => c.pageIndex = value,
+          onDestinationSelected: HomeController.to.onDestinationSelected,
           destinations: const [
             NavigationDestination(
               icon: Icon(Icons.list),

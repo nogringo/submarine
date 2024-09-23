@@ -13,4 +13,8 @@ class HomeController extends GetxController {
     _pageIndex = value;
     update();
   }
+
+  void onDestinationSelected(int value) {
+    pageIndex = value;
+  }
 }

@@ -18,7 +18,7 @@ class Repository extends GetxController {
   static Repository get to => Get.find();
 
   final box = GetStorage();
-  int onUserActivityCallCount = 0;
+  Timer? inactivityTimer;
 
   Uint8List? _secretKey;
   Keychain? nostrKey;
@@ -32,11 +32,14 @@ class Repository extends GetxController {
   set secretKey(Uint8List? value) {
     _secretKey = value;
 
-    nostrKey = Keychain(
-      _secretKey!.map((b) => b.toRadixString(16).padLeft(2, '0')).join(''),
-    );
-
-    listenNostrEvents();
+    if (_secretKey == null) {
+      nostrKey = null;
+    } else {
+      nostrKey = Keychain(
+        _secretKey!.map((b) => b.toRadixString(16).padLeft(2, '0')).join(''),
+      );
+      listenNostrEvents();
+    }
   }
 
   int get automaticLockAfter => box.read("automaticLockAfter") ?? 2;
@@ -88,19 +91,15 @@ class Repository extends GetxController {
   }
 
   onUserActivity() async {
-    onUserActivityCallCount++;
-    await Future.delayed(Duration(minutes: automaticLockAfter));
-
-    onUserActivityCallCount--;
-    if (onUserActivityCallCount > 0) return;
-
-    bool isSubmarineOpen = _secretKey != null;
-    if (isSubmarineOpen) lock();
+    inactivityTimer?.cancel();
+    inactivityTimer = Timer(Duration(minutes: automaticLockAfter), () {
+      bool isSubmarineOpen = _secretKey != null;
+      if (isSubmarineOpen) lock();
+    });
   }
 
   lock() {
     _secretKey = null;
-    nostrKey = null;
 
     Get.offAll(() => const LockPage());
   }

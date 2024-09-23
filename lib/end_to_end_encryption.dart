@@ -62,6 +62,13 @@ String decryptText(String encryptedBase64, Uint8List key) {
   return utf8.decode(decryptedBytes);
 }
 
+String hashString(String input) {
+  final bytes = utf8.encode(input);
+  final digest = Digest('SHA-256');
+  final hashedBytes = digest.process(Uint8List.fromList(bytes));
+  return hashedBytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
+}
+
 Uint8List generateKey(String password) {
   final derivator = PBKDF2KeyDerivator(HMac(SHA256Digest(), 64))
     ..init(Pbkdf2Parameters(

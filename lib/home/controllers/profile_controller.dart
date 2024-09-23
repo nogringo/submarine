@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -8,7 +7,6 @@ import 'package:isar/isar.dart';
 import 'package:submarine/end_to_end_encryption.dart';
 import 'package:submarine/models/nostr_relay.dart';
 import 'package:submarine/repository.dart';
-import 'package:toastification/toastification.dart';
 
 class ProfileController extends GetxController {
   static ProfileController get to => Get.find();
@@ -105,47 +103,5 @@ class ProfileController extends GetxController {
     publicKeyCopied = true;
     await Future.delayed(const Duration(seconds: 4));
     publicKeyCopied = false;
-  }
-
-  void import() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ["json", "pgp"],
-    );
-
-    if (result == null) {
-      toastification.show(
-        type: ToastificationType.error,
-        style: ToastificationStyle.flat,
-        title: const Text("No file selected"),
-        alignment: Alignment.bottomRight,
-        autoCloseDuration: const Duration(seconds: 4),
-      );
-      return;
-    }
-
-    //  {
-    //   final file = File(result.files.single.path!);
-    //   EndToEndEncryption.encryptFile(
-    //       result.files.single.path!,
-    //       Repository.to.secretKey!,
-    //       "${File(result.files.single.path!).parent.path}/encrypted.enc");
-    // } else {
-    //   // User canceled the picker
-    // }
-  }
-
-  void export() async {
-    String? result = await FilePicker.platform.saveFile(
-      fileName: "Submarine.txt",
-    );
-    print(result);
-
-    // if (result != null) {
-    //   final file = File(result.files.single.path!);
-    //   EndToEndEncryption.encryptFile(result.files.single.path!, Repository.to.secretKey!, "${File(result.files.single.path!).parent.path}/encrypted.enc");
-    // } else {
-    //   // User canceled the picker
-    // }
   }
 }

@@ -73,16 +73,10 @@ class LaboratoryView extends StatelessWidget {
             ),
             onChanged: LaboratoryController.to.encryptedTextChanged,
           ),
-          // TODO add encrypt decrypt files features
-          // IconButton(onPressed: null, icon: Container()),
-          // FilledButton.icon(
-          //   onPressed: LaboratoryController.to.chooseFiles,
-          //   label: const Text("Choose a file"),
-          // ),
         ],
       ),
     );
   }
 }
 
-// TODO add a field forcustom encryption decrytion key
+// TODO add a field for custom encryption decrytion key

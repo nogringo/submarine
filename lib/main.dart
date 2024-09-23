@@ -7,15 +7,11 @@ import 'package:submarine/lock/lock_page.dart';
 import 'package:submarine/models/nostr_event.dart';
 import 'package:submarine/models/nostr_relay.dart';
 import 'package:submarine/repository.dart';
-import 'package:system_theme/system_theme.dart';
-import 'package:toastification/toastification.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:submarine/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  SystemTheme.fallbackColor = const Color(0xFFfcc515);
-  await SystemTheme.accentColor.load();
 
   await GetStorage.init();
 
@@ -35,35 +31,22 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SystemThemeBuilder(builder: (context, accent) {
-      ThemeData getThemeData(Brightness brightness) {
-        return ThemeData.from(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: accent.accent,
-            brightness: brightness,
+    return Listener(
+      onPointerDown: (event) {
+        Repository.to.onUserActivity();
+      },
+      child: GetMaterialApp(
+        theme: ThemeData.from(colorScheme: MaterialTheme.lightScheme()),
+        darkTheme: ThemeData.from(colorScheme: MaterialTheme.darkScheme()),
+        getPages: [
+          GetPage(
+            name: "/",
+            page: () => const LockPage(),
           ),
-        );
-      }
-
-      return ToastificationWrapper(
-        child: Listener(
-          onPointerDown: (event) {
-            Repository.to.onUserActivity();
-          },
-          child: GetMaterialApp(
-            theme: getThemeData(Brightness.light),
-            darkTheme: getThemeData(Brightness.dark),
-            getPages: [
-              GetPage(
-                name: "/",
-                page: () => const LockPage(),
-              ),
-            ],
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-          ),
-        ),
-      );
-    });
+        ],
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+      ),
+    );
   }
 }

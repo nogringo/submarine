@@ -7,7 +7,6 @@ import 'package:submarine/models/note.dart';
 import 'package:submarine/note/note_editor/note_editor_page.dart';
 import 'package:submarine/note/note_history/note_history_page.dart';
 import 'package:submarine/note/note_viewer/note_viewer_controller.dart';
-import 'package:toastification/toastification.dart';
 
 class NoteViewerPage extends StatelessWidget {
   final Note note;
@@ -178,13 +177,7 @@ class FieldView extends StatelessWidget {
             ClipboardData(text: field.value),
           );
 
-          toastification.show(
-            style: ToastificationStyle.simple,
-            title: Text("${field.name} copied"),
-            alignment: Alignment.bottomCenter,
-            autoCloseDuration: const Duration(seconds: 4),
-            applyBlurEffect: true,
-          );
+          // TODO show toast with "${field.name} copied"
         },
       ),
     );

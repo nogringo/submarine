@@ -1,4 +1,4 @@
-import 'package:uuid/uuid.dart';
+import 'package:submarine/end_to_end_encryption.dart';
 
 class Note {
   List<NoteVersion> history;
@@ -40,7 +40,7 @@ class NoteVersion {
     required this.content,
     String? id,
     DateTime? date,
-  })  : id = id ?? const Uuid().v4(),
+  })  : id = id ?? hashString(DateTime.now().microsecondsSinceEpoch.toString()),
         date = date ?? DateTime.now();
 
   factory NoteVersion.fromJson(Map<String, dynamic> json) {

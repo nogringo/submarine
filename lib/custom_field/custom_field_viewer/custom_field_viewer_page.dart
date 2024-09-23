@@ -7,7 +7,6 @@ import 'package:submarine/custom_field/custom_field_history/custom_field_history
 import 'package:submarine/custom_field/custom_field_viewer/custom_field_viewer_controller.dart';
 import 'package:submarine/extensions.dart';
 import 'package:submarine/models/custom_field.dart';
-import 'package:toastification/toastification.dart';
 
 class CustomFieldViewerPage extends StatelessWidget {
   final CustomField customField;
@@ -194,13 +193,7 @@ class FieldView extends StatelessWidget {
             ClipboardData(text: field.value),
           );
 
-          toastification.show(
-            style: ToastificationStyle.simple,
-            title: Text("${field.name} copied"),
-            alignment: Alignment.bottomCenter,
-            autoCloseDuration: const Duration(seconds: 4),
-            applyBlurEffect: true,
-          );
+          // TODO show toast with "${field.name} copied"
         },
       ),
     );

@@ -7,7 +7,6 @@ environment:
   sdk: ^3.5.1
 
 dependencies:
-  file_picker: ^8.1.2
   flutter:
     sdk: flutter
   flutter_localizations:
@@ -20,9 +19,6 @@ dependencies:
   nostr: ^1.5.0
   path_provider: ^2.1.4
   pointycastle: ^3.9.1
-  system_theme: ^3.1.0
-  toastification: ^2.2.0
-  uuid: ^4.5.0
   web_socket_channel: ^3.0.1
 
 dev_dependencies:

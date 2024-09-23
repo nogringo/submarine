@@ -12,22 +12,21 @@ class DesktopLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     return Align(
       alignment: const Alignment(0, -0.5),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return ListView(
-            padding: EdgeInsets.symmetric(horizontal: (Get.width - mobileWidth) / 2 + 8),
-            shrinkWrap: true,
-            children: const [
-              TitleView(),
-              SecretKeyInput(),
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: 32),
-                child: OpenButton(),
-              ),
-            ],
-          );
-        }
-      ),
+      child: LayoutBuilder(builder: (context, constraints) {
+        return ListView(
+          padding: EdgeInsets.symmetric(
+              horizontal: (Get.width - mobileWidth) / 2 + 8),
+          shrinkWrap: true,
+          children: const [
+            TitleView(),
+            SecretKeyInput(),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 32),
+              child: OpenButton(),
+            ),
+          ],
+        );
+      }),
     );
   }
 }

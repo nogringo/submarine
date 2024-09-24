@@ -19,7 +19,7 @@ jobs:
           flutter-version: '3.24.3'
 
       - name: Build Flutter web
-        run: flutter build web
+        run: flutter build web --base-href "/submarine/"
 
       - name: Deploy to GitHub Pages
         run: |

@@ -1,0 +1,32 @@
+name: Deploy Flutter Web App
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'latest'
+
+      - name: Build Flutter web
+        run: flutter build web
+
+      - name: Deploy to GitHub Pages
+        run: |
+          cd build/web
+          git init
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add .
+          git commit -m "Deploy to GitHub Pages"
+          git push --force "https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" master:gh-pages

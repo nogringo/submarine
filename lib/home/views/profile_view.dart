@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:isar/isar.dart';
 import 'package:submarine/constants.dart';
+import 'package:submarine/database.dart';
 import 'package:submarine/home/controllers/profile_controller.dart';
-import 'package:submarine/models/nostr_relay.dart';
 import 'package:submarine/repository.dart';
 
 class ProfileView extends StatelessWidget {
@@ -20,7 +19,6 @@ class ProfileView extends StatelessWidget {
         const SizedBox(height: 12),
         const PublicKey(),
         const SizedBox(height: 12),
-        // ImportExport(), // TODO add import export features
         const Padding(
           padding: EdgeInsets.all(32.0),
           child: Text("1.0.0", textAlign: TextAlign.center),
@@ -184,29 +182,34 @@ class NostrRelays extends StatelessWidget {
               ),
             ),
             StreamBuilder(
-              stream: Isar.getInstance()!.nostrRelays.watchLazy(),
+              stream: AppDatabase.to.watchRelays(),
               builder: (context, snapshot) {
-                return Column(
-                  children: Isar.getInstance()!
-                      .nostrRelays
-                      .filter()
-                      .pubkeyEqualTo(Repository.to.nostrKey!.public)
-                      .findAllSync()
-                      .map(
-                        (nostrRelay) => ListTile(
-                          title: SelectableText(
-                            nostrRelay.url,
-                          ),
-                          trailing: IconButton(
-                            color: Get.theme.colorScheme.primary,
-                            onPressed: () {
-                              ProfileController.to.removeNostrRelay(nostrRelay);
-                            },
-                            icon: const Icon(Icons.cancel_outlined),
-                          ),
-                        ),
-                      )
-                      .toList(),
+                return FutureBuilder(
+                  future: AppDatabase.to.getAllNostrRelays(),
+                  builder: (context, snapshot) {
+                    if (snapshot.data == null) {
+                      return Container();
+                    }
+                    return Column(
+                      children: snapshot.data!
+                          .map(
+                            (nostrRelay) => ListTile(
+                              title: SelectableText(
+                                nostrRelay.url,
+                              ),
+                              trailing: IconButton(
+                                color: Get.theme.colorScheme.primary,
+                                onPressed: () {
+                                  ProfileController.to
+                                      .removeNostrRelay(nostrRelay);
+                                },
+                                icon: const Icon(Icons.cancel_outlined),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    );
+                  },
                 );
               },
             ),

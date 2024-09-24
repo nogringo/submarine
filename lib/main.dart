@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:isar/isar.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:submarine/database.dart';
 import 'package:submarine/lock/lock_page.dart';
-import 'package:submarine/models/nostr_event.dart';
-import 'package:submarine/models/nostr_relay.dart';
 import 'package:submarine/repository.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:submarine/theme.dart';
@@ -13,13 +10,9 @@ import 'package:submarine/theme.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await GetStorage.init();
+  Get.put(AppDatabase());
 
-  final dir = await getApplicationDocumentsDirectory();
-  await Isar.open(
-    [NostrEventSchema, NostrRelaySchema],
-    directory: dir.path,
-  );
+  await GetStorage.init();
 
   Get.put(Repository());
 

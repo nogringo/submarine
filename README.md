@@ -1,3 +1,3 @@
-# submarine
+# Submarine
 
-A new Flutter project.
+Your data is yours

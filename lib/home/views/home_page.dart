@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:submarine/constants.dart';
+import 'package:submarine/custom_field/custom_field_editor/custom_field_editor_page.dart';
 import 'package:submarine/home/controllers/laboratory_controller.dart';
 import 'package:submarine/home/controllers/home_controller.dart';
 import 'package:submarine/home/controllers/profile_controller.dart';
+import 'package:submarine/home/views/expandable_fab.dart';
 import 'package:submarine/home/views/items_view.dart';
 import 'package:submarine/home/views/laboratory_view.dart';
 import 'package:submarine/home/views/list_app_bar.dart';
 import 'package:submarine/home/views/profile_view.dart';
+import 'package:submarine/note/note_editor/note_editor_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -75,6 +78,24 @@ class HomePage extends StatelessWidget {
         destinations: navigationBarDestinations,
       );
 
+      Widget expandableFab = ExpandableFab(
+        distance: 56,
+        children: [
+          ActionButton(
+            onPressed: () {
+              Get.to(() => const CustomFieldEditorPage());
+            },
+            icon: const Icon(Icons.dashboard_customize_outlined),
+          ),
+          ActionButton(
+            onPressed: () {
+              Get.to(() => const NoteEditorPage());
+            },
+            icon: const Icon(Icons.note_add_outlined),
+          ),
+        ],
+      );
+
       return LayoutBuilder(builder: (context, constraints) {
         bool isMobile = constraints.maxWidth <= mobileWidth;
 
@@ -100,6 +121,10 @@ class HomePage extends StatelessWidget {
           appBar: appBar,
           body: body,
           bottomNavigationBar: isMobile ? navigationBarWidget : null,
+          floatingActionButton: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: c.pageIndex == 0 ? expandableFab : null,
+          ),
         );
       });
     });

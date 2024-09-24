@@ -2,10 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:isar/isar.dart';
 import 'package:nostr/nostr.dart';
+import 'package:submarine/database.dart';
 import 'package:submarine/end_to_end_encryption.dart';
-import 'package:submarine/models/nostr_event.dart';
+import 'package:submarine/functions.dart';
 import 'package:submarine/models/note.dart';
 import 'package:submarine/repository.dart';
 
@@ -48,12 +48,15 @@ class NoteEditorController extends GetxController {
       privkey: Repository.to.nostrKey!.private,
     );
 
-    final serializedEvent = event.serialize();
-
-    final isar = Isar.getInstance()!;
-    await isar.writeTxn(() async {
-      await isar.nostrEvents.put(NostrEvent(serializedEvent));
-    });
+    AppDatabase.to.insertNostrEvent(NostrEventData(
+      id: event.id,
+      pubkey: event.pubkey,
+      createdAt: DateTime.fromMillisecondsSinceEpoch(event.createdAt * 1000),
+      kind: event.kind,
+      tags: convertTagsToJson(event.tags),
+      content: event.content,
+      sig: event.sig,
+    ));
 
     Get.back();
   }

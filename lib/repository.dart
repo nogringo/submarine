@@ -4,14 +4,13 @@ import 'dart:typed_data';
 
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:isar/isar.dart';
 import 'package:nostr/nostr.dart';
 import 'package:submarine/api.dart';
+import 'package:submarine/database.dart';
 import 'package:submarine/end_to_end_encryption.dart';
+import 'package:submarine/functions.dart';
 import 'package:submarine/lock/lock_page.dart';
 import 'package:submarine/models/custom_field.dart';
-import 'package:submarine/models/nostr_event.dart';
-import 'package:submarine/models/nostr_relay.dart';
 import 'package:submarine/models/note.dart';
 
 class Repository extends GetxController {
@@ -25,8 +24,6 @@ class Repository extends GetxController {
 
   List items = [];
   List filteredItems = [];
-
-  Isar get isar => Isar.getInstance()!;
 
   Uint8List? get secretKey => _secretKey;
   set secretKey(Uint8List? value) {
@@ -49,7 +46,9 @@ class Repository extends GetxController {
   }
 
   void listenNostrEvents() {
-    final nostrEventChanged = isar.nostrEvents.watchLazy();
+    final nostrEventChanged = AppDatabase.to.watchNostrEventsByPubkey(
+      nostrKey!.public,
+    );
     nostrEventChanged.listen((_) {
       fillItems();
       sendUnsyncedNostrEvents();
@@ -58,14 +57,12 @@ class Repository extends GetxController {
   }
 
   void fillItems() async {
-    final nostrEvents = await Isar.getInstance()!
-        .nostrEvents
-        .filter()
-        .pubkeyEqualTo(nostrKey!.public)
-        .findAll();
+    final nostrEvents = await AppDatabase.to.getEventsForPubkey(
+      nostrKey!.public,
+    );
 
     Map<String, dynamic> mergedItems = {};
-    for (NostrEvent e in nostrEvents) {
+    for (var e in nostrEvents) {
       final json = jsonDecode(decryptText(
         e.content,
         secretKey!,
@@ -105,55 +102,57 @@ class Repository extends GetxController {
   }
 
   void fetchNostrEvents() async {
-    final nostrRelays = await isar.nostrRelays
-        .filter()
-        .pubkeyEqualTo(Repository.to.nostrKey!.public)
-        .findAll();
+    final nostrRelays = await AppDatabase.to.getAllNostrRelays();
 
     Request requestWithFilter = Request(generate64RandomHexChars(), [
       Filter(kinds: [1], authors: [Repository.to.nostrKey!.public])
     ]);
 
-    for (NostrRelay nostrRelay in nostrRelays) {
+    for (var nostrRelay in nostrRelays) {
       final events = await nostrFetchEvents(
         requestWithFilter.serialize(),
         nostrRelay.url,
       );
       for (var e in events) {
         final event = Event.fromJson(jsonDecode(e));
-        NostrEvent? nostrEvent =
-            await isar.nostrEvents.filter().idEqualTo(event.id).findFirst();
+        NostrEventData? nostrEvent = await AppDatabase.to.findNostrEventById(
+          event.id,
+        );
 
         final nostrEventNotFound = nostrEvent == null;
         if (nostrEventNotFound) {
-          nostrEvent = NostrEvent(event.serialize());
-          await isar.writeTxn(() async {
-            await isar.nostrEvents.put(nostrEvent!);
-          });
+          nostrEvent = NostrEventData(
+            id: event.id,
+            pubkey: event.pubkey,
+            createdAt: DateTime.fromMillisecondsSinceEpoch(
+              event.createdAt * 1000,
+            ),
+            kind: event.kind,
+            tags: convertTagsToJson(event.tags),
+            content: event.content,
+            sig: event.sig,
+          );
+          AppDatabase.to.insertNostrEvent(nostrEvent);
         }
 
-        nostrEvent.nostrRelays.add(nostrRelay);
-        await isar.writeTxn(() async {
-          await nostrEvent!.nostrRelays.save();
-        });
+        AppDatabase.to.insertRelayEventLink(event.id, nostrRelay.url);
       }
     }
   }
 
   Future<List<String>> getLocalUnsyncedEvents() async {
-    final nostrRelays = await isar.nostrRelays
-        .filter()
-        .pubkeyEqualTo(Repository.to.nostrKey!.public)
-        .findAll();
-    final nostrEvents = await isar.nostrEvents
-        .filter()
-        .pubkeyEqualTo(Repository.to.nostrKey!.public)
-        .findAll();
+    final nostrRelays = await AppDatabase.to.getAllNostrRelays();
+    final nostrEvents = await AppDatabase.to.getEventsForPubkey(
+      nostrKey!.public,
+    );
 
     Set<String> results = {};
-    for (NostrRelay nostrRelay in nostrRelays) {
-      for (NostrEvent nostrEvent in nostrEvents) {
-        final isEventStored = nostrEvent.nostrRelays.contains(nostrRelay);
+    for (var nostrRelay in nostrRelays) {
+      for (var nostrEvent in nostrEvents) {
+        final isEventStored = await AppDatabase.to.isEventStoredOnRelay(
+          nostrEvent.id,
+          nostrRelay.url,
+        );
         if (isEventStored) continue;
 
         results.add(decryptText(nostrEvent.content, secretKey!));
@@ -164,21 +163,31 @@ class Repository extends GetxController {
   }
 
   void sendUnsyncedNostrEvents() async {
-    final nostrRelays = await isar.nostrRelays
-        .filter()
-        .pubkeyEqualTo(Repository.to.nostrKey!.public)
-        .findAll();
-    final nostrEvents = await isar.nostrEvents
-        .filter()
-        .pubkeyEqualTo(Repository.to.nostrKey!.public)
-        .findAll();
+    final nostrRelays = await AppDatabase.to.getAllNostrRelays();
+    final nostrEvents = await AppDatabase.to.getEventsForPubkey(
+      nostrKey!.public,
+    );
 
-    for (NostrRelay nostrRelay in nostrRelays) {
-      for (NostrEvent nostrEvent in nostrEvents) {
-        final isEventStored = nostrEvent.nostrRelays.contains(nostrRelay);
+    for (var nostrRelay in nostrRelays) {
+      for (var nostrEvent in nostrEvents) {
+        final isEventStored = await AppDatabase.to.isEventStoredOnRelay(
+          nostrEvent.id,
+          nostrRelay.url,
+        );
         if (isEventStored) continue;
 
-        nostrSendEvent(nostrEvent.serializedEvent, nostrRelay.url);
+        nostrSendEvent(
+          Event(
+            nostrEvent.id,
+            nostrEvent.pubkey,
+            nostrEvent.createdAt.millisecondsSinceEpoch ~/ 1000,
+            nostrEvent.kind,
+            convertJsonToTags(nostrEvent.tags),
+            nostrEvent.content,
+            nostrEvent.sig,
+          ).serialize(),
+          nostrRelay.url,
+        );
       }
     }
   }

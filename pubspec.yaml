@@ -11,13 +11,12 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+  drift: ^2.20.2
+  drift_flutter: ^0.1.0
   get: ^4.6.6
   get_storage: ^2.1.1
   intl: any
-  isar: ^3.1.0+1
-  isar_flutter_libs: ^3.1.0+1
   nostr: ^1.5.0
-  path_provider: ^2.1.4
   pointycastle: ^3.9.1
   web_socket_channel: ^3.0.1
 
@@ -25,7 +24,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
-  isar_generator: ^3.1.0+1
+  drift_dev: ^2.20.3
   build_runner: ^2.4.12
 
 flutter:

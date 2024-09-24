@@ -82,14 +82,13 @@ class _ExpandableFabState extends State<ExpandableFab>
           shape: const CircleBorder(),
           clipBehavior: Clip.antiAlias,
           elevation: 4,
-          color: Theme.of(context).colorScheme.secondaryContainer,
           child: InkWell(
             onTap: _toggle,
             child: Padding(
               padding: const EdgeInsets.all(8),
               child: Icon(
                 Icons.close,
-                color: Theme.of(context).colorScheme.primary,
+                color: Theme.of(context).primaryColor,
               ),
             ),
           ),
@@ -101,15 +100,14 @@ class _ExpandableFabState extends State<ExpandableFab>
   List<Widget> _buildExpandingActionButtons() {
     final children = <Widget>[];
     final count = widget.children.length;
-    // Adjust the step to control the spacing between buttons.
-    // Since we want to expand vertically, we use a fixed -90 degrees.
-    for (var i = 0, angleInDegrees = 90.0; i < count; i++) {
+    final step = 90.0 / (count - 1);
+    for (var i = 0, angleInDegrees = 0.0;
+        i < count;
+        i++, angleInDegrees += step) {
       children.add(
         _ExpandingActionButton(
-          directionInDegrees:
-              angleInDegrees, // This sets the buttons to expand upwards
-          maxDistance: widget.distance *
-              (i + 1), // This ensures the buttons expand with proper distance
+          directionInDegrees: angleInDegrees,
+          maxDistance: widget.distance,
           progress: _expandAnimation,
           child: widget.children[i],
         ),
@@ -168,7 +166,7 @@ class _ExpandingActionButton extends StatelessWidget {
           progress.value * maxDistance,
         );
         return Positioned(
-          right: 8.0 + offset.dx,
+          right: 4.0 + offset.dx,
           bottom: 4.0 + offset.dy,
           child: Transform.rotate(
             angle: (1.0 - progress.value) * math.pi / 2,

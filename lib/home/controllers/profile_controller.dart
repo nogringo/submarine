@@ -3,9 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:isar/isar.dart';
-import 'package:submarine/end_to_end_encryption.dart';
-import 'package:submarine/models/nostr_relay.dart';
+import 'package:submarine/database.dart';
 import 'package:submarine/repository.dart';
 
 class ProfileController extends GetxController {
@@ -31,29 +29,12 @@ class ProfileController extends GetxController {
 
     if (!isNostrRelay) return;
 
-    final isar = Isar.getInstance()!;
-
-    final foundRelay = (await isar.nostrRelays
-            .filter()
-            .pubkeyEqualTo(Repository.to.nostrKey!.public)
-            .findAll())
-        .firstWhereOrNull((element) => element.url == newNostrRelay);
-
-    if (foundRelay != null) return;
-
-    NostrRelay nostrRelay = NostrRelay(
-      Repository.to.nostrKey!.public,
-      encryptText(newNostrRelay, Repository.to.secretKey!),
-    );
-
-    await isar.writeTxn(() async {
-      await isar.nostrRelays.put(nostrRelay);
-    });
+    AppDatabase.to.insertNostrRelay(NostrRelayData(url: newNostrRelay));
 
     newNostrRelayController.text = "";
   }
 
-  void removeNostrRelay(NostrRelay nostrRelay) {
+  void removeNostrRelay(NostrRelayData nostrRelay) {
     Get.dialog(AlertDialog(
       title: const Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -81,11 +62,7 @@ class ProfileController extends GetxController {
         ),
         FilledButton(
           onPressed: () async {
-            final isar = Isar.getInstance()!;
-
-            await isar.writeTxn(() async {
-              await isar.nostrRelays.delete(nostrRelay.id);
-            });
+            await AppDatabase.to.deleteNostrRelay(nostrRelay.url);
 
             Get.back();
           },

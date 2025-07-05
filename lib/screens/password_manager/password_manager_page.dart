@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:submarine/app_routes.dart';
 import 'package:submarine/config.dart';
+import 'package:submarine/repository.dart';
 import 'package:submarine/screens/password_manager/password_manager_controller.dart';
 
 class PasswordManagerPage extends StatelessWidget {
@@ -13,7 +14,28 @@ class PasswordManagerPage extends StatelessWidget {
       init: PasswordManagerController(),
       builder: (controller) {
         return Scaffold(
-          appBar: AppBar(title: Text(appTitle)),
+          appBar: AppBar(
+            title: Text(appTitle),
+            actions: [
+              Padding(
+                padding: EdgeInsets.only(right: 16),
+                child: Obx(() => GestureDetector(
+                  onTap: () {
+                    // TODO: Navigate to profile/settings page
+                  },
+                  child: CircleAvatar(
+                    radius: 18,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    backgroundImage: NetworkImage(
+                      controller.userProfilePicture.value.isNotEmpty
+                          ? controller.userProfilePicture.value
+                          : _getRoboHashUrl(),
+                    ),
+                  ),
+                )),
+              ),
+            ],
+          ),
           body: Obx(() {
             if (controller.isLoading.value) {
               return Center(child: CircularProgressIndicator());
@@ -119,5 +141,10 @@ class PasswordManagerPage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _getRoboHashUrl() {
+    final publicKey = Repository.to.publicKey ?? 'default';
+    return 'https://robohash.org/$publicKey';
   }
 }

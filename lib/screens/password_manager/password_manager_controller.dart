@@ -13,6 +13,8 @@ class PasswordManagerController extends GetxController {
 
   final RxList<Secret> secrets = <Secret>[].obs;
   final RxBool isLoading = false.obs;
+  final RxString userProfilePicture = ''.obs;
+  final RxString userName = ''.obs;
 
   StreamSubscription? _subscription;
 
@@ -20,6 +22,7 @@ class PasswordManagerController extends GetxController {
   void onInit() {
     super.onInit();
     _listenToSecrets();
+    _fetchUserMetadata();
   }
 
   @override
@@ -103,6 +106,22 @@ class PasswordManagerController extends GetxController {
     } catch (e) {
       // Handle error
       Get.snackbar('Error', 'Failed to delete secret');
+    }
+  }
+
+  Future<void> _fetchUserMetadata() async {
+    try {
+      final publicKey = Repository.to.publicKey;
+      if (publicKey == null) return;
+
+      // Load user metadata using NDK
+      final metadata = await Repository.to.ndk.metadata.loadMetadata(publicKey);
+      if (metadata != null) {
+        userProfilePicture.value = metadata.picture ?? '';
+        userName.value = metadata.name ?? '';
+      }
+    } catch (e) {
+      // Handle error silently
     }
   }
 }

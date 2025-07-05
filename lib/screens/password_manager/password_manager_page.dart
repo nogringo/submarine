@@ -19,10 +19,24 @@ class PasswordManagerPage extends StatelessWidget {
             actions: [
               Padding(
                 padding: EdgeInsets.only(right: 16),
-                child: Obx(() => GestureDetector(
-                  onTap: () {
-                    // TODO: Navigate to profile/settings page
+                child: Obx(() => PopupMenuButton<String>(
+                  onSelected: (value) {
+                    if (value == 'logout') {
+                      _showLogoutDialog(context);
+                    }
                   },
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'logout',
+                      child: Row(
+                        children: [
+                          Icon(Icons.logout, color: Colors.red),
+                          SizedBox(width: 8),
+                          Text('Logout', style: TextStyle(color: Colors.red)),
+                        ],
+                      ),
+                    ),
+                  ],
                   child: CircleAvatar(
                     radius: 18,
                     backgroundColor: Theme.of(context).colorScheme.primary,
@@ -146,5 +160,29 @@ class PasswordManagerPage extends StatelessWidget {
   String _getRoboHashUrl() {
     final publicKey = Repository.to.publicKey ?? 'default';
     return 'https://robohash.org/$publicKey';
+  }
+
+  void _showLogoutDialog(BuildContext context) {
+    Get.dialog(
+      AlertDialog(
+        title: Text('Logout'),
+        content: Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Get.back();
+              await Repository.to.logOut();
+              Get.offAllNamed(AppRoutes.signIn);
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: Text('Logout'),
+          ),
+        ],
+      ),
+    );
   }
 }

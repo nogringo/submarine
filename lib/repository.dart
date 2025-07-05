@@ -65,10 +65,14 @@ class Repository extends GetxController {
   }
 
   Future<void> logOut() async {
+    final db = await DatabaseService().database;
+
     await Future.wait([
       stopListeningEvents(),
       FlutterSecureStorage().delete(key: "privateKey"),
+      secretsStore.delete(db),
     ]);
+    ndk.accounts.logout();
   }
 
   void listenEvents() async {

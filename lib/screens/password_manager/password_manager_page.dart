@@ -19,24 +19,8 @@ class PasswordManagerPage extends StatelessWidget {
             actions: [
               Padding(
                 padding: EdgeInsets.only(right: 16),
-                child: Obx(() => PopupMenuButton<String>(
-                  onSelected: (value) {
-                    if (value == 'logout') {
-                      _showLogoutDialog(context);
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    PopupMenuItem(
-                      value: 'logout',
-                      child: Row(
-                        children: [
-                          Icon(Icons.logout, color: Colors.red),
-                          SizedBox(width: 8),
-                          Text('Logout', style: TextStyle(color: Colors.red)),
-                        ],
-                      ),
-                    ),
-                  ],
+                child: Obx(() => GestureDetector(
+                  onTap: () => _showProfilePopup(context, controller),
                   child: CircleAvatar(
                     radius: 18,
                     backgroundColor: Theme.of(context).colorScheme.primary,
@@ -162,11 +146,91 @@ class PasswordManagerPage extends StatelessWidget {
     return 'https://robohash.org/$publicKey';
   }
 
-  void _showLogoutDialog(BuildContext context) {
+  String _truncatePublicKey(String publicKey) {
+    if (publicKey.length <= 16) return publicKey;
+    return '${publicKey.substring(0, 8)}...${publicKey.substring(publicKey.length - 8)}';
+  }
+
+  void _showProfilePopup(BuildContext context, PasswordManagerController controller) {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Container(
+          width: 300,
+          padding: EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Profile picture
+              CircleAvatar(
+                radius: 40,
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                backgroundImage: NetworkImage(
+                  controller.userProfilePicture.value.isNotEmpty
+                      ? controller.userProfilePicture.value
+                      : _getRoboHashUrl(),
+                ),
+              ),
+              SizedBox(height: 16),
+              
+              // User name
+              Text(
+                controller.userName.value.isNotEmpty 
+                    ? controller.userName.value 
+                    : 'Anonymous User',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 8),
+              
+              // Public key (truncated)
+              Text(
+                _truncatePublicKey(Repository.to.publicKey ?? ''),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 24),
+              
+              // Divider(),
+              SizedBox(height: 8),
+              
+              // Sign out button
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Get.back();
+                    _showLogoutConfirmation(context);
+                  },
+                  icon: Icon(Icons.logout, color: Colors.red),
+                  label: Text(
+                    'Sign out',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: Colors.red),
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showLogoutConfirmation(BuildContext context) {
     Get.dialog(
       AlertDialog(
-        title: Text('Logout'),
-        content: Text('Are you sure you want to logout?'),
+        title: Text('Sign out'),
+        content: Text('Are you sure you want to sign out?'),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
@@ -179,7 +243,7 @@ class PasswordManagerPage extends StatelessWidget {
               Get.offAllNamed(AppRoutes.signIn);
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text('Logout'),
+            child: Text('Sign out'),
           ),
         ],
       ),

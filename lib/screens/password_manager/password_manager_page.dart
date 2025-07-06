@@ -72,7 +72,7 @@ class PasswordManagerPage extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final secret = controller.secrets[index];
                   return Container(
-                    margin: EdgeInsets.only(bottom: 8),
+                    margin: EdgeInsets.symmetric(vertical: 4),
                     clipBehavior: Clip.antiAlias,
                     decoration: BoxDecoration(
                       color: Theme.of(

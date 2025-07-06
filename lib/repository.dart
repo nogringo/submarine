@@ -80,8 +80,8 @@ class Repository extends GetxController {
 
     subscription = ndk.requests.subscription(
       filters: [
-        Filter(kinds: [5, 34567], authors: [publicKey!]),
-        Filter(kinds: [34567], pTags: [publicKey!]),
+        Filter(kinds: [5, 4111], authors: [publicKey!]),
+        Filter(kinds: [4111], pTags: [publicKey!]),
       ],
       cacheRead: true,
       cacheWrite: true,

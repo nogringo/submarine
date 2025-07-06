@@ -118,7 +118,7 @@ class CreatePasswordController extends GetxController {
 
     final nostrEvent = Nip01Event(
       pubKey: pubkey,
-      kind: 34567,
+      kind: 4111,
       tags: [],
       content: encryptedPassword,
     );

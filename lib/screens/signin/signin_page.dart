@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nip19/nip19.dart';
@@ -5,7 +6,6 @@ import 'package:submarine/app_routes.dart';
 import 'package:submarine/config.dart';
 import 'package:submarine/repository.dart';
 import 'package:window_manager/window_manager.dart';
-import 'dart:io';
 
 class SigninPage extends StatelessWidget {
   const SigninPage({super.key});
@@ -18,7 +18,7 @@ class SigninPage extends StatelessWidget {
         child: DragToMoveArea(
           child: AppBar(
             actions: [
-          if (Platform.isWindows || Platform.isLinux || Platform.isMacOS)
+          if (!kIsWeb && GetPlatform.isDesktop)
             SizedBox(
               width: 154,
               child: WindowCaption(

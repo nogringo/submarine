@@ -1,8 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:submarine/screens/create_password/create_password_controller.dart';
 import 'package:window_manager/window_manager.dart';
-import 'dart:io';
 
 class CreatePasswordPage extends StatelessWidget {
   const CreatePasswordPage({super.key});
@@ -24,7 +24,7 @@ class CreatePasswordPage extends StatelessWidget {
                 child: Text("Create"),
               ),
               SizedBox(width: 8),
-              if (Platform.isWindows || Platform.isLinux || Platform.isMacOS)
+              if (!kIsWeb && GetPlatform.isDesktop)
                 SizedBox(
                   width: 154,
                   child: WindowCaption(

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:submarine/app_routes.dart';
@@ -9,12 +10,11 @@ import 'package:submarine/screens/password_manager/password_manager_page.dart';
 import 'package:submarine/screens/signin/signin_page.dart';
 import 'package:submarine/screens/create_password/create_password_page.dart';
 import 'package:window_manager/window_manager.dart';
-import 'dart:io';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+  if (!kIsWeb && GetPlatform.isDesktop) {
     await windowManager.ensureInitialized();
     await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
   }
@@ -54,7 +54,7 @@ class MainApp extends StatelessWidget {
       ],
     );
     
-    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    if (!kIsWeb && GetPlatform.isDesktop) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: DragToResizeArea(child: app),

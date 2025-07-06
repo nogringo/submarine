@@ -40,7 +40,7 @@ class Repository extends GetxController {
         eventVerifier: NoEventVerifier(),
         cache: SembastCacheManager(db),
         bootstrapRelays: kDebugMode
-            ? ["wss://bwcervpt.mooo.com/"]
+            ? ["wss://bwcervpt.mooo.com/", "wss://relay.primal.net"]
             : DEFAULT_BOOTSTRAP_RELAYS,
       ),
     );
@@ -93,7 +93,7 @@ class Repository extends GetxController {
         final db = await DatabaseService().database;
 
         // Remove secrets where eventId is in targetEventsIds
-        await secretsStore.delete(
+        secretsStore.delete(
           db,
           finder: sembast.Finder(
             filter: sembast.Filter.inList('eventId', targetEventsIds),
@@ -102,7 +102,7 @@ class Repository extends GetxController {
 
         // Add deleted event IDs to store
         for (final eventId in targetEventsIds) {
-          await deletedEventsStore.record(eventId).put(db, {'id': eventId});
+          deletedEventsStore.record(eventId).put(db, {'id': eventId});
         }
         continue;
       }

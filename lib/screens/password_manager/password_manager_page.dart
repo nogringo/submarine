@@ -4,6 +4,8 @@ import 'package:submarine/app_routes.dart';
 import 'package:submarine/config.dart';
 import 'package:submarine/repository.dart';
 import 'package:submarine/screens/password_manager/password_manager_controller.dart';
+import 'package:window_manager/window_manager.dart';
+import 'dart:io';
 
 class PasswordManagerPage extends StatelessWidget {
   const PasswordManagerPage({super.key});
@@ -14,7 +16,10 @@ class PasswordManagerPage extends StatelessWidget {
       init: PasswordManagerController(),
       builder: (controller) {
         return Scaffold(
-          appBar: AppBar(
+          appBar: PreferredSize(
+            preferredSize: Size.fromHeight(kToolbarHeight),
+            child: DragToMoveArea(
+              child: AppBar(
             title: Text(appTitle),
             actions: [
               Padding(
@@ -32,7 +37,17 @@ class PasswordManagerPage extends StatelessWidget {
                   ),
                 )),
               ),
+              if (Platform.isWindows || Platform.isLinux || Platform.isMacOS)
+                SizedBox(
+                  width: 154,
+                  child: WindowCaption(
+                    brightness: Theme.of(context).brightness,
+                    backgroundColor: Colors.transparent,
+                  ),
+                ),
             ],
+              ),
+            ),
           ),
           body: Obx(() {
             if (controller.isLoading.value) {

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:submarine/screens/create_password/create_password_controller.dart';
+import 'package:window_manager/window_manager.dart';
+import 'dart:io';
 
 class CreatePasswordPage extends StatelessWidget {
   const CreatePasswordPage({super.key});
@@ -11,7 +13,10 @@ class CreatePasswordPage extends StatelessWidget {
       init: CreatePasswordController(),
       builder: (c) {
         return Scaffold(
-          appBar: AppBar(
+          appBar: PreferredSize(
+            preferredSize: Size.fromHeight(kToolbarHeight),
+            child: DragToMoveArea(
+              child: AppBar(
             title: Text("New Password"),
             actions: [
               FilledButton(
@@ -19,7 +24,17 @@ class CreatePasswordPage extends StatelessWidget {
                 child: Text("Create"),
               ),
               SizedBox(width: 8),
+              if (Platform.isWindows || Platform.isLinux || Platform.isMacOS)
+                SizedBox(
+                  width: 154,
+                  child: WindowCaption(
+                    brightness: Theme.of(context).brightness,
+                    backgroundColor: Colors.transparent,
+                  ),
+                ),
             ],
+              ),
+            ),
           ),
           body: ListView(
             padding: EdgeInsets.symmetric(horizontal: 8),

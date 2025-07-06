@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:window_manager/window_manager.dart';
+import 'dart:io';
 
 class CreateNotePage extends StatelessWidget {
   const CreateNotePage({super.key});
@@ -6,12 +8,25 @@ class CreateNotePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: DragToMoveArea(
+          child: AppBar(
         title: Text("New Note"),
         actions: [
           FilledButton(onPressed: () {}, child: Text("Create")),
           SizedBox(width: 8),
+          if (Platform.isWindows || Platform.isLinux || Platform.isMacOS)
+            SizedBox(
+              width: 154,
+              child: WindowCaption(
+                brightness: Theme.of(context).brightness,
+                backgroundColor: Colors.transparent,
+              ),
+            ),
         ],
+          ),
+        ),
       ),
       body: Column(
         children: [

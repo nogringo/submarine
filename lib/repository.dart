@@ -1,9 +1,7 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
-import 'package:ndk/config/bootstrap_relays.dart';
 import 'package:ndk/ndk.dart';
 import 'package:sembast/sembast.dart' as sembast;
 import 'package:submarine/get_database.dart';
@@ -39,9 +37,6 @@ class Repository extends GetxController {
       NdkConfig(
         eventVerifier: NoEventVerifier(),
         cache: SembastCacheManager(db),
-        bootstrapRelays: kDebugMode
-            ? ["wss://bwcervpt.mooo.com/", "wss://relay.primal.net"]
-            : DEFAULT_BOOTSTRAP_RELAYS,
       ),
     );
   }

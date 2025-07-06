@@ -4,6 +4,8 @@ import 'package:nip19/nip19.dart';
 import 'package:submarine/app_routes.dart';
 import 'package:submarine/config.dart';
 import 'package:submarine/repository.dart';
+import 'package:window_manager/window_manager.dart';
+import 'dart:io';
 
 class SigninPage extends StatelessWidget {
   const SigninPage({super.key});
@@ -11,7 +13,23 @@ class SigninPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: DragToMoveArea(
+          child: AppBar(
+            actions: [
+          if (Platform.isWindows || Platform.isLinux || Platform.isMacOS)
+            SizedBox(
+              width: 154,
+              child: WindowCaption(
+                brightness: Theme.of(context).brightness,
+                backgroundColor: Colors.transparent,
+              ),
+            ),
+        ],
+          ),
+        ),
+      ),
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(

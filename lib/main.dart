@@ -8,9 +8,16 @@ import 'package:submarine/screens/create_note/create_note_page.dart';
 import 'package:submarine/screens/password_manager/password_manager_page.dart';
 import 'package:submarine/screens/signin/signin_page.dart';
 import 'package:submarine/screens/create_password/create_password_page.dart';
+import 'package:window_manager/window_manager.dart';
+import 'dart:io';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    await windowManager.ensureInitialized();
+    await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
+  }
 
   Get.put(Repository());
   await Repository.to.loadApp();
@@ -23,7 +30,7 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
+    final app = GetMaterialApp(
       title: appTitle,
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
@@ -46,5 +53,14 @@ class MainApp extends StatelessWidget {
         ),
       ],
     );
+    
+    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: DragToResizeArea(child: app),
+      );
+    }
+    
+    return app;
   }
 }

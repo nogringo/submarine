@@ -10,8 +10,10 @@ import 'package:submarine/screens/create_note/create_note_page.dart';
 import 'package:submarine/screens/password_manager/password_manager_page.dart';
 import 'package:submarine/screens/signin/signin_page.dart';
 import 'package:submarine/screens/create_password/create_password_page.dart';
+import 'package:submarine/screens/secret_detail/secret_detail_page.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:system_theme/system_theme.dart';
+import 'package:toastification/toastification.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -68,12 +70,13 @@ class MainApp extends StatelessWidget {
           );
         }
 
-        final app = GetMaterialApp(
-          title: appTitle,
-          theme: getTheme(),
-          darkTheme: getTheme(Brightness.dark),
-          themeMode: ThemeMode.system,
-          getPages: [
+        final app = ToastificationWrapper(
+          child: GetMaterialApp(
+            title: appTitle,
+            theme: getTheme(),
+            darkTheme: getTheme(Brightness.dark),
+            themeMode: ThemeMode.system,
+            getPages: [
         GetPage(name: AppRoutes.signIn, page: () => SigninPage()),
         GetPage(
           name: AppRoutes.passwordManager,
@@ -90,7 +93,13 @@ class MainApp extends StatelessWidget {
           middlewares: [RouterMustBeLoggedInMiddleware()],
           page: () => CreateNotePage(),
         ),
-          ],
+        GetPage(
+          name: AppRoutes.secretDetail,
+          middlewares: [RouterMustBeLoggedInMiddleware()],
+          page: () => SecretDetailPage(),
+        ),
+            ],
+          ),
         );
         
         if (!kIsWeb && GetPlatform.isDesktop) {

@@ -114,7 +114,7 @@ class PasswordManagerPage extends StatelessWidget {
                         ],
                       ),
                       onTap: () {
-                        // TODO: Navigate to secret detail page
+                        Get.toNamed(AppRoutes.secretDetail, arguments: secret);
                       },
                     ),
                   );

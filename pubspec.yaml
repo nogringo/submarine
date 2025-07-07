@@ -20,6 +20,8 @@ dependencies:
   sembast_cache_manager: ^1.0.0
   sembast_web: ^2.4.2
   system_theme: ^3.1.2
+  toastification: ^3.0.3
+  url_launcher: ^6.3.1
   window_manager: ^0.5.0
 
 dev_dependencies:

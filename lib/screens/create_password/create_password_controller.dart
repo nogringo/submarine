@@ -160,6 +160,17 @@ class CreatePasswordController extends GetxController {
     update();
   }
 
+  void deleteField(CustomField field) {
+    fields.remove(field);
+    field.value.dispose();
+    update();
+  }
+
+  void toggleFieldVisibility(CustomField field) {
+    field.visible = !field.visible;
+    update();
+  }
+
   void onReorder(int oldIndex, int newIndex) {
     if (oldIndex < newIndex) {
       newIndex -= 1;

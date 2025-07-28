@@ -18,7 +18,7 @@ class CreatePasswordPage extends StatelessWidget {
             preferredSize: Size.fromHeight(kToolbarHeight),
             child: DragToMoveArea(
               child: AppBar(
-                title: Text("New Password"),
+                title: Text("New Secret"),
                 actions: [
                   FilledButton(
                     onPressed: c.isCreatingPassword ? null : c.createPassword,
@@ -99,8 +99,10 @@ class CreatePasswordPage extends StatelessWidget {
                           onPressed: c.showNewFieldDialog,
                           child: Text("Field"),
                         ),
-                        TextButton(onPressed: null, child: Text("Email")),
-                        TextButton(onPressed: null, child: Text("Password")),
+                        if (!c.fields.any((field) => field.name.toLowerCase() == 'email' || field.name.toLowerCase() == 'nsec'))
+                          TextButton(onPressed: c.addEmail, child: Text("Email")),
+                        if (!c.fields.any((field) => field.name.toLowerCase() == 'password'))
+                          TextButton(onPressed: c.addPassword, child: Text("Password")),
                         if (!c.fields.any((field) => field.name.toLowerCase() == 'first name'))
                           TextButton(onPressed: c.addFirstName, child: Text("First name")),
                         if (!c.fields.any((field) => field.name.toLowerCase() == 'surname'))

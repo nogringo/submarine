@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:ndk/entities.dart';
+import 'package:ndk/ndk.dart';
+import 'package:nip01/nip01.dart';
+import 'package:nip19/nip19.dart';
 import 'package:sembast/sembast.dart';
 import 'package:submarine/models/decrypted_event.dart';
 import 'package:submarine/repository.dart';
@@ -89,6 +92,64 @@ class CreatePasswordController extends GetxController {
     final birthDateField = CustomField(name: "Birth date");
     birthDateField.value.text = formattedDate;
     fields.add(birthDateField);
+    update();
+  }
+
+  void addPassword() {
+    // Generate a secure random password
+    final length = 16;
+    final letters = 'abcdefghijklmnopqrstuvwxyz';
+    final capitalLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    final numbers = '0123456789';
+    final specialChars = '!@#\$%^&*()_+-=[]{}|;:,.<>?';
+    
+    final allChars = letters + capitalLetters + numbers + specialChars;
+    final random = DateTime.now().millisecondsSinceEpoch;
+    
+    String password = '';
+    // Ensure at least one of each type
+    password += capitalLetters[(random + 1) % capitalLetters.length];
+    password += letters[(random + 2) % letters.length];
+    password += numbers[(random + 3) % numbers.length];
+    password += specialChars[(random + 4) % specialChars.length];
+    
+    // Fill the rest randomly
+    for (int i = 4; i < length; i++) {
+      password += allChars[(random + i * 7) % allChars.length];
+    }
+    
+    // Shuffle the password
+    final passwordChars = password.split('');
+    for (int i = passwordChars.length - 1; i > 0; i--) {
+      final j = (random + i) % (i + 1);
+      final temp = passwordChars[i];
+      passwordChars[i] = passwordChars[j];
+      passwordChars[j] = temp;
+    }
+    
+    final passwordField = CustomField(name: "Password", visible: false);
+    passwordField.value.text = passwordChars.join();
+    fields.add(passwordField);
+    update();
+  }
+
+  void addEmail() async {
+    // Generate a new Nostr keypair
+    final keyPair = KeyPair.generate();
+    
+    // Create email in the format npub...@uid.ovh
+    final email = '${keyPair.npub}@uid.ovh';
+    
+    // Add email field
+    final emailField = CustomField(name: "Email");
+    emailField.value.text = email;
+    fields.add(emailField);
+    
+    // Add nsec field (hidden by default)
+    final nsecField = CustomField(name: "Nsec", visible: false);
+    nsecField.value.text = keyPair.nsec;
+    fields.add(nsecField);
+    
     update();
   }
 

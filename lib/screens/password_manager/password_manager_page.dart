@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nostr_widgets/nostr_widgets.dart';
 import 'package:submarine/app_routes.dart';
 import 'package:submarine/config.dart';
 import 'package:submarine/repository.dart';
@@ -24,18 +25,17 @@ class PasswordManagerPage extends StatelessWidget {
             actions: [
               Padding(
                 padding: EdgeInsets.only(right: 16),
-                child: Obx(() => GestureDetector(
+                child: GestureDetector(
                   onTap: () => Get.toNamed(AppRoutes.userProfile),
                   child: CircleAvatar(
-                    radius: 18,
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    backgroundImage: NetworkImage(
-                      controller.userProfilePicture.value.isNotEmpty
-                          ? controller.userProfilePicture.value
-                          : _getRoboHashUrl(),
+                    child: ClipOval(
+                      child: NPicture(
+                        ndk: Repository.to.ndk,
+                        pubKey: Repository.to.publicKey!,
+                      ),
                     ),
                   ),
-                )),
+                ),
               ),
               if (!kIsWeb && GetPlatform.isDesktop)
                 SizedBox(
@@ -154,10 +154,5 @@ class PasswordManagerPage extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  String _getRoboHashUrl() {
-    final publicKey = Repository.to.publicKey ?? 'default';
-    return 'https://robohash.org/$publicKey';
   }
 }

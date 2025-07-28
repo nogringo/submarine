@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:ndk/ndk.dart';
+import 'package:nostr_widgets/nostr_widgets.dart';
 import 'package:sembast/sembast.dart' as sembast;
 import 'package:submarine/get_database.dart';
 import 'package:submarine/models/decrypted_event.dart';
-import 'package:submarine/no_event_verifier.dart';
 import 'package:nip01/nip01.dart';
 import 'package:sembast_cache_manager/sembast_cache_manager.dart';
 import 'package:submarine/services/database_service.dart';
@@ -23,19 +23,14 @@ class Repository extends GetxController {
 
   Future<void> loadApp() async {
     await _initNdk();
-
-    final privateKey = await FlutterSecureStorage().read(key: "privateKey");
-
-    if (privateKey == null) return;
-
-    await signInWithPrivateKey(privateKey);
+    await nRestoreLastSession(Repository.to.ndk);
   }
 
   Future<void> _initNdk() async {
     final db = await getDatabase();
     ndk = Ndk(
       NdkConfig(
-        eventVerifier: NoEventVerifier(),
+        eventVerifier: Bip340EventVerifier(),
         cache: SembastCacheManager(db),
       ),
     );

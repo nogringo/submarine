@@ -11,9 +11,12 @@ import 'package:submarine/screens/password_manager/password_manager_page.dart';
 import 'package:submarine/screens/signin/signin_page.dart';
 import 'package:submarine/screens/create_password/create_password_page.dart';
 import 'package:submarine/screens/secret_detail/secret_detail_page.dart';
+import 'package:submarine/screens/user_profile/user_profile_page.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:system_theme/system_theme.dart';
 import 'package:toastification/toastification.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:nostr_widgets/l10n/app_localizations.dart' as nostr_widgets_l10n;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -76,39 +79,54 @@ class MainApp extends StatelessWidget {
             theme: getTheme(),
             darkTheme: getTheme(Brightness.dark),
             themeMode: ThemeMode.system,
+            localizationsDelegates: [
+              nostr_widgets_l10n.AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: [
+              Locale('en'),
+              Locale('fr'),
+            ],
             getPages: [
-        GetPage(name: AppRoutes.signIn, page: () => SigninPage()),
-        GetPage(
-          name: AppRoutes.passwordManager,
-          middlewares: [RouterMustBeLoggedInMiddleware()],
-          page: () => PasswordManagerPage(),
-        ),
-        GetPage(
-          name: AppRoutes.createPassword,
-          middlewares: [RouterMustBeLoggedInMiddleware()],
-          page: () => CreatePasswordPage(),
-        ),
-        GetPage(
-          name: AppRoutes.createNote,
-          middlewares: [RouterMustBeLoggedInMiddleware()],
-          page: () => CreateNotePage(),
-        ),
-        GetPage(
-          name: AppRoutes.secretDetail,
-          middlewares: [RouterMustBeLoggedInMiddleware()],
-          page: () => SecretDetailPage(),
-        ),
+              GetPage(name: AppRoutes.signIn, page: () => SigninPage()),
+              GetPage(
+                name: AppRoutes.passwordManager,
+                middlewares: [RouterMustBeLoggedInMiddleware()],
+                page: () => PasswordManagerPage(),
+              ),
+              GetPage(
+                name: AppRoutes.createPassword,
+                middlewares: [RouterMustBeLoggedInMiddleware()],
+                page: () => CreatePasswordPage(),
+              ),
+              GetPage(
+                name: AppRoutes.createNote,
+                middlewares: [RouterMustBeLoggedInMiddleware()],
+                page: () => CreateNotePage(),
+              ),
+              GetPage(
+                name: AppRoutes.secretDetail,
+                middlewares: [RouterMustBeLoggedInMiddleware()],
+                page: () => SecretDetailPage(),
+              ),
+              GetPage(
+                name: AppRoutes.userProfile,
+                middlewares: [RouterMustBeLoggedInMiddleware()],
+                page: () => UserProfilePage(),
+              ),
             ],
           ),
         );
-        
+
         if (!kIsWeb && GetPlatform.isDesktop) {
           return Directionality(
             textDirection: TextDirection.ltr,
             child: DragToResizeArea(child: app),
           );
         }
-        
+
         return app;
       },
     );

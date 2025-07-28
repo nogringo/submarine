@@ -4,4 +4,5 @@ class AppRoutes {
   static const createPassword = "/create-password";
   static const createNote = "/create-note";
   static const secretDetail = "/secret-detail";
+  static const userProfile = "/user-profile";
 }

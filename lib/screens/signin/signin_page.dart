@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:nip19/nip19.dart';
+import 'package:nostr_widgets/nostr_widgets.dart';
 import 'package:submarine/app_routes.dart';
 import 'package:submarine/config.dart';
 import 'package:submarine/repository.dart';
@@ -18,15 +18,15 @@ class SigninPage extends StatelessWidget {
         child: DragToMoveArea(
           child: AppBar(
             actions: [
-          if (!kIsWeb && GetPlatform.isDesktop)
-            SizedBox(
-              width: 154,
-              child: WindowCaption(
-                brightness: Theme.of(context).brightness,
-                backgroundColor: Colors.transparent,
-              ),
-            ),
-        ],
+              if (!kIsWeb && GetPlatform.isDesktop)
+                SizedBox(
+                  width: 154,
+                  child: WindowCaption(
+                    brightness: Theme.of(context).brightness,
+                    backgroundColor: Colors.transparent,
+                  ),
+                ),
+            ],
           ),
         ),
       ),
@@ -40,21 +40,12 @@ class SigninPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text("$appTitle sign in", style: Get.textTheme.displaySmall),
-                TextField(
-                  decoration: InputDecoration(labelText: "Nsec"),
-                  onChanged: (nsec) async {
-                    String privateKey;
-                    try {
-                      privateKey = Nip19.nsecToHex(nsec);
-                    } catch (e) {
-                      return;
-                    }
-
-                    await Repository.to.signInWithPrivateKey(
-                      privateKey,
-                      storelocaly: true,
-                    );
-
+                SizedBox(height: 16),
+                NLogin(
+                  ndk: Repository.to.ndk,
+                  enableNip05Login: false,
+                  enableNpubLogin: false,
+                  onLoggedIn: () {
                     Get.offNamed(AppRoutes.passwordManager);
                   },
                 ),

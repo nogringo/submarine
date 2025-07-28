@@ -35,6 +35,10 @@ class CreatePasswordController extends GetxController {
     );
   }
 
+  void addSurname() {
+    newField("Surname");
+  }
+
   void add2FA() {}
 
   void toggleReorderMode() {

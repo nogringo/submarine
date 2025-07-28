@@ -69,6 +69,29 @@ class CreatePasswordController extends GetxController {
     update();
   }
 
+  void addBirthDate() {
+    // Generate random birth date between 18 and 65 years ago
+    final now = DateTime.now();
+    final minAge = 18;
+    final maxAge = 65;
+    
+    final random = DateTime.now().millisecondsSinceEpoch;
+    final ageRange = maxAge - minAge;
+    final randomAge = minAge + (random % ageRange);
+    
+    final birthYear = now.year - randomAge;
+    final birthMonth = 1 + (random % 12);
+    final birthDay = 1 + (random % 28); // Using 28 to avoid invalid dates
+    
+    final birthDate = DateTime(birthYear, birthMonth, birthDay);
+    final formattedDate = "${birthDate.year}-${birthDate.month.toString().padLeft(2, '0')}-${birthDate.day.toString().padLeft(2, '0')}";
+    
+    final birthDateField = CustomField(name: "Birth date");
+    birthDateField.value.text = formattedDate;
+    fields.add(birthDateField);
+    update();
+  }
+
   void add2FA() {}
 
   void toggleReorderMode() {

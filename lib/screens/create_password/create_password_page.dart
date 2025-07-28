@@ -18,22 +18,22 @@ class CreatePasswordPage extends StatelessWidget {
             preferredSize: Size.fromHeight(kToolbarHeight),
             child: DragToMoveArea(
               child: AppBar(
-            title: Text("New Password"),
-            actions: [
-              FilledButton(
-                onPressed: c.isCreatingPassword ? null : c.createPassword,
-                child: Text("Create"),
-              ),
-              SizedBox(width: 8),
-              if (!kIsWeb && GetPlatform.isDesktop)
-                SizedBox(
-                  width: 154,
-                  child: WindowCaption(
-                    brightness: Theme.of(context).brightness,
-                    backgroundColor: Colors.transparent,
+                title: Text("New Password"),
+                actions: [
+                  FilledButton(
+                    onPressed: c.isCreatingPassword ? null : c.createPassword,
+                    child: Text("Create"),
                   ),
-                ),
-            ],
+                  SizedBox(width: 8),
+                  if (!kIsWeb && GetPlatform.isDesktop)
+                    SizedBox(
+                      width: 154,
+                      child: WindowCaption(
+                        brightness: Theme.of(context).brightness,
+                        backgroundColor: Colors.transparent,
+                      ),
+                    ),
+                ],
               ),
             ),
           ),
@@ -97,9 +97,13 @@ class CreatePasswordPage extends StatelessWidget {
                       children: [
                         TextButton(
                           onPressed: c.showNewFieldDialog,
-                          child: Text("New field"),
+                          child: Text("Field"),
                         ),
-                        TextButton(onPressed: null, child: Text("Add 2FA")),
+                        TextButton(onPressed: null, child: Text("Email")),
+                        TextButton(onPressed: null, child: Text("Password")),
+                        TextButton(onPressed: null, child: Text("First name")),
+                        TextButton(onPressed: null, child: Text("Surname")),
+                        TextButton(onPressed: null, child: Text("2FA")),
                         Spacer(),
                         IconButton(
                           onPressed: c.toggleReorderMode,
@@ -163,7 +167,6 @@ class CreatePasswordPage extends StatelessWidget {
     );
   }
 }
-
 
 class FieldView extends StatelessWidget {
   final String name;

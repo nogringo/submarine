@@ -16,10 +16,7 @@ class CreatePasswordController extends GetxController {
   bool isCreatingPassword = false;
 
   final titleController = TextEditingController();
-  List<CustomField> fields = [
-    CustomField(name: "Username"),
-    CustomField(name: "Password", visible: false),
-  ];
+  List<CustomField> fields = [];
   bool isReorderMode = false;
   List<TextEditingController> websites = [];
   final newWebsiteController = TextEditingController(text: "https://");

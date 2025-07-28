@@ -52,6 +52,23 @@ class CreatePasswordController extends GetxController {
     update();
   }
 
+  void addFirstName() {
+    final firstNames = [
+      'James', 'Mary', 'John', 'Patricia', 'Robert',
+      'Jennifer', 'Michael', 'Linda', 'William', 'Elizabeth',
+      'David', 'Barbara', 'Richard', 'Susan', 'Joseph',
+      'Jessica', 'Thomas', 'Sarah', 'Charles', 'Karen',
+      'Christopher', 'Nancy', 'Daniel', 'Lisa', 'Matthew',
+      'Betty', 'Anthony', 'Helen', 'Mark', 'Sandra'
+    ];
+    
+    final randomFirstName = firstNames[(DateTime.now().millisecondsSinceEpoch % firstNames.length)];
+    final firstNameField = CustomField(name: "First name");
+    firstNameField.value.text = randomFirstName;
+    fields.add(firstNameField);
+    update();
+  }
+
   void add2FA() {}
 
   void toggleReorderMode() {

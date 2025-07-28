@@ -101,7 +101,8 @@ class CreatePasswordPage extends StatelessWidget {
                         ),
                         TextButton(onPressed: null, child: Text("Email")),
                         TextButton(onPressed: null, child: Text("Password")),
-                        TextButton(onPressed: null, child: Text("First name")),
+                        if (!c.fields.any((field) => field.name.toLowerCase() == 'first name'))
+                          TextButton(onPressed: c.addFirstName, child: Text("First name")),
                         if (!c.fields.any((field) => field.name.toLowerCase() == 'surname'))
                           TextButton(onPressed: c.addSurname, child: Text("Surname")),
                         TextButton(onPressed: null, child: Text("2FA")),

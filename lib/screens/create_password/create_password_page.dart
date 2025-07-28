@@ -123,49 +123,56 @@ class CreatePasswordPage extends StatelessWidget {
                     padding: const EdgeInsets.all(8),
                     child: Row(
                       children: [
-                        TextButton(
-                          onPressed: c.showNewFieldDialog,
-                          child: Text("Field"),
+                        Expanded(
+                          child: Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              TextButton(
+                                onPressed: c.showNewFieldDialog,
+                                child: Text("Field"),
+                              ),
+                              if (!c.fields.any(
+                                (field) =>
+                                    field.name.toLowerCase() == 'email' ||
+                                    field.name.toLowerCase() == 'nsec',
+                              ))
+                                TextButton(
+                                  onPressed: c.addEmail,
+                                  child: Text("Email"),
+                                ),
+                              if (!c.fields.any(
+                                (field) => field.name.toLowerCase() == 'password',
+                              ))
+                                TextButton(
+                                  onPressed: c.addPassword,
+                                  child: Text("Password"),
+                                ),
+                              if (!c.fields.any(
+                                (field) => field.name.toLowerCase() == 'first name',
+                              ))
+                                TextButton(
+                                  onPressed: c.addFirstName,
+                                  child: Text("First name"),
+                                ),
+                              if (!c.fields.any(
+                                (field) => field.name.toLowerCase() == 'surname',
+                              ))
+                                TextButton(
+                                  onPressed: c.addSurname,
+                                  child: Text("Surname"),
+                                ),
+                              if (!c.fields.any(
+                                (field) => field.name.toLowerCase() == 'birth date',
+                              ))
+                                TextButton(
+                                  onPressed: c.addBirthDate,
+                                  child: Text("Birth date"),
+                                ),
+                              // TextButton(onPressed: null, child: Text("2FA")),
+                            ],
+                          ),
                         ),
-                        if (!c.fields.any(
-                          (field) =>
-                              field.name.toLowerCase() == 'email' ||
-                              field.name.toLowerCase() == 'nsec',
-                        ))
-                          TextButton(
-                            onPressed: c.addEmail,
-                            child: Text("Email"),
-                          ),
-                        if (!c.fields.any(
-                          (field) => field.name.toLowerCase() == 'password',
-                        ))
-                          TextButton(
-                            onPressed: c.addPassword,
-                            child: Text("Password"),
-                          ),
-                        if (!c.fields.any(
-                          (field) => field.name.toLowerCase() == 'first name',
-                        ))
-                          TextButton(
-                            onPressed: c.addFirstName,
-                            child: Text("First name"),
-                          ),
-                        if (!c.fields.any(
-                          (field) => field.name.toLowerCase() == 'surname',
-                        ))
-                          TextButton(
-                            onPressed: c.addSurname,
-                            child: Text("Surname"),
-                          ),
-                        if (!c.fields.any(
-                          (field) => field.name.toLowerCase() == 'birth date',
-                        ))
-                          TextButton(
-                            onPressed: c.addBirthDate,
-                            child: Text("Birth date"),
-                          ),
-                        // TextButton(onPressed: null, child: Text("2FA")),
-                        Spacer(),
                         IconButton(
                           onPressed: c.toggleReorderMode,
                           icon: Icon(Icons.swap_vert),

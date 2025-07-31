@@ -15,6 +15,7 @@ class PasswordManagerController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxString userProfilePicture = ''.obs;
   final RxString userName = ''.obs;
+  final Map<String, String> _secretEventIds = {}; // secretId -> eventId
 
   StreamSubscription? _subscription;
 
@@ -40,8 +41,15 @@ class PasswordManagerController extends GetxController {
     _subscription = secretsStore.query().onSnapshots(db).listen((snapshots) {
       final secretsList = snapshots.map((snapshot) {
         final decryptedEvent = DecryptedSecretEvent.fromJson(snapshot.value);
+        final secret = Secret.fromJson(decryptedEvent.secret);
+        
+        // Store the mapping of secretId -> eventId
+        if (secret.id != null) {
+          _secretEventIds[secret.id!] = snapshot.key;
+        }
+        
         return {
-          'secret': Secret.fromJson(decryptedEvent.secret),
+          'secret': secret,
           'createdAt': decryptedEvent.createdAt,
         };
       }).toList();
@@ -123,5 +131,9 @@ class PasswordManagerController extends GetxController {
     } catch (e) {
       // Handle error silently
     }
+  }
+
+  String? getEventId(String secretId) {
+    return _secretEventIds[secretId];
   }
 }

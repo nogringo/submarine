@@ -7,6 +7,7 @@ import 'package:submarine/config.dart';
 import 'package:submarine/repository.dart';
 import 'package:submarine/screens/password_manager/password_manager_controller.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:submarine/widgets/share_secret_dialog.dart';
 
 class PasswordManagerPage extends StatelessWidget {
   const PasswordManagerPage({super.key});
@@ -95,12 +96,42 @@ class PasswordManagerPage extends StatelessWidget {
                             : "Untitled",
                       ),
                       trailing: PopupMenuButton<String>(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: BorderSide(
+                            color: Theme.of(context).colorScheme.outline,
+                            width: 1,
+                          ),
+                        ),
+                        // padding: EdgeInsetsGeometry.zero,
+                        // menuPadding: EdgeInsetsGeometry.zero,
                         onSelected: (value) {
                           if (value == 'delete' && secret.id != null) {
                             _showDeleteDialog(context, controller, secret.id!);
+                          } else if (value == 'share') {
+                            final eventId = controller.getEventId(secret.id!);
+                            if (eventId != null) {
+                              showDialog(
+                                context: context,
+                                builder: (context) => ShareSecretDialog(
+                                  eventId: eventId,
+                                  secretTitle: secret.title ?? 'Secret',
+                                ),
+                              );
+                            }
                           }
                         },
                         itemBuilder: (context) => [
+                          PopupMenuItem(
+                            value: 'share',
+                            child: Row(
+                              children: [
+                                Icon(Icons.share),
+                                SizedBox(width: 8),
+                                Text('Share'),
+                              ],
+                            ),
+                          ),
                           PopupMenuItem(
                             value: 'delete',
                             child: Row(

@@ -8,6 +8,13 @@ import 'package:submarine/models/secret.dart';
 import 'package:submarine/models/otp_field.dart' as model;
 import 'package:submarine/models/text_field.dart' as model;
 import 'package:submarine/models/secret_text_field.dart' as model;
+import 'package:submarine/repository.dart';
+import 'package:submarine/models/decrypted_event.dart';
+import 'package:submarine/services/database_service.dart';
+import 'package:submarine/services/stores.dart';
+import 'package:flutter/material.dart';
+import 'package:toastification/toastification.dart';
+import 'package:sembast/sembast.dart' as sembast;
 
 class SecretDetailController extends GetxController {
   static SecretDetailController get to => Get.find();
@@ -59,15 +66,39 @@ class SecretDetailController extends GetxController {
 
   SecretDetailController({required this.secret});
 
+  final shareRecipientController = TextEditingController();
+  final isSharing = false.obs;
+  String? eventId;
+  final searchController = TextEditingController();
+  final filteredFollows = <Follow>[].obs;
+
   @override
   void onInit() {
     super.onInit();
     _initializeOTP();
+    _loadEventId();
+  }
+
+  Future<void> _loadEventId() async {
+    final db = await DatabaseService().database;
+    final records = await secretsStore.find(
+      db,
+      finder: sembast.Finder(
+        filter: sembast.Filter.equals('secret.id', secret.id),
+      ),
+    );
+    
+    if (records.isNotEmpty) {
+      final decryptedEvent = DecryptedSecretEvent.fromJson(records.first.value);
+      eventId = decryptedEvent.eventId;
+    }
   }
 
   @override
   void onClose() {
     _otpTimer?.cancel();
+    shareRecipientController.dispose();
+    searchController.dispose();
     super.onClose();
   }
 
@@ -156,5 +187,110 @@ class SecretDetailController extends GetxController {
     update();
 
     ndk.destroy();
+  }
+
+  Future<void> shareSecret() async {
+    if (eventId == null) {
+      toastification.show(
+        context: Get.context!,
+        title: Text('Error'),
+        description: Text('Unable to share this secret'),
+        type: ToastificationType.error,
+        autoCloseDuration: const Duration(seconds: 3),
+      );
+      return;
+    }
+
+    final recipientInput = shareRecipientController.text.trim();
+    if (recipientInput.isEmpty) {
+      toastification.show(
+        context: Get.context!,
+        title: Text('Error'),
+        description: Text('Please enter a recipient'),
+        type: ToastificationType.error,
+        autoCloseDuration: const Duration(seconds: 3),
+      );
+      return;
+    }
+
+    String recipientPubkey;
+    try {
+      // Check if input is npub
+      if (recipientInput.startsWith('npub')) {
+        recipientPubkey = Nip19.npubToHex(recipientInput);
+      } else if (recipientInput.length == 64 && _isHex(recipientInput)) {
+        // Already a hex pubkey
+        recipientPubkey = recipientInput;
+      } else {
+        throw Exception('Invalid public key format');
+      }
+    } catch (e) {
+      toastification.show(
+        context: Get.context!,
+        title: Text('Error'),
+        description: Text('Invalid public key format'),
+        type: ToastificationType.error,
+        autoCloseDuration: const Duration(seconds: 3),
+      );
+      return;
+    }
+
+    isSharing.value = true;
+    try {
+      await Repository.to.shareSecret(
+        eventId: eventId!,
+        recipientPubkey: recipientPubkey,
+      );
+      
+      shareRecipientController.clear();
+      Get.back(); // Close the dialog
+      
+      toastification.show(
+        context: Get.context!,
+        title: Text('Success'),
+        description: Text('Secret shared successfully'),
+        type: ToastificationType.success,
+        autoCloseDuration: const Duration(seconds: 3),
+      );
+    } catch (e) {
+      toastification.show(
+        context: Get.context!,
+        title: Text('Error'),
+        description: Text('Failed to share secret: ${e.toString()}'),
+        type: ToastificationType.error,
+        autoCloseDuration: const Duration(seconds: 3),
+      );
+    } finally {
+      isSharing.value = false;
+    }
+  }
+
+  bool _isHex(String input) {
+    final hexRegex = RegExp(r'^[0-9a-fA-F]+$');
+    return hexRegex.hasMatch(input);
+  }
+
+  void filterFollows(String query) {
+    if (query.isEmpty) {
+      filteredFollows.value = Repository.to.follows;
+      return;
+    }
+    
+    final lowerQuery = query.toLowerCase();
+    filteredFollows.value = Repository.to.follows.where((follow) {
+      final name = follow.displayName.toLowerCase();
+      final nip05 = (follow.nip05 ?? '').toLowerCase();
+      final npub = follow.pubkey.toLowerCase();
+      
+      return name.contains(lowerQuery) || 
+             nip05.contains(lowerQuery) || 
+             npub.contains(lowerQuery);
+    }).toList();
+  }
+
+  void selectFollow(Follow follow) {
+    shareRecipientController.text = follow.pubkey;
+    searchController.clear();
+    filterFollows('');
   }
 }

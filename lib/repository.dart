@@ -18,6 +18,9 @@ class Repository extends GetxController {
   late final Ndk ndk;
 
   NdkResponse? subscription;
+  
+  final follows = <Follow>[].obs;
+  final isLoadingFollows = false.obs;
 
   String? get publicKey => ndk.accounts.getPublicKey();
 
@@ -63,6 +66,122 @@ class Repository extends GetxController {
       secretsStore.delete(db),
     ]);
     ndk.accounts.logout();
+  }
+
+  Future<void> shareSecret({
+    required String eventId,
+    required String recipientPubkey,
+  }) async {
+    // Get the secret from local storage
+    final db = await DatabaseService().database;
+    final record = await secretsStore.record(eventId).get(db);
+    
+    if (record == null) {
+      throw Exception('Secret not found');
+    }
+    
+    final decryptedEvent = DecryptedSecretEvent.fromJson(record);
+    final secretJson = jsonEncode(decryptedEvent.secret);
+    
+    // Encrypt the secret using recipient's public key
+    final encryptedContent = await ndk.accounts
+        .getLoggedAccount()!
+        .signer
+        .encryptNip44(plaintext: secretJson, recipientPubKey: recipientPubkey);
+    
+    if (encryptedContent == null) {
+      throw Exception('Failed to encrypt secret');
+    }
+    
+    // Create event with p tag for recipient
+    final event = Nip01Event(
+      kind: 4111,
+      tags: [
+        ["d", decryptedEvent.secret['id'] ?? eventId],
+        ["p", recipientPubkey],
+      ],
+      content: encryptedContent,
+      createdAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      pubKey: publicKey!,
+    );
+    
+    // Sign and publish the event
+    await ndk.accounts.getLoggedAccount()!.signer.sign(event);
+    ndk.broadcast.broadcast(nostrEvent: event);
+  }
+
+  Future<void> loadFollows() async {
+    if (publicKey == null) return;
+    
+    isLoadingFollows.value = true;
+    follows.clear(); // Clear existing follows to get fresh data
+    
+    try {
+      final response = ndk.requests.query(
+        filters: [
+          Filter(kinds: [3], authors: [publicKey!], limit: 1),
+        ],
+        cacheRead: false, // Don't read from cache to get latest
+      );
+
+      await for (final event in response.stream) {
+        final followList = <Follow>[];
+        for (final tag in event.tags) {
+          if (tag.length >= 2 && tag[0] == 'p') {
+            final pubkey = tag[1];
+            String? relay;
+            String? petname;
+            
+            if (tag.length > 2) relay = tag[2];
+            if (tag.length > 3) petname = tag[3];
+            
+            followList.add(Follow(
+              pubkey: pubkey,
+              relay: relay,
+              petname: petname,
+            ));
+          }
+        }
+        
+        follows.value = followList;
+        
+        // Fetch metadata for follows
+        await _fetchFollowsMetadata();
+        break;
+      }
+    } catch (e) {
+      // Error loading follows: $e
+    } finally {
+      isLoadingFollows.value = false;
+    }
+  }
+
+  Future<void> _fetchFollowsMetadata() async {
+    if (follows.isEmpty) return;
+    
+    final pubkeys = follows.map((f) => f.pubkey).toList();
+    final response = ndk.requests.query(
+      filters: [
+        Filter(kinds: [0], authors: pubkeys),
+      ],
+      cacheRead: false, // Get latest metadata
+    );
+
+    await for (final event in response.stream) {
+      try {
+        final metadata = jsonDecode(event.content);
+        final followIndex = follows.indexWhere((f) => f.pubkey == event.pubKey);
+        if (followIndex != -1) {
+          follows[followIndex] = follows[followIndex].copyWith(
+            name: metadata['name'] ?? metadata['display_name'],
+            picture: metadata['picture'],
+            nip05: metadata['nip05'],
+          );
+        }
+      } catch (e) {
+        // Error parsing metadata: $e
+      }
+    }
   }
 
   void listenEvents() async {
@@ -128,5 +247,52 @@ class Repository extends GetxController {
   Future<void> stopListeningEvents() async {
     if (subscription == null) return;
     await ndk.requests.closeSubscription(subscription!.requestId);
+  }
+}
+
+class Follow {
+  final String pubkey;
+  final String? relay;
+  final String? petname;
+  final String? name;
+  final String? picture;
+  final String? nip05;
+
+  Follow({
+    required this.pubkey,
+    this.relay,
+    this.petname,
+    this.name,
+    this.picture,
+    this.nip05,
+  });
+
+  String get displayName => petname ?? name ?? 'Unknown';
+  
+  String get npub {
+    try {
+      // Create npub manually - it's just bech32 encoding
+      return 'npub1${pubkey.substring(0, 16)}...';
+    } catch (e) {
+      return pubkey;
+    }
+  }
+
+  Follow copyWith({
+    String? pubkey,
+    String? relay,
+    String? petname,
+    String? name,
+    String? picture,
+    String? nip05,
+  }) {
+    return Follow(
+      pubkey: pubkey ?? this.pubkey,
+      relay: relay ?? this.relay,
+      petname: petname ?? this.petname,
+      name: name ?? this.name,
+      picture: picture ?? this.picture,
+      nip05: nip05 ?? this.nip05,
+    );
   }
 }

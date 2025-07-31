@@ -68,7 +68,6 @@ The content must be json stringified and then encrypted using [NIP-44](https://g
 ```jsonc
 {
     "kind": 4111,
-    "tags": [["d", "<vault id>"]],
     "content": "nip44.encrypt(JSON.stringify(<secret>))"
 }
 ```
@@ -81,7 +80,6 @@ To share a secret you must add a "p" tag with the recipient pubkey and you must 
 {
     "kind": 4111,
     "tags": [
-        ["d", "<vault id>"],
         ["p", "<recipient pubkey>"],
     ],
     "content": "nip44.encrypt(JSON.stringify(<secret>), <recipient pubkey>)"

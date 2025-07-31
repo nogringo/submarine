@@ -15,6 +15,7 @@ import 'package:submarine/widgets/area_view.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:toastification/toastification.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:submarine/repository.dart';
 
 class SecretDetailPage extends StatelessWidget {
   const SecretDetailPage({super.key});
@@ -33,6 +34,10 @@ class SecretDetailPage extends StatelessWidget {
               child: AppBar(
                 title: Text(secret.title ?? 'Secret Details'),
                 actions: [
+                  IconButton(
+                    icon: Icon(Icons.share),
+                    onPressed: () => _showShareDialog(context, controller),
+                  ),
                   // IconButton(
                   //   icon: Icon(Icons.edit),
                   //   onPressed: () {
@@ -549,4 +554,145 @@ class MailboxView extends StatelessWidget {
       TextSpan(children: spans),
     );
   }
+}
+
+void _showShareDialog(BuildContext context, SecretDetailController controller) {
+  // Load follows when dialog opens
+  Repository.to.loadFollows();
+  controller.filteredFollows.value = Repository.to.follows;
+  
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Container(
+          padding: EdgeInsets.all(24),
+          constraints: BoxConstraints(maxWidth: 500, maxHeight: 600),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Share Secret',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              SizedBox(height: 16),
+              TextField(
+                controller: controller.shareRecipientController,
+                decoration: InputDecoration(
+                  hintText: 'npub1... or hex public key',
+                  label: Text('Recipient'),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                ),
+              ),
+              SizedBox(height: 16),
+              TextField(
+                controller: controller.searchController,
+                onChanged: controller.filterFollows,
+                decoration: InputDecoration(
+                  hintText: 'Search follows...',
+                  prefixIcon: Icon(Icons.search),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                ),
+              ),
+              SizedBox(height: 16),
+              Expanded(
+                child: Obx(() {
+                  if (Repository.to.isLoadingFollows.value) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  
+                  if (controller.filteredFollows.isEmpty) {
+                    return Center(
+                      child: Text(
+                        Repository.to.follows.isEmpty 
+                          ? 'No follows found' 
+                          : 'No matches found',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    );
+                  }
+                  
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: controller.filteredFollows.length,
+                    itemBuilder: (context, index) {
+                      final follow = controller.filteredFollows[index];
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundImage: follow.picture != null 
+                            ? NetworkImage(follow.picture!) 
+                            : null,
+                          child: follow.picture == null 
+                            ? Text(follow.displayName[0].toUpperCase()) 
+                            : null,
+                        ),
+                        title: Text(follow.displayName),
+                        subtitle: follow.nip05 != null 
+                          ? Text(follow.nip05!) 
+                          : Text(
+                              follow.npub,
+                              style: TextStyle(fontFamily: 'monospace'),
+                            ),
+                        onTap: () => controller.selectFollow(follow),
+                      );
+                    },
+                  );
+                }),
+              ),
+              SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      controller.shareRecipientController.clear();
+                      controller.searchController.clear();
+                      Navigator.of(context).pop();
+                    },
+                    child: Text('Cancel'),
+                  ),
+                  SizedBox(width: 16),
+                  Obx(
+                    () => FilledButton(
+                      onPressed: controller.isSharing.value
+                          ? null
+                          : () => controller.shareSecret(),
+                      child: controller.isSharing.value
+                          ? SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Theme.of(context).colorScheme.onPrimary,
+                                ),
+                              ),
+                            )
+                          : Text('Share'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
 }

@@ -1,12 +1,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/gestures.dart';
 import 'package:get/get.dart';
+import 'package:ndk/entities.dart';
 import 'package:submarine/models/secret.dart';
 import 'package:submarine/models/field.dart';
 import 'package:submarine/models/text_field.dart' as model;
 import 'package:submarine/models/secret_text_field.dart';
 import 'package:submarine/models/otp_field.dart';
+import 'package:submarine/screens/secret_detail/compact_email_view.dart';
 import 'package:submarine/screens/secret_detail/secret_detail_controller.dart';
 import 'package:submarine/widgets/area_view.dart';
 import 'package:window_manager/window_manager.dart';
@@ -77,8 +80,12 @@ class SecretDetailPage extends StatelessWidget {
               if (secret.note != null && secret.note!.isNotEmpty)
                 AreaView(
                   title: 'Note',
-                  children: [SelectableText(secret.note!, style: TextStyle(height: 1.5))],
+                  children: [
+                    SelectableText(secret.note!, style: TextStyle(height: 1.5)),
+                  ],
                 ),
+
+              if (SecretDetailController.to.hasNostrMail) MailboxView(),
             ],
           ),
         );
@@ -140,7 +147,10 @@ class SecretDetailPage extends StatelessWidget {
               alignment: Alignment.bottomCenter,
               backgroundColor: Theme.of(context).colorScheme.inverseSurface,
               foregroundColor: Theme.of(context).colorScheme.onInverseSurface,
-              icon: Icon(Icons.check, color: Theme.of(context).colorScheme.onInverseSurface),
+              icon: Icon(
+                Icons.check,
+                color: Theme.of(context).colorScheme.onInverseSurface,
+              ),
             );
           },
           child: Container(
@@ -209,7 +219,10 @@ class SecretDetailPage extends StatelessWidget {
               alignment: Alignment.bottomCenter,
               backgroundColor: Theme.of(context).colorScheme.inverseSurface,
               foregroundColor: Theme.of(context).colorScheme.onInverseSurface,
-              icon: Icon(Icons.check, color: Theme.of(context).colorScheme.onInverseSurface),
+              icon: Icon(
+                Icons.check,
+                color: Theme.of(context).colorScheme.onInverseSurface,
+              ),
             );
           },
           child: Container(
@@ -277,14 +290,263 @@ class SecretDetailPage extends StatelessWidget {
             Expanded(
               child: Text(
                 url,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+                style: TextStyle(color: Theme.of(context).colorScheme.primary),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class MailboxView extends StatelessWidget {
+  const MailboxView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return GetBuilder<SecretDetailController>(
+      builder: (c) {
+        return AreaView(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("Mailbox", style: Theme.of(context).textTheme.titleLarge),
+                IconButton(
+                  onPressed: () {
+                    SecretDetailController.to.fetchEmails();
+                  },
+                  icon: Icon(Icons.refresh),
+                ),
+              ],
+            ),
+            ...SecretDetailController.to.emails.map(
+              (e) => CompactEmailView(
+                email: e,
+                onTap: () => _showFullEmail(context, e),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showFullEmail(BuildContext context, Nip01Event email) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        final theme = Theme.of(context);
+        return Dialog(
+          backgroundColor: theme.colorScheme.surface,
+          surfaceTintColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          insetPadding: const EdgeInsets.all(24),
+          child: Container(
+            constraints: const BoxConstraints(
+              maxWidth: 700,
+              maxHeight: 600,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(24),
+                      topRight: Radius.circular(24),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Email icon
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.email_outlined,
+                              color: theme.colorScheme.primary,
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          // Subject and date
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _extractSubject(email.content),
+                                  style: theme.textTheme.headlineSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.access_time,
+                                      size: 16,
+                                      color: theme.textTheme.bodySmall?.color,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      _formatFullTimestamp(email.createdAt),
+                                      style: theme.textTheme.bodySmall?.copyWith(
+                                        color: theme.textTheme.bodySmall?.color,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Close button
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(8),
+                              onTap: () => Navigator.of(context).pop(),
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                child: Icon(
+                                  Icons.close,
+                                  color: theme.textTheme.bodyMedium?.color,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                // Email body
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(24),
+                        bottomRight: Radius.circular(24),
+                      ),
+                    ),
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(24),
+                      child: _buildClickableContent(
+                        context,
+                        _extractBody(email.content),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  String _extractSubject(String content) {
+    final lines = content.split('\n');
+    for (final line in lines) {
+      if (line.toLowerCase().startsWith('subject:')) {
+        return line.substring(8).trim();
+      }
+    }
+    return lines.isNotEmpty && lines.first.isNotEmpty ? lines.first : 'No subject';
+  }
+
+  String _extractBody(String content) {
+    if (content.toLowerCase().contains('subject:')) {
+      final subjectEnd = content.indexOf('\n');
+      if (subjectEnd != -1) {
+        return content.substring(subjectEnd + 1).trim();
+      }
+    }
+    return content;
+  }
+
+  String _formatFullTimestamp(int timestamp) {
+    final date = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
+    return '${date.day}/${date.month}/${date.year} at ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  }
+
+  Widget _buildClickableContent(BuildContext context, String content) {
+    final urlRegex = RegExp(
+      r'https?://[^\s<>"{}|\\^\[\]`]+',
+      caseSensitive: false,
+    );
+
+    final matches = urlRegex.allMatches(content).toList();
+    
+    if (matches.isEmpty) {
+      return SelectableText(
+        content,
+        style: Theme.of(context).textTheme.bodyMedium,
+      );
+    }
+
+    final spans = <InlineSpan>[];
+    int lastEnd = 0;
+
+    for (final match in matches) {
+      // Add text before the URL
+      if (match.start > lastEnd) {
+        spans.add(TextSpan(
+          text: content.substring(lastEnd, match.start),
+          style: Theme.of(context).textTheme.bodyMedium,
+        ));
+      }
+
+      // Add the URL as a clickable link
+      final url = match.group(0)!;
+      spans.add(TextSpan(
+        text: url,
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          color: Theme.of(context).colorScheme.primary,
+          decoration: TextDecoration.underline,
+        ),
+        recognizer: TapGestureRecognizer()
+          ..onTap = () async {
+            final uri = Uri.tryParse(url);
+            if (uri != null && await canLaunchUrl(uri)) {
+              await launchUrl(uri);
+            }
+          },
+      ));
+
+      lastEnd = match.end;
+    }
+
+    // Add any remaining text
+    if (lastEnd < content.length) {
+      spans.add(TextSpan(
+        text: content.substring(lastEnd),
+        style: Theme.of(context).textTheme.bodyMedium,
+      ));
+    }
+
+    return SelectableText.rich(
+      TextSpan(children: spans),
     );
   }
 }

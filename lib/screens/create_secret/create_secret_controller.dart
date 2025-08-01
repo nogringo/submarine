@@ -8,6 +8,7 @@ import 'package:ndk/ndk.dart';
 import 'package:nip01/nip01.dart';
 import 'package:nip19/nip19.dart';
 import 'package:sembast/sembast.dart' as sembast;
+import 'package:submarine/app_routes.dart';
 import 'package:submarine/models/decrypted_event.dart';
 import 'package:submarine/models/secret.dart';
 import 'package:submarine/models/text_field.dart' as model;
@@ -544,7 +545,8 @@ class CreateSecretController extends GetxController {
 
     Repository.to.ndk.broadcast.broadcast(nostrEvent: nostrEvent);
 
-    Get.back();
+    // Navigate to password manager after creating/editing
+    Get.offAllNamed(AppRoutes.passwordManager);
   }
 }
 

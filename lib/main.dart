@@ -113,6 +113,7 @@ class MainApp extends StatelessWidget {
                 name: AppRoutes.secretDetail,
                 middlewares: [RouterMustBeLoggedInMiddleware()],
                 page: () => SecretDetailPage(),
+                transition: Transition.noTransition,
               ),
               GetPage(
                 name: AppRoutes.userProfile,

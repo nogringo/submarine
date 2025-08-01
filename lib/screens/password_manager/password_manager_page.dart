@@ -205,7 +205,7 @@ class PasswordManagerPage extends StatelessWidget {
       AlertDialog(
         title: Text('Delete Secret'),
         content: Text(
-          'Are you sure you want to delete this secret? This action cannot be undone.',
+          'Are you sure you want to delete this secret? All versions of this secret will be permanently deleted. This action cannot be undone.',
         ),
         actions: [
           TextButton(onPressed: () => Get.back(), child: Text('Cancel')),

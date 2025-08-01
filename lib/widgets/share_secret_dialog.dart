@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:submarine/models/follow.dart';
 import 'package:submarine/repository.dart';
-import 'package:toastification/toastification.dart';
+import 'package:submarine/utils/toast_helper.dart';
 import 'package:nip19/nip19.dart';
 
 class ShareSecretDialog extends StatefulWidget {
@@ -70,12 +70,10 @@ class _ShareSecretDialogState extends State<ShareSecretDialog> {
   Future<void> _shareSecret() async {
     final recipientInput = shareRecipientController.text.trim();
     if (recipientInput.isEmpty) {
-      toastification.show(
+      ToastHelper.showError(
         context: context,
-        title: Text('Error'),
-        description: Text('Please enter a recipient'),
-        type: ToastificationType.error,
-        autoCloseDuration: const Duration(seconds: 3),
+        title: 'Error',
+        description: 'Please enter a recipient',
       );
       return;
     }
@@ -92,12 +90,10 @@ class _ShareSecretDialogState extends State<ShareSecretDialog> {
         throw Exception('Invalid public key format');
       }
     } catch (e) {
-      toastification.show(
+      ToastHelper.showError(
         context: context,
-        title: Text('Error'),
-        description: Text('Invalid public key format'),
-        type: ToastificationType.error,
-        autoCloseDuration: const Duration(seconds: 3),
+        title: 'Error',
+        description: 'Invalid public key format',
       );
       return;
     }
@@ -113,22 +109,18 @@ class _ShareSecretDialogState extends State<ShareSecretDialog> {
       if (mounted) {
         Get.back(); // Close the dialog
 
-        toastification.show(
+        ToastHelper.showSuccess(
           context: context,
-          title: Text('Success'),
-          description: Text('${widget.secretTitle} shared successfully'),
-          type: ToastificationType.success,
-          autoCloseDuration: const Duration(seconds: 3),
+          title: 'Success',
+          description: '${widget.secretTitle} shared successfully',
         );
       }
     } catch (e) {
       if (mounted) {
-        toastification.show(
+        ToastHelper.showError(
           context: context,
-          title: Text('Error'),
-          description: Text('Failed to share secret: ${e.toString()}'),
-          type: ToastificationType.error,
-          autoCloseDuration: const Duration(seconds: 3),
+          title: 'Error',
+          description: 'Failed to share secret: ${e.toString()}',
         );
       }
     } finally {

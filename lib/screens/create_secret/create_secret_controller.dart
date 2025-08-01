@@ -87,8 +87,9 @@ class CreateSecretController extends GetxController {
         .toList();
     if (currentUrls.length != _originalUrls.length) return true;
     for (int i = 0; i < currentUrls.length; i++) {
-      if (i >= _originalUrls.length || currentUrls[i] != _originalUrls[i])
+      if (i >= _originalUrls.length || currentUrls[i] != _originalUrls[i]) {
         return true;
+      }
     }
 
     // Check fields count

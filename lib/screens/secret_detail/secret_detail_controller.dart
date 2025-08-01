@@ -14,7 +14,7 @@ import 'package:submarine/models/decrypted_event.dart';
 import 'package:submarine/services/database_service.dart';
 import 'package:submarine/services/stores.dart';
 import 'package:flutter/material.dart';
-import 'package:toastification/toastification.dart';
+import 'package:submarine/utils/toast_helper.dart';
 import 'package:sembast/sembast.dart' as sembast;
 import 'package:submarine/models/secret_history_item.dart';
 
@@ -294,24 +294,20 @@ class SecretDetailController extends GetxController {
 
   Future<void> shareSecret() async {
     if (eventId == null) {
-      toastification.show(
+      ToastHelper.showError(
         context: Get.context!,
-        title: Text('Error'),
-        description: Text('Unable to share this secret'),
-        type: ToastificationType.error,
-        autoCloseDuration: const Duration(seconds: 3),
+        title: 'Error',
+        description: 'Unable to share this secret',
       );
       return;
     }
 
     final recipientInput = shareRecipientController.text.trim();
     if (recipientInput.isEmpty) {
-      toastification.show(
+      ToastHelper.showError(
         context: Get.context!,
-        title: Text('Error'),
-        description: Text('Please enter a recipient'),
-        type: ToastificationType.error,
-        autoCloseDuration: const Duration(seconds: 3),
+        title: 'Error',
+        description: 'Please enter a recipient',
       );
       return;
     }
@@ -328,12 +324,10 @@ class SecretDetailController extends GetxController {
         throw Exception('Invalid public key format');
       }
     } catch (e) {
-      toastification.show(
+      ToastHelper.showError(
         context: Get.context!,
-        title: Text('Error'),
-        description: Text('Invalid public key format'),
-        type: ToastificationType.error,
-        autoCloseDuration: const Duration(seconds: 3),
+        title: 'Error',
+        description: 'Invalid public key format',
       );
       return;
     }
@@ -348,20 +342,16 @@ class SecretDetailController extends GetxController {
       shareRecipientController.clear();
       Get.back(); // Close the dialog
 
-      toastification.show(
+      ToastHelper.showSuccess(
         context: Get.context!,
-        title: Text('Success'),
-        description: Text('Secret shared successfully'),
-        type: ToastificationType.success,
-        autoCloseDuration: const Duration(seconds: 3),
+        title: 'Success',
+        description: 'Secret shared successfully',
       );
     } catch (e) {
-      toastification.show(
+      ToastHelper.showError(
         context: Get.context!,
-        title: Text('Error'),
-        description: Text('Failed to share secret: ${e.toString()}'),
-        type: ToastificationType.error,
-        autoCloseDuration: const Duration(seconds: 3),
+        title: 'Error',
+        description: 'Failed to share secret: ${e.toString()}',
       );
     } finally {
       isSharing.value = false;

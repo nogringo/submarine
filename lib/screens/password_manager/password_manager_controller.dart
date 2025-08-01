@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'package:get/get.dart';
 import 'package:ndk/entities.dart';
-import 'package:sembast/sembast.dart';
+import 'package:sembast/sembast.dart' as sembast;
 import 'package:submarine/models/decrypted_event.dart';
 import 'package:submarine/models/secret.dart';
 import 'package:submarine/repository.dart';
 import 'package:submarine/services/database_service.dart';
 import 'package:submarine/services/stores.dart';
+import 'package:submarine/utils/toast_helper.dart';
 
 class PasswordManagerController extends GetxController {
   static PasswordManagerController get to => Get.find();
@@ -102,43 +103,54 @@ class PasswordManagerController extends GetxController {
 
   Future<void> deleteSecret(String secretId) async {
     try {
-      // Find the event ID for this secret
+      // Find ALL event IDs for this secret (all versions)
       final db = await DatabaseService().database;
-      final records = await secretsStore.find(db);
-
-      String? eventIdToDelete;
-      for (final record in records) {
-        final decryptedEvent = DecryptedSecretEvent.fromJson(record.value);
-        final secret = Secret.fromJson(decryptedEvent.secret);
-        if (secret.id == secretId) {
-          eventIdToDelete = record.key;
-          break;
-        }
-      }
-
-      if (eventIdToDelete == null) return;
-
-      // Create deletion event (kind 5)
-      final loggedAccount = Repository.to.ndk.accounts.getLoggedAccount()!;
-      final deletionEvent = Nip01Event(
-        pubKey: loggedAccount.pubkey,
-        kind: 5,
-        tags: [
-          ['e', eventIdToDelete],
-        ],
-        content: '',
+      final records = await secretsStore.find(
+        db,
+        finder: sembast.Finder(
+          filter: sembast.Filter.equals('secret.id', secretId),
+        ),
       );
 
-      await loggedAccount.signer.sign(deletionEvent);
+      if (records.isEmpty) return;
 
-      // Remove from local database
-      await secretsStore.record(eventIdToDelete).delete(db);
+      final loggedAccount = Repository.to.ndk.accounts.getLoggedAccount()!;
+      
+      // Create deletion events for each version
+      for (final record in records) {
+        final eventId = record.key;
+        
+        // Create deletion event (kind 5) for this version
+        final deletionEvent = Nip01Event(
+          pubKey: loggedAccount.pubkey,
+          kind: 5,
+          tags: [
+            ['e', eventId],
+          ],
+          content: '',
+        );
 
-      // Broadcast deletion event
-      Repository.to.ndk.broadcast.broadcast(nostrEvent: deletionEvent);
+        await loggedAccount.signer.sign(deletionEvent);
+
+        // Remove from local database
+        await secretsStore.record(eventId).delete(db);
+
+        // Broadcast deletion event
+        Repository.to.ndk.broadcast.broadcast(nostrEvent: deletionEvent);
+      }
+      
+      ToastHelper.showSuccess(
+        context: Get.context!,
+        title: 'Success',
+        description: '${records.length} version${records.length > 1 ? 's' : ''} deleted',
+      );
     } catch (e) {
       // Handle error
-      Get.snackbar('Error', 'Failed to delete secret');
+      ToastHelper.showError(
+        context: Get.context!,
+        title: 'Error',
+        description: 'Failed to delete secret: ${e.toString()}',
+      );
     }
   }
 

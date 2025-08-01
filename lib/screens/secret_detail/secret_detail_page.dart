@@ -13,11 +13,11 @@ import 'package:submarine/screens/secret_detail/compact_email_view.dart';
 import 'package:submarine/screens/secret_detail/secret_detail_controller.dart';
 import 'package:submarine/widgets/area_view.dart';
 import 'package:window_manager/window_manager.dart';
-import 'package:toastification/toastification.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:submarine/repository.dart';
 import 'package:submarine/app_routes.dart';
 import 'package:submarine/models/secret_history_item.dart';
+import 'package:submarine/utils/toast_helper.dart';
 
 class SecretDetailPage extends StatelessWidget {
   const SecretDetailPage({super.key});
@@ -280,20 +280,11 @@ class SecretDetailPage extends StatelessWidget {
         child: InkWell(
           onTap: () {
             Clipboard.setData(ClipboardData(text: value));
-            toastification.show(
+            ToastHelper.showSuccess(
               context: context,
-              title: Text('Copied'),
-              description: Text('$name copied to clipboard'),
-              type: ToastificationType.success,
-              style: ToastificationStyle.flat,
-              autoCloseDuration: const Duration(seconds: 2),
-              alignment: Alignment.bottomCenter,
-              backgroundColor: Theme.of(context).colorScheme.inverseSurface,
-              foregroundColor: Theme.of(context).colorScheme.onInverseSurface,
-              icon: Icon(
-                Icons.check,
-                color: Theme.of(context).colorScheme.onInverseSurface,
-              ),
+              title: 'Copied',
+              description: '$name copied to clipboard',
+              duration: const Duration(seconds: 2),
             );
           },
           child: Container(
@@ -352,20 +343,11 @@ class SecretDetailPage extends StatelessWidget {
         child: InkWell(
           onTap: () {
             Clipboard.setData(ClipboardData(text: controller.currentOTP.value));
-            toastification.show(
+            ToastHelper.showSuccess(
               context: context,
-              title: Text('Copied'),
-              description: Text('OTP code copied to clipboard'),
-              type: ToastificationType.success,
-              style: ToastificationStyle.flat,
-              autoCloseDuration: const Duration(seconds: 2),
-              alignment: Alignment.bottomCenter,
-              backgroundColor: Theme.of(context).colorScheme.inverseSurface,
-              foregroundColor: Theme.of(context).colorScheme.onInverseSurface,
-              icon: Icon(
-                Icons.check,
-                color: Theme.of(context).colorScheme.onInverseSurface,
-              ),
+              title: 'Copied',
+              description: 'OTP code copied to clipboard',
+              duration: const Duration(seconds: 2),
             );
           },
           child: Container(
@@ -477,7 +459,7 @@ class SecretDetailPage extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           onTap: () {
             if (!isDisplayed) {
-              Get.toNamed(
+              Get.offNamed(
                 AppRoutes.secretDetail.replaceAll(':eventId', item.eventId),
               );
             }

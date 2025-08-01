@@ -122,7 +122,9 @@ class PasswordManagerPage extends StatelessWidget {
                           } else if (value == 'edit') {
                             final eventId = controller.getEventId(secret.id!);
                             if (eventId != null) {
-                              Get.toNamed(AppRoutes.editSecret, arguments: secret);
+                              Get.toNamed(
+                                AppRoutes.editSecret.replaceAll(':eventId', eventId),
+                              );
                             }
                           }
                         },
@@ -161,7 +163,12 @@ class PasswordManagerPage extends StatelessWidget {
                         ],
                       ),
                       onTap: () {
-                        Get.toNamed(AppRoutes.secretDetail, arguments: secret);
+                        final eventId = controller.getEventId(secret.id!);
+                        if (eventId != null) {
+                          Get.toNamed(
+                            AppRoutes.secretDetail.replaceAll(':eventId', eventId),
+                          );
+                        }
                       },
                     ),
                   );

@@ -17,17 +17,32 @@ import 'package:toastification/toastification.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:submarine/repository.dart';
 import 'package:submarine/app_routes.dart';
+import 'package:submarine/models/secret_history_item.dart';
 
 class SecretDetailPage extends StatelessWidget {
   const SecretDetailPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final Secret secret = Get.arguments as Secret;
+    final String eventId = Get.parameters['eventId']!;
 
     return GetBuilder<SecretDetailController>(
-      init: SecretDetailController(secret: secret),
+      init: SecretDetailController(eventId: eventId),
+      tag: eventId, // Use eventId as tag to ensure unique controller instances
       builder: (controller) {
+        if (controller.isLoading) {
+          return Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        
+        if (controller.secret == null) {
+          return Scaffold(
+            body: Center(child: Text('Secret not found')),
+          );
+        }
+        
+        final secret = controller.secret!;
         return Scaffold(
           appBar: PreferredSize(
             preferredSize: Size.fromHeight(kToolbarHeight),
@@ -39,7 +54,9 @@ class SecretDetailPage extends StatelessWidget {
                     icon: Icon(Icons.edit),
                     onPressed: () {
                       if (controller.eventId != null) {
-                        Get.toNamed(AppRoutes.editSecret, arguments: secret);
+                        Get.toNamed(
+                          AppRoutes.editSecret.replaceAll(':eventId', controller.eventId!),
+                        );
                       }
                     },
                   ),
@@ -93,7 +110,84 @@ class SecretDetailPage extends StatelessWidget {
                   ],
                 ),
 
-              if (SecretDetailController.to.hasNostrMail) MailboxView(),
+              if (controller.hasNostrMail) MailboxView(controller: controller),
+              
+              // Secret History
+              SizedBox(height: 16),
+              AreaView(
+                title: 'History',
+                children: [
+                  // Show current version indicator
+                  if (!controller.isCurrentVersion(secret))
+                    Container(
+                      margin: EdgeInsets.only(bottom: 12),
+                      padding: EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.error,
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            color: Theme.of(context).colorScheme.error,
+                            size: 20,
+                          ),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'You are viewing an older version of this secret',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onErrorContainer,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  Obx(() {
+                    if (controller.isLoadingHistory.value) {
+                      return Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+                    }
+                    
+                    if (controller.secretHistory.isEmpty) {
+                      return Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Text(
+                          'No history available',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).textTheme.bodySmall?.color,
+                          ),
+                        ),
+                      );
+                    }
+                    
+                    return Column(
+                      children: controller.secretHistory
+                          .asMap()
+                          .entries
+                          .map((entry) => _buildHistoryItem(
+                                context,
+                                entry.value,
+                                entry.key == 0,
+                                controller,
+                                secret,
+                              ))
+                          .toList(),
+                    );
+                  }),
+                ],
+              ),
             ],
           ),
         );
@@ -306,16 +400,176 @@ class SecretDetailPage extends StatelessWidget {
       ),
     );
   }
+  
+  Widget _buildHistoryItem(
+    BuildContext context,
+    SecretHistoryItem item,
+    bool isLatest,
+    SecretDetailController controller,
+    Secret displayedSecret,
+  ) {
+    final isDisplayed = item.eventId == controller.eventId;
+    return Container(
+      margin: EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: isDisplayed
+            ? Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.5)
+            : isLatest
+                ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3)
+                : null,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDisplayed
+              ? Theme.of(context).colorScheme.secondary
+              : isLatest
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+          width: isDisplayed || isLatest ? 2 : 1,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () {
+            if (!isDisplayed) {
+              // Open the historical version in a new detail page
+              Get.toNamed(
+                AppRoutes.secretDetail.replaceAll(':eventId', item.eventId),
+              );
+            }
+          },
+          child: Padding(
+            padding: EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      isDisplayed
+                          ? Icons.visibility
+                          : isLatest
+                              ? Icons.check_circle
+                              : Icons.history,
+                      size: 20,
+                      color: isDisplayed
+                          ? Theme.of(context).colorScheme.secondary
+                          : isLatest
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    SizedBox(width: 8),
+                    Text(
+                      item.formattedDate,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            fontWeight: isDisplayed || isLatest ? FontWeight.bold : null,
+                          ),
+                    ),
+                    if (isDisplayed) ...[
+                      SizedBox(width: 8),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.secondary,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          'Viewing',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSecondary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ] else if (isLatest) ...[
+                      SizedBox(width: 8),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primary,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          'Latest',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                    Spacer(),
+                    Icon(
+                      Icons.chevron_right,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8),
+                Text(
+                  _getChangeSummary(item, isLatest ? null : controller.secretHistory.firstOrNull),
+                  style: Theme.of(context).textTheme.bodySmall,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+  
+  String _getChangeSummary(SecretHistoryItem item, SecretHistoryItem? previousItem) {
+    final changes = <String>[];
+    
+    // Check title change
+    if (previousItem != null && item.secret.title != previousItem.secret.title) {
+      changes.add('Title changed');
+    }
+    
+    // Check fields count
+    final currentFieldCount = item.secret.fields?.length ?? 0;
+    final previousFieldCount = previousItem?.secret.fields?.length ?? 0;
+    
+    if (previousItem == null) {
+      changes.add('Initial version with $currentFieldCount field${currentFieldCount == 1 ? '' : 's'}');
+    } else if (currentFieldCount != previousFieldCount) {
+      if (currentFieldCount > previousFieldCount) {
+        changes.add('${currentFieldCount - previousFieldCount} field${(currentFieldCount - previousFieldCount) == 1 ? '' : 's'} added');
+      } else {
+        changes.add('${previousFieldCount - currentFieldCount} field${(previousFieldCount - currentFieldCount) == 1 ? '' : 's'} removed');
+      }
+    }
+    
+    // Check note change
+    if (previousItem != null && item.secret.note != previousItem.secret.note) {
+      changes.add('Note updated');
+    }
+    
+    // Check URLs
+    final currentUrlCount = item.secret.urls?.length ?? 0;
+    final previousUrlCount = previousItem?.secret.urls?.length ?? 0;
+    
+    if (previousItem != null && currentUrlCount != previousUrlCount) {
+      changes.add('URLs modified');
+    }
+    
+    return changes.isEmpty ? 'No changes' : changes.join(', ');
+  }
 }
 
 class MailboxView extends StatelessWidget {
-  const MailboxView({super.key});
+  final SecretDetailController controller;
+  const MailboxView({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<SecretDetailController>(
-      builder: (c) {
-        return AreaView(
+    return AreaView(
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -323,13 +577,13 @@ class MailboxView extends StatelessWidget {
                 Text("Mailbox", style: Theme.of(context).textTheme.titleLarge),
                 IconButton(
                   onPressed: () {
-                    SecretDetailController.to.fetchEmails();
+                    controller.fetchEmails();
                   },
                   icon: Icon(Icons.refresh),
                 ),
               ],
             ),
-            ...SecretDetailController.to.emails.map(
+            ...controller.emails.map(
               (e) => CompactEmailView(
                 email: e,
                 onTap: () => _showFullEmail(context, e),
@@ -337,8 +591,6 @@ class MailboxView extends StatelessWidget {
             ),
           ],
         );
-      },
-    );
   }
 
   void _showFullEmail(BuildContext context, Nip01Event email) {

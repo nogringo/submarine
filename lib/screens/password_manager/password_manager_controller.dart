@@ -39,22 +39,42 @@ class PasswordManagerController extends GetxController {
 
     // Listen to changes in the secrets store
     _subscription = secretsStore.query().onSnapshots(db).listen((snapshots) {
-      final secretsList = snapshots.map((snapshot) {
+      final allSecrets = snapshots.map((snapshot) {
         final decryptedEvent = DecryptedSecretEvent.fromJson(snapshot.value);
         final secret = Secret.fromJson(decryptedEvent.secret);
-        
-        // Store the mapping of secretId -> eventId
-        if (secret.id != null) {
-          _secretEventIds[secret.id!] = snapshot.key;
-        }
         
         return {
           'secret': secret,
           'createdAt': decryptedEvent.createdAt,
+          'eventId': snapshot.key,
         };
       }).toList();
 
+      // Group by secret ID and keep only the latest version
+      final latestSecrets = <String, Map<String, dynamic>>{};
+      
+      for (final item in allSecrets) {
+        final secret = item['secret'] as Secret;
+        if (secret.id != null) {
+          final existingItem = latestSecrets[secret.id!];
+          if (existingItem == null || 
+              (item['createdAt'] as int) > (existingItem['createdAt'] as int)) {
+            latestSecrets[secret.id!] = item;
+          }
+        }
+      }
+      
+      // Store the mapping of secretId -> eventId for the latest versions
+      _secretEventIds.clear();
+      for (final item in latestSecrets.values) {
+        final secret = item['secret'] as Secret;
+        if (secret.id != null) {
+          _secretEventIds[secret.id!] = item['eventId'] as String;
+        }
+      }
+      
       // Sort by createdAt (newest first)
+      final secretsList = latestSecrets.values.toList();
       secretsList.sort((a, b) => (b['createdAt'] as int).compareTo(a['createdAt'] as int));
       
       secrets.value = secretsList.map((item) => item['secret'] as Secret).toList();

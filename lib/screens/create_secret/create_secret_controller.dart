@@ -37,21 +37,20 @@ class CreateSecretController extends GetxController {
   // Original data for change detection
   String? _originalTitle;
   String? _originalNote;
-  List<String> _originalUrls = [];
-  Map<String, Map<String, dynamic>> _originalFields = {};
+  final List<String> _originalUrls = [];
+  final Map<String, Map<String, dynamic>> _originalFields = {};
   final List<String> _originalFieldOrder = [];
 
   @override
   void onInit() {
     super.onInit();
     
-    // Check if we're in edit mode via arguments
-    final args = Get.arguments;
-    if (args != null && args is Secret) {
+    // Check if we're in edit mode via eventId parameter
+    final eventIdParam = Get.parameters['eventId'];
+    if (eventIdParam != null) {
       isEditMode = true;
-      originalSecret = args;
-      _loadSecretEventId();
-      _loadSecretData();
+      eventId = eventIdParam;
+      _loadSecretFromEventId();
     }
     
     // Add listeners for change detection
@@ -112,28 +111,20 @@ class CreateSecretController extends GetxController {
     return false;
   }
 
-  void _loadSecretEventId() async {
-    if (originalSecret?.id == null) return;
+  Future<void> _loadSecretFromEventId() async {
+    if (eventId == null) return;
     
     try {
       final db = await DatabaseService().database;
-      // Find the eventId by searching for the secret with matching id
-      final finder = sembast.Finder(
-        filter: sembast.Filter.custom((record) {
-          if (record.value is Map) {
-            final decryptedEvent = DecryptedSecretEvent.fromJson(record.value as Map<String, dynamic>);
-            return decryptedEvent.secret['id'] == originalSecret!.id;
-          }
-          return false;
-        }),
-      );
+      final record = await secretsStore.record(eventId!).get(db);
       
-      final snapshot = await secretsStore.findFirst(db, finder: finder);
-      if (snapshot != null) {
-        eventId = snapshot.key;
+      if (record != null) {
+        final decryptedEvent = DecryptedSecretEvent.fromJson(record);
+        originalSecret = Secret.fromJson(decryptedEvent.secret);
+        _loadSecretData();
       }
     } catch (e) {
-      // Error loading eventId: $e
+      // Error loading secret: $e
     }
   }
   
@@ -147,9 +138,11 @@ class CreateSecretController extends GetxController {
     _originalTitle = originalSecret!.title ?? '';
     _originalNote = originalSecret!.note ?? '';
     
-    // Load existing websites
+    // Clear and load existing websites
+    _originalUrls.clear();
+    websites.clear();
     if (originalSecret!.urls != null) {
-      _originalUrls = List<String>.from(originalSecret!.urls!);
+      _originalUrls.addAll(originalSecret!.urls!);
       for (var url in originalSecret!.urls!) {
         final controller = TextEditingController(text: url);
         controller.addListener(_checkForChanges);
@@ -157,7 +150,10 @@ class CreateSecretController extends GetxController {
       }
     }
     
-    // Load existing fields
+    // Clear and load existing fields
+    _originalFields.clear();
+    _originalFieldOrder.clear();
+    fields.clear();
     if (originalSecret!.fields != null) {
       for (var field in originalSecret!.fields!) {
         CustomField customField;
@@ -497,27 +493,6 @@ class CreateSecretController extends GetxController {
         );
 
     Repository.to.ndk.broadcast.broadcast(nostrEvent: nostrEvent);
-
-    // If in edit mode, delete the old event
-    if (isEditMode && eventId != null) {
-      final deleteEvent = Nip01Event(
-        pubKey: pubkey,
-        kind: 5, // NIP-09 deletion event
-        tags: [
-          ["e", eventId!], // Reference to the event being deleted
-        ],
-        content: "Deleted",
-        createdAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-      );
-      
-      await loggedAccount.signer.sign(deleteEvent);
-      Repository.to.ndk.broadcast.broadcast(nostrEvent: deleteEvent);
-      
-      // Also delete from local database
-      await secretsStore
-          .record(eventId!)
-          .delete(await DatabaseService().database);
-    }
 
     Get.back();
   }

@@ -16,11 +16,12 @@ import 'package:submarine/services/stores.dart';
 import 'package:flutter/material.dart';
 import 'package:toastification/toastification.dart';
 import 'package:sembast/sembast.dart' as sembast;
+import 'package:submarine/models/secret_history_item.dart';
 
 class SecretDetailController extends GetxController {
-  static SecretDetailController get to => Get.find();
 
-  final Secret secret;
+  Secret? secret;
+  bool isLoading = true;
   final Map<String, bool> fieldVisibility = {};
   final RxString currentOTP = ''.obs;
   final RxDouble otpProgress = 0.0.obs;
@@ -29,8 +30,8 @@ class SecretDetailController extends GetxController {
   List<Nip01Event> emails = [];
 
   bool get hasNostrMail {
-    if (secret.fields == null) return false;
-    return secret.fields!
+    if (secret?.fields == null) return false;
+    return secret!.fields!
         .where(
           (field) =>
               field is model.TextField && field.value.endsWith("uid.ovh"),
@@ -39,9 +40,9 @@ class SecretDetailController extends GetxController {
   }
 
   String? get firstNsec {
-    if (secret.fields == null) return null;
+    if (secret?.fields == null) return null;
 
-    for (final field in secret.fields!) {
+    for (final field in secret!.fields!) {
       String? value;
 
       if (field is model.TextField) {
@@ -65,33 +66,130 @@ class SecretDetailController extends GetxController {
     return null;
   }
 
-  SecretDetailController({required this.secret});
+  SecretDetailController({String? eventId}) {
+    if (eventId != null) {
+      this.eventId = eventId;
+      _loadSecretFromEventId();
+    }
+  }
 
   final shareRecipientController = TextEditingController();
   final isSharing = false.obs;
   String? eventId;
   final searchController = TextEditingController();
   final filteredFollows = <Follow>[].obs;
+  
+  // Secret history
+  final secretHistory = <SecretHistoryItem>[].obs;
+  final isLoadingHistory = false.obs;
 
   @override
   void onInit() {
     super.onInit();
-    _initializeOTP();
-    _loadEventId();
+    if (secret != null) {
+      _initializeOTP();
+      if (secret!.id != null) {
+        loadSecretHistory();
+      }
+    }
+  }
+  
+  Future<void> _loadSecretFromEventId() async {
+    if (eventId == null) return;
+    
+    try {
+      final db = await DatabaseService().database;
+      final record = await secretsStore.record(eventId!).get(db);
+      
+      if (record != null) {
+        final decryptedEvent = DecryptedSecretEvent.fromJson(record);
+        secret = Secret.fromJson(decryptedEvent.secret);
+        _initializeOTP();
+        if (secret!.id != null) {
+          loadSecretHistory();
+        }
+      }
+    } catch (e) {
+      // Error loading secret
+    } finally {
+      isLoading = false;
+      update();
+    }
+  }
+  
+  // Check if this secret is the current/latest version
+  bool isCurrentVersion(Secret secretToCheck) {
+    if (secretHistory.isEmpty) return true;
+    
+    // The first item in history is the latest version
+    final latestSecret = secretHistory.first.secret;
+    
+    // Compare by checking if all fields match
+    // This is more reliable than comparing timestamps which might be equal
+    return areSecretsEqual(secretToCheck, latestSecret);
+  }
+  
+  bool areSecretsEqual(Secret s1, Secret s2) {
+    // Compare basic fields
+    if (s1.title != s2.title || s1.note != s2.note) return false;
+    
+    // Compare URLs
+    final urls1 = s1.urls ?? [];
+    final urls2 = s2.urls ?? [];
+    if (urls1.length != urls2.length) return false;
+    for (int i = 0; i < urls1.length; i++) {
+      if (urls1[i] != urls2[i]) return false;
+    }
+    
+    // Compare fields
+    final fields1 = s1.fields ?? [];
+    final fields2 = s2.fields ?? [];
+    if (fields1.length != fields2.length) return false;
+    
+    // Simple comparison - could be enhanced
+    return true;
   }
 
-  Future<void> _loadEventId() async {
-    final db = await DatabaseService().database;
-    final records = await secretsStore.find(
-      db,
-      finder: sembast.Finder(
-        filter: sembast.Filter.equals('secret.id', secret.id),
-      ),
-    );
+  
+  Future<void> loadSecretHistory() async {
+    if (secret?.id == null) return;
     
-    if (records.isNotEmpty) {
-      final decryptedEvent = DecryptedSecretEvent.fromJson(records.first.value);
-      eventId = decryptedEvent.eventId;
+    isLoadingHistory.value = true;
+    secretHistory.clear();
+    
+    try {
+      final db = await DatabaseService().database;
+      
+      // Find all records with the same secret ID
+      final records = await secretsStore.find(
+        db,
+        finder: sembast.Finder(
+          filter: sembast.Filter.equals('secret.id', secret!.id),
+          sortOrders: [
+            sembast.SortOrder('createdAt', false), // Sort by createdAt descending
+          ],
+        ),
+      );
+      
+      // Convert records to history items
+      for (final record in records) {
+        try {
+          final decryptedEvent = DecryptedSecretEvent.fromJson(record.value);
+          secretHistory.add(SecretHistoryItem(
+            eventId: decryptedEvent.eventId,
+            createdAt: DateTime.fromMillisecondsSinceEpoch(decryptedEvent.createdAt * 1000),
+            secret: Secret.fromJson(decryptedEvent.secret),
+          ));
+        } catch (e) {
+          // Skip invalid records
+          continue;
+        }
+      }
+      
+    } catch (e) {
+      // Error loading secret history: $e
+    } finally {
+      isLoadingHistory.value = false;
     }
   }
 
@@ -109,9 +207,9 @@ class SecretDetailController extends GetxController {
   }
 
   void _initializeOTP() {
-    if (secret.fields == null) return;
+    if (secret?.fields == null) return;
 
-    for (final field in secret.fields!) {
+    for (final field in secret!.fields!) {
       if (field is model.OTPField) {
         _startOTPGeneration(field);
         break;

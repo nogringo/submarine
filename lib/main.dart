@@ -9,7 +9,7 @@ import 'package:submarine/repository.dart';
 import 'package:submarine/screens/create_note/create_note_page.dart';
 import 'package:submarine/screens/password_manager/password_manager_page.dart';
 import 'package:submarine/screens/signin/signin_page.dart';
-import 'package:submarine/screens/create_password/create_password_page.dart';
+import 'package:submarine/screens/create_secret/create_secret_page.dart';
 import 'package:submarine/screens/secret_detail/secret_detail_page.dart';
 import 'package:submarine/screens/user_profile/user_profile_page.dart';
 import 'package:window_manager/window_manager.dart';
@@ -97,9 +97,14 @@ class MainApp extends StatelessWidget {
                 page: () => PasswordManagerPage(),
               ),
               GetPage(
-                name: AppRoutes.createPassword,
+                name: AppRoutes.createSecret,
                 middlewares: [RouterMustBeLoggedInMiddleware()],
-                page: () => CreatePasswordPage(),
+                page: () => CreateSecretPage(),
+              ),
+              GetPage(
+                name: AppRoutes.editSecret,
+                middlewares: [RouterMustBeLoggedInMiddleware()],
+                page: () => CreateSecretPage(),
               ),
               GetPage(
                 name: AppRoutes.createNote,

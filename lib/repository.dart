@@ -1,14 +1,13 @@
 import 'dart:convert';
 
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:ndk/ndk.dart';
 import 'package:nostr_widgets/nostr_widgets.dart';
 import 'package:sembast/sembast.dart' as sembast;
 import 'package:submarine/get_database.dart';
 import 'package:submarine/models/decrypted_event.dart';
-import 'package:nip01/nip01.dart';
 import 'package:sembast_cache_manager/sembast_cache_manager.dart';
+import 'package:submarine/models/follow.dart';
 import 'package:submarine/services/database_service.dart';
 import 'package:submarine/services/stores.dart';
 
@@ -37,35 +36,6 @@ class Repository extends GetxController {
         cache: SembastCacheManager(db),
       ),
     );
-  }
-
-  Future<void> signInWithPrivateKey(
-    String privateKey, {
-    bool storelocaly = false,
-  }) async {
-    if (storelocaly) {
-      await FlutterSecureStorage().write(key: "privateKey", value: privateKey);
-    }
-
-    final keyPair = KeyPair.fromPrivateKey(privateKey: privateKey);
-
-    ndk.accounts.loginPrivateKey(
-      pubkey: keyPair.publicKey,
-      privkey: keyPair.privateKey,
-    );
-
-    listenEvents();
-  }
-
-  Future<void> logOut() async {
-    final db = await DatabaseService().database;
-
-    await Future.wait([
-      stopListeningEvents(),
-      FlutterSecureStorage().delete(key: "privateKey"),
-      secretsStore.delete(db),
-    ]);
-    ndk.accounts.logout();
   }
 
   Future<void> shareSecret({
@@ -247,52 +217,5 @@ class Repository extends GetxController {
   Future<void> stopListeningEvents() async {
     if (subscription == null) return;
     await ndk.requests.closeSubscription(subscription!.requestId);
-  }
-}
-
-class Follow {
-  final String pubkey;
-  final String? relay;
-  final String? petname;
-  final String? name;
-  final String? picture;
-  final String? nip05;
-
-  Follow({
-    required this.pubkey,
-    this.relay,
-    this.petname,
-    this.name,
-    this.picture,
-    this.nip05,
-  });
-
-  String get displayName => petname ?? name ?? 'Unknown';
-  
-  String get npub {
-    try {
-      // Create npub manually - it's just bech32 encoding
-      return 'npub1${pubkey.substring(0, 16)}...';
-    } catch (e) {
-      return pubkey;
-    }
-  }
-
-  Follow copyWith({
-    String? pubkey,
-    String? relay,
-    String? petname,
-    String? name,
-    String? picture,
-    String? nip05,
-  }) {
-    return Follow(
-      pubkey: pubkey ?? this.pubkey,
-      relay: relay ?? this.relay,
-      petname: petname ?? this.petname,
-      name: name ?? this.name,
-      picture: picture ?? this.picture,
-      nip05: nip05 ?? this.nip05,
-    );
   }
 }

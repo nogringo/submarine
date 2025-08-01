@@ -16,6 +16,7 @@ import 'package:window_manager/window_manager.dart';
 import 'package:toastification/toastification.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:submarine/repository.dart';
+import 'package:submarine/app_routes.dart';
 
 class SecretDetailPage extends StatelessWidget {
   const SecretDetailPage({super.key});
@@ -35,15 +36,17 @@ class SecretDetailPage extends StatelessWidget {
                 title: Text(secret.title ?? 'Secret Details'),
                 actions: [
                   IconButton(
+                    icon: Icon(Icons.edit),
+                    onPressed: () {
+                      if (controller.eventId != null) {
+                        Get.toNamed(AppRoutes.editSecret, arguments: secret);
+                      }
+                    },
+                  ),
+                  IconButton(
                     icon: Icon(Icons.share),
                     onPressed: () => _showShareDialog(context, controller),
                   ),
-                  // IconButton(
-                  //   icon: Icon(Icons.edit),
-                  //   onPressed: () {
-                  //     // TODO: Navigate to edit page
-                  //   },
-                  // ),
                   if (!kIsWeb && GetPlatform.isDesktop)
                     SizedBox(
                       width: 154,

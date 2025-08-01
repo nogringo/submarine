@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:submarine/models/follow.dart';
 import 'package:submarine/repository.dart';
 import 'package:toastification/toastification.dart';
 import 'package:nip19/nip19.dart';

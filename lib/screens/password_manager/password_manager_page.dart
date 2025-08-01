@@ -119,9 +119,24 @@ class PasswordManagerPage extends StatelessWidget {
                                 ),
                               );
                             }
+                          } else if (value == 'edit') {
+                            final eventId = controller.getEventId(secret.id!);
+                            if (eventId != null) {
+                              Get.toNamed(AppRoutes.editSecret, arguments: secret);
+                            }
                           }
                         },
                         itemBuilder: (context) => [
+                          PopupMenuItem(
+                            value: 'edit',
+                            child: Row(
+                              children: [
+                                Icon(Icons.edit),
+                                SizedBox(width: 8),
+                                Text('Edit'),
+                              ],
+                            ),
+                          ),
                           PopupMenuItem(
                             value: 'share',
                             child: Row(
@@ -132,6 +147,7 @@ class PasswordManagerPage extends StatelessWidget {
                               ],
                             ),
                           ),
+                          PopupMenuDivider(),
                           PopupMenuItem(
                             value: 'delete',
                             child: Row(
@@ -155,7 +171,7 @@ class PasswordManagerPage extends StatelessWidget {
           }),
           floatingActionButton: FloatingActionButton(
             onPressed: () {
-              Get.toNamed(AppRoutes.createPassword);
+              Get.toNamed(AppRoutes.createSecret);
             },
             child: Icon(Icons.add),
           ),

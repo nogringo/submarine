@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:ndk/ndk.dart';
 import 'package:nip01/nip01.dart';
 import 'package:nip19/nip19.dart';
+import 'package:submarine/models/follow.dart';
 import 'package:submarine/models/secret.dart';
 import 'package:submarine/models/otp_field.dart' as model;
 import 'package:submarine/models/text_field.dart' as model;

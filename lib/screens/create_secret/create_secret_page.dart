@@ -1,28 +1,28 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:submarine/screens/create_password/create_password_controller.dart';
+import 'package:submarine/screens/create_secret/create_secret_controller.dart';
 import 'package:submarine/widgets/area_view.dart';
 import 'package:window_manager/window_manager.dart';
 
-class CreatePasswordPage extends StatelessWidget {
-  const CreatePasswordPage({super.key});
+class CreateSecretPage extends StatelessWidget {
+  const CreateSecretPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<CreatePasswordController>(
-      init: CreatePasswordController(),
+    return GetBuilder<CreateSecretController>(
+      init: CreateSecretController(),
       builder: (c) {
         return Scaffold(
           appBar: PreferredSize(
             preferredSize: Size.fromHeight(kToolbarHeight),
             child: DragToMoveArea(
               child: AppBar(
-                title: Text("New Secret"),
+                title: Text(c.isEditMode ? "Edit Secret" : "New Secret"),
                 actions: [
                   FilledButton(
-                    onPressed: c.isCreatingPassword ? null : c.createPassword,
-                    child: Text("Create"),
+                    onPressed: c.isCreatingPassword || !c.hasChanges ? null : c.createPassword,
+                    child: Text(c.isEditMode ? "Save" : "Create"),
                   ),
                   SizedBox(width: 8),
                   if (!kIsWeb && GetPlatform.isDesktop)

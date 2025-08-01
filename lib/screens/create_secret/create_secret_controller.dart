@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
@@ -222,7 +223,8 @@ class CreateSecretController extends GetxController {
       'Sanchez', 'Clark', 'Ramirez', 'Lewis', 'Robinson'
     ];
     
-    final randomSurname = surnames[(DateTime.now().millisecondsSinceEpoch % surnames.length)];
+    final secureRandom = Random.secure();
+    final randomSurname = surnames[secureRandom.nextInt(surnames.length)];
     final surnameField = CustomField(name: "Surname");
     surnameField.value.text = randomSurname;
     if (isEditMode) {
@@ -242,7 +244,8 @@ class CreateSecretController extends GetxController {
       'Betty', 'Anthony', 'Helen', 'Mark', 'Sandra'
     ];
     
-    final randomFirstName = firstNames[(DateTime.now().millisecondsSinceEpoch % firstNames.length)];
+    final secureRandom = Random.secure();
+    final randomFirstName = firstNames[secureRandom.nextInt(firstNames.length)];
     final firstNameField = CustomField(name: "First name");
     firstNameField.value.text = randomFirstName;
     if (isEditMode) {
@@ -258,13 +261,13 @@ class CreateSecretController extends GetxController {
     final minAge = 18;
     final maxAge = 65;
     
-    final random = DateTime.now().millisecondsSinceEpoch;
+    final secureRandom = Random.secure();
     final ageRange = maxAge - minAge;
-    final randomAge = minAge + (random % ageRange);
+    final randomAge = minAge + secureRandom.nextInt(ageRange);
     
     final birthYear = now.year - randomAge;
-    final birthMonth = 1 + (random % 12);
-    final birthDay = 1 + (random % 28); // Using 28 to avoid invalid dates
+    final birthMonth = 1 + secureRandom.nextInt(12);
+    final birthDay = 1 + secureRandom.nextInt(28); // Using 28 to avoid invalid dates
     
     final birthDate = DateTime(birthYear, birthMonth, birthDay);
     final formattedDate = "${birthDate.year}-${birthDate.month.toString().padLeft(2, '0')}-${birthDate.day.toString().padLeft(2, '0')}";
@@ -287,24 +290,24 @@ class CreateSecretController extends GetxController {
     final specialChars = '!@#\$%^&*()_+-=[]{}|;:,.<>?';
     
     final allChars = letters + capitalLetters + numbers + specialChars;
-    final random = DateTime.now().millisecondsSinceEpoch;
+    final secureRandom = Random.secure();
     
     String password = '';
     // Ensure at least one of each type
-    password += capitalLetters[(random + 1) % capitalLetters.length];
-    password += letters[(random + 2) % letters.length];
-    password += numbers[(random + 3) % numbers.length];
-    password += specialChars[(random + 4) % specialChars.length];
+    password += capitalLetters[secureRandom.nextInt(capitalLetters.length)];
+    password += letters[secureRandom.nextInt(letters.length)];
+    password += numbers[secureRandom.nextInt(numbers.length)];
+    password += specialChars[secureRandom.nextInt(specialChars.length)];
     
     // Fill the rest randomly
     for (int i = 4; i < length; i++) {
-      password += allChars[(random + i * 7) % allChars.length];
+      password += allChars[secureRandom.nextInt(allChars.length)];
     }
     
     // Shuffle the password
     final passwordChars = password.split('');
     for (int i = passwordChars.length - 1; i > 0; i--) {
-      final j = (random + i) % (i + 1);
+      final j = secureRandom.nextInt(i + 1);
       final temp = passwordChars[i];
       passwordChars[i] = passwordChars[j];
       passwordChars[j] = temp;

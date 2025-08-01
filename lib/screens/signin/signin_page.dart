@@ -46,6 +46,8 @@ class SigninPage extends StatelessWidget {
                   enableNip05Login: false,
                   enableNpubLogin: false,
                   onLoggedIn: () {
+                    // Start listening to events after login
+                    Repository.to.listenEvents();
                     Get.offNamed(AppRoutes.passwordManager);
                   },
                 ),

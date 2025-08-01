@@ -393,10 +393,10 @@ packages:
     dependency: "direct main"
     description:
       name: nostr_widgets
-      sha256: "9e6b4f2e09f9593a39fbacd76d7cba5100ccf6204be26864f17026e719b15ea5"
+      sha256: "611b56200e3249e8ac766b22b2be36156d077903711e51ffd9ae07e575415778"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.2"
+    version: "0.0.3"
   path:
     dependency: "direct main"
     description:

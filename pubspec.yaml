@@ -1,7 +1,7 @@
 name: submarine
 description: "A new Flutter project."
 publish_to: 'none'
-version: 0.1.0
+version: 0.2.0
 
 environment:
   sdk: ^3.8.1
@@ -17,7 +17,7 @@ dependencies:
   ndk: ^0.5.0
   nip01: ^0.3.0+1
   nip19: ^0.2.0
-  nostr_widgets: ^0.0.2
+  nostr_widgets: ^0.0.3
   path: ^1.9.1
   path_provider: ^2.1.5
   sembast: ^3.8.5+1

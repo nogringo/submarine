@@ -32,7 +32,7 @@ class PasswordManagerPage extends StatelessWidget {
                         child: ClipOval(
                           child: NPicture(
                             ndk: Repository.to.ndk,
-                            pubKey: Repository.to.publicKey!,
+                            pubkey: Repository.to.publicKey!,
                           ),
                         ),
                       ),

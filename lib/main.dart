@@ -16,7 +16,8 @@ import 'package:window_manager/window_manager.dart';
 import 'package:system_theme/system_theme.dart';
 import 'package:toastification/toastification.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:nostr_widgets/l10n/app_localizations.dart' as nostr_widgets_l10n;
+import 'package:nostr_widgets/l10n/app_localizations.dart'
+    as nostr_widgets_l10n;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -85,10 +86,7 @@ class MainApp extends StatelessWidget {
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
-            supportedLocales: [
-              Locale('en'),
-              Locale('fr'),
-            ],
+            supportedLocales: [Locale('en'), Locale('fr')],
             getPages: [
               GetPage(name: AppRoutes.signIn, page: () => SigninPage()),
               GetPage(

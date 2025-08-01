@@ -22,31 +22,31 @@ class PasswordManagerPage extends StatelessWidget {
             preferredSize: Size.fromHeight(kToolbarHeight),
             child: DragToMoveArea(
               child: AppBar(
-            title: Text(appTitle),
-            actions: [
-              Padding(
-                padding: EdgeInsets.only(right: 16),
-                child: GestureDetector(
-                  onTap: () => Get.toNamed(AppRoutes.userProfile),
-                  child: CircleAvatar(
-                    child: ClipOval(
-                      child: NPicture(
-                        ndk: Repository.to.ndk,
-                        pubKey: Repository.to.publicKey!,
+                title: Text(appTitle),
+                actions: [
+                  Padding(
+                    padding: EdgeInsets.only(right: 16),
+                    child: GestureDetector(
+                      onTap: () => Get.toNamed(AppRoutes.userProfile),
+                      child: CircleAvatar(
+                        child: ClipOval(
+                          child: NPicture(
+                            ndk: Repository.to.ndk,
+                            pubKey: Repository.to.publicKey!,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
-              if (!kIsWeb && GetPlatform.isDesktop)
-                SizedBox(
-                  width: 154,
-                  child: WindowCaption(
-                    brightness: Theme.of(context).brightness,
-                    backgroundColor: Colors.transparent,
-                  ),
-                ),
-            ],
+                  if (!kIsWeb && GetPlatform.isDesktop)
+                    SizedBox(
+                      width: 154,
+                      child: WindowCaption(
+                        brightness: Theme.of(context).brightness,
+                        backgroundColor: Colors.transparent,
+                      ),
+                    ),
+                ],
               ),
             ),
           ),
@@ -123,7 +123,10 @@ class PasswordManagerPage extends StatelessWidget {
                             final eventId = controller.getEventId(secret.id!);
                             if (eventId != null) {
                               Get.toNamed(
-                                AppRoutes.editSecret.replaceAll(':eventId', eventId),
+                                AppRoutes.editSecret.replaceAll(
+                                  ':eventId',
+                                  eventId,
+                                ),
                               );
                             }
                           }
@@ -156,7 +159,10 @@ class PasswordManagerPage extends StatelessWidget {
                               children: [
                                 Icon(Icons.delete, color: Colors.red),
                                 SizedBox(width: 8),
-                                Text('Delete', style: TextStyle(color: Colors.red)),
+                                Text(
+                                  'Delete',
+                                  style: TextStyle(color: Colors.red),
+                                ),
                               ],
                             ),
                           ),
@@ -166,7 +172,10 @@ class PasswordManagerPage extends StatelessWidget {
                         final eventId = controller.getEventId(secret.id!);
                         if (eventId != null) {
                           Get.toNamed(
-                            AppRoutes.secretDetail.replaceAll(':eventId', eventId),
+                            AppRoutes.secretDetail.replaceAll(
+                              ':eventId',
+                              eventId,
+                            ),
                           );
                         }
                       },
@@ -187,16 +196,19 @@ class PasswordManagerPage extends StatelessWidget {
     );
   }
 
-  void _showDeleteDialog(BuildContext context, PasswordManagerController controller, String secretId) {
+  void _showDeleteDialog(
+    BuildContext context,
+    PasswordManagerController controller,
+    String secretId,
+  ) {
     Get.dialog(
       AlertDialog(
         title: Text('Delete Secret'),
-        content: Text('Are you sure you want to delete this secret? This action cannot be undone.'),
+        content: Text(
+          'Are you sure you want to delete this secret? This action cannot be undone.',
+        ),
         actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: Text('Cancel'),
-          ),
+          TextButton(onPressed: () => Get.back(), child: Text('Cancel')),
           TextButton(
             onPressed: () {
               Get.back();

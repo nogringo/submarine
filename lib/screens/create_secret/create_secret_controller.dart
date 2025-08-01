@@ -33,7 +33,7 @@ class CreateSecretController extends GetxController {
   List<TextEditingController> websites = [];
   final newWebsiteController = TextEditingController(text: "https://");
   final noteController = TextEditingController();
-  
+
   // Original data for change detection
   String? _originalTitle;
   String? _originalNote;
@@ -44,7 +44,7 @@ class CreateSecretController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    
+
     // Check if we're in edit mode via eventId parameter
     final eventIdParam = Get.parameters['eventId'];
     if (eventIdParam != null) {
@@ -52,34 +52,34 @@ class CreateSecretController extends GetxController {
       eventId = eventIdParam;
       _loadSecretFromEventId();
     }
-    
+
     // Add listeners for change detection
     if (isEditMode) {
       titleController.addListener(_checkForChanges);
       noteController.addListener(_checkForChanges);
     }
   }
-  
+
   @override
   void onClose() {
     titleController.removeListener(_checkForChanges);
     noteController.removeListener(_checkForChanges);
     super.onClose();
   }
-  
+
   void _checkForChanges() {
     update();
   }
-  
+
   bool get hasChanges {
     if (!isEditMode) return true; // Always allow save in create mode
-    
+
     // Check title
     if (titleController.text != _originalTitle) return true;
-    
+
     // Check note
     if (noteController.text != _originalNote) return true;
-    
+
     // Check websites
     final currentUrls = websites
         .map((w) => w.text.trim())
@@ -87,19 +87,21 @@ class CreateSecretController extends GetxController {
         .toList();
     if (currentUrls.length != _originalUrls.length) return true;
     for (int i = 0; i < currentUrls.length; i++) {
-      if (i >= _originalUrls.length || currentUrls[i] != _originalUrls[i]) return true;
+      if (i >= _originalUrls.length || currentUrls[i] != _originalUrls[i])
+        return true;
     }
-    
+
     // Check fields count
     if (fields.length != _originalFields.length) return true;
-    
+
     // Check field order
     for (int i = 0; i < fields.length; i++) {
-      if (i >= _originalFieldOrder.length || fields[i].name != _originalFieldOrder[i]) {
+      if (i >= _originalFieldOrder.length ||
+          fields[i].name != _originalFieldOrder[i]) {
         return true;
       }
     }
-    
+
     // Check field values and visibility
     for (final field in fields) {
       final original = _originalFields[field.name];
@@ -107,17 +109,17 @@ class CreateSecretController extends GetxController {
       if (field.value.text != original['value']) return true;
       if (field.visible != (original['kind'] == 'text')) return true;
     }
-    
+
     return false;
   }
 
   Future<void> _loadSecretFromEventId() async {
     if (eventId == null) return;
-    
+
     try {
       final db = await DatabaseService().database;
       final record = await secretsStore.record(eventId!).get(db);
-      
+
       if (record != null) {
         final decryptedEvent = DecryptedSecretEvent.fromJson(record);
         originalSecret = Secret.fromJson(decryptedEvent.secret);
@@ -127,17 +129,17 @@ class CreateSecretController extends GetxController {
       // Error loading secret: $e
     }
   }
-  
+
   void _loadSecretData() {
     if (originalSecret == null) return;
-    
+
     titleController.text = originalSecret!.title ?? '';
     noteController.text = originalSecret!.note ?? '';
-    
+
     // Store original values for change detection
     _originalTitle = originalSecret!.title ?? '';
     _originalNote = originalSecret!.note ?? '';
-    
+
     // Clear and load existing websites
     _originalUrls.clear();
     websites.clear();
@@ -149,7 +151,7 @@ class CreateSecretController extends GetxController {
         websites.add(controller);
       }
     }
-    
+
     // Clear and load existing fields
     _originalFields.clear();
     _originalFieldOrder.clear();
@@ -159,7 +161,7 @@ class CreateSecretController extends GetxController {
         CustomField customField;
         String value;
         String kind;
-        
+
         if (field is model.TextField) {
           customField = CustomField(name: field.name, visible: true);
           value = field.value;
@@ -178,14 +180,11 @@ class CreateSecretController extends GetxController {
         } else {
           continue;
         }
-        
+
         // Store original field data
-        _originalFields[field.name] = {
-          'value': value,
-          'kind': kind,
-        };
+        _originalFields[field.name] = {'value': value, 'kind': kind};
         _originalFieldOrder.add(field.name);
-        
+
         customField.value.addListener(_checkForChanges);
         fields.add(customField);
       }
@@ -211,14 +210,38 @@ class CreateSecretController extends GetxController {
 
   void addSurname() {
     final surnames = [
-      'Smith', 'Johnson', 'Williams', 'Brown', 'Jones',
-      'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez',
-      'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson',
-      'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin',
-      'Lee', 'Perez', 'Thompson', 'White', 'Harris',
-      'Sanchez', 'Clark', 'Ramirez', 'Lewis', 'Robinson'
+      'Smith',
+      'Johnson',
+      'Williams',
+      'Brown',
+      'Jones',
+      'Garcia',
+      'Miller',
+      'Davis',
+      'Rodriguez',
+      'Martinez',
+      'Hernandez',
+      'Lopez',
+      'Gonzalez',
+      'Wilson',
+      'Anderson',
+      'Thomas',
+      'Taylor',
+      'Moore',
+      'Jackson',
+      'Martin',
+      'Lee',
+      'Perez',
+      'Thompson',
+      'White',
+      'Harris',
+      'Sanchez',
+      'Clark',
+      'Ramirez',
+      'Lewis',
+      'Robinson',
     ];
-    
+
     final secureRandom = Random.secure();
     final randomSurname = surnames[secureRandom.nextInt(surnames.length)];
     final surnameField = CustomField(name: "Surname");
@@ -232,14 +255,38 @@ class CreateSecretController extends GetxController {
 
   void addFirstName() {
     final firstNames = [
-      'James', 'Mary', 'John', 'Patricia', 'Robert',
-      'Jennifer', 'Michael', 'Linda', 'William', 'Elizabeth',
-      'David', 'Barbara', 'Richard', 'Susan', 'Joseph',
-      'Jessica', 'Thomas', 'Sarah', 'Charles', 'Karen',
-      'Christopher', 'Nancy', 'Daniel', 'Lisa', 'Matthew',
-      'Betty', 'Anthony', 'Helen', 'Mark', 'Sandra'
+      'James',
+      'Mary',
+      'John',
+      'Patricia',
+      'Robert',
+      'Jennifer',
+      'Michael',
+      'Linda',
+      'William',
+      'Elizabeth',
+      'David',
+      'Barbara',
+      'Richard',
+      'Susan',
+      'Joseph',
+      'Jessica',
+      'Thomas',
+      'Sarah',
+      'Charles',
+      'Karen',
+      'Christopher',
+      'Nancy',
+      'Daniel',
+      'Lisa',
+      'Matthew',
+      'Betty',
+      'Anthony',
+      'Helen',
+      'Mark',
+      'Sandra',
     ];
-    
+
     final secureRandom = Random.secure();
     final randomFirstName = firstNames[secureRandom.nextInt(firstNames.length)];
     final firstNameField = CustomField(name: "First name");
@@ -256,18 +303,20 @@ class CreateSecretController extends GetxController {
     final now = DateTime.now();
     final minAge = 18;
     final maxAge = 65;
-    
+
     final secureRandom = Random.secure();
     final ageRange = maxAge - minAge;
     final randomAge = minAge + secureRandom.nextInt(ageRange);
-    
+
     final birthYear = now.year - randomAge;
     final birthMonth = 1 + secureRandom.nextInt(12);
-    final birthDay = 1 + secureRandom.nextInt(28); // Using 28 to avoid invalid dates
-    
+    final birthDay =
+        1 + secureRandom.nextInt(28); // Using 28 to avoid invalid dates
+
     final birthDate = DateTime(birthYear, birthMonth, birthDay);
-    final formattedDate = "${birthDate.year}-${birthDate.month.toString().padLeft(2, '0')}-${birthDate.day.toString().padLeft(2, '0')}";
-    
+    final formattedDate =
+        "${birthDate.year}-${birthDate.month.toString().padLeft(2, '0')}-${birthDate.day.toString().padLeft(2, '0')}";
+
     final birthDateField = CustomField(name: "Birth date");
     birthDateField.value.text = formattedDate;
     if (isEditMode) {
@@ -284,22 +333,22 @@ class CreateSecretController extends GetxController {
     final capitalLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     final numbers = '0123456789';
     final specialChars = '!@#\$%^&*()_+-=[]{}|;:,.<>?';
-    
+
     final allChars = letters + capitalLetters + numbers + specialChars;
     final secureRandom = Random.secure();
-    
+
     String password = '';
     // Ensure at least one of each type
     password += capitalLetters[secureRandom.nextInt(capitalLetters.length)];
     password += letters[secureRandom.nextInt(letters.length)];
     password += numbers[secureRandom.nextInt(numbers.length)];
     password += specialChars[secureRandom.nextInt(specialChars.length)];
-    
+
     // Fill the rest randomly
     for (int i = 4; i < length; i++) {
       password += allChars[secureRandom.nextInt(allChars.length)];
     }
-    
+
     // Shuffle the password
     final passwordChars = password.split('');
     for (int i = passwordChars.length - 1; i > 0; i--) {
@@ -308,7 +357,7 @@ class CreateSecretController extends GetxController {
       passwordChars[i] = passwordChars[j];
       passwordChars[j] = temp;
     }
-    
+
     final passwordField = CustomField(name: "Password", visible: false);
     passwordField.value.text = passwordChars.join();
     if (isEditMode) {
@@ -321,10 +370,10 @@ class CreateSecretController extends GetxController {
   void addEmail() async {
     // Generate a new Nostr keypair
     final keyPair = KeyPair.generate();
-    
+
     // Create email in the format npub...@uid.ovh
     final email = '${keyPair.npub}@uid.ovh';
-    
+
     // Add email field
     final emailField = CustomField(name: "Email");
     emailField.value.text = email;
@@ -332,7 +381,7 @@ class CreateSecretController extends GetxController {
       emailField.value.addListener(_checkForChanges);
     }
     fields.add(emailField);
-    
+
     // Add nsec field (hidden by default)
     final nsecField = CustomField(name: "Nsec", visible: false);
     nsecField.value.text = keyPair.nsec;
@@ -340,7 +389,7 @@ class CreateSecretController extends GetxController {
       nsecField.value.addListener(_checkForChanges);
     }
     fields.add(nsecField);
-    
+
     update();
   }
 

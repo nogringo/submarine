@@ -4,17 +4,17 @@ class SecretHistoryItem {
   final String eventId;
   final DateTime createdAt;
   final Secret secret;
-  
+
   SecretHistoryItem({
     required this.eventId,
     required this.createdAt,
     required this.secret,
   });
-  
+
   String get formattedDate {
     final now = DateTime.now();
     final difference = now.difference(createdAt);
-    
+
     if (difference.inDays == 0) {
       if (difference.inHours == 0) {
         if (difference.inMinutes == 0) {

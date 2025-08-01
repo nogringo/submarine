@@ -30,7 +30,7 @@ class AreaView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (title != null)
-            Text(title!, style: Theme.of(context).textTheme.titleMedium),
+            Text(title!, style: Theme.of(context).textTheme.titleLarge),
           ...children,
         ],
       ),

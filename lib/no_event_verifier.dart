@@ -5,5 +5,4 @@ class NoEventVerifier extends EventVerifier {
   Future<bool> verify(Nip01Event event) async {
     return true;
   }
-
 }

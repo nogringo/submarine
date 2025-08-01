@@ -7,13 +7,7 @@ class Secret {
   final List<String>? urls;
   final String? note;
 
-  Secret({
-    this.id,
-    this.title,
-    this.fields,
-    this.urls,
-    this.note,
-  });
+  Secret({this.id, this.title, this.fields, this.urls, this.note});
 
   factory Secret.fromJson(Map<String, dynamic> json) {
     return Secret(

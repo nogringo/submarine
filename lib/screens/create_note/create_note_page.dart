@@ -13,19 +13,19 @@ class CreateNotePage extends StatelessWidget {
         preferredSize: Size.fromHeight(kToolbarHeight),
         child: DragToMoveArea(
           child: AppBar(
-        title: Text("New Note"),
-        actions: [
-          FilledButton(onPressed: () {}, child: Text("Create")),
-          SizedBox(width: 8),
-          if (!kIsWeb && GetPlatform.isDesktop)
-            SizedBox(
-              width: 154,
-              child: WindowCaption(
-                brightness: Theme.of(context).brightness,
-                backgroundColor: Colors.transparent,
-              ),
-            ),
-        ],
+            title: Text("New Note"),
+            actions: [
+              FilledButton(onPressed: () {}, child: Text("Create")),
+              SizedBox(width: 8),
+              if (!kIsWeb && GetPlatform.isDesktop)
+                SizedBox(
+                  width: 154,
+                  child: WindowCaption(
+                    brightness: Theme.of(context).brightness,
+                    backgroundColor: Colors.transparent,
+                  ),
+                ),
+            ],
           ),
         ),
       ),

@@ -42,7 +42,7 @@ class PasswordManagerController extends GetxController {
       final allSecrets = snapshots.map((snapshot) {
         final decryptedEvent = DecryptedSecretEvent.fromJson(snapshot.value);
         final secret = Secret.fromJson(decryptedEvent.secret);
-        
+
         return {
           'secret': secret,
           'createdAt': decryptedEvent.createdAt,
@@ -52,18 +52,18 @@ class PasswordManagerController extends GetxController {
 
       // Group by secret ID and keep only the latest version
       final latestSecrets = <String, Map<String, dynamic>>{};
-      
+
       for (final item in allSecrets) {
         final secret = item['secret'] as Secret;
         if (secret.id != null) {
           final existingItem = latestSecrets[secret.id!];
-          if (existingItem == null || 
+          if (existingItem == null ||
               (item['createdAt'] as int) > (existingItem['createdAt'] as int)) {
             latestSecrets[secret.id!] = item;
           }
         }
       }
-      
+
       // Store the mapping of secretId -> eventId for the latest versions
       _secretEventIds.clear();
       for (final item in latestSecrets.values) {
@@ -72,12 +72,16 @@ class PasswordManagerController extends GetxController {
           _secretEventIds[secret.id!] = item['eventId'] as String;
         }
       }
-      
+
       // Sort by createdAt (newest first)
       final secretsList = latestSecrets.values.toList();
-      secretsList.sort((a, b) => (b['createdAt'] as int).compareTo(a['createdAt'] as int));
-      
-      secrets.value = secretsList.map((item) => item['secret'] as Secret).toList();
+      secretsList.sort(
+        (a, b) => (b['createdAt'] as int).compareTo(a['createdAt'] as int),
+      );
+
+      secrets.value = secretsList
+          .map((item) => item['secret'] as Secret)
+          .toList();
 
       if (isLoading.value) {
         isLoading.value = false;
@@ -101,7 +105,7 @@ class PasswordManagerController extends GetxController {
       // Find the event ID for this secret
       final db = await DatabaseService().database;
       final records = await secretsStore.find(db);
-      
+
       String? eventIdToDelete;
       for (final record in records) {
         final decryptedEvent = DecryptedSecretEvent.fromJson(record.value);
@@ -119,7 +123,9 @@ class PasswordManagerController extends GetxController {
       final deletionEvent = Nip01Event(
         pubKey: loggedAccount.pubkey,
         kind: 5,
-        tags: [['e', eventIdToDelete]],
+        tags: [
+          ['e', eventIdToDelete],
+        ],
         content: '',
       );
 
@@ -130,7 +136,6 @@ class PasswordManagerController extends GetxController {
 
       // Broadcast deletion event
       Repository.to.ndk.broadcast.broadcast(nostrEvent: deletionEvent);
-
     } catch (e) {
       // Handle error
       Get.snackbar('Error', 'Failed to delete secret');

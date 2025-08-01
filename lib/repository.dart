@@ -17,7 +17,7 @@ class Repository extends GetxController {
   late final Ndk ndk;
 
   NdkResponse? subscription;
-  
+
   final follows = <Follow>[].obs;
   final isLoadingFollows = false.obs;
 
@@ -45,24 +45,24 @@ class Repository extends GetxController {
     // Get the secret from local storage
     final db = await DatabaseService().database;
     final record = await secretsStore.record(eventId).get(db);
-    
+
     if (record == null) {
       throw Exception('Secret not found');
     }
-    
+
     final decryptedEvent = DecryptedSecretEvent.fromJson(record);
     final secretJson = jsonEncode(decryptedEvent.secret);
-    
+
     // Encrypt the secret using recipient's public key
     final encryptedContent = await ndk.accounts
         .getLoggedAccount()!
         .signer
         .encryptNip44(plaintext: secretJson, recipientPubKey: recipientPubkey);
-    
+
     if (encryptedContent == null) {
       throw Exception('Failed to encrypt secret');
     }
-    
+
     // Create event with p tag for recipient
     final event = Nip01Event(
       kind: 4111,
@@ -74,7 +74,7 @@ class Repository extends GetxController {
       createdAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
       pubKey: publicKey!,
     );
-    
+
     // Sign and publish the event
     await ndk.accounts.getLoggedAccount()!.signer.sign(event);
     ndk.broadcast.broadcast(nostrEvent: event);
@@ -82,10 +82,10 @@ class Repository extends GetxController {
 
   Future<void> loadFollows() async {
     if (publicKey == null) return;
-    
+
     isLoadingFollows.value = true;
     follows.clear(); // Clear existing follows to get fresh data
-    
+
     try {
       final response = ndk.requests.query(
         filters: [
@@ -101,20 +101,18 @@ class Repository extends GetxController {
             final pubkey = tag[1];
             String? relay;
             String? petname;
-            
+
             if (tag.length > 2) relay = tag[2];
             if (tag.length > 3) petname = tag[3];
-            
-            followList.add(Follow(
-              pubkey: pubkey,
-              relay: relay,
-              petname: petname,
-            ));
+
+            followList.add(
+              Follow(pubkey: pubkey, relay: relay, petname: petname),
+            );
           }
         }
-        
+
         follows.value = followList;
-        
+
         // Fetch metadata for follows
         await _fetchFollowsMetadata();
         break;
@@ -128,7 +126,7 @@ class Repository extends GetxController {
 
   Future<void> _fetchFollowsMetadata() async {
     if (follows.isEmpty) return;
-    
+
     final pubkeys = follows.map((f) => f.pubkey).toList();
     final response = ndk.requests.query(
       filters: [

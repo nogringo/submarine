@@ -144,9 +144,7 @@ class _ShareSecretDialogState extends State<ShareSecretDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
         padding: EdgeInsets.all(24),
         constraints: BoxConstraints(maxWidth: 500, maxHeight: 600),

@@ -19,7 +19,6 @@ import 'package:sembast/sembast.dart' as sembast;
 import 'package:submarine/models/secret_history_item.dart';
 
 class SecretDetailController extends GetxController {
-
   Secret? secret;
   bool isLoading = true;
   final Map<String, bool> fieldVisibility = {};
@@ -78,7 +77,7 @@ class SecretDetailController extends GetxController {
   String? eventId;
   final searchController = TextEditingController();
   final filteredFollows = <Follow>[].obs;
-  
+
   // Secret history
   final secretHistory = <SecretHistoryItem>[].obs;
   final isLoadingHistory = false.obs;
@@ -93,14 +92,14 @@ class SecretDetailController extends GetxController {
       }
     }
   }
-  
+
   Future<void> _loadSecretFromEventId() async {
     if (eventId == null) return;
-    
+
     try {
       final db = await DatabaseService().database;
       final record = await secretsStore.record(eventId!).get(db);
-      
+
       if (record != null) {
         final decryptedEvent = DecryptedSecretEvent.fromJson(record);
         secret = Secret.fromJson(decryptedEvent.secret);
@@ -116,23 +115,23 @@ class SecretDetailController extends GetxController {
       update();
     }
   }
-  
+
   // Check if this secret is the current/latest version
   bool isCurrentVersion(Secret secretToCheck) {
     if (secretHistory.isEmpty) return true;
-    
+
     // The first item in history is the latest version
     final latestSecret = secretHistory.first.secret;
-    
+
     // Compare by checking if all fields match
     // This is more reliable than comparing timestamps which might be equal
     return areSecretsEqual(secretToCheck, latestSecret);
   }
-  
+
   bool areSecretsEqual(Secret s1, Secret s2) {
     // Compare basic fields
     if (s1.title != s2.title || s1.note != s2.note) return false;
-    
+
     // Compare URLs
     final urls1 = s1.urls ?? [];
     final urls2 = s2.urls ?? [];
@@ -140,52 +139,57 @@ class SecretDetailController extends GetxController {
     for (int i = 0; i < urls1.length; i++) {
       if (urls1[i] != urls2[i]) return false;
     }
-    
+
     // Compare fields
     final fields1 = s1.fields ?? [];
     final fields2 = s2.fields ?? [];
     if (fields1.length != fields2.length) return false;
-    
+
     // Simple comparison - could be enhanced
     return true;
   }
 
-  
   Future<void> loadSecretHistory() async {
     if (secret?.id == null) return;
-    
+
     isLoadingHistory.value = true;
     secretHistory.clear();
-    
+
     try {
       final db = await DatabaseService().database;
-      
+
       // Find all records with the same secret ID
       final records = await secretsStore.find(
         db,
         finder: sembast.Finder(
           filter: sembast.Filter.equals('secret.id', secret!.id),
           sortOrders: [
-            sembast.SortOrder('createdAt', false), // Sort by createdAt descending
+            sembast.SortOrder(
+              'createdAt',
+              false,
+            ), // Sort by createdAt descending
           ],
         ),
       );
-      
+
       // Convert records to history items
       for (final record in records) {
         try {
           final decryptedEvent = DecryptedSecretEvent.fromJson(record.value);
-          secretHistory.add(SecretHistoryItem(
-            eventId: decryptedEvent.eventId,
-            createdAt: DateTime.fromMillisecondsSinceEpoch(decryptedEvent.createdAt * 1000),
-            secret: Secret.fromJson(decryptedEvent.secret),
-          ));
+          secretHistory.add(
+            SecretHistoryItem(
+              eventId: decryptedEvent.eventId,
+              createdAt: DateTime.fromMillisecondsSinceEpoch(
+                decryptedEvent.createdAt * 1000,
+              ),
+              secret: Secret.fromJson(decryptedEvent.secret),
+            ),
+          );
         } catch (e) {
           // Skip invalid records
           continue;
         }
       }
-      
     } catch (e) {
       // Error loading secret history: $e
     } finally {
@@ -340,10 +344,10 @@ class SecretDetailController extends GetxController {
         eventId: eventId!,
         recipientPubkey: recipientPubkey,
       );
-      
+
       shareRecipientController.clear();
       Get.back(); // Close the dialog
-      
+
       toastification.show(
         context: Get.context!,
         title: Text('Success'),
@@ -374,16 +378,16 @@ class SecretDetailController extends GetxController {
       filteredFollows.value = Repository.to.follows;
       return;
     }
-    
+
     final lowerQuery = query.toLowerCase();
     filteredFollows.value = Repository.to.follows.where((follow) {
       final name = follow.displayName.toLowerCase();
       final nip05 = (follow.nip05 ?? '').toLowerCase();
       final npub = follow.pubkey.toLowerCase();
-      
-      return name.contains(lowerQuery) || 
-             nip05.contains(lowerQuery) || 
-             npub.contains(lowerQuery);
+
+      return name.contains(lowerQuery) ||
+          nip05.contains(lowerQuery) ||
+          npub.contains(lowerQuery);
     }).toList();
   }
 

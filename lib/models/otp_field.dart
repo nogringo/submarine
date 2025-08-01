@@ -4,10 +4,7 @@ import 'package:submarine/models/otp_value.dart';
 class OTPField extends Field {
   final OTPValue value;
 
-  OTPField({
-    required super.name,
-    required this.value,
-  }) : super(kind: 'otp');
+  OTPField({required super.name, required this.value}) : super(kind: 'otp');
 
   factory OTPField.fromJson(Map<String, dynamic> json) {
     return OTPField(
@@ -18,10 +15,6 @@ class OTPField extends Field {
 
   @override
   Map<String, dynamic> toJson() {
-    return {
-      'name': name,
-      'kind': kind,
-      'value': value.toJson(),
-    };
+    return {'name': name, 'kind': kind, 'value': value.toJson()};
   }
 }

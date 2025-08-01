@@ -36,9 +36,7 @@ class _NewFieldDialogState extends State<NewFieldDialog> {
         children: [
           TextField(
             controller: _nameController,
-            decoration: InputDecoration(
-              labelText: "Field Name",
-            ),
+            decoration: InputDecoration(labelText: "Field Name"),
             autofocus: true,
           ),
           SizedBox(height: 16),
@@ -59,13 +57,10 @@ class _NewFieldDialogState extends State<NewFieldDialog> {
         ],
       ),
       actions: [
-        TextButton(
-          onPressed: () => Get.back(),
-          child: Text("Cancel"),
-        ),
+        TextButton(onPressed: () => Get.back(), child: Text("Cancel")),
         FilledButton(
-          onPressed: _isFieldNameEmpty 
-              ? null 
+          onPressed: _isFieldNameEmpty
+              ? null
               : () {
                   widget.onAdd(_nameController.text.trim(), !_isObscure);
                   Get.back();

@@ -31,17 +31,13 @@ class SecretDetailPage extends StatelessWidget {
       tag: eventId, // Use eventId as tag to ensure unique controller instances
       builder: (controller) {
         if (controller.isLoading) {
-          return Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
+          return Scaffold(body: Center(child: CircularProgressIndicator()));
         }
-        
+
         if (controller.secret == null) {
-          return Scaffold(
-            body: Center(child: Text('Secret not found')),
-          );
+          return Scaffold(body: Center(child: Text('Secret not found')));
         }
-        
+
         final secret = controller.secret!;
         return Scaffold(
           appBar: PreferredSize(
@@ -55,7 +51,10 @@ class SecretDetailPage extends StatelessWidget {
                     onPressed: () {
                       if (controller.eventId != null) {
                         Get.toNamed(
-                          AppRoutes.editSecret.replaceAll(':eventId', controller.eventId!),
+                          AppRoutes.editSecret.replaceAll(
+                            ':eventId',
+                            controller.eventId!,
+                          ),
                         );
                       }
                     },
@@ -111,40 +110,75 @@ class SecretDetailPage extends StatelessWidget {
                 ),
 
               if (controller.hasNostrMail) MailboxView(controller: controller),
-              
+
               // Secret History
               SizedBox(height: 16),
               AreaView(
-                title: 'History',
+                title: 'Version History',
                 children: [
+                  SizedBox(height: 8),
                   // Show current version indicator
                   if (!controller.isCurrentVersion(secret))
                     Container(
-                      margin: EdgeInsets.only(bottom: 12),
-                      padding: EdgeInsets.all(12),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.circular(12),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.errorContainer.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: Theme.of(context).colorScheme.error,
-                          width: 1,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.error.withValues(alpha: 0.5),
+                          width: 1.5,
                         ),
                       ),
                       child: Row(
                         children: [
-                          Icon(
-                            Icons.info_outline,
-                            color: Theme.of(context).colorScheme.error,
-                            size: 20,
+                          Container(
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.error.withValues(alpha: 0.2),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.history,
+                              color: Theme.of(context).colorScheme.error,
+                              size: 18,
+                            ),
                           ),
-                          SizedBox(width: 8),
+                          SizedBox(width: 12),
                           Expanded(
-                            child: Text(
-                              'You are viewing an older version of this secret',
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.onErrorContainer,
-                                fontWeight: FontWeight.w500,
-                              ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Viewing Previous Version',
+                                  style: TextStyle(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onErrorContainer,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                                SizedBox(height: 2),
+                                Text(
+                                  'This is not the most recent version of this secret',
+                                  style: TextStyle(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onErrorContainer
+                                        .withValues(alpha: 0.8),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
@@ -159,35 +193,42 @@ class SecretDetailPage extends StatelessWidget {
                         ),
                       );
                     }
-                    
+
                     if (controller.secretHistory.isEmpty) {
                       return Padding(
                         padding: EdgeInsets.all(16),
                         child: Text(
                           'No history available',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).textTheme.bodySmall?.color,
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).textTheme.bodySmall?.color,
+                              ),
                         ),
                       );
                     }
-                    
+
                     return Column(
                       children: controller.secretHistory
                           .asMap()
                           .entries
-                          .map((entry) => _buildHistoryItem(
-                                context,
-                                entry.value,
-                                entry.key == 0,
-                                controller,
-                                secret,
-                              ))
+                          .map(
+                            (entry) => _buildHistoryItem(
+                              context,
+                              entry.value,
+                              entry.key == 0,
+                              controller,
+                              secret,
+                            ),
+                          )
                           .toList(),
                     );
                   }),
                 ],
               ),
+
+              SizedBox(height: 100),
             ],
           ),
         );
@@ -400,7 +441,7 @@ class SecretDetailPage extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildHistoryItem(
     BuildContext context,
     SecretHistoryItem item,
@@ -409,112 +450,187 @@ class SecretDetailPage extends StatelessWidget {
     Secret displayedSecret,
   ) {
     final isDisplayed = item.eventId == controller.eventId;
+
+    // Determine styling based on state
+    final backgroundColor = isDisplayed
+        ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3)
+        : isLatest
+        ? Theme.of(
+            context,
+          ).colorScheme.secondaryContainer.withValues(alpha: 0.2)
+        : Theme.of(
+            context,
+          ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5);
+
+    final borderColor = isDisplayed
+        ? Theme.of(context).colorScheme.primary
+        : isLatest
+        ? Theme.of(context).colorScheme.secondary
+        : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3);
+
     return Container(
-      margin: EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: isDisplayed
-            ? Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.5)
-            : isLatest
-                ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3)
-                : null,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDisplayed
-              ? Theme.of(context).colorScheme.secondary
-              : isLatest
-                  ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
-          width: isDisplayed || isLatest ? 2 : 1,
-        ),
-      ),
+      margin: EdgeInsets.only(top: 12),
       child: Material(
-        color: Colors.transparent,
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(16),
         child: InkWell(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           onTap: () {
             if (!isDisplayed) {
-              // Open the historical version in a new detail page
               Get.toNamed(
                 AppRoutes.secretDetail.replaceAll(':eventId', item.eventId),
               );
             }
           },
-          child: Padding(
-            padding: EdgeInsets.all(12),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: borderColor,
+                width: isDisplayed ? 2 : 1,
+              ),
+            ),
+            padding: EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    Icon(
-                      isDisplayed
-                          ? Icons.visibility
-                          : isLatest
-                              ? Icons.check_circle
-                              : Icons.history,
-                      size: 20,
-                      color: isDisplayed
-                          ? Theme.of(context).colorScheme.secondary
-                          : isLatest
-                              ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                    SizedBox(width: 8),
-                    Text(
-                      item.formattedDate,
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            fontWeight: isDisplayed || isLatest ? FontWeight.bold : null,
-                          ),
-                    ),
-                    if (isDisplayed) ...[
-                      SizedBox(width: 8),
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.secondary,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          'Viewing',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSecondary,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                    // Icon container
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: isDisplayed
+                            ? Theme.of(
+                                context,
+                              ).colorScheme.primary.withValues(alpha: 0.1)
+                            : isLatest
+                            ? Theme.of(
+                                context,
+                              ).colorScheme.secondary.withValues(alpha: 0.1)
+                            : Theme.of(
+                                context,
+                              ).colorScheme.surfaceContainerHigh,
+                        shape: BoxShape.circle,
                       ),
-                    ] else if (isLatest) ...[
-                      SizedBox(width: 8),
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          'Latest',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
+                      child: Icon(
+                        isDisplayed
+                            ? Icons.remove_red_eye
+                            : isLatest
+                            ? Icons.star_rounded
+                            : Icons.access_time_filled,
+                        size: 18,
+                        color: isDisplayed
+                            ? Theme.of(context).colorScheme.primary
+                            : isLatest
+                            ? Theme.of(context).colorScheme.secondary
+                            : Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    // Content
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                item.formattedDate,
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(
+                                      fontWeight: isDisplayed || isLatest
+                                          ? FontWeight.w600
+                                          : FontWeight.w500,
+                                    ),
+                              ),
+                              if (isDisplayed) ...[
+                                SizedBox(width: 8),
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    'VIEWING',
+                                    style: TextStyle(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onPrimary,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ),
+                              ] else if (isLatest) ...[
+                                SizedBox(width: 8),
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.secondary,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    'LATEST',
+                                    style: TextStyle(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSecondary,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
-                        ),
+                          SizedBox(height: 4),
+                          Text(
+                            _getChangeSummary(
+                              item,
+                              isLatest
+                                  ? null
+                                  : controller.secretHistory.firstOrNull,
+                            ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                  height: 1.4,
+                                ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Arrow
+                    if (!isDisplayed) ...[
+                      SizedBox(width: 8),
+                      Icon(
+                        Icons.arrow_forward_ios,
+                        size: 16,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                       ),
                     ],
-                    Spacer(),
-                    Icon(
-                      Icons.chevron_right,
-                      size: 20,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
                   ],
-                ),
-                SizedBox(height: 8),
-                Text(
-                  _getChangeSummary(item, isLatest ? null : controller.secretHistory.firstOrNull),
-                  style: Theme.of(context).textTheme.bodySmall,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -523,42 +639,52 @@ class SecretDetailPage extends StatelessWidget {
       ),
     );
   }
-  
-  String _getChangeSummary(SecretHistoryItem item, SecretHistoryItem? previousItem) {
+
+  String _getChangeSummary(
+    SecretHistoryItem item,
+    SecretHistoryItem? previousItem,
+  ) {
     final changes = <String>[];
-    
+
     // Check title change
-    if (previousItem != null && item.secret.title != previousItem.secret.title) {
+    if (previousItem != null &&
+        item.secret.title != previousItem.secret.title) {
       changes.add('Title changed');
     }
-    
+
     // Check fields count
     final currentFieldCount = item.secret.fields?.length ?? 0;
     final previousFieldCount = previousItem?.secret.fields?.length ?? 0;
-    
+
     if (previousItem == null) {
-      changes.add('Initial version with $currentFieldCount field${currentFieldCount == 1 ? '' : 's'}');
+      changes.add(
+        'Initial version with $currentFieldCount field${currentFieldCount == 1 ? '' : 's'}',
+      );
     } else if (currentFieldCount != previousFieldCount) {
       if (currentFieldCount > previousFieldCount) {
-        changes.add('${currentFieldCount - previousFieldCount} field${(currentFieldCount - previousFieldCount) == 1 ? '' : 's'} added');
+        changes.add(
+          '${currentFieldCount - previousFieldCount} field${(currentFieldCount - previousFieldCount) == 1 ? '' : 's'} added',
+        );
       } else {
-        changes.add('${previousFieldCount - currentFieldCount} field${(previousFieldCount - currentFieldCount) == 1 ? '' : 's'} removed');
+        changes.add(
+          '${previousFieldCount - currentFieldCount} field${(previousFieldCount - currentFieldCount) == 1 ? '' : 's'} removed',
+        );
       }
     }
-    
+
     // Check note change
     if (previousItem != null && item.secret.note != previousItem.secret.note) {
       changes.add('Note updated');
     }
-    
+
     // Check URLs
     final currentUrlCount = item.secret.urls?.length ?? 0;
     final previousUrlCount = previousItem?.secret.urls?.length ?? 0;
-    
+
     if (previousItem != null && currentUrlCount != previousUrlCount) {
       changes.add('URLs modified');
     }
-    
+
     return changes.isEmpty ? 'No changes' : changes.join(', ');
   }
 }
@@ -570,27 +696,27 @@ class MailboxView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AreaView(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("Mailbox", style: Theme.of(context).textTheme.titleLarge),
-                IconButton(
-                  onPressed: () {
-                    controller.fetchEmails();
-                  },
-                  icon: Icon(Icons.refresh),
-                ),
-              ],
-            ),
-            ...controller.emails.map(
-              (e) => CompactEmailView(
-                email: e,
-                onTap: () => _showFullEmail(context, e),
-              ),
+            Text("Mailbox", style: Theme.of(context).textTheme.titleLarge),
+            IconButton(
+              onPressed: () {
+                controller.fetchEmails();
+              },
+              icon: Icon(Icons.refresh),
             ),
           ],
-        );
+        ),
+        ...controller.emails.map(
+          (e) => CompactEmailView(
+            email: e,
+            onTap: () => _showFullEmail(context, e),
+          ),
+        ),
+      ],
+    );
   }
 
   void _showFullEmail(BuildContext context, Nip01Event email) {
@@ -607,10 +733,7 @@ class MailboxView extends StatelessWidget {
           ),
           insetPadding: const EdgeInsets.all(24),
           child: Container(
-            constraints: const BoxConstraints(
-              maxWidth: 700,
-              maxHeight: 600,
-            ),
+            constraints: const BoxConstraints(maxWidth: 700, maxHeight: 600),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -618,7 +741,9 @@ class MailboxView extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                    color: theme.colorScheme.primaryContainer.withValues(
+                      alpha: 0.3,
+                    ),
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(24),
                       topRight: Radius.circular(24),
@@ -634,7 +759,9 @@ class MailboxView extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                              color: theme.colorScheme.primary.withValues(
+                                alpha: 0.1,
+                              ),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
@@ -651,9 +778,8 @@ class MailboxView extends StatelessWidget {
                               children: [
                                 Text(
                                   _extractSubject(email.content),
-                                  style: theme.textTheme.headlineSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  style: theme.textTheme.headlineSmall
+                                      ?.copyWith(fontWeight: FontWeight.bold),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -668,9 +794,13 @@ class MailboxView extends StatelessWidget {
                                     const SizedBox(width: 4),
                                     Text(
                                       _formatFullTimestamp(email.createdAt),
-                                      style: theme.textTheme.bodySmall?.copyWith(
-                                        color: theme.textTheme.bodySmall?.color,
-                                      ),
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            color: theme
+                                                .textTheme
+                                                .bodySmall
+                                                ?.color,
+                                          ),
                                     ),
                                   ],
                                 ),
@@ -732,7 +862,9 @@ class MailboxView extends StatelessWidget {
         return line.substring(8).trim();
       }
     }
-    return lines.isNotEmpty && lines.first.isNotEmpty ? lines.first : 'No subject';
+    return lines.isNotEmpty && lines.first.isNotEmpty
+        ? lines.first
+        : 'No subject';
   }
 
   String _extractBody(String content) {
@@ -757,7 +889,7 @@ class MailboxView extends StatelessWidget {
     );
 
     final matches = urlRegex.allMatches(content).toList();
-    
+
     if (matches.isEmpty) {
       return SelectableText(
         content,
@@ -771,43 +903,47 @@ class MailboxView extends StatelessWidget {
     for (final match in matches) {
       // Add text before the URL
       if (match.start > lastEnd) {
-        spans.add(TextSpan(
-          text: content.substring(lastEnd, match.start),
-          style: Theme.of(context).textTheme.bodyMedium,
-        ));
+        spans.add(
+          TextSpan(
+            text: content.substring(lastEnd, match.start),
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        );
       }
 
       // Add the URL as a clickable link
       final url = match.group(0)!;
-      spans.add(TextSpan(
-        text: url,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: Theme.of(context).colorScheme.primary,
-          decoration: TextDecoration.underline,
+      spans.add(
+        TextSpan(
+          text: url,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: Theme.of(context).colorScheme.primary,
+            decoration: TextDecoration.underline,
+          ),
+          recognizer: TapGestureRecognizer()
+            ..onTap = () async {
+              final uri = Uri.tryParse(url);
+              if (uri != null && await canLaunchUrl(uri)) {
+                await launchUrl(uri);
+              }
+            },
         ),
-        recognizer: TapGestureRecognizer()
-          ..onTap = () async {
-            final uri = Uri.tryParse(url);
-            if (uri != null && await canLaunchUrl(uri)) {
-              await launchUrl(uri);
-            }
-          },
-      ));
+      );
 
       lastEnd = match.end;
     }
 
     // Add any remaining text
     if (lastEnd < content.length) {
-      spans.add(TextSpan(
-        text: content.substring(lastEnd),
-        style: Theme.of(context).textTheme.bodyMedium,
-      ));
+      spans.add(
+        TextSpan(
+          text: content.substring(lastEnd),
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      );
     }
 
-    return SelectableText.rich(
-      TextSpan(children: spans),
-    );
+    return SelectableText.rich(TextSpan(children: spans));
   }
 }
 
@@ -815,14 +951,12 @@ void _showShareDialog(BuildContext context, SecretDetailController controller) {
   // Load follows when dialog opens
   Repository.to.loadFollows();
   controller.filteredFollows.value = Repository.to.follows;
-  
+
   showDialog(
     context: context,
     builder: (BuildContext context) {
       return Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Container(
           padding: EdgeInsets.all(24),
           constraints: BoxConstraints(maxWidth: 500, maxHeight: 600),
@@ -871,18 +1005,18 @@ void _showShareDialog(BuildContext context, SecretDetailController controller) {
                   if (Repository.to.isLoadingFollows.value) {
                     return Center(child: CircularProgressIndicator());
                   }
-                  
+
                   if (controller.filteredFollows.isEmpty) {
                     return Center(
                       child: Text(
-                        Repository.to.follows.isEmpty 
-                          ? 'No follows found' 
-                          : 'No matches found',
+                        Repository.to.follows.isEmpty
+                            ? 'No follows found'
+                            : 'No matches found',
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     );
                   }
-                  
+
                   return ListView.builder(
                     shrinkWrap: true,
                     itemCount: controller.filteredFollows.length,
@@ -890,20 +1024,20 @@ void _showShareDialog(BuildContext context, SecretDetailController controller) {
                       final follow = controller.filteredFollows[index];
                       return ListTile(
                         leading: CircleAvatar(
-                          backgroundImage: follow.picture != null 
-                            ? NetworkImage(follow.picture!) 
-                            : null,
-                          child: follow.picture == null 
-                            ? Text(follow.displayName[0].toUpperCase()) 
-                            : null,
+                          backgroundImage: follow.picture != null
+                              ? NetworkImage(follow.picture!)
+                              : null,
+                          child: follow.picture == null
+                              ? Text(follow.displayName[0].toUpperCase())
+                              : null,
                         ),
                         title: Text(follow.displayName),
-                        subtitle: follow.nip05 != null 
-                          ? Text(follow.nip05!) 
-                          : Text(
-                              follow.npub,
-                              style: TextStyle(fontFamily: 'monospace'),
-                            ),
+                        subtitle: follow.nip05 != null
+                            ? Text(follow.nip05!)
+                            : Text(
+                                follow.npub,
+                                style: TextStyle(fontFamily: 'monospace'),
+                              ),
                         onTap: () => controller.selectFollow(follow),
                       );
                     },

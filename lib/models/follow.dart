@@ -16,7 +16,7 @@ class Follow {
   });
 
   String get displayName => petname ?? name ?? 'Unknown';
-  
+
   String get npub {
     try {
       // Create npub manually - it's just bech32 encoding

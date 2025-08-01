@@ -6,20 +6,18 @@ class CompactEmailView extends StatelessWidget {
   final Nip01Event email;
   final VoidCallback? onTap;
 
-  const CompactEmailView({
-    super.key,
-    required this.email,
-    this.onTap,
-  });
+  const CompactEmailView({super.key, required this.email, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     // Parse email content
     final subject = _extractSubject(email.content);
     final preview = _extractPreview(email.content);
-    final timestamp = _formatTimestamp(DateTime.fromMillisecondsSinceEpoch(email.createdAt * 1000));
+    final timestamp = _formatTimestamp(
+      DateTime.fromMillisecondsSinceEpoch(email.createdAt * 1000),
+    );
 
     return Card(
       elevation: 0,
@@ -37,71 +35,73 @@ class CompactEmailView extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Avatar placeholder
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Icon(
-                  Icons.mail_outline,
-                  size: 20,
-                  color: theme.colorScheme.primary,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Avatar placeholder
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.mail_outline,
+                    size: 20,
+                    color: theme.colorScheme.primary,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 12),
-            // Email content
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          subject,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: theme.textTheme.bodyLarge?.color,
+              const SizedBox(width: 12),
+              // Email content
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            subject,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: theme.textTheme.bodyLarge?.color,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        timestamp,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: theme.textTheme.bodySmall?.color,
+                        const SizedBox(width: 8),
+                        Text(
+                          timestamp,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: theme.textTheme.bodySmall?.color,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    preview,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.8),
+                      ],
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+                    const SizedBox(height: 4),
+                    Text(
+                      preview,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: theme.textTheme.bodyMedium?.color?.withValues(
+                          alpha: 0.8,
+                        ),
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
@@ -116,8 +116,8 @@ class CompactEmailView extends StatelessWidget {
       }
     }
     // If no subject found, use first line or part of content
-    return lines.isNotEmpty && lines.first.isNotEmpty 
-        ? lines.first 
+    return lines.isNotEmpty && lines.first.isNotEmpty
+        ? lines.first
         : 'No subject';
   }
 
@@ -130,7 +130,7 @@ class CompactEmailView extends StatelessWidget {
         preview = preview.substring(subjectEnd + 1).trim();
       }
     }
-    
+
     // Clean up and limit preview
     preview = preview.replaceAll('\n', ' ').trim();
     return preview.isNotEmpty ? preview : 'No preview available';

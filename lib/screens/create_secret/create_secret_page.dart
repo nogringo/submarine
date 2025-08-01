@@ -21,7 +21,9 @@ class CreateSecretPage extends StatelessWidget {
                 title: Text(c.isEditMode ? "Edit Secret" : "New Secret"),
                 actions: [
                   FilledButton(
-                    onPressed: c.isCreatingPassword || !c.hasChanges ? null : c.createPassword,
+                    onPressed: c.isCreatingPassword || !c.hasChanges
+                        ? null
+                        : c.createPassword,
                     child: Text(c.isEditMode ? "Save" : "Create"),
                   ),
                   SizedBox(width: 8),
@@ -142,28 +144,32 @@ class CreateSecretPage extends StatelessWidget {
                                   child: Text("Email"),
                                 ),
                               if (!c.fields.any(
-                                (field) => field.name.toLowerCase() == 'password',
+                                (field) =>
+                                    field.name.toLowerCase() == 'password',
                               ))
                                 TextButton(
                                   onPressed: c.addPassword,
                                   child: Text("Password"),
                                 ),
                               if (!c.fields.any(
-                                (field) => field.name.toLowerCase() == 'first name',
+                                (field) =>
+                                    field.name.toLowerCase() == 'first name',
                               ))
                                 TextButton(
                                   onPressed: c.addFirstName,
                                   child: Text("First name"),
                                 ),
                               if (!c.fields.any(
-                                (field) => field.name.toLowerCase() == 'surname',
+                                (field) =>
+                                    field.name.toLowerCase() == 'surname',
                               ))
                                 TextButton(
                                   onPressed: c.addSurname,
                                   child: Text("Surname"),
                                 ),
                               if (!c.fields.any(
-                                (field) => field.name.toLowerCase() == 'birth date',
+                                (field) =>
+                                    field.name.toLowerCase() == 'birth date',
                               ))
                                 TextButton(
                                   onPressed: c.addBirthDate,

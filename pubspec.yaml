@@ -1,5 +1,5 @@
 name: submarine
-description: "A new Flutter project."
+description: "A nostr native password manager with emails"
 publish_to: 'none'
 version: 0.2.0
 

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
 import 'package:get/get.dart';
-import 'package:ndk/entities.dart';
+import 'package:submarine/models/mail.dart';
 import 'package:submarine/models/secret.dart';
 import 'package:submarine/models/field.dart';
 import 'package:submarine/models/text_field.dart' as model;
@@ -634,7 +634,7 @@ class MailboxView extends StatelessWidget {
     );
   }
 
-  void _showFullEmail(BuildContext context, Nip01Event email) {
+  void _showFullEmail(BuildContext context, Mail email) {
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -692,7 +692,7 @@ class MailboxView extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  _extractSubject(email.content),
+                                  _extractSubject(email.event.content),
                                   style: theme.textTheme.headlineSmall
                                       ?.copyWith(fontWeight: FontWeight.bold),
                                   maxLines: 2,
@@ -708,7 +708,7 @@ class MailboxView extends StatelessWidget {
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
-                                      _formatFullTimestamp(email.createdAt),
+                                      _formatFullTimestamp(email.event.createdAt),
                                       style: theme.textTheme.bodySmall
                                           ?.copyWith(
                                             color: theme
@@ -757,7 +757,7 @@ class MailboxView extends StatelessWidget {
                       padding: const EdgeInsets.all(24),
                       child: _buildClickableContent(
                         context,
-                        _extractBody(email.content),
+                        _extractBody(email.event.content),
                       ),
                     ),
                   ),

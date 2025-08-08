@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:submarine/utils/toast_helper.dart';
 import 'package:sembast/sembast.dart' as sembast;
 import 'package:submarine/models/secret_history_item.dart';
+import 'package:submarine/models/mail.dart';
 
 class SecretDetailController extends GetxController {
   Secret? secret;
@@ -26,7 +27,7 @@ class SecretDetailController extends GetxController {
   final RxDouble otpProgress = 0.0.obs;
   Timer? _otpTimer;
 
-  List<Nip01Event> emails = [];
+  List<Mail> emails = [];
 
   bool get hasNostrMail {
     if (secret?.fields == null) return false;
@@ -275,17 +276,37 @@ class SecretDetailController extends GetxController {
             senderPubKey: unwrapped.pubKey,
           );
       Map<String, dynamic> json = jsonDecode(messageEventJson!);
-      final email = Nip01Event(
+      
+      // Use the gift wrap ID as the unique identifier
+      final emailId = giftWrap.id;
+      
+      // Check if email with this ID already exists
+      if (emails.any((mail) => mail.id == emailId)) {
+        continue;
+      }
+      
+      final event = Nip01Event(
         pubKey: json["pubkey"],
         kind: json["kind"],
-        tags: [],
+        tags: json["tags"] != null 
+            ? (json["tags"] as List).map((tag) => 
+                (tag as List).map((item) => item.toString()).toList()
+              ).toList()
+            : [],
         content: json["content"],
+        createdAt: json["created_at"] ?? giftWrap.createdAt,
       );
-      emails.addIf(emails.where((e) => e.id == email.id).isEmpty, email);
+      
+      final mail = Mail(
+        id: emailId,
+        event: event,
+      );
+      
+      emails.add(mail);
     }
 
     // Sort emails by timestamp in descending order (newest first)
-    emails.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    emails.sort((a, b) => b.event.createdAt.compareTo(a.event.createdAt));
 
     update();
 

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:ndk/ndk.dart';
+import 'package:submarine/models/mail.dart';
 
 class CompactEmailView extends StatelessWidget {
-  final Nip01Event email;
+  final Mail email;
   final VoidCallback? onTap;
 
   const CompactEmailView({super.key, required this.email, this.onTap});
@@ -13,10 +13,10 @@ class CompactEmailView extends StatelessWidget {
     final theme = Theme.of(context);
 
     // Parse email content
-    final subject = _extractSubject(email.content);
-    final preview = _extractPreview(email.content);
+    final subject = _extractSubject(email.event.content);
+    final preview = _extractPreview(email.event.content);
     final timestamp = _formatTimestamp(
-      DateTime.fromMillisecondsSinceEpoch(email.createdAt * 1000),
+      DateTime.fromMillisecondsSinceEpoch(email.event.createdAt * 1000),
     );
 
     return Card(

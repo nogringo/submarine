@@ -26,7 +26,7 @@ class Repository extends GetxController {
   Future<void> loadApp() async {
     await _initNdk();
     await nRestoreAccounts(Repository.to.ndk);
-    
+
     // Start listening to events if user is logged in
     if (publicKey != null) {
       listenEvents();
@@ -39,7 +39,7 @@ class Repository extends GetxController {
       NdkConfig(
         eventVerifier: Bip340EventVerifier(),
         cache: SembastCacheManager(db),
-        bootstrapRelays: ["ws://localhost:8081"]
+        bootstrapRelays: ["ws://localhost:8081"],
       ),
     );
   }

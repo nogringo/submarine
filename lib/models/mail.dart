@@ -4,10 +4,7 @@ class Mail {
   final String id;
   final Nip01Event event;
 
-  Mail({
-    required this.id,
-    required this.event,
-  });
+  Mail({required this.id, required this.event});
 
   @override
   bool operator ==(Object other) =>

@@ -708,7 +708,9 @@ class MailboxView extends StatelessWidget {
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
-                                      _formatFullTimestamp(email.event.createdAt),
+                                      _formatFullTimestamp(
+                                        email.event.createdAt,
+                                      ),
                                       style: theme.textTheme.bodySmall
                                           ?.copyWith(
                                             color: theme

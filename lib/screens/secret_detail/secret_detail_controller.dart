@@ -276,32 +276,32 @@ class SecretDetailController extends GetxController {
             senderPubKey: unwrapped.pubKey,
           );
       Map<String, dynamic> json = jsonDecode(messageEventJson!);
-      
+
       // Use the gift wrap ID as the unique identifier
       final emailId = giftWrap.id;
-      
+
       // Check if email with this ID already exists
       if (emails.any((mail) => mail.id == emailId)) {
         continue;
       }
-      
+
       final event = Nip01Event(
         pubKey: json["pubkey"],
         kind: json["kind"],
-        tags: json["tags"] != null 
-            ? (json["tags"] as List).map((tag) => 
-                (tag as List).map((item) => item.toString()).toList()
-              ).toList()
+        tags: json["tags"] != null
+            ? (json["tags"] as List)
+                  .map(
+                    (tag) =>
+                        (tag as List).map((item) => item.toString()).toList(),
+                  )
+                  .toList()
             : [],
         content: json["content"],
         createdAt: json["created_at"] ?? giftWrap.createdAt,
       );
-      
-      final mail = Mail(
-        id: emailId,
-        event: event,
-      );
-      
+
+      final mail = Mail(id: emailId, event: event);
+
       emails.add(mail);
     }
 

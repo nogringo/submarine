@@ -115,11 +115,11 @@ class PasswordManagerController extends GetxController {
       if (records.isEmpty) return;
 
       final loggedAccount = Repository.to.ndk.accounts.getLoggedAccount()!;
-      
+
       // Create deletion events for each version
       for (final record in records) {
         final eventId = record.key;
-        
+
         // Create deletion event (kind 5) for this version
         final deletionEvent = Nip01Event(
           pubKey: loggedAccount.pubkey,
@@ -138,11 +138,12 @@ class PasswordManagerController extends GetxController {
         // Broadcast deletion event
         Repository.to.ndk.broadcast.broadcast(nostrEvent: deletionEvent);
       }
-      
+
       ToastHelper.showSuccess(
         context: Get.context!,
         title: 'Success',
-        description: '${records.length} version${records.length > 1 ? 's' : ''} deleted',
+        description:
+            '${records.length} version${records.length > 1 ? 's' : ''} deleted',
       );
     } catch (e) {
       // Handle error

@@ -15,7 +15,7 @@ maintainer:
 # Build options
 build:
   # Clean before building
-  clean: false
+  clean: true
   
   # Which platforms to build (set to false to skip)
   platforms:

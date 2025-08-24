@@ -8,6 +8,7 @@ import 'package:submarine/get_database.dart';
 import 'package:submarine/models/decrypted_event.dart';
 import 'package:sembast_cache_manager/sembast_cache_manager.dart';
 import 'package:submarine/models/follow.dart';
+import 'package:submarine/no_event_verifier.dart';
 import 'package:submarine/services/database_service.dart';
 import 'package:submarine/services/stores.dart';
 
@@ -37,7 +38,7 @@ class Repository extends GetxController {
     final db = await getDatabase();
     ndk = Ndk(
       NdkConfig(
-        eventVerifier: Bip340EventVerifier(),
+        eventVerifier: NoEventVerifier(),
         cache: SembastCacheManager(db),
         bootstrapRelays: ["ws://localhost:8081"],
       ),

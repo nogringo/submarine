@@ -4,45 +4,29 @@ import 'package:get/get.dart';
 import 'package:ndk/ndk.dart';
 import 'package:nostr_widgets/nostr_widgets.dart';
 import 'package:sembast/sembast.dart' as sembast;
-import 'package:submarine/get_database.dart';
 import 'package:submarine/models/decrypted_event.dart';
-import 'package:sembast_cache_manager/sembast_cache_manager.dart';
 import 'package:submarine/models/follow.dart';
-import 'package:submarine/no_event_verifier.dart';
 import 'package:submarine/services/database_service.dart';
 import 'package:submarine/services/stores.dart';
 
 class Repository extends GetxController {
   static Repository get to => Get.find();
 
-  late final Ndk ndk;
-
   NdkResponse? subscription;
 
   final follows = <Follow>[].obs;
   final isLoadingFollows = false.obs;
 
+  Ndk get ndk => Get.find<Ndk>();
   String? get publicKey => ndk.accounts.getPublicKey();
 
   Future<void> loadApp() async {
-    await _initNdk();
     await nRestoreAccounts(Repository.to.ndk);
 
     // Start listening to events if user is logged in
     if (publicKey != null) {
       listenEvents();
     }
-  }
-
-  Future<void> _initNdk() async {
-    final db = await getDatabase();
-    ndk = Ndk(
-      NdkConfig(
-        eventVerifier: NoEventVerifier(),
-        cache: SembastCacheManager(db),
-        bootstrapRelays: ["ws://localhost:8081"],
-      ),
-    );
   }
 
   Future<void> shareSecret({
@@ -221,5 +205,24 @@ class Repository extends GetxController {
   Future<void> stopListeningEvents() async {
     if (subscription == null) return;
     await ndk.requests.closeSubscription(subscription!.requestId);
+  }
+
+  Future<void> logOut() async {
+    // Stop listening to events
+    await stopListeningEvents();
+
+    // Clear local data
+    follows.clear();
+
+    // Log out from NDK accounts
+    ndk.accounts.logout();
+
+    // Clear database
+    final db = await DatabaseService().database;
+    await secretsStore.delete(db);
+    await deletedEventsStore.delete(db);
+
+    // Navigate to sign in page
+    Get.offAllNamed('/sign-in');
   }
 }

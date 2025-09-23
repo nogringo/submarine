@@ -8,6 +8,7 @@ import 'package:submarine/repository.dart';
 import 'package:submarine/screens/password_manager/password_manager_controller.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:submarine/widgets/share_secret_dialog.dart';
+import 'package:submarine/widgets/user_dialog.dart';
 
 class PasswordManagerPage extends StatelessWidget {
   const PasswordManagerPage({super.key});
@@ -26,15 +27,10 @@ class PasswordManagerPage extends StatelessWidget {
                 actions: [
                   Padding(
                     padding: EdgeInsets.only(right: 16),
-                    child: GestureDetector(
-                      onTap: () => Get.toNamed(AppRoutes.userProfile),
-                      child: CircleAvatar(
-                        child: ClipOval(
-                          child: NPicture(
-                            ndk: Repository.to.ndk,
-                            pubkey: Repository.to.publicKey!,
-                          ),
-                        ),
+                    child: Builder(
+                      builder: (context) => GestureDetector(
+                        onTap: () => showUserDialog(context),
+                        child: NPicture(ndk: Repository.to.ndk),
                       ),
                     ),
                   ),

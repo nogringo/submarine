@@ -1,5 +1,6 @@
 class AppRoutes {
   static const signIn = "/sign-in";
+  static const switchAccount = "/switch-account";
   static const passwordManager = "/";
   static const createSecret = "/create-secret";
   static const editSecret = "/edit-secret/:eventId";

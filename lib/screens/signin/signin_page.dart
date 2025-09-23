@@ -53,7 +53,7 @@ class SigninPage extends StatelessWidget {
                   onLoggedIn: () {
                     // Start listening to events after login
                     Repository.to.listenEvents();
-                    Get.offNamed(AppRoutes.passwordManager);
+                    Get.offAllNamed(AppRoutes.passwordManager);
                   },
                 ),
               ],

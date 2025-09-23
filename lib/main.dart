@@ -2,13 +2,19 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:ndk/config/bootstrap_relays.dart';
+import 'package:ndk/ndk.dart';
+import 'package:sembast_cache_manager/sembast_cache_manager.dart';
 import 'package:submarine/app_routes.dart';
 import 'package:submarine/config.dart';
+import 'package:submarine/get_database.dart';
 import 'package:submarine/middlewares/router_must_be_logged_in_middleware.dart';
+import 'package:submarine/nostr_utils/no_event_verifier.dart';
 import 'package:submarine/repository.dart';
 import 'package:submarine/screens/create_note/create_note_page.dart';
 import 'package:submarine/screens/password_manager/password_manager_page.dart';
 import 'package:submarine/screens/signin/signin_page.dart';
+import 'package:submarine/screens/switch_account/switch_account_page.dart';
 import 'package:submarine/screens/create_secret/create_secret_page.dart';
 import 'package:submarine/screens/secret_detail/secret_detail_page.dart';
 import 'package:submarine/screens/user_profile/user_profile_page.dart';
@@ -28,6 +34,18 @@ void main() async {
   }
 
   await SystemTheme.accentColor.load();
+
+  final db = await getDatabase();
+  final ndk = Ndk(
+    NdkConfig(
+      eventVerifier: NoEventVerifier(),
+      cache: SembastCacheManager(db),
+      bootstrapRelays: kDebugMode
+          ? ["ws://localhost:8081"]
+          : DEFAULT_BOOTSTRAP_RELAYS,
+    ),
+  );
+  Get.put(ndk);
 
   Get.put(Repository());
   await Repository.to.loadApp();
@@ -89,6 +107,10 @@ class MainApp extends StatelessWidget {
             supportedLocales: [Locale('en'), Locale('fr')],
             getPages: [
               GetPage(name: AppRoutes.signIn, page: () => SigninPage()),
+              GetPage(
+                name: AppRoutes.switchAccount,
+                page: () => SwitchAccountPage(),
+              ),
               GetPage(
                 name: AppRoutes.passwordManager,
                 middlewares: [RouterMustBeLoggedInMiddleware()],

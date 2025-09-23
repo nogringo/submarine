@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ndk/ndk.dart';
 import 'package:nostr_widgets/nostr_widgets.dart';
 import 'package:submarine/app_routes.dart';
 import 'package:submarine/config.dart';
@@ -45,6 +46,10 @@ class SigninPage extends StatelessWidget {
                   ndk: Repository.to.ndk,
                   enableNip05Login: false,
                   enableNpubLogin: false,
+                  nostrConnect: NostrConnect(
+                    relays: ["wss://relay.nsec.app", "wss://offchain.pub"],
+                    appName: appTitle,
+                  ),
                   onLoggedIn: () {
                     // Start listening to events after login
                     Repository.to.listenEvents();

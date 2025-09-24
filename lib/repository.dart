@@ -207,6 +207,25 @@ class Repository extends GetxController {
     await ndk.requests.closeSubscription(subscription!.requestId);
   }
 
+  Future<void> switchAccount(String newPubkey) async {
+    // Stop listening to old account's events
+    await stopListeningEvents();
+
+    // Clear local data
+    follows.clear();
+
+    // Clear database for old account
+    final db = await DatabaseService().database;
+    await secretsStore.delete(db);
+    await deletedEventsStore.delete(db);
+
+    // The NDK account switch is handled by the NSwitchAccount widget
+    // After switching, start listening to new account's events
+    if (publicKey != null) {
+      listenEvents();
+    }
+  }
+
   Future<void> logOut() async {
     // Stop listening to events
     await stopListeningEvents();

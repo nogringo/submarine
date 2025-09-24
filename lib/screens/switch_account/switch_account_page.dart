@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:ndk/ndk.dart';
 import 'package:nostr_widgets/widgets/n_switch_account.dart';
 import 'package:submarine/app_routes.dart';
+import 'package:submarine/repository.dart';
 import 'package:window_manager/window_manager.dart';
 
 class SwitchAccountPage extends StatelessWidget {
@@ -39,7 +40,8 @@ class SwitchAccountPage extends StatelessWidget {
               child: NSwitchAccount(
                 ndk: Get.find<Ndk>(),
                 onAccountRemove: (pubkey) {},
-                onAccountSwitch: (pubkey) {
+                onAccountSwitch: (pubkey) async {
+                  await Repository.to.switchAccount(pubkey);
                   Get.offAllNamed(AppRoutes.passwordManager);
                 },
                 onAddAccount: () {

@@ -11,7 +11,6 @@ import 'package:submarine/models/text_field.dart' as model;
 import 'package:submarine/models/secret_text_field.dart' as model;
 import 'package:submarine/repository.dart';
 import 'package:submarine/models/decrypted_event.dart';
-import 'package:submarine/services/database_service.dart';
 import 'package:submarine/services/stores.dart';
 import 'package:flutter/material.dart';
 import 'package:submarine/utils/toast_helper.dart';
@@ -98,7 +97,7 @@ class SecretDetailController extends GetxController {
     if (eventId == null) return;
 
     try {
-      final db = await DatabaseService().database;
+      final db = await Repository.to.getDb();
       final record = await secretsStore.record(eventId!).get(db);
 
       if (record != null) {
@@ -157,7 +156,7 @@ class SecretDetailController extends GetxController {
     secretHistory.clear();
 
     try {
-      final db = await DatabaseService().database;
+      final db = await Repository.to.getDb();
 
       // Find all records with the same secret ID
       final records = await secretsStore.find(

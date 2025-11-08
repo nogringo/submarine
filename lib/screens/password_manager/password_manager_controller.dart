@@ -5,7 +5,6 @@ import 'package:sembast/sembast.dart' as sembast;
 import 'package:submarine/models/decrypted_event.dart';
 import 'package:submarine/models/secret.dart';
 import 'package:submarine/repository.dart';
-import 'package:submarine/services/database_service.dart';
 import 'package:submarine/services/stores.dart';
 import 'package:submarine/utils/toast_helper.dart';
 
@@ -36,7 +35,7 @@ class PasswordManagerController extends GetxController {
   Future<void> _listenToSecrets() async {
     isLoading.value = true;
 
-    final db = await DatabaseService().database;
+    final db = await Repository.to.getDb();
 
     // Listen to changes in the secrets store
     _subscription = secretsStore.query().onSnapshots(db).listen((snapshots) {
@@ -92,7 +91,7 @@ class PasswordManagerController extends GetxController {
 
   Future<void> refreshSecrets() async {
     // The stream will automatically update, but we can trigger a manual refresh if needed
-    final db = await DatabaseService().database;
+    final db = await Repository.to.getDb();
     final records = await secretsStore.find(db);
 
     secrets.value = records.map((record) {
@@ -104,7 +103,7 @@ class PasswordManagerController extends GetxController {
   Future<void> deleteSecret(String secretId) async {
     try {
       // Find ALL event IDs for this secret (all versions)
-      final db = await DatabaseService().database;
+      final db = await Repository.to.getDb();
       final records = await secretsStore.find(
         db,
         finder: sembast.Finder(

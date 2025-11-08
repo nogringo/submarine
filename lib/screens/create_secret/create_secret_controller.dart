@@ -17,7 +17,6 @@ import 'package:submarine/models/otp_field.dart';
 import 'package:submarine/models/otp_value.dart';
 import 'package:submarine/repository.dart';
 import 'package:submarine/screens/create_secret/new_field_dialog.dart';
-import 'package:submarine/services/database_service.dart';
 import 'package:submarine/services/stores.dart';
 
 class CreateSecretController extends GetxController {
@@ -119,7 +118,7 @@ class CreateSecretController extends GetxController {
     if (eventId == null) return;
 
     try {
-      final db = await DatabaseService().database;
+      final db = await Repository.to.getDb();
       final record = await secretsStore.record(eventId!).get(db);
 
       if (record != null) {
@@ -535,7 +534,7 @@ class CreateSecretController extends GetxController {
     await secretsStore
         .record(nostrEvent.id)
         .put(
-          await DatabaseService().database,
+          await Repository.to.getDb(),
           DecryptedSecretEvent(
             eventId: nostrEvent.id,
             createdAt: nostrEvent.createdAt,

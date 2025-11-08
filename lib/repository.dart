@@ -4,9 +4,9 @@ import 'package:get/get.dart';
 import 'package:ndk/ndk.dart';
 import 'package:nostr_widgets/nostr_widgets.dart';
 import 'package:sembast/sembast.dart' as sembast;
+import 'package:submarine/functions/get_user_database.dart';
 import 'package:submarine/models/decrypted_event.dart';
 import 'package:submarine/models/follow.dart';
-import 'package:submarine/services/database_service.dart';
 import 'package:submarine/services/stores.dart';
 
 class Repository extends GetxController {
@@ -19,6 +19,25 @@ class Repository extends GetxController {
 
   Ndk get ndk => Get.find<Ndk>();
   String? get publicKey => ndk.accounts.getPublicKey();
+
+  Map<String, sembast.Database> dbs = {};
+
+  // sembast.Database get db => dbs[ndk.accounts.getPublicKey()!]!;
+
+  Future<sembast.Database> getDb([String? pubkey]) async {
+    pubkey ??= ndk.accounts.getPublicKey();
+
+    if (pubkey == null) throw "pubkey is null";
+
+    sembast.Database? db = dbs[pubkey];
+
+    if (db == null) {
+      db = await getUserDatabase(pubkey);
+      dbs[pubkey] = db;
+    }
+
+    return db;
+  }
 
   Future<void> loadApp() async {
     await nRestoreAccounts(Repository.to.ndk);
@@ -33,9 +52,7 @@ class Repository extends GetxController {
     required String eventId,
     required String recipientPubkey,
   }) async {
-    // Get the secret from local storage
-    final db = await DatabaseService().database;
-    final record = await secretsStore.record(eventId).get(db);
+    final record = await secretsStore.record(eventId).get(await getDb());
 
     if (record == null) {
       throw Exception('Secret not found');
@@ -157,11 +174,10 @@ class Repository extends GetxController {
     await for (final event in subscription!.stream) {
       if (event.kind == 5) {
         final targetEventsIds = event.getTags("e");
-        final db = await DatabaseService().database;
 
         // Remove secrets where eventId is in targetEventsIds
         secretsStore.delete(
-          db,
+          await getDb(),
           finder: sembast.Finder(
             filter: sembast.Filter.inList('eventId', targetEventsIds),
           ),
@@ -169,14 +185,12 @@ class Repository extends GetxController {
 
         // Add deleted event IDs to store
         for (final eventId in targetEventsIds) {
-          deletedEventsStore.record(eventId).put(db, {'id': eventId});
+          deletedEventsStore.record(eventId).put(await getDb(), {'id': eventId});
         }
         continue;
       }
 
-      if (await deletedEventsStore
-          .record(event.id)
-          .exists(await DatabaseService().database)) {
+      if (await deletedEventsStore.record(event.id).exists(await getDb())) {
         continue;
       }
 
@@ -192,7 +206,7 @@ class Repository extends GetxController {
       secretsStore
           .record(event.id)
           .put(
-            await DatabaseService().database,
+            await getDb(),
             DecryptedSecretEvent(
               eventId: event.id,
               createdAt: event.createdAt,
@@ -215,9 +229,8 @@ class Repository extends GetxController {
     follows.clear();
 
     // Clear database for old account
-    final db = await DatabaseService().database;
-    await secretsStore.delete(db);
-    await deletedEventsStore.delete(db);
+    await secretsStore.delete(await getDb());
+    await deletedEventsStore.delete(await getDb());
 
     // The NDK account switch is handled by the NSwitchAccount widget
     // After switching, start listening to new account's events
@@ -237,9 +250,8 @@ class Repository extends GetxController {
     ndk.accounts.logout();
 
     // Clear database
-    final db = await DatabaseService().database;
-    await secretsStore.delete(db);
-    await deletedEventsStore.delete(db);
+    await secretsStore.delete(await getDb());
+    await deletedEventsStore.delete(await getDb());
 
     // Navigate to sign in page
     Get.offAllNamed('/sign-in');

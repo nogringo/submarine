@@ -3,10 +3,8 @@ import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import 'package:ndk/entities.dart';
 import 'package:ndk/ndk.dart';
-import 'package:nip01/nip01.dart';
-import 'package:nip19/nip19.dart';
+import 'package:ndk/shared/nips/nip01/bip340.dart';
 import 'package:sembast/sembast.dart' as sembast;
 import 'package:submarine/app_routes.dart';
 import 'package:submarine/models/decrypted_event.dart';
@@ -370,10 +368,10 @@ class CreateSecretController extends GetxController {
 
   void addEmail() async {
     // Generate a new Nostr keypair
-    final keyPair = KeyPair.generate();
+    final keyPair = Bip340.generatePrivateKey();
 
     // Create email in the format npub...@uid.ovh
-    final email = '${keyPair.npub}@uid.ovh';
+    final email = '${keyPair.publicKey}@uid.ovh';
 
     // Add email field
     final emailField = CustomField(name: "Email");
@@ -385,7 +383,7 @@ class CreateSecretController extends GetxController {
 
     // Add nsec field (hidden by default)
     final nsecField = CustomField(name: "Nsec", visible: false);
-    nsecField.value.text = keyPair.nsec;
+    nsecField.value.text = Nip19.encodePrivateKey(keyPair.privateKey!);
     if (isEditMode) {
       nsecField.value.addListener(_checkForChanges);
     }

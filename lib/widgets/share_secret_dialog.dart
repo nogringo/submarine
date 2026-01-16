@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ndk/shared/nips/nip19/nip19.dart';
 import 'package:submarine/models/follow.dart';
 import 'package:submarine/repository.dart';
 import 'package:submarine/utils/toast_helper.dart';
-import 'package:nip19/nip19.dart';
 
 class ShareSecretDialog extends StatefulWidget {
   final String eventId;
@@ -82,7 +82,7 @@ class _ShareSecretDialogState extends State<ShareSecretDialog> {
     try {
       // Check if input is npub
       if (recipientInput.startsWith('npub')) {
-        recipientPubkey = Nip19.npubToHex(recipientInput);
+        recipientPubkey = Nip19.decode(recipientInput);
       } else if (recipientInput.length == 64 && _isHex(recipientInput)) {
         // Already a hex pubkey
         recipientPubkey = recipientInput;

@@ -96,9 +96,8 @@ class Repository extends GetxController {
 
     try {
       final response = ndk.requests.query(
-        filters: [
-          Filter(kinds: [3], authors: [publicKey!], limit: 1),
-        ],
+        filter: Filter(kinds: [3], authors: [publicKey!], limit: 1),
+
         cacheRead: false, // Don't read from cache to get latest
       );
 
@@ -137,9 +136,8 @@ class Repository extends GetxController {
 
     final pubkeys = follows.map((f) => f.pubkey).toList();
     final response = ndk.requests.query(
-      filters: [
-        Filter(kinds: [0], authors: pubkeys),
-      ],
+      filter: Filter(kinds: [0], authors: pubkeys),
+
       cacheRead: false, // Get latest metadata
     );
 
@@ -185,7 +183,9 @@ class Repository extends GetxController {
 
         // Add deleted event IDs to store
         for (final eventId in targetEventsIds) {
-          deletedEventsStore.record(eventId).put(await getDb(), {'id': eventId});
+          deletedEventsStore.record(eventId).put(await getDb(), {
+            'id': eventId,
+          });
         }
         continue;
       }

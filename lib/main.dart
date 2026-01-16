@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:ndk/ndk.dart';
-import 'package:ndk_rust_verifier/ndk_rust_verifier.dart';
 import 'package:sembast_cache_manager/sembast_cache_manager.dart';
 import 'package:submarine/app_routes.dart';
 import 'package:submarine/config.dart';
@@ -34,12 +33,10 @@ void main() async {
 
   await SystemTheme.accentColor.load();
 
-  Get.put(RustEventVerifier());
-
   final db = await getDatabase();
   final ndk = Ndk(
     NdkConfig(
-      eventVerifier: Get.find<RustEventVerifier>(),
+      eventVerifier: Bip340EventVerifier(),
       cache: SembastCacheManager(db),
     ),
   );

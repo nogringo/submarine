@@ -2,8 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:ndk/ndk.dart';
-import 'package:nip01/nip01.dart';
-import 'package:nip19/nip19.dart';
+import 'package:ndk/shared/nips/nip01/bip340.dart';
 import 'package:submarine/models/follow.dart';
 import 'package:submarine/models/secret.dart';
 import 'package:submarine/models/otp_field.dart' as model;
@@ -53,7 +52,7 @@ class SecretDetailController extends GetxController {
       if (value != null && value.startsWith('nsec')) {
         try {
           // Validate that it's a real nsec by attempting to decode it
-          Nip19.nsecToHex(value);
+          Nip19.decode(value);
           return value;
         } catch (e) {
           // Not a valid nsec, continue searching
@@ -250,19 +249,14 @@ class SecretDetailController extends GetxController {
   void fetchEmails() async {
     if (firstNsec == null) return;
 
-    final privateKey = Nip19.nsecToHex(firstNsec!);
-    final keyPair = KeyPair.fromPrivateKey(privateKey: privateKey);
+    final privateKey = Nip19.decode(firstNsec!);
+    final publicKey = Bip340.getPublicKey(privateKey);
 
     final ndk = Ndk.defaultConfig();
-    ndk.accounts.loginPrivateKey(
-      pubkey: keyPair.publicKey,
-      privkey: keyPair.privateKey,
-    );
+    ndk.accounts.loginPrivateKey(pubkey: publicKey, privkey: privateKey);
 
     final response = ndk.requests.query(
-      filters: [
-        Filter(kinds: [1059], pTags: [keyPair.publicKey]),
-      ],
+      filter: Filter(kinds: [1059], pTags: [publicKey]),
     );
 
     await for (final giftWrap in response.stream) {
@@ -336,7 +330,7 @@ class SecretDetailController extends GetxController {
     try {
       // Check if input is npub
       if (recipientInput.startsWith('npub')) {
-        recipientPubkey = Nip19.npubToHex(recipientInput);
+        recipientPubkey = Nip19.decode(recipientInput);
       } else if (recipientInput.length == 64 && _isHex(recipientInput)) {
         // Already a hex pubkey
         recipientPubkey = recipientInput;

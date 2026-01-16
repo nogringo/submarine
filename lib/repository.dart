@@ -7,6 +7,7 @@ import 'package:sembast/sembast.dart' as sembast;
 import 'package:submarine/functions/get_user_database.dart';
 import 'package:submarine/models/decrypted_event.dart';
 import 'package:submarine/models/follow.dart';
+import 'package:submarine/screens/password_manager/password_manager_controller.dart';
 import 'package:submarine/services/stores.dart';
 
 class Repository extends GetxController {
@@ -244,14 +245,15 @@ class Repository extends GetxController {
     // Clear local data
     follows.clear();
 
-    // Clear database for old account
-    await secretsStore.delete(await getDb());
-    await deletedEventsStore.delete(await getDb());
-
     // The NDK account switch is handled by the NSwitchAccount widget
     // After switching, start listening to new account's events
     if (publicKey != null) {
       listenEvents();
+    }
+
+    // Reload secrets for the new account
+    if (Get.isRegistered<PasswordManagerController>()) {
+      await PasswordManagerController.to.reloadSecrets();
     }
   }
 

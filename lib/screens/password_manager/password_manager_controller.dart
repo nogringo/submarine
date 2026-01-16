@@ -32,6 +32,15 @@ class PasswordManagerController extends GetxController {
     super.onClose();
   }
 
+  Future<void> reloadSecrets() async {
+    await _subscription?.cancel();
+    _subscription = null;
+    secrets.clear();
+    _secretEventIds.clear();
+    await _listenToSecrets();
+    await _fetchUserMetadata();
+  }
+
   Future<void> _listenToSecrets() async {
     isLoading.value = true;
 

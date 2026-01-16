@@ -12,7 +12,8 @@ import 'package:submarine/services/stores.dart';
 class Repository extends GetxController {
   static Repository get to => Get.find();
 
-  NdkResponse? subscription;
+  NdkResponse? ownEventsSubscription;
+  NdkResponse? taggedEventsSubscription;
 
   final follows = <Follow>[].obs;
   final isLoadingFollows = false.obs;
@@ -160,16 +161,25 @@ class Repository extends GetxController {
 
   void listenEvents() async {
     await stopListeningEvents();
-    subscription = ndk.requests.subscription(
-      filters: [
-        Filter(kinds: [5, 4111], authors: [publicKey!]),
-        Filter(kinds: [4111], pTags: [publicKey!]),
-      ],
+
+    ownEventsSubscription = ndk.requests.subscription(
+      filter: Filter(kinds: [5, 4111], authors: [publicKey!]),
       cacheRead: true,
       cacheWrite: true,
     );
 
-    await for (final event in subscription!.stream) {
+    taggedEventsSubscription = ndk.requests.subscription(
+      filter: Filter(kinds: [4111], pTags: [publicKey!]),
+      cacheRead: true,
+      cacheWrite: true,
+    );
+
+    _processSubscription(ownEventsSubscription!);
+    _processSubscription(taggedEventsSubscription!);
+  }
+
+  void _processSubscription(NdkResponse subscription) async {
+    await for (final event in subscription.stream) {
       if (event.kind == 5) {
         final targetEventsIds = event.getTags("e");
 
@@ -217,8 +227,14 @@ class Repository extends GetxController {
   }
 
   Future<void> stopListeningEvents() async {
-    if (subscription == null) return;
-    await ndk.requests.closeSubscription(subscription!.requestId);
+    await Future.wait([
+      if (ownEventsSubscription != null)
+        ndk.requests.closeSubscription(ownEventsSubscription!.requestId),
+      if (taggedEventsSubscription != null)
+        ndk.requests.closeSubscription(taggedEventsSubscription!.requestId),
+    ]);
+    ownEventsSubscription = null;
+    taggedEventsSubscription = null;
   }
 
   Future<void> switchAccount(String newPubkey) async {

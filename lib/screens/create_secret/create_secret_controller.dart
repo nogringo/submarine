@@ -414,9 +414,6 @@ class CreateSecretController extends GetxController {
   }
 
   void onReorder(int oldIndex, int newIndex) {
-    if (oldIndex < newIndex) {
-      newIndex -= 1;
-    }
     final item = fields.removeAt(oldIndex);
     fields.insert(newIndex, item);
     update();

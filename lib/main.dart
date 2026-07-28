@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:ndk/ndk.dart';
-import 'package:sembast_cache_manager/sembast_cache_manager.dart';
+import 'package:ndk_flutter/ndk_flutter.dart';
 import 'package:submarine/app_routes.dart';
 import 'package:submarine/config.dart';
 import 'package:submarine/get_database.dart';
@@ -20,8 +20,7 @@ import 'package:window_manager/window_manager.dart';
 import 'package:system_theme/system_theme.dart';
 import 'package:toastification/toastification.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:nostr_widgets/l10n/app_localizations.dart'
-    as nostr_widgets_l10n;
+import 'package:ndk_flutter/l10n/app_localizations.dart' as ndk_flutter_l10n;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,11 +35,13 @@ void main() async {
   final db = await getDatabase();
   final ndk = Ndk(
     NdkConfig(
-      eventVerifier: Bip340EventVerifier(),
+      eventVerifier: NdkEventVerifier(),
+      eventSignerFactory: const NdkEventSignerFactory(),
       cache: SembastCacheManager(db),
     ),
   );
   Get.put(ndk);
+  Get.put(NdkFlutter(ndk: ndk));
 
   Get.put(Repository());
   await Repository.to.loadApp();
@@ -94,7 +95,7 @@ class MainApp extends StatelessWidget {
             darkTheme: getTheme(Brightness.dark),
             themeMode: ThemeMode.system,
             localizationsDelegates: [
-              nostr_widgets_l10n.AppLocalizations.delegate,
+              ndk_flutter_l10n.AppLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,

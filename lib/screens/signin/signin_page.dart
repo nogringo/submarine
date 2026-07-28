@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ndk/ndk.dart';
-import 'package:nostr_widgets/nostr_widgets.dart';
+import 'package:ndk_flutter/ndk_flutter.dart';
 import 'package:submarine/app_routes.dart';
 import 'package:submarine/config.dart';
 import 'package:submarine/repository.dart';
@@ -43,7 +43,7 @@ class SigninPage extends StatelessWidget {
                 Text("$appTitle sign in", style: Get.textTheme.displaySmall),
                 SizedBox(height: 16),
                 NLogin(
-                  ndk: Repository.to.ndk,
+                  ndkFlutter: Repository.to.ndkFlutter,
                   enableNip05Login: false,
                   enableNpubLogin: false,
                   nostrConnect: NostrConnect(

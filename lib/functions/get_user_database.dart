@@ -1,31 +1,46 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:ndk/shared/nips/nip01/bip340.dart';
+import 'package:ndk/ndk.dart';
+import 'package:ndk_flutter/ndk_flutter.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:sembast/sembast_io.dart';
 import 'package:sembast_web/sembast_web.dart';
-import 'package:ndk/shared/nips/nip44/nip44.dart';
 import 'dart:convert';
+
+const _signerFactory = NdkEventSignerFactory();
 
 class Nip44AsyncCodec extends AsyncContentCodecBase {
   final String privateKey;
+  final EventSigner signer;
   final String publicKey;
 
   Nip44AsyncCodec({required this.privateKey})
-    : publicKey = Bip340.getPublicKey(privateKey);
+    : signer = _signerFactory.create(privateKey: privateKey),
+      publicKey = _signerFactory.derivePublicKey(privateKey);
 
   @override
   Future<Object?> decodeAsync(String encoded) async {
-    return jsonDecode(
-      await Nip44.decryptMessage(encoded, privateKey, publicKey),
+    final plaintext = await signer.decryptNip44(
+      ciphertext: encoded,
+      senderPubKey: publicKey,
     );
+    if (plaintext == null)
+      throw StateError("Failed to decrypt database record");
+    return jsonDecode(plaintext);
   }
 
   @override
   Future<String> encodeAsync(Object? input) async {
-    return await Nip44.encryptMessage(jsonEncode(input), privateKey, publicKey);
+    final ciphertext = await signer.encryptNip44(
+      plaintext: jsonEncode(input),
+      recipientPubKey: publicKey,
+    );
+    if (ciphertext == null) {
+      throw StateError("Failed to encrypt database record");
+    }
+    return ciphertext;
   }
 }
 
@@ -37,12 +52,13 @@ Future<Database> getUserDatabase(String pubkey) async {
   String? encryptionKey = await secureStorage.read(key: encryptionKeyName);
   if (encryptionKey == null) {
     // Generate a new nsec for database encryption
-    encryptionKey = Bip340.generatePrivateKey().privateKey;
+    final (privateKey, _) = _signerFactory.generateKeyPair();
+    encryptionKey = privateKey;
     await secureStorage.write(key: encryptionKeyName, value: encryptionKey);
   }
 
   // Create NIP-44 codec with the encryption key
-  final codec = Nip44AsyncCodec(privateKey: encryptionKey!);
+  final codec = Nip44AsyncCodec(privateKey: encryptionKey);
   final sembastCodec = SembastCodec(
     signature: "nip44_codec_$pubkey",
     codec: codec,

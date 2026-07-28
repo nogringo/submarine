@@ -107,7 +107,7 @@ class CreateSecretPage extends StatelessWidget {
                       if (c.isReorderMode) {
                         return ReorderableListView(
                           shrinkWrap: true,
-                          onReorder: c.onReorder,
+                          onReorderItem: c.onReorder,
                           proxyDecorator: (child, index, animation) {
                             return Material(
                               color: Colors.transparent,

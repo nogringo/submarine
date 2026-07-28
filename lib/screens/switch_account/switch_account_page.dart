@@ -1,8 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ndk/ndk.dart';
-import 'package:nostr_widgets/widgets/n_switch_account.dart';
+import 'package:ndk_flutter/ndk_flutter.dart';
 import 'package:submarine/app_routes.dart';
 import 'package:submarine/repository.dart';
 import 'package:window_manager/window_manager.dart';
@@ -38,7 +37,7 @@ class SwitchAccountPage extends StatelessWidget {
             child: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 400),
               child: NSwitchAccount(
-                ndk: Get.find<Ndk>(),
+                ndkFlutter: Get.find<NdkFlutter>(),
                 onAccountRemove: (pubkey) {},
                 onAccountSwitch: (pubkey) async {
                   await Repository.to.switchAccount(pubkey);

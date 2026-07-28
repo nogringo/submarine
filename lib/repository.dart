@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:get/get.dart';
 import 'package:ndk/ndk.dart';
-import 'package:nostr_widgets/nostr_widgets.dart';
+import 'package:ndk_flutter/ndk_flutter.dart';
 import 'package:sembast/sembast.dart' as sembast;
 import 'package:submarine/functions/get_user_database.dart';
 import 'package:submarine/models/decrypted_event.dart';
@@ -20,6 +20,7 @@ class Repository extends GetxController {
   final isLoadingFollows = false.obs;
 
   Ndk get ndk => Get.find<Ndk>();
+  NdkFlutter get ndkFlutter => Get.find<NdkFlutter>();
   String? get publicKey => ndk.accounts.getPublicKey();
 
   Map<String, sembast.Database> dbs = {};
@@ -42,7 +43,7 @@ class Repository extends GetxController {
   }
 
   Future<void> loadApp() async {
-    await nRestoreAccounts(Repository.to.ndk);
+    await ndkFlutter.restoreAccountsState();
 
     // Start listening to events if user is logged in
     if (publicKey != null) {

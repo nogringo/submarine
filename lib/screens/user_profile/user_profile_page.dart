@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:nostr_widgets/nostr_widgets.dart';
+import 'package:ndk_flutter/ndk_flutter.dart';
 import 'package:submarine/app_routes.dart';
 import 'package:submarine/repository.dart';
 import 'package:window_manager/window_manager.dart';
@@ -37,7 +37,7 @@ class UserProfilePage extends StatelessWidget {
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: 550),
             child: NUserProfile(
-              ndk: Repository.to.ndk,
+              ndkFlutter: Repository.to.ndkFlutter,
               onLogout: () {
                 Get.offAllNamed(AppRoutes.signIn);
               },

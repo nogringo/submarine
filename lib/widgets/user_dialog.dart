@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ndk/ndk.dart';
-import 'package:nostr_widgets/nostr_widgets.dart';
+import 'package:ndk_flutter/ndk_flutter.dart';
 import 'package:submarine/app_routes.dart';
 import 'package:submarine/repository.dart';
 
@@ -48,18 +47,23 @@ class _UserDialogContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ndk = Get.find<Ndk>();
+    final ndkFlutter = Get.find<NdkFlutter>();
+    final ndk = ndkFlutter.ndk;
     final currentPubkey = ndk.accounts.getPublicKey();
     final hasMultipleAccounts = ndk.accounts.accounts.keys.length > 1;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        NPicture(ndk: ndk, pubkey: currentPubkey, circleAvatarRadius: 40),
+        NPicture(
+          ndkFlutter: ndkFlutter,
+          pubkey: currentPubkey,
+          circleAvatarRadius: 40,
+        ),
         SizedBox(height: 8),
         Center(
           child: NName(
-            ndk: ndk,
+            ndkFlutter: ndkFlutter,
             pubkey: currentPubkey,
             style: Theme.of(context).textTheme.titleLarge,
           ),

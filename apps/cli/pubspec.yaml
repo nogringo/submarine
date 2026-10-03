@@ -23,7 +23,7 @@ dependencies:
       ref: f15fc17a8cc1a71fe5aa50159641a7444ae53902
   nostr_passwords: ^0.1.0
   path: ^1.9.1
-  sembast: ^3.8.11
+  sqlite3: ^3.7.0
   sync_engine_shim_for_ndk: ^0.8.0
 
 dev_dependencies:

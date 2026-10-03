@@ -4,17 +4,19 @@ import 'package:ndk/ndk.dart';
 import 'package:ndk_sqlite3/ndk_sqlite3.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
 import 'package:path/path.dart' as p;
-import 'package:sembast/sembast_io.dart' show databaseFactoryIo;
+import 'package:sqlite3/sqlite3.dart';
 import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
 
 import 'cli_exception.dart';
+import 'sqlite_sync_store.dart';
 
 class VaultSession {
   VaultSession({
     required String privateKey,
     required List<String> relays,
-    required this.cacheDirectory,
-  }) : _cache = _openCache(cacheDirectory) {
+    required Directory cacheDirectory,
+  }) : _database = _openDatabase(cacheDirectory) {
+    _cache = SqliteCacheManager(_database);
     ndk = _quietNdk(_cache);
     final signer = const Bip340EventSignerFactory().create(
       privateKey: privateKey,
@@ -29,21 +31,18 @@ class VaultSession {
 
   /// Holds the ndk cache and the sync engine's coverage of it, which only make
   /// sense together.
-  final Directory cacheDirectory;
-  final SqliteCacheManager _cache;
+  final Database _database;
+  late final SqliteCacheManager _cache;
   late final Ndk ndk;
   late final Vault vault;
 
   /// Items not in the trash, once the relays sent what changed since the last
   /// run.
   Future<List<Item>> syncedItems() async {
-    final db = await databaseFactoryIo.openDatabase(
-      p.join(cacheDirectory.path, 'sync.db'),
-    );
     // Coverage from the last run is never fresh enough to skip the relays.
     final engine = SyncEngine(
       ndk,
-      store: SembastSyncStore(db),
+      store: SqliteSyncStore(_database),
       maxStaleness: Duration.zero,
     );
     try {
@@ -69,7 +68,6 @@ class VaultSession {
       ];
     } finally {
       await engine.dispose();
-      await db.close();
     }
   }
 
@@ -79,9 +77,13 @@ class VaultSession {
   }
 }
 
-SqliteCacheManager _openCache(Directory directory) {
+Database _openDatabase(Directory directory) {
   directory.createSync(recursive: true);
-  return SqliteCacheManager.open(p.join(directory.path, 'ndk_cache.db'));
+  return sqlite3.open(p.join(directory.path, 'ndk_cache.db'))
+    // Another submarine process may be writing.
+    ..execute('PRAGMA busy_timeout = 5000')
+    ..execute('PRAGMA journal_mode = WAL')
+    ..execute('PRAGMA synchronous = NORMAL');
 }
 
 Ndk _quietNdk(CacheManager cache) {

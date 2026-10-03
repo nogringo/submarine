@@ -55,5 +55,4 @@ Before reading the vault, `list` and `get` fetch what changed on the relays
 since the last run. The vault's gift wraps, still encrypted, are cached in
 `~/.cache/submarine` (under `$XDG_CACHE_HOME` or `%LOCALAPPDATA%` when set).
 Passwords are decrypted in memory only. Delete the whole folder to start over
-from the relays, never one of its files alone: the cache and the record of what
-was already fetched only make sense together.
+from the relays.

@@ -9,8 +9,11 @@ resolution: workspace
 
 # Add regular dependencies here.
 dependencies:
+  ndk: ^0.10.1
+  sync_engine_shim_for_ndk: ^0.7.2
   # path: ^1.9.0
 
 dev_dependencies:
+  bip340: ^0.3.1
   lints: ^6.0.0
   test: ^1.25.6

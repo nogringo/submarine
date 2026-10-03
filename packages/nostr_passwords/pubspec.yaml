@@ -1,0 +1,16 @@
+name: nostr_passwords
+description: Reference Dart implementation of a password manager protocol built on Nostr.
+version: 0.1.0
+# repository: https://github.com/my_org/my_repo
+
+environment:
+  sdk: ^3.13.4
+resolution: workspace
+
+# Add regular dependencies here.
+dependencies:
+  # path: ^1.9.0
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.25.6

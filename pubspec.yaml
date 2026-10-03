@@ -1,0 +1,8 @@
+name: _
+publish_to: none
+environment:
+  sdk: ^3.13.4
+workspace:
+  - packages/nostr_passwords
+  - apps/app
+  - apps/cli

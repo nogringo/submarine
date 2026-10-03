@@ -371,6 +371,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
+  native_toolchain_c:
+    dependency: transitive
+    description:
+      name: native_toolchain_c
+      sha256: "90eaad8059ebc2004a63810a4696ea9acdb02473e47ed3b6b3bafb100ac77e31"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.19.5"
   native_toolchain_rust:
     dependency: transitive
     description:
@@ -387,6 +395,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.10.1"
+  ndk_sqlite3:
+    dependency: transitive
+    description:
+      path: "packages/sqlite3"
+      ref: f15fc17a8cc1a71fe5aa50159641a7444ae53902
+      resolved-ref: f15fc17a8cc1a71fe5aa50159641a7444ae53902
+      url: "https://github.com/relaystr/ndk.git"
+    source: git
+    version: "0.1.0"
   node_preamble:
     dependency: transitive
     description:
@@ -419,6 +436,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.1.0"
+  platform:
+    dependency: transitive
+    description:
+      name: platform
+      sha256: a36d119c13416516a7b5913fbe8af8531e11633d784c550b2125f76c758524ec
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.2.0"
   pointycastle:
     dependency: transitive
     description:
@@ -435,6 +460,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.5.3"
+  process:
+    dependency: transitive
+    description:
+      name: process
+      sha256: "4242ba3508d37e01808bdf71ad1d5bb93a8d671bf2e7450e6b1b353fb0808891"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.0.6"
   pub_semver:
     dependency: transitive
     description:
@@ -536,6 +569,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.10.2"
+  sqlite3:
+    dependency: transitive
+    description:
+      name: sqlite3
+      sha256: cc62d72dbf16bb1f6ae8954b238016de1473e53df060ed0c332eed0a41dd1848
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.7.0"
   stack_trace:
     dependency: transitive
     description:
@@ -564,10 +605,10 @@ packages:
     dependency: transitive
     description:
       name: sync_engine_shim_for_ndk
-      sha256: c03e547366c3cedc90d82cac7854e560a05011f808836967a020f8678a886c35
+      sha256: fdb93f8b8f493824c7332bd992ef6ce1ab60f4b081170c714cd42ba9d4d08692
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.2"
+    version: "0.8.0"
   synchronized:
     dependency: transitive
     description:

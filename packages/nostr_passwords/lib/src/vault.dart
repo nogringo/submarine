@@ -20,6 +20,9 @@ class Vault {
   final _versions = <String, Envelope>{};
 
   /// Keeps the vault's gift wraps synced from [relays] into the ndk cache.
+  ///
+  /// Some relays serve gift wraps to their recipient only, so this
+  /// authenticates as the vault (NIP-42): [signer] must be in `ndk.accounts`.
   SyncHandle sync(SyncEngine engine) => engine.ensure(
     SyncRequest(
       filters: [
@@ -29,6 +32,7 @@ class Vault {
         ),
       ],
       relays: relays,
+      authPubkey: signer.getPublicKey(),
     ),
   );
 
@@ -77,7 +81,18 @@ class Vault {
   Future<void> _publish(Envelope envelope) async {
     final wrap = await wrapEnvelope(envelope, signer);
     final responses = await ndk.broadcast
-        .broadcast(nostrEvent: wrap, specificRelays: relays)
+        .broadcast(
+          nostrEvent: wrap,
+          specificRelays: relays,
+          // Without it, a relay asking for AUTH would see the logged account.
+          auth: AuthPolicy.allow(
+            Account(
+              type: AccountType.externalSigner,
+              pubkey: signer.getPublicKey(),
+              signer: signer,
+            ),
+          ),
+        )
         .broadcastDoneFuture;
     if (!responses.any((response) => response.broadcastSuccessful)) {
       throw PublishException(envelope, {

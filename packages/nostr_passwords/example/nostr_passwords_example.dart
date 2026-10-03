@@ -5,12 +5,19 @@ import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
 
 Future<void> main() async {
   final ndk = Ndk.defaultConfig();
+  final signer = Bip340EventSigner(
+    privateKey: '<vault private key, hex>',
+    publicKey: '<vault public key, hex>',
+  );
+  // vault.sync authenticates as the vault, which ndk must know.
+  ndk.accounts.addAccount(
+    pubkey: signer.getPublicKey(),
+    type: AccountType.privateKey,
+    signer: signer,
+  );
   final vault = Vault(
     ndk: ndk,
-    signer: Bip340EventSigner(
-      privateKey: '<vault private key, hex>',
-      publicKey: '<vault public key, hex>',
-    ),
+    signer: signer,
     relays: ['wss://relay.damus.io', 'wss://nos.lol'],
   );
 
@@ -29,7 +36,7 @@ Future<void> main() async {
 
   final engine = SyncEngine(
     ndk,
-    db: await databaseFactoryIo.openDatabase('sync.db'),
+    store: SembastSyncStore(await databaseFactoryIo.openDatabase('sync.db')),
   );
   final handle = vault.sync(engine);
   engine.start();

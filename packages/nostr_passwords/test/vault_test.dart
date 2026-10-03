@@ -50,6 +50,17 @@ void main() {
     );
   });
 
+  test('createItem authenticates as the vault when the relay asks', () async {
+    relay.requireAuthForEvents = true;
+
+    await vault.createItem(boulanger);
+
+    expect(
+      relay.eventsAuthenticatedAs(signer.getPublicKey()),
+      contains(relay.receivedEvents.first.id),
+    );
+  });
+
   test('items lists what this device created', () async {
     await vault.createItem(boulanger);
 
@@ -64,9 +75,16 @@ void main() {
 
     setUp(() async {
       otherNdk = Ndk.emptyBootstrapRelaysConfig();
+      otherNdk.accounts.addAccount(
+        pubkey: signer.getPublicKey(),
+        type: AccountType.privateKey,
+        signer: signer,
+      );
       engine = SyncEngine(
         otherNdk,
-        db: await newDatabaseFactoryMemory().openDatabase('sync.db'),
+        store: SembastSyncStore(
+          await newDatabaseFactoryMemory().openDatabase('sync.db'),
+        ),
       );
       otherVault = Vault(ndk: otherNdk, signer: signer, relays: [relay.url]);
     });
@@ -91,6 +109,14 @@ void main() {
       final [item] = await syncedItems();
       expect(item.id, created.id);
       expect(item.cipher.name, 'Boulanger');
+    });
+
+    test('items are synced from relays that require AUTH', () async {
+      relay.requireAuthForRequests = true;
+      final created = await vault.createItem(boulanger);
+
+      final [item] = await syncedItems();
+      expect(item.id, created.id);
     });
 
     test('wraps the vault did not sign are ignored', () async {

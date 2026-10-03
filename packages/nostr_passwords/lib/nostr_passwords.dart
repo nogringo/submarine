@@ -12,5 +12,6 @@ export 'src/cipher/payment_card.dart';
 export 'src/cipher/secure_note.dart';
 export 'src/cipher/ssh_key.dart';
 export 'src/envelope.dart';
+export 'src/item.dart';
 export 'src/vault.dart';
 export 'src/version_event.dart';

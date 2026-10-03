@@ -1,19 +1,51 @@
 import 'dart:math';
 
 import 'package:ndk/ndk.dart';
+import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
 
 import 'cipher/cipher.dart';
 import 'envelope.dart';
+import 'item.dart';
 import 'version_event.dart';
 
 class Vault {
-  Vault({required this.ndk, required this.signer, this.relays});
+  Vault({required this.ndk, required this.signer, required this.relays});
 
   final Ndk ndk;
   final EventSigner signer;
+  final List<String> relays;
 
-  /// Relays the vault publishes to. When null, ndk picks them (outbox model).
-  final List<String>? relays;
+  /// Decrypted on demand and kept in memory only: ndk's own decrypted payload
+  /// cache would write the passwords to disk in clear.
+  final _versions = <String, Envelope>{};
+
+  /// Keeps the vault's gift wraps synced from [relays] into the ndk cache.
+  SyncHandle sync(SyncEngine engine) => engine.ensure(
+    SyncRequest(
+      filters: [
+        Filter(
+          kinds: [GiftWrap.kGiftWrapEventkind],
+          pTags: [signer.getPublicKey()],
+        ),
+      ],
+      relays: relays,
+    ),
+  );
+
+  /// Items found in the ndk cache, see [sync] to fill it.
+  Future<List<Item>> items() async {
+    final wraps = await ndk.config.cache.loadEvents(
+      kinds: [GiftWrap.kGiftWrapEventkind],
+      tags: {
+        'p': [signer.getPublicKey()],
+      },
+    );
+    final versions = <Envelope>[];
+    for (final wrap in wraps) {
+      if (await _open(wrap) case final version?) versions.add(version);
+    }
+    return resolveItems(versions);
+  }
 
   Future<Envelope> createItem(Cipher cipher) async {
     final envelope = Envelope(
@@ -26,6 +58,20 @@ class Vault {
     );
     await _publish(envelope);
     return envelope;
+  }
+
+  Future<Envelope?> _open(Nip01Event wrap) async {
+    if (_versions[wrap.id] case final version?) return version;
+    try {
+      return _versions[wrap.id] = await unwrapEnvelope(
+        wrap,
+        signer,
+        verifier: ndk.config.eventVerifier,
+      );
+    } catch (_) {
+      // Anyone can send a wrap to the vault: one that does not open is skipped.
+      return null;
+    }
   }
 
   Future<void> _publish(Envelope envelope) async {

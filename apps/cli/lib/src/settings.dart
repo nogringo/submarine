@@ -20,6 +20,10 @@ const defaultRelays = [
 
 final _hexKey = RegExp(r'^[0-9a-f]{64}$');
 
+/// Whether `SUBMARINE_NSEC` is set, valid or not.
+bool hasVaultKey(Map<String, String> environment) =>
+    environment['SUBMARINE_NSEC']?.trim().isNotEmpty ?? false;
+
 /// The vault's private key, in hex, from `SUBMARINE_NSEC` (an nsec or hex).
 String vaultPrivateKey(Map<String, String> environment) {
   final value = environment['SUBMARINE_NSEC']?.trim().toLowerCase() ?? '';

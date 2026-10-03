@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'vault_command.dart';
 
 class SyncCommand extends VaultCommand {
@@ -19,13 +17,13 @@ class SyncCommand extends VaultCommand {
       'Fetch from the relays what changed in the vault since the last sync.';
 
   @override
-  Future<void> run() async {
+  Future<void> execute() async {
     if (argResults!.flag('last')) {
       final lastSync = await withVault((session) => session.lastSync());
-      if (lastSync != null) stdout.writeln(lastSync.toIso8601String());
+      output.string(lastSync?.toIso8601String());
       return;
     }
     await withVault((session) => session.sync());
-    stdout.writeln('Syncing complete.');
+    output.message('Syncing complete.');
   }
 }

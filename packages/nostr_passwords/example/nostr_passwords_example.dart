@@ -49,9 +49,13 @@ Future<void> main() async {
       );
   print('Synced up to ${await vault.lastSync(engine)}');
 
-  for (final item in await vault.items()) {
-    print('${item.cipher.name}: ${item.cipher.login?.username}');
+  final items = await vault.items();
+  for (final item in items) {
+    print('${item.cipher.name}: ${item.cipher.subtitle}');
   }
+  // Ignores case and accents, and looks in usernames, hostnames and notes.
+  final found = searchItems(items, 'boulanger alice');
+  print('Found ${found.length} item(s) for "boulanger alice"');
 
   await engine.dispose();
   await ndk.destroy();

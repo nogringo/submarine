@@ -42,20 +42,35 @@ From `apps/cli`:
 ```sh
 dart run bin/submarine.dart sync
 dart run bin/submarine.dart add Boulanger --uri https://www.boulanger.com --username alice@example.com
-dart run bin/submarine.dart list
-dart run bin/submarine.dart get boulanger
+dart run bin/submarine.dart list items --search boulanger
+dart run bin/submarine.dart get password boulanger
 ```
 
 `add` asks for whatever the options leave out, and always for the password,
 which is not echoed. When stdin is piped, it reads one line per question.
 
-`get` finds an item by name, ignoring case, or by id. When several items share
-the name, it lists their ids.
+### Bitwarden CLI compatibility
 
-`list` and `get` read the local cache only, they never go to the relays, as in
-the Bitwarden CLI. `sync` fetches what changed on the relays since the last
-sync, and `sync --last` prints when that was. Until the first sync, `list` and
-`get` refuse to run. Items saved with `add` are in the cache right away.
+These commands behave like their `bw` counterparts, so a script written for
+the Bitwarden CLI runs on Submarine as long as it sticks to them:
+
+- `sync`, `sync --last`
+- `status`: `unlocked` when `SUBMARINE_NSEC` is set, `unauthenticated`
+  otherwise. `userId` is the vault's public key, in hex.
+- `list items`, with `--search` and `--trash`
+- `get item|username|password|uri|notes <id>`, where `<id>` is an item id or
+  a search term
+- the global flags `--pretty`, `--raw` and `--quiet`
+
+Output is the same: JSON items, bare values for `get password` and the like,
+errors on stderr with exit code 1, and no final newline when the output is
+piped. Searching ignores case and accents and looks in the name, username,
+hostnames and notes. Other `bw` commands and objects fail with an error.
+
+`list` and `get` read the local cache only, they never go to the relays.
+`sync` fetches what changed on the relays since the last sync. Until the first
+sync, `list` and `get` refuse to run. Items saved with `add` are in the cache
+right away.
 
 The vault's gift wraps, still encrypted, are cached in `~/.cache/submarine`
 (under `$XDG_CACHE_HOME` or `%LOCALAPPDATA%` when set). Passwords are decrypted

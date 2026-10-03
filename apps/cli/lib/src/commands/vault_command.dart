@@ -2,10 +2,47 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 
+import '../cli_exception.dart';
+import '../output.dart';
 import '../settings.dart';
 import '../vault_session.dart';
 
+/// bw's global flags, also accepted after the command as bw allows.
+const outputFlags = {
+  'pretty': 'Format output. JSON is tabbed with two spaces.',
+  'raw': 'Return raw output instead of a descriptive message.',
+  'quiet': "Don't return anything to stdout.",
+};
+
 abstract class VaultCommand extends Command<void> {
+  VaultCommand() {
+    for (final flag in outputFlags.keys) {
+      argParser.addFlag(flag, negatable: false, hide: true);
+    }
+  }
+
+  late final output = Output(
+    pretty: _flag('pretty'),
+    raw: _flag('raw'),
+    quiet: _flag('quiet'),
+  );
+
+  bool _flag(String name) =>
+      globalResults!.flag(name) || argResults!.flag(name);
+
+  /// Does the work of [run], which reports a [CliException] as bw would.
+  Future<void> execute();
+
+  @override
+  Future<void> run() async {
+    try {
+      await execute();
+    } on CliException catch (error) {
+      output.error(error.message);
+      exitCode = 1;
+    }
+  }
+
   List<String> get relays {
     final fromOption = globalResults!.multiOption('relay');
     return fromOption.isNotEmpty

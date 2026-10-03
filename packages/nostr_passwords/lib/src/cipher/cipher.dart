@@ -107,6 +107,33 @@ class Cipher {
   DateTime? archivedDate;
   final Map<String, dynamic> _source;
 
+  /// In the trash.
+  bool get isDeleted => deletedDate != null;
+
+  bool get isArchived => archivedDate != null;
+
+  /// What Bitwarden shows under the name: a login's username, a card's brand
+  /// and last digits, and so on.
+  String? get subtitle => switch (type) {
+    CipherType.login => _loginSubtitle(login),
+    CipherType.card => _cardSubtitle(card),
+    CipherType.identity => _joinPresent([
+      identity?.firstName,
+      identity?.lastName,
+    ], ' '),
+    CipherType.sshKey => sshKey?.keyFingerprint,
+    CipherType.bankAccount => bankAccount?.bankName,
+    CipherType.driversLicense => _joinPresent([
+      _joinPresent([driversLicense?.firstName, driversLicense?.lastName], ' '),
+      driversLicense?.issuingState,
+    ], ', '),
+    CipherType.passport => _joinPresent([
+      _joinPresent([passport?.givenName, passport?.surname], ' '),
+      passport?.issuingCountry,
+    ], ', '),
+    _ => null,
+  };
+
   Map<String, dynamic> toJson() => mergeJson(_source, {
     'type': type.value,
     'name': name,
@@ -130,3 +157,29 @@ class Cipher {
     'archivedDate': formatDate(archivedDate),
   });
 }
+
+String? _loginSubtitle(Login? login) {
+  final username = login?.username;
+  if ((username == null || username.isEmpty) &&
+      (login?.fido2Credentials.isNotEmpty ?? false)) {
+    return login!.fido2Credentials.first.userName;
+  }
+  return username;
+}
+
+String? _cardSubtitle(PaymentCard? card) {
+  final number = card?.number;
+  if (number == null || number.length < 4) return card?.brand;
+  // Amex numbers end on 5 digits.
+  final digits = number.length >= 5 && number.startsWith(RegExp('3[47]'))
+      ? 5
+      : 4;
+  final brand = card?.brand ?? '';
+  return '${brand.isEmpty ? '' : '$brand, '}'
+      '*${number.substring(number.length - digits)}';
+}
+
+String _joinPresent(Iterable<String?> parts, String separator) => [
+  for (final part in parts)
+    if (part != null && part.isNotEmpty) part,
+].join(separator);

@@ -11,6 +11,7 @@ resolution: workspace
 dependencies:
   ndk: ^0.10.1
   sync_engine_shim_for_ndk: ^0.8.0
+  unorm_dart: ^0.3.2
   # path: ^1.9.0
 
 dev_dependencies:

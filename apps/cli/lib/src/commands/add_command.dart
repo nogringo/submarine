@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:nostr_passwords/nostr_passwords.dart';
 
 import '../cli_exception.dart';
@@ -25,7 +23,7 @@ class AddCommand extends VaultCommand {
   String get invocation => 'submarine add <name> [options]';
 
   @override
-  Future<void> run() async {
+  Future<void> execute() async {
     final itemName = singleArgument('name');
     final uri = argResults!.option('uri') ?? prompt('URI (optional): ');
     final username = argResults!.option('username') ?? prompt('Username: ');
@@ -52,6 +50,6 @@ class AddCommand extends VaultCommand {
         ].join('\n'),
       );
     }
-    stdout.writeln('Saved $itemName.');
+    output.message('Saved $itemName.');
   }
 }

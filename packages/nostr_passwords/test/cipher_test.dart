@@ -242,4 +242,79 @@ void main() {
       },
     );
   });
+
+  group('subtitle', () {
+    String? subtitleOf(CipherType type, Cipher Function(Cipher) fill) =>
+        fill(Cipher(type: type, name: 'Item')).subtitle;
+
+    test('of a login is its username, else its passkey user', () {
+      expect(
+        subtitleOf(CipherType.login, (c) => c..login = Login(username: 'al')),
+        'al',
+      );
+      expect(
+        subtitleOf(
+          CipherType.login,
+          (c) => c
+            ..login = Login.fromJson({
+              'fido2Credentials': [
+                {'userName': 'passkey-al'},
+              ],
+            }),
+        ),
+        'passkey-al',
+      );
+    });
+
+    test('of a card is its brand and last digits, five for Amex', () {
+      expect(
+        subtitleOf(
+          CipherType.card,
+          (c) =>
+              c..card = PaymentCard(brand: 'Visa', number: '4111111111111111'),
+        ),
+        'Visa, *1111',
+      );
+      expect(
+        subtitleOf(
+          CipherType.card,
+          (c) => c..card = PaymentCard(number: '378282246310005'),
+        ),
+        '*10005',
+      );
+    });
+
+    test('of an identity document is the name, then where it was issued', () {
+      expect(
+        subtitleOf(
+          CipherType.identity,
+          (c) => c..identity = Identity(firstName: 'Alice', lastName: 'Martin'),
+        ),
+        'Alice Martin',
+      );
+      expect(
+        subtitleOf(
+          CipherType.passport,
+          (c) => c
+            ..passport = Passport(
+              givenName: 'Alice',
+              surname: 'Martin',
+              issuingCountry: 'FR',
+            ),
+        ),
+        'Alice Martin, FR',
+      );
+      expect(
+        subtitleOf(
+          CipherType.driversLicense,
+          (c) => c..driversLicense = DriversLicense(issuingState: 'IDF'),
+        ),
+        'IDF',
+      );
+    });
+
+    test('of a secure note is null', () {
+      expect(subtitleOf(CipherType.secureNote, (c) => c), isNull);
+    });
+  });
 }

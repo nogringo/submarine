@@ -68,17 +68,14 @@ class VaultSession {
 
   Future<DateTime?> lastSync() => vault.lastSync(_engine);
 
-  /// Items not in the trash, as of the last [sync]. Never goes to the relays.
+  /// Items as of the last [sync], trash included. Never goes to the relays.
   Future<List<Item>> items() async {
     if (await lastSync() == null) {
       throw CliException(
         'The vault was never synced. Run `submarine sync` first.',
       );
     }
-    return [
-      for (final item in await vault.items())
-        if (item.cipher.deletedDate == null) item,
-    ];
+    return vault.items();
   }
 
   Future<void> close() async {

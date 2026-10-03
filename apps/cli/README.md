@@ -40,6 +40,7 @@ To use other relays, list them in `~/.config/submarine/config.json` (under
 From `apps/cli`:
 
 ```sh
+dart run bin/submarine.dart sync
 dart run bin/submarine.dart add Boulanger --uri https://www.boulanger.com --username alice@example.com
 dart run bin/submarine.dart list
 dart run bin/submarine.dart get boulanger
@@ -51,8 +52,11 @@ which is not echoed. When stdin is piped, it reads one line per question.
 `get` finds an item by name, ignoring case, or by id. When several items share
 the name, it lists their ids.
 
-Before reading the vault, `list` and `get` fetch what changed on the relays
-since the last run. The vault's gift wraps, still encrypted, are cached in
-`~/.cache/submarine` (under `$XDG_CACHE_HOME` or `%LOCALAPPDATA%` when set).
-Passwords are decrypted in memory only. Delete the whole folder to start over
-from the relays.
+`list` and `get` read the local cache only, they never go to the relays, as in
+the Bitwarden CLI. `sync` fetches what changed on the relays since the last
+sync, and `sync --last` prints when that was. Until the first sync, `list` and
+`get` refuse to run. Items saved with `add` are in the cache right away.
+
+The vault's gift wraps, still encrypted, are cached in `~/.cache/submarine`
+(under `$XDG_CACHE_HOME` or `%LOCALAPPDATA%` when set). Passwords are decrypted
+in memory only. Delete the whole folder to start over from the relays.

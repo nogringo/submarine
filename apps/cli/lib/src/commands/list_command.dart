@@ -13,7 +13,7 @@ class ListCommand extends VaultCommand {
 
   @override
   Future<void> run() async {
-    final items = await withVault((session) => session.syncedItems());
+    final items = await withVault((session) => session.items());
     if (items.isEmpty) {
       stderr.writeln('The vault is empty.');
       return;

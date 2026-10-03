@@ -5,6 +5,7 @@ import 'package:args/command_runner.dart';
 import 'src/commands/add_command.dart';
 import 'src/commands/get_command.dart';
 import 'src/commands/list_command.dart';
+import 'src/commands/sync_command.dart';
 
 export 'src/cli_exception.dart';
 
@@ -21,5 +22,6 @@ class SubmarineCommandRunner extends CommandRunner<void> {
     addCommand(AddCommand());
     addCommand(ListCommand());
     addCommand(GetCommand());
+    addCommand(SyncCommand());
   }
 }

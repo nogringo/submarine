@@ -111,6 +111,38 @@ void main() {
       expect(item.cipher.name, 'Boulanger');
     });
 
+    test('lastSync is null before the first sync', () async {
+      expect(await otherVault.lastSync(engine), isNull);
+    });
+
+    test('lastSync is when the last sync started', () async {
+      // Coverage is stored to the second.
+      final before = DateTime.now().toUtc().subtract(
+        const Duration(seconds: 1),
+      );
+      await syncedItems();
+      final after = DateTime.now().toUtc();
+
+      final lastSync = await otherVault.lastSync(engine);
+      expect(lastSync!.isBefore(before), isFalse);
+      expect(lastSync.isAfter(after), isFalse);
+    });
+
+    test('lastSync ignores a sync no relay answered', () async {
+      final offline = Vault(
+        ndk: otherNdk,
+        signer: signer,
+        relays: ['ws://127.0.0.1:1'],
+      );
+      final handle = offline.sync(engine);
+      engine.start();
+      await engine
+          .watchStatus(handle)
+          .firstWhere((status) => status.phase == SyncRequestPhase.failed);
+
+      expect(await offline.lastSync(engine), isNull);
+    });
+
     test('items are synced from relays that require AUTH', () async {
       relay.requireAuthForRequests = true;
       final created = await vault.createItem(boulanger);

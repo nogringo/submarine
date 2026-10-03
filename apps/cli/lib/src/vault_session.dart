@@ -27,6 +27,12 @@ class VaultSession {
       signer: signer,
     );
     vault = Vault(ndk: ndk, signer: signer, relays: relays);
+    _engine = SyncEngine(
+      ndk,
+      store: SqliteSyncStore(_database),
+      // A sync is asked for explicitly, so it always goes to the relays.
+      maxStaleness: Duration.zero,
+    );
   }
 
   /// Holds the ndk cache and the sync engine's coverage of it, which only make
@@ -35,43 +41,48 @@ class VaultSession {
   late final SqliteCacheManager _cache;
   late final Ndk ndk;
   late final Vault vault;
+  late final SyncEngine _engine;
 
-  /// Items not in the trash, once the relays sent what changed since the last
-  /// run.
-  Future<List<Item>> syncedItems() async {
-    // Coverage from the last run is never fresh enough to skip the relays.
-    final engine = SyncEngine(
-      ndk,
-      store: SqliteSyncStore(_database),
-      maxStaleness: Duration.zero,
-    );
-    try {
-      final handle = vault.sync(engine);
-      engine.start();
-      final status = await engine
-          .watchStatus(handle)
-          .firstWhere(
-            (status) =>
-                status.phase == SyncRequestPhase.synced ||
-                status.phase == SyncRequestPhase.failed,
-          )
-          .timeout(
-            const Duration(seconds: 30),
-            onTimeout: () => throw CliException('Syncing the vault timed out.'),
-          );
-      if (status.phase == SyncRequestPhase.failed) {
-        throw CliException('No relay answered: ${vault.relays.join(', ')}.');
-      }
-      return [
-        for (final item in await vault.items())
-          if (item.cipher.deletedDate == null) item,
-      ];
-    } finally {
-      await engine.dispose();
+  /// Fetches from the relays what changed since the last sync.
+  Future<void> sync() async {
+    final handle = vault.sync(_engine);
+    _engine.start();
+    final status = await _engine
+        .watchStatus(handle)
+        .firstWhere(
+          (status) =>
+              status.phase == SyncRequestPhase.synced ||
+              status.phase == SyncRequestPhase.failed,
+        )
+        .timeout(
+          const Duration(seconds: 30),
+          onTimeout: () =>
+              throw CliException('Syncing failed: timed out after 30 s.'),
+        );
+    if (status.phase == SyncRequestPhase.failed) {
+      throw CliException(
+        'Syncing failed: no answer from ${vault.relays.join(', ')}.',
+      );
     }
   }
 
+  Future<DateTime?> lastSync() => vault.lastSync(_engine);
+
+  /// Items not in the trash, as of the last [sync]. Never goes to the relays.
+  Future<List<Item>> items() async {
+    if (await lastSync() == null) {
+      throw CliException(
+        'The vault was never synced. Run `submarine sync` first.',
+      );
+    }
+    return [
+      for (final item in await vault.items())
+        if (item.cipher.deletedDate == null) item,
+    ];
+  }
+
   Future<void> close() async {
+    await _engine.dispose();
     await ndk.destroy();
     await _cache.close();
   }

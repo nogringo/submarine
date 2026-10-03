@@ -25,15 +25,33 @@ class Vault {
   /// authenticates as the vault (NIP-42): [signer] must be in `ndk.accounts`.
   SyncHandle sync(SyncEngine engine) => engine.ensure(
     SyncRequest(
-      filters: [
-        Filter(
-          kinds: [GiftWrap.kGiftWrapEventkind],
-          pTags: [signer.getPublicKey()],
-        ),
-      ],
+      filters: [_wraps],
       relays: relays,
       authPubkey: signer.getPublicKey(),
     ),
+  );
+
+  /// When [sync] last got an answer from a relay, on any relay it ever used,
+  /// or null if it never did. Reads the local state only.
+  Future<DateTime?> lastSync(SyncEngine engine) async {
+    DateTime? last;
+    final states = await engine.coverageOfFilter(
+      _wraps,
+      authPubkey: signer.getPublicKey(),
+    );
+    for (final state in states) {
+      // A pass covers up to the moment it started, while completedAt keeps
+      // the oldest pass once ranges merge.
+      for (final range in state.coverage) {
+        if (last == null || range.to.isAfter(last)) last = range.to;
+      }
+    }
+    return last;
+  }
+
+  Filter get _wraps => Filter(
+    kinds: [GiftWrap.kGiftWrapEventkind],
+    pTags: [signer.getPublicKey()],
   );
 
   /// Items found in the ndk cache, see [sync] to fill it.

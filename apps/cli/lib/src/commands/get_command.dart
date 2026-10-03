@@ -18,7 +18,7 @@ class GetCommand extends VaultCommand {
   @override
   Future<void> run() async {
     final query = singleArgument('name');
-    final items = await withVault((session) => session.syncedItems());
+    final items = await withVault((session) => session.items());
     final matches = [
       for (final item in items)
         if (item.id == query ||

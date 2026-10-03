@@ -47,6 +47,7 @@ Future<void> main() async {
             status.phase == SyncRequestPhase.synced ||
             status.phase == SyncRequestPhase.failed,
       );
+  print('Synced up to ${await vault.lastSync(engine)}');
 
   for (final item in await vault.items()) {
     print('${item.cipher.name}: ${item.cipher.login?.username}');

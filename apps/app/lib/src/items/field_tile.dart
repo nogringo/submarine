@@ -64,12 +64,12 @@ class _FieldTileState extends State<FieldTile> {
     return _TileLayout(
       label: row.label,
       value: switch (row.kind) {
-        _ when hidden && !_shown => const _Mask(),
-        FieldKind.password => PasswordText(row.value),
-        FieldKind.secret || FieldKind.mono => SelectableText(
-          row.value,
-          style: monoStyle.copyWith(fontSize: 15, height: 1.4),
+        _ when hidden && !_shown => _Mask(
+          style: row.kind == FieldKind.password ? _passwordStyle : _secretStyle,
         ),
+        FieldKind.password => PasswordText(row.value),
+        FieldKind.secret ||
+        FieldKind.mono => SelectableText(row.value, style: _secretStyle),
         _ => SelectableText(row.value, style: _valueStyle),
       },
       actions: [
@@ -97,6 +97,8 @@ class _FieldTileState extends State<FieldTile> {
 }
 
 const _valueStyle = TextStyle(fontSize: 16, height: 1.35);
+final _passwordStyle = monoStyle.copyWith(fontSize: 17, height: 1.35);
+final _secretStyle = monoStyle.copyWith(fontSize: 15, height: 1.4);
 
 class _TileLayout extends StatelessWidget {
   const _TileLayout({
@@ -135,14 +137,14 @@ class _TileLayout extends StatelessWidget {
   );
 }
 
+/// In the [style] of the value it hides, so that showing it moves nothing.
 class _Mask extends StatelessWidget {
-  const _Mask();
+  const _Mask({required this.style});
+
+  final TextStyle style;
 
   @override
-  Widget build(BuildContext context) => const Text(
-    '••••••••••••',
-    style: TextStyle(fontSize: 16, letterSpacing: 2, height: 1.35),
-  );
+  Widget build(BuildContext context) => Text('••••••••••••', style: style);
 }
 
 /// Digits in signal, special characters in symbol, so that look-alike
@@ -174,7 +176,7 @@ class PasswordText extends StatelessWidget {
             ),
         ],
       ),
-      style: monoStyle.copyWith(fontSize: 17, height: 1.35),
+      style: _passwordStyle,
     );
   }
 }

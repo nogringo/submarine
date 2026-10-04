@@ -38,7 +38,7 @@
   },
   "vaultNameHelper": "Only on this device. Someone you share the vault with names it their own way.",
   "@vaultNameHelper": {
-    "description": "Help under the vault name field: the name is local to the device."
+    "description": "Help under the vault name field, and under the name and color section of the vault settings: the name is local to the device."
   },
   "vaultNameRequired": "Give the vault a name.",
   "@vaultNameRequired": {
@@ -59,7 +59,7 @@
   },
   "vaultKey": "Vault key",
   "@vaultKey": {
-    "description": "Label of the field where the vault key (an nsec) is entered."
+    "description": "The vault key (an nsec): label of the field where it is entered, and title of the vault settings section and row showing it."
   },
   "vaultKeyInvalid": "This is not a vault key. It starts with nsec1.",
   "@vaultKeyInvalid": {
@@ -85,6 +85,30 @@
   "saveVaultKeyBody": "Anyone who has this key can open the vault. Keep it somewhere safe: you need it to open the vault on another device, or to share it.",
   "@saveVaultKeyBody": {
     "description": "Asks to keep the key of a vault just created somewhere safe."
+  },
+  "vaultSettings": "Vault settings",
+  "@vaultSettings": {
+    "description": "Subtitle of the vault settings screen, and tooltip of the buttons opening it."
+  },
+  "vaultNameAndColor": "Name and color",
+  "@vaultNameAndColor": {
+    "description": "Title of the vault settings section renaming and recoloring the vault."
+  },
+  "vaultPublicKey": "Public key",
+  "@vaultPublicKey": {
+    "description": "Row of the vault settings showing the vault's public key (an npub)."
+  },
+  "vaultKeyDescription": "Anyone who has it can open this vault. Enter it on another device to open the vault there, or give it to someone to share the vault with them.",
+  "@vaultKeyDescription": {
+    "description": "Explains the vault key, in the vault settings row that shows it."
+  },
+  "sync": "Sync",
+  "@sync": {
+    "description": "Title of the vault settings section about syncing with the relays."
+  },
+  "syncAllSent": "Every change is on your relays.",
+  "@syncAllSent": {
+    "description": "Under the sync status in the vault settings, once every change reached the relays."
   },
   "cancel": "Cancel",
   "@cancel": {
@@ -117,7 +141,7 @@
   },
   "syncNow": "Sync now",
   "@syncNow": {
-    "description": "Tooltip of the button fetching changes from the relays now."
+    "description": "Tooltip of the button fetching changes from the relays now, and that button in the vault settings."
   },
   "syncing": "Syncing",
   "@syncing": {

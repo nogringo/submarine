@@ -57,14 +57,33 @@ class FilterColumn extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(24, 22, 16, 14),
-            child: Text(
-              vaultId == allVaultsId || vault == null
-                  ? context.l10n.allVaults
-                  : vault.name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+            padding: const EdgeInsets.fromLTRB(24, 10, 8, 2),
+            child: SizedBox(
+              height: 48,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      vaultId == allVaultsId || vault == null
+                          ? context.l10n.allVaults
+                          : vault.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  if (vaultId != allVaultsId && vault != null)
+                    IconButton(
+                      tooltip: context.l10n.vaultSettings,
+                      onPressed: () =>
+                          context.push(vaultSettingsPath(vault.pubkey)),
+                      icon: const Icon(Icons.settings_outlined),
+                    ),
+                ],
+              ),
             ),
           ),
           Expanded(

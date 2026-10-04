@@ -22,6 +22,12 @@ class VaultRecord {
   final String name;
   final Color color;
 
+  VaultRecord copyWith({String? name, Color? color}) => VaultRecord(
+    privateKey: privateKey,
+    name: name ?? this.name,
+    color: color ?? this.color,
+  );
+
   Map<String, dynamic> toJson() => {
     'privateKey': privateKey,
     'name': name,

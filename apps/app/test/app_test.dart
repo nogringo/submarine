@@ -686,4 +686,83 @@ void main() {
     expect(tester.getRect(find.text('GitHub')), withBadge);
     await close(tester);
   });
+
+  Finder nsecText() => find.byWidgetPredicate(
+    (widget) =>
+        widget is SelectableText && (widget.data?.startsWith('nsec1') ?? false),
+  );
+
+  testWidgets('shows the key of a vault in its settings on a phone', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(390, 844), locale: const Locale('fr'));
+    await open(tester, withFamily: true);
+    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await settle(tester);
+
+    await tester.tap(find.byTooltip('Coffres'));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Réglages du coffre'));
+    await settle(tester);
+
+    expect(find.text('Réglages du coffre'), findsOneWidget);
+    expect(nsecText(), findsNothing);
+    await tester.tap(find.text('Afficher'));
+    await settle(tester);
+    final nsec = tester.widget<SelectableText>(nsecText());
+    expect(parseVaultKey(nsec.data!), vaults.all.single.record.privateKey);
+
+    await tester.tap(find.byType(BackButton));
+    await settle(tester);
+    expect(find.text('Réglages du coffre'), findsNothing);
+    expect(find.text('Tous les coffres'), findsOneWidget);
+    await close(tester);
+  });
+
+  testWidgets('renames and recolors a vault in its settings on a desktop', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(tester, withFamily: true);
+    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await settle(tester);
+    Future<Map<String, dynamic>> saved() async =>
+        (jsonDecode(
+              (await const FlutterSecureStorage().read(key: 'vaults'))!,
+            ) as List).single
+            as Map<String, dynamic>;
+
+    await tester.tap(find.byTooltip('Family'));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Vault settings'));
+    await settle(tester);
+    expect(find.text('Vault settings'), findsOneWidget);
+
+    await tester.runAsync(() async {
+      await tester.enterText(find.widgetWithText(TextField, 'Name'), 'Home');
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+    });
+    await settle(tester);
+    expect(find.byTooltip('Home'), findsOneWidget);
+    expect((await saved())['name'], 'Home');
+
+    await write(
+      tester,
+      find.byWidgetPredicate(
+        (widget) => widget is Semantics && widget.properties.label == 'Color 3',
+      ),
+    );
+    expect((await saved())['color'], vaultColors[2].toARGB32());
+
+    await tester.enterText(find.widgetWithText(TextField, 'Name'), ' ');
+    await settle(tester);
+    expect(find.text('Give the vault a name.'), findsOneWidget);
+    expect((await saved())['name'], 'Home');
+
+    await tester.tap(find.byTooltip('Home'));
+    await settle(tester);
+    expect(find.text('Vault settings'), findsNothing);
+    expect(find.text('Home'), findsOneWidget);
+    await close(tester);
+  });
 }

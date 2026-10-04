@@ -156,7 +156,13 @@ class ItemDetail extends StatelessWidget {
     final created = cipher.creationDate;
     const gap = SizedBox(height: 16);
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+      // Clear of the system navigation bar, the app drawing edge to edge.
+      padding: EdgeInsets.fromLTRB(
+        20,
+        20,
+        20,
+        32 + MediaQuery.paddingOf(context).bottom,
+      ),
       child: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(

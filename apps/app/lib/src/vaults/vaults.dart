@@ -121,11 +121,26 @@ class Vaults extends ChangeNotifier {
 
   /// Saves [record] on this device, and starts syncing it.
   Future<VaultController> add(VaultRecord record) async {
-    await _storage.write([for (final vault in _vaults) vault.record, record]);
+    await _save([for (final vault in _vaults) vault.record, record]);
     final vault = _open(record);
     notifyListeners();
     return vault;
   }
+
+  /// Renames or recolors [vault] on this device.
+  Future<void> edit(VaultController vault, {String? name, Color? color}) {
+    vault.record = vault.record.copyWith(name: name, color: color);
+    return _save([for (final vault in _vaults) vault.record]);
+  }
+
+  /// One write after the other, so that an older list never lands last.
+  Future<void> _save(List<VaultRecord> records) {
+    final saved = _saving.then((_) => _storage.write(records));
+    _saving = saved.catchError((_) {});
+    return saved;
+  }
+
+  Future<void> _saving = Future.value();
 
   VaultController _open(VaultRecord record) {
     final signer = ndk.config.eventSignerFactory.create(

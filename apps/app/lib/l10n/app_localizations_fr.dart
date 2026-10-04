@@ -77,6 +77,25 @@ class AppLocalizationsFr extends AppLocalizations {
       'Toute personne qui a cette clé peut ouvrir le coffre. Gardez-la en lieu sûr : il vous la faudra pour ouvrir le coffre sur un autre appareil, ou pour le partager.';
 
   @override
+  String get vaultSettings => 'Réglages du coffre';
+
+  @override
+  String get vaultNameAndColor => 'Nom et couleur';
+
+  @override
+  String get vaultPublicKey => 'Clé publique';
+
+  @override
+  String get vaultKeyDescription =>
+      'Toute personne qui la détient peut ouvrir ce coffre. Saisissez-la sur un autre appareil pour y ouvrir le coffre, ou donnez-la à quelqu\'un pour partager le coffre.';
+
+  @override
+  String get sync => 'Synchronisation';
+
+  @override
+  String get syncAllSent => 'Toutes vos modifications sont sur vos relais.';
+
+  @override
   String get cancel => 'Annuler';
 
   @override

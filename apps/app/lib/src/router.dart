@@ -6,6 +6,7 @@ import 'items/item_filter.dart';
 import 'screens/item_detail.dart';
 import 'screens/item_form.dart';
 import 'screens/item_list.dart';
+import 'screens/vault_settings.dart';
 import 'screens/vault_shell.dart';
 import 'screens/welcome_screen.dart';
 import 'vaults/vaults.dart';
@@ -43,6 +44,8 @@ String newItemPath(String vaultId, ItemFilter filter) =>
 String editItemPath(String vaultId, ItemFilter filter, String itemId) =>
     '${vaultPath(vaultId, filter: filter, itemId: itemId)}/edit';
 
+String vaultSettingsPath(String vaultId) => '/vaults/$vaultId/settings';
+
 ItemFilter _filterOf(GoRouterState state) =>
     ItemFilter.fromSlug(state.pathParameters['filter']!)!;
 
@@ -65,6 +68,22 @@ GoRouter buildRouter(Vaults vaults) => GoRouter(
     GoRoute(
       path: '/vaults/:vaultId',
       redirect: (context, state) => vaultPath(state.pathParameters['vaultId']!),
+    ),
+    // Before the shell, whose ':filter' would take "settings".
+    GoRoute(
+      path: '/vaults/:vaultId/settings',
+      redirect: (context, state) =>
+          vaults.byPubkey(state.pathParameters['vaultId']!) == null
+          ? vaultPath(allVaultsId)
+          : null,
+      pageBuilder: (context, state) {
+        final screen = VaultSettingsScreen(
+          vaultId: state.pathParameters['vaultId']!,
+        );
+        return context.isWide
+            ? NoTransitionPage(key: state.pageKey, child: screen)
+            : MaterialPage(key: state.pageKey, child: screen);
+      },
     ),
     ShellRoute(
       pageBuilder: (context, state, child) => NoTransitionPage(

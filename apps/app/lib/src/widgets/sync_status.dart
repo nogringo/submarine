@@ -45,11 +45,15 @@ class SyncStatusText extends StatefulWidget {
     required this.vaults,
     this.maxLines = 1,
     this.showsUnsentIcon = true,
+    this.style,
   });
 
   final List<VaultController> vaults;
   final int maxLines;
   final bool showsUnsentIcon;
+
+  /// Over the muted small text, a failure still showing in red.
+  final TextStyle? style;
 
   @override
   State<SyncStatusText> createState() => _SyncStatusTextState();
@@ -83,10 +87,9 @@ class _SyncStatusTextState extends State<SyncStatusText> {
       summary.describe(context.l10n),
       maxLines: widget.maxLines,
       overflow: TextOverflow.ellipsis,
-      style: TextStyle(
-        fontSize: 13,
-        color: summary.failed && !unsent ? palette.danger : palette.muted,
-      ),
+      style: TextStyle(fontSize: 13, color: palette.muted)
+          .merge(widget.style)
+          .copyWith(color: summary.failed && !unsent ? palette.danger : null),
     );
     if (!unsent || !widget.showsUnsentIcon) return text;
     return Row(

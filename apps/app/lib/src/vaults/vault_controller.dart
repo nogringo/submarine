@@ -13,7 +13,7 @@ import 'vault_storage.dart';
 /// another device publishes a change.
 class VaultController extends ChangeNotifier {
   VaultController({
-    required this.record,
+    required this._record,
     required this.vault,
     required SyncEngine engine,
   }) : _engine = engine {
@@ -23,12 +23,20 @@ class VaultController extends ChangeNotifier {
     subscribe();
   }
 
-  final VaultRecord record;
   final Vault vault;
   final SyncEngine _engine;
   late final SyncHandle _handle;
   late final StreamSubscription<SyncRequestStatus> _statuses;
   StreamSubscription<Nip01Event>? _live;
+
+  /// Changed through [Vaults.edit], which saves it.
+  VaultRecord get record => _record;
+  VaultRecord _record;
+
+  set record(VaultRecord record) {
+    _record = record;
+    notifyListeners();
+  }
 
   String get pubkey => vault.signer.getPublicKey();
   String get name => record.name;

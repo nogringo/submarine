@@ -152,7 +152,7 @@ abstract class AppLocalizations {
   /// **'Name'**
   String get vaultName;
 
-  /// Help under the vault name field: the name is local to the device.
+  /// Help under the vault name field, and under the name and color section of the vault settings: the name is local to the device.
   ///
   /// In en, this message translates to:
   /// **'Only on this device. Someone you share the vault with names it their own way.'**
@@ -176,7 +176,7 @@ abstract class AppLocalizations {
   /// **'Color {number}'**
   String vaultColorOption(int number);
 
-  /// Label of the field where the vault key (an nsec) is entered.
+  /// The vault key (an nsec): label of the field where it is entered, and title of the vault settings section and row showing it.
   ///
   /// In en, this message translates to:
   /// **'Vault key'**
@@ -211,6 +211,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Anyone who has this key can open the vault. Keep it somewhere safe: you need it to open the vault on another device, or to share it.'**
   String get saveVaultKeyBody;
+
+  /// Subtitle of the vault settings screen, and tooltip of the buttons opening it.
+  ///
+  /// In en, this message translates to:
+  /// **'Vault settings'**
+  String get vaultSettings;
+
+  /// Title of the vault settings section renaming and recoloring the vault.
+  ///
+  /// In en, this message translates to:
+  /// **'Name and color'**
+  String get vaultNameAndColor;
+
+  /// Row of the vault settings showing the vault's public key (an npub).
+  ///
+  /// In en, this message translates to:
+  /// **'Public key'**
+  String get vaultPublicKey;
+
+  /// Explains the vault key, in the vault settings row that shows it.
+  ///
+  /// In en, this message translates to:
+  /// **'Anyone who has it can open this vault. Enter it on another device to open the vault there, or give it to someone to share the vault with them.'**
+  String get vaultKeyDescription;
+
+  /// Title of the vault settings section about syncing with the relays.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync'**
+  String get sync;
+
+  /// Under the sync status in the vault settings, once every change reached the relays.
+  ///
+  /// In en, this message translates to:
+  /// **'Every change is on your relays.'**
+  String get syncAllSent;
 
   /// Button closing a dialog without doing anything.
   ///
@@ -248,7 +284,7 @@ abstract class AppLocalizations {
   /// **'{count, plural, =0{No items} =1{1 item} other{{count} items}}'**
   String itemCount(int count);
 
-  /// Tooltip of the button fetching changes from the relays now.
+  /// Tooltip of the button fetching changes from the relays now, and that button in the vault settings.
   ///
   /// In en, this message translates to:
   /// **'Sync now'**

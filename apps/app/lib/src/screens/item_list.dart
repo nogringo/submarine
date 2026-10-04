@@ -109,6 +109,36 @@ class _Header extends StatelessWidget {
     final selection = Vaults.of(context).select(vaultId);
     final all = vaultId == allVaultsId;
     final vault = selection.firstOrNull;
+    final title = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Flexible(
+              child: Text(
+                all || vault == null ? l10n.allVaults : vault.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  height: 1.25,
+                ),
+              ),
+            ),
+            if (!withDrawer && !all && vault != null) ...[
+              const SizedBox(width: 6),
+              Icon(
+                Icons.settings_outlined,
+                size: 18,
+                color: context.palette.muted,
+              ),
+            ],
+          ],
+        ),
+        SyncStatusText(vaults: selection),
+      ],
+    );
     return Padding(
       padding: EdgeInsets.fromLTRB(
         withDrawer ? 12 : 20,
@@ -136,22 +166,19 @@ class _Header extends StatelessWidget {
             const SizedBox(width: 12),
           ],
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  all || vault == null ? l10n.allVaults : vault.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                    height: 1.25,
+            // The drawer has the settings on a phone, the filter column on a
+            // desktop.
+            child: withDrawer || all || vault == null
+                ? title
+                : Tooltip(
+                    message: l10n.vaultSettings,
+                    child: InkWell(
+                      onTap: () =>
+                          context.push(vaultSettingsPath(vault.pubkey)),
+                      borderRadius: BorderRadius.circular(10),
+                      child: title,
+                    ),
                   ),
-                ),
-                SyncStatusText(vaults: selection),
-              ],
-            ),
           ),
           SyncButton(vaults: selection),
           if (!withDrawer) ...[

@@ -212,6 +212,15 @@ class VaultDrawer extends StatelessWidget {
                 subtitle: l10n.itemCount(vaults.itemsOf(vault.pubkey).length),
                 selected: selectedVaultId == vault.pubkey,
                 onTap: () => select(vault.pubkey),
+                trailing: IconButton(
+                  tooltip: l10n.vaultSettings,
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () {
+                    Navigator.pop(context);
+                    context.push(vaultSettingsPath(vault.pubkey));
+                  },
+                  icon: const Icon(Icons.settings_outlined),
+                ),
               ),
             _DrawerTile(
               leading: const _AddVaultMark(size: 40),
@@ -236,6 +245,7 @@ class _DrawerTile extends StatelessWidget {
     this.subtitle,
     required this.selected,
     required this.onTap,
+    this.trailing,
   });
 
   final Widget leading;
@@ -243,11 +253,13 @@ class _DrawerTile extends StatelessWidget {
   final String? subtitle;
   final bool selected;
   final VoidCallback onTap;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
     final subtitle = this.subtitle;
+    final trailing = this.trailing;
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Material(
@@ -283,6 +295,7 @@ class _DrawerTile extends StatelessWidget {
                     ],
                   ),
                 ),
+                ?trailing,
               ],
             ),
           ),

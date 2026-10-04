@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:ndk/ndk.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
 
 import '../context.dart';
@@ -9,7 +8,8 @@ import '../theme/theme.dart';
 import '../vaults/vault_controller.dart';
 import '../vaults/vault_storage.dart';
 import '../vaults/vaults.dart';
-import '../widgets/copy_button.dart';
+import '../widgets/vault_color_picker.dart';
+import '../widgets/vault_key_box.dart';
 
 enum AddVaultChoice { create, open }
 
@@ -265,18 +265,9 @@ class _VaultFormDialogState extends State<_VaultFormDialog> {
                 style: TextStyle(fontSize: 13, color: palette.muted),
               ),
               const SizedBox(height: 10),
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: [
-                  for (final (index, option) in vaultColors.indexed)
-                    _ColorSwatch(
-                      color: option,
-                      label: l10n.vaultColorOption(index + 1),
-                      selected: option == color,
-                      onTap: () => setState(() => _color = option),
-                    ),
-                ],
+              VaultColorPicker(
+                selected: color,
+                onSelected: (color) => setState(() => _color = color),
               ),
               if (_saveError case final error?) ...[
                 const SizedBox(height: 16),
@@ -305,45 +296,6 @@ class _VaultFormDialogState extends State<_VaultFormDialog> {
   }
 }
 
-class _ColorSwatch extends StatelessWidget {
-  const _ColorSwatch({
-    required this.color,
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final Color color;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => Semantics(
-    label: label,
-    selected: selected,
-    button: true,
-    child: InkResponse(
-      onTap: onTap,
-      radius: 24,
-      child: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
-          border: selected
-              ? Border.all(color: context.palette.text, width: 2.5)
-              : null,
-        ),
-        child: selected
-            ? const Icon(Icons.check_rounded, color: Colors.white, size: 20)
-            : null,
-      ),
-    ),
-  );
-}
-
 class _VaultKeyDialog extends StatelessWidget {
   const _VaultKeyDialog({required this.vault});
 
@@ -353,7 +305,6 @@ class _VaultKeyDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final palette = context.palette;
-    final nsec = Nip19.encodePrivateKey(vault.record.privateKey);
     return Dialog(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 480),
@@ -373,25 +324,7 @@ class _VaultKeyDialog extends StatelessWidget {
                 style: TextStyle(color: palette.muted),
               ),
               const SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.fromLTRB(16, 8, 4, 8),
-                decoration: BoxDecoration(
-                  color: palette.background,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: palette.line),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: SelectableText(
-                        nsec,
-                        style: monoStyle.copyWith(fontSize: 14, height: 1.4),
-                      ),
-                    ),
-                    CopyButton(value: nsec),
-                  ],
-                ),
-              ),
+              VaultKeyBox(vault: vault),
               const SizedBox(height: 24),
               Align(
                 alignment: Alignment.centerRight,

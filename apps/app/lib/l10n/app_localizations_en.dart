@@ -74,6 +74,25 @@ class AppLocalizationsEn extends AppLocalizations {
       'Anyone who has this key can open the vault. Keep it somewhere safe: you need it to open the vault on another device, or to share it.';
 
   @override
+  String get vaultSettings => 'Vault settings';
+
+  @override
+  String get vaultNameAndColor => 'Name and color';
+
+  @override
+  String get vaultPublicKey => 'Public key';
+
+  @override
+  String get vaultKeyDescription =>
+      'Anyone who has it can open this vault. Enter it on another device to open the vault there, or give it to someone to share the vault with them.';
+
+  @override
+  String get sync => 'Sync';
+
+  @override
+  String get syncAllSent => 'Every change is on your relays.';
+
+  @override
   String get cancel => 'Cancel';
 
   @override

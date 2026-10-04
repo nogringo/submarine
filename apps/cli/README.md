@@ -14,14 +14,21 @@ export SUBMARINE_NSEC=nsec1...
 By default, the vault lives on these relays:
 
 - `wss://relay.nmail.li`
-- `wss://nos.lol`
-- `wss://nostr.mom`
 - `wss://relay.primal.net`
 - `wss://relay.nos.social`
-- `wss://offchain.pub`
 - `wss://relay.coinos.io`
-- `wss://nostr-pub.wellorder.net`
 - `wss://relay.ditto.pub`
+- `wss://auth.nostr1.com`
+- `wss://chat.wisp.talk`
+- `wss://relay.nostrfeed.com`
+- `wss://relay.nostr.net`
+- `wss://relay.nostr.com`
+- `wss://nostr.oxtr.dev`
+- `wss://nostr.bitcoiner.social`
+- `wss://nostr.data.haus`
+- `wss://purplerelay.com`
+- `wss://relay.nostr.wirednet.jp`
+- `wss://nip17.com`
 
 Some relays, like `relay.nmail.li` and `relay.ditto.pub`, serve gift wraps to
 their recipient only: the CLI authenticates to them as the vault key (NIP-42).

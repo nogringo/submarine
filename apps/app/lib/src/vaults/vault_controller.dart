@@ -2,13 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
+import 'package:ndk/ndk.dart' show Nip01Event;
 import 'package:nostr_passwords/nostr_passwords.dart';
 import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
 
 import 'vault_storage.dart';
 
 /// A vault of this device, kept synced from its relays while the app runs.
-/// Its items are read from the ndk cache again whenever the sync moves on.
+/// Its items are read from the ndk cache again whenever the sync moves on, or
+/// another device publishes a change.
 class VaultController extends ChangeNotifier {
   VaultController({
     required this.record,
@@ -18,6 +20,7 @@ class VaultController extends ChangeNotifier {
     _handle = vault.sync(engine);
     // Replays the current status, which triggers the first read.
     _statuses = engine.watchStatus(_handle).listen(_onStatus);
+    subscribe();
   }
 
   final VaultRecord record;
@@ -25,6 +28,7 @@ class VaultController extends ChangeNotifier {
   final SyncEngine _engine;
   late final SyncHandle _handle;
   late final StreamSubscription<SyncRequestStatus> _statuses;
+  StreamSubscription<Nip01Event>? _live;
 
   String get pubkey => vault.signer.getPublicKey();
   String get name => record.name;
@@ -57,6 +61,17 @@ class VaultController extends ChangeNotifier {
     vault.push().then((_) => _checkUnsent()),
     _engine.refresh(_handle),
   ]);
+
+  /// Shows what other devices change the moment they publish it, until
+  /// [unsubscribe].
+  void subscribe() =>
+      _live ??= vault.subscribe().listen((_) => unawaited(_reload()));
+
+  Future<void> unsubscribe() async {
+    final live = _live;
+    _live = null;
+    await live?.cancel();
+  }
 
   /// Saved once in the ndk cache, then sent to the relays.
   Future<Item> createItem(Cipher cipher) => _write(vault.createItem(cipher));
@@ -141,6 +156,7 @@ class VaultController extends ChangeNotifier {
     _disposed = true;
     _unsentCheck?.cancel();
     unawaited(_statuses.cancel());
+    unawaited(unsubscribe());
     _engine.release(_handle);
     super.dispose();
   }

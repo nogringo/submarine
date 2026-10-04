@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:ndk/ndk.dart';
+import 'package:ndk/shared/nips/nip09/deletion.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
 import 'package:sembast/sembast_memory.dart' show newDatabaseFactoryMemory;
 import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
@@ -452,6 +454,117 @@ void main() {
       expect(item.id, created.id);
     });
 
+    group('subscribe', () {
+      late List<Nip01Event> received;
+      late StreamSubscription<Nip01Event> subscription;
+
+      setUp(() async {
+        received = [];
+        subscription = otherVault.subscribe().listen(received.add);
+        await _until(() => relay.activeSubscriptionCount == 2);
+      });
+
+      tearDown(() => subscription.cancel());
+
+      test('brings in what another device pushes', () async {
+        final created = await vault.createItem(boulanger);
+        await vault.push();
+
+        await _until(() => received.isNotEmpty);
+        expect(received.single.kind, GiftWrap.kGiftWrapEventkind);
+        final [item] = await otherVault.items();
+        expect(item.id, created.id);
+      });
+
+      test('brings in the deletion requests', () async {
+        await vault.createItem(boulanger);
+        await vault.push();
+        await _until(() => received.isNotEmpty);
+        final [item] = await vault.items();
+
+        await vault.deleteItem(item);
+        await vault.push();
+
+        await _until(
+          () => received.any((event) => event.kind == Deletion.kKind),
+        );
+        expect(await otherVault.items(), isEmpty);
+      });
+
+      test('closes the subscriptions once cancelled', () async {
+        await subscription.cancel();
+
+        await _until(() => relay.activeSubscriptionCount == 0);
+      });
+
+      test('shares the subscriptions between its listeners', () async {
+        final alsoReceived = <Nip01Event>[];
+        final other = otherVault.subscribe().listen(alsoReceived.add);
+        addTearDown(other.cancel);
+
+        await vault.createItem(boulanger);
+        await vault.push();
+
+        await _until(() => received.isNotEmpty && alsoReceived.isNotEmpty);
+        expect(relay.totalRequestedSubscriptionCount, 2);
+      });
+
+      test('keeps the subscriptions while a listener is left', () async {
+        final alsoReceived = <Nip01Event>[];
+        final other = otherVault.subscribe().listen(alsoReceived.add);
+        await subscription.cancel();
+
+        await vault.createItem(boulanger);
+        await vault.push();
+        await _until(() => alsoReceived.isNotEmpty);
+        expect(relay.activeSubscriptionCount, 2);
+
+        await other.cancel();
+        await _until(() => relay.activeSubscriptionCount == 0);
+      });
+
+      test('opens the subscriptions again after the last listener', () async {
+        await subscription.cancel();
+        await _until(() => relay.activeSubscriptionCount == 0);
+
+        subscription = otherVault.subscribe().listen(received.add);
+        await _until(() => relay.activeSubscriptionCount == 2);
+        await vault.createItem(boulanger);
+        await vault.push();
+
+        await _until(() => received.isNotEmpty);
+      });
+    });
+
+    test('subscribe leaves to sync what was published before', () async {
+      await vault.createItem(boulanger);
+      await vault.push();
+      final received = <Nip01Event>[];
+      final subscription = otherVault.subscribe().listen(received.add);
+      addTearDown(subscription.cancel);
+      await _until(() => relay.activeSubscriptionCount == 2);
+
+      final later = await vault.createItem(boulanger);
+      await vault.push();
+
+      await _until(() => received.isNotEmpty);
+      final [item] = await otherVault.items();
+      expect(item.id, later.id);
+    });
+
+    test('subscribe authenticates as the vault', () async {
+      relay.requireAuthForRequests = true;
+      final pubkey = signer.getPublicKey();
+
+      final subscription = otherVault.subscribe().listen((_) {});
+      addTearDown(subscription.cancel);
+
+      await _until(
+        () => relay.subscriptionsAuthenticatedAs(pubkey).length == 2,
+      );
+      expect(relay.subscriptionsRequestedOutside(pubkey), isEmpty);
+    });
+
     test('wraps the vault did not sign are ignored', () async {
       await vault.createItem(boulanger);
       final attacker = const Bip340EventSignerFactory().createWithNewKeyPair();
@@ -515,5 +628,12 @@ class _CountingSignerFactory extends Bip340EventSignerFactory {
   EventSigner createWithNewKeyPair() {
     keyPairs++;
     return super.createWithNewKeyPair();
+  }
+}
+
+/// Polls [condition], as the mock relay tells nothing when it changes.
+Future<void> _until(bool Function() condition) async {
+  while (!condition()) {
+    await Future<void>.delayed(const Duration(milliseconds: 10));
   }
 }

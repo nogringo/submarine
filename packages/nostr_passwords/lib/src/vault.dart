@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:ndk/ndk.dart';
@@ -41,6 +42,52 @@ class Vault {
       overlapMargin: engine.overlapMargin + _backdating,
     ),
   );
+
+  /// Holds a subscription open on [relays] for what other devices publish to
+  /// the vault from now on, and saves it in the ndk cache. An event comes out
+  /// of the stream once saved, for [items] to see it.
+  ///
+  /// Every listener shares the same subscriptions: they open with the first
+  /// one, and close once the last one cancels.
+  ///
+  /// What was published before, or while a relay was out of reach, is left to
+  /// [sync]. It authenticates as the vault, like [sync].
+  Stream<Nip01Event> subscribe() =>
+      // Without explicit relays, ndk would ask its bootstrap relays.
+      relays.isEmpty ? const Stream.empty() : _live.stream;
+
+  late final _live = StreamController<Nip01Event>.broadcast(
+    onListen: _openLive,
+    onCancel: _closeLive,
+  );
+
+  var _liveRequests = <(String, StreamSubscription<Nip01Event>)>[];
+
+  void _openLive() {
+    for (final filter in [_wraps, _deletions]) {
+      final response = ndk.requests.subscription(
+        // A limit holds for stored events only, while a `since` would also
+        // drop the new gift wraps, which are backdated.
+        filter: filter..limit = 0,
+        explicitRelays: relays,
+        cacheWrite: true,
+        auth: AuthPolicy.require(_account),
+      );
+      _liveRequests.add((
+        response.requestId,
+        response.stream.listen(_live.add, onError: _live.addError),
+      ));
+    }
+  }
+
+  void _closeLive() {
+    final requests = _liveRequests;
+    _liveRequests = [];
+    for (final (requestId, listener) in requests) {
+      unawaited(listener.cancel());
+      unawaited(ndk.requests.closeSubscription(requestId));
+    }
+  }
 
   /// When [sync] last got an answer from a relay, on any relay it ever used,
   /// or null if it never did. Reads the local state only.
@@ -261,16 +308,16 @@ class Vault {
           timeout: timeout,
           saveToCache: false,
           // Without it, a relay asking for AUTH would see the logged account.
-          auth: AuthPolicy.allow(
-            Account(
-              type: AccountType.externalSigner,
-              pubkey: signer.getPublicKey(),
-              signer: signer,
-            ),
-          ),
+          auth: AuthPolicy.allow(_account),
         )
         .broadcastDoneFuture;
   }
+
+  Account get _account => Account(
+    type: AccountType.externalSigner,
+    pubkey: signer.getPublicKey(),
+    signer: signer,
+  );
 }
 
 /// Bitwarden's CipherService.updateModelfromExistingCipher, then

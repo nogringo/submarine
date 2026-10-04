@@ -18,7 +18,7 @@ Future<void> main() async {
   final vault = Vault(
     ndk: ndk,
     signer: signer,
-    relays: ['wss://nos.lol', 'wss://relay.primal.net'],
+    relays: ['wss://relay.primal.net'],
   );
 
   final saved = await vault.createItem(
@@ -55,6 +55,11 @@ Future<void> main() async {
       );
   print('Synced up to ${await vault.lastSync(engine)}');
 
+  // What other devices publish from now on, the moment they do.
+  final live = vault.subscribe().listen((_) async {
+    print('Now ${(await vault.items()).length} item(s)');
+  });
+
   final items = await vault.items();
   for (final item in items) {
     print('${item.cipher.name}: ${item.cipher.subtitle}');
@@ -81,6 +86,7 @@ Future<void> main() async {
   await vault.deleteItem(boulanger);
   await vault.push();
 
+  await live.cancel();
   await engine.dispose();
   await ndk.destroy();
 }

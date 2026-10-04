@@ -10,14 +10,21 @@ import 'vault_storage.dart';
 /// The same relays as the CLI.
 const defaultRelays = [
   'wss://relay.nmail.li',
-  'wss://nos.lol',
-  'wss://nostr.mom',
   'wss://relay.primal.net',
   'wss://relay.nos.social',
-  'wss://offchain.pub',
   'wss://relay.coinos.io',
-  'wss://nostr-pub.wellorder.net',
   'wss://relay.ditto.pub',
+  'wss://auth.nostr1.com',
+  'wss://chat.wisp.talk',
+  'wss://relay.nostrfeed.com',
+  'wss://relay.nostr.net',
+  'wss://relay.nostr.com',
+  'wss://nostr.oxtr.dev',
+  'wss://nostr.bitcoiner.social',
+  'wss://nostr.data.haus',
+  'wss://purplerelay.com',
+  'wss://relay.nostr.wirednet.jp',
+  'wss://nip17.com',
 ];
 
 const vaultColors = [
@@ -140,9 +147,17 @@ class Vaults extends ChangeNotifier {
   }
 
   /// What an app going to the background does: nothing keeps syncing.
-  Future<void> pauseSync() => engine.stop();
+  Future<void> pauseSync() => Future.wait([
+    engine.stop(),
+    for (final vault in _vaults) vault.unsubscribe(),
+  ]);
 
-  void resumeSync() => engine.start();
+  void resumeSync() {
+    engine.start();
+    for (final vault in _vaults) {
+      vault.subscribe();
+    }
+  }
 
   @override
   void dispose() {

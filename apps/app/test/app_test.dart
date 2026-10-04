@@ -337,7 +337,7 @@ void main() {
     await tester.pumpWidget(SubmarineApp(vaults: vaults));
     await settle(tester);
 
-    expect(find.text('Favorites'), findsNothing);
+    expect(find.byType(FilterColumn), findsNothing);
     expect(find.text('All vaults'), findsOneWidget);
     expect(find.byTooltip('Sync now'), findsOneWidget);
     await close(tester);
@@ -740,7 +740,7 @@ void main() {
     await close(tester);
   });
 
-  testWidgets('moves an item to the trash on a phone, in French', (
+  testWidgets('moves an item to the trash and back on a phone, in French', (
     tester,
   ) async {
     setScreen(tester, const Size(390, 844), locale: const Locale('fr'));
@@ -755,6 +755,16 @@ void main() {
 
     expect(find.text('Tous les coffres'), findsOneWidget);
     expect(find.text('GitHub'), findsNothing);
+    await tester.tap(find.text('Corbeille'));
+    await settle(tester);
+    await tester.tap(find.text('GitHub'));
+    await settle(tester);
+    await write(tester, find.text('Restaurer'));
+
+    expect(find.text('GitHub'), findsNothing);
+    await tester.tap(find.text('Tous'));
+    await settle(tester);
+    expect(find.text('GitHub'), findsOneWidget);
     await close(tester);
   });
 

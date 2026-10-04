@@ -31,6 +31,16 @@ enum ItemFilter {
   static ItemFilter? fromSlug(String slug) =>
       values.where((filter) => filter.slug == slug).firstOrNull;
 
+  /// The type filters worth offering for [ciphers]: those of the types they
+  /// hold, and [selected] even if emptied.
+  static List<ItemFilter> typesFor(List<Cipher> ciphers, ItemFilter selected) =>
+      [
+        for (final filter in values)
+          if (filter.type != null &&
+              (filter == selected || ciphers.any(filter.matches)))
+            filter,
+      ];
+
   bool matches(Cipher cipher) => switch (this) {
     trash => cipher.isDeleted,
     _ when cipher.isDeleted => false,

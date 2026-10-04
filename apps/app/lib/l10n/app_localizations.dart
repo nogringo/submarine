@@ -872,6 +872,12 @@ abstract class AppLocalizations {
   /// **'All items'**
   String get filterAllItems;
 
+  /// Chip listing every item, where the filters are chips above the items.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get filterAllShort;
+
   /// Filter: the items marked as favorite.
   ///
   /// In en, this message translates to:

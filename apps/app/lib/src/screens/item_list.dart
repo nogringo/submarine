@@ -11,6 +11,7 @@ import '../widgets/search_field.dart';
 import '../widgets/sync_status.dart';
 import '../widgets/vault_avatar.dart';
 import 'add_vault.dart';
+import 'filter_chips.dart';
 import 'vault_navigation.dart';
 
 /// Wide layout: the items, between the rail or the filters and the selected
@@ -282,6 +283,14 @@ class _ItemsState extends State<_Items> {
             onChanged: (query) => setState(() => _query = query),
           ),
         ),
+        if (!context.showsFilters) ...[
+          FilterChips(
+            vaultId: widget.vaultId,
+            filter: widget.filter,
+            selectedItemId: widget.selectedItemId,
+          ),
+          const SizedBox(height: 12),
+        ],
         Expanded(
           child: shown.isEmpty
               ? _Empty(

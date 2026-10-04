@@ -568,6 +568,10 @@
   "@filterAllItems": {
     "description": "Filter: every item outside the trash."
   },
+  "filterAllShort": "All",
+  "@filterAllShort": {
+    "description": "Chip listing every item, where the filters are chips above the items."
+  },
   "filterFavorites": "Favorites",
   "@filterFavorites": {
     "description": "Filter: the items marked as favorite."

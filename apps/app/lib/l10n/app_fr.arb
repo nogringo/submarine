@@ -129,6 +129,7 @@
   "passportType": "Type",
   "nationalId": "Numéro d'identification national",
   "filterAllItems": "Tous les éléments",
+  "filterAllShort": "Tous",
   "filterFavorites": "Favoris",
   "filterLogins": "Identifiants",
   "filterSecureNotes": "Notes sécurisées",

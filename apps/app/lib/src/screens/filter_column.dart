@@ -44,12 +44,7 @@ class FilterColumn extends StatelessWidget {
         ),
       ),
     );
-    // Only the types the vault holds, and the one selected even if emptied.
-    final types = [
-      for (final option in ItemFilter.values)
-        if (option.type != null && (count(option) > 0 || option == filter))
-          option,
-    ];
+    final types = ItemFilter.typesFor(everything, filter);
     final vault = selection.firstOrNull;
     return ColoredBox(
       color: context.palette.surface,

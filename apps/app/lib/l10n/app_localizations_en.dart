@@ -437,6 +437,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get filterAllItems => 'All items';
 
   @override
+  String get filterAllShort => 'All';
+
+  @override
   String get filterFavorites => 'Favorites';
 
   @override

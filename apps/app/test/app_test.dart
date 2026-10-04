@@ -7,6 +7,7 @@ import 'package:ndk/ndk.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
 import 'package:sembast/sembast_memory.dart' show newDatabaseFactoryMemory;
 import 'package:submarine/src/app.dart';
+import 'package:submarine/src/screens/filter_column.dart';
 import 'package:submarine/src/vaults/vault_storage.dart';
 import 'package:submarine/src/vaults/vaults.dart';
 import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
@@ -194,6 +195,84 @@ void main() {
     expect(find.text('Username'), findsOneWidget);
     expect(find.text('https://github.com'), findsOneWidget);
     expect(find.text('GitHub'), findsNWidgets(2));
+    await close(tester);
+  });
+
+  testWidgets('filters the items in a column of their own on a desktop', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(
+      tester,
+      items: [
+        github,
+        Cipher(
+          type: CipherType.secureNote,
+          name: 'Alarm code',
+          secureNote: SecureNote(),
+        ),
+        Cipher(
+          type: CipherType.login,
+          name: 'Old bank',
+          login: Login(username: 'alice'),
+          deletedDate: DateTime.utc(2026, 10, 1),
+        ),
+        Cipher(
+          type: CipherType.login,
+          name: 'Old mail',
+          archivedDate: DateTime.utc(2026, 10, 2),
+        ),
+      ],
+    );
+    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await settle(tester);
+
+    Finder countOf(String filter) => find.descendant(
+      of: find
+          .ancestor(
+            of: find.descendant(
+              of: find.byType(FilterColumn),
+              matching: find.text(filter),
+            ),
+            matching: find.byType(Row),
+          )
+          .first,
+      matching: find.byWidgetPredicate(
+        (widget) => widget is Text && int.tryParse(widget.data ?? '') != null,
+      ),
+    );
+    // Submarine does not support the archive yet.
+    expect(tester.widget<Text>(countOf('All items')).data, '3');
+    expect(tester.widget<Text>(countOf('Logins')).data, '2');
+    expect(find.text('Old mail'), findsOneWidget);
+    expect(find.text('Archive'), findsNothing);
+    expect(tester.widget<Text>(countOf('Secure notes')).data, '1');
+    expect(tester.widget<Text>(countOf('Trash')).data, '1');
+    expect(find.text('Cards'), findsNothing);
+    expect(find.text('Old bank'), findsNothing);
+
+    await tester.tap(find.text('Trash'));
+    await settle(tester);
+    expect(find.text('Trash'), findsNWidgets(2));
+    expect(find.text('GitHub'), findsNothing);
+    await tester.tap(find.text('Old bank'));
+    await settle(tester);
+    expect(find.text('Old bank'), findsNWidgets(2));
+    expect(find.text('alice'), findsNWidgets(2));
+    await close(tester);
+  });
+
+  testWidgets('leaves the filter column out below a desktop width', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(900, 800));
+    await open(tester, items: [github]);
+    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await settle(tester);
+
+    expect(find.text('Favorites'), findsNothing);
+    expect(find.text('All vaults'), findsOneWidget);
+    expect(find.byTooltip('Sync now'), findsOneWidget);
     await close(tester);
   });
 

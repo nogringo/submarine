@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../context.dart';
+import '../router.dart';
 import '../vaults/vaults.dart';
 import '../widgets/vault_avatar.dart';
 import 'add_vault.dart';
@@ -25,7 +26,7 @@ class VaultRail extends StatelessWidget {
           _RailTile(
             tooltip: l10n.allVaults,
             selected: selectedVaultId == allVaultsId,
-            onTap: () => context.go('/vaults/$allVaultsId'),
+            onTap: () => context.go(vaultPath(allVaultsId)),
             builder: (highlighted) => AllVaultsAvatar(selected: highlighted),
           ),
           Container(
@@ -45,7 +46,7 @@ class VaultRail extends StatelessWidget {
                   _RailTile(
                     tooltip: vault.name,
                     selected: selectedVaultId == vault.pubkey,
-                    onTap: () => context.go('/vaults/${vault.pubkey}'),
+                    onTap: () => context.go(vaultPath(vault.pubkey)),
                     builder: (highlighted) =>
                         VaultAvatar(vault: vault, selected: highlighted),
                   ),
@@ -169,7 +170,7 @@ class VaultDrawer extends StatelessWidget {
     final vaults = Vaults.of(context);
     void select(String vaultId) {
       Navigator.pop(context);
-      context.go('/vaults/$vaultId');
+      context.go(vaultPath(vaultId));
     }
 
     return Drawer(
@@ -201,7 +202,7 @@ class VaultDrawer extends StatelessWidget {
               _DrawerTile(
                 leading: VaultAvatar(vault: vault, size: 40),
                 title: vault.name,
-                subtitle: l10n.itemCount(vault.items.length),
+                subtitle: l10n.itemCount(vaults.itemsOf(vault.pubkey).length),
                 selected: selectedVaultId == vault.pubkey,
                 onTap: () => select(vault.pubkey),
               ),

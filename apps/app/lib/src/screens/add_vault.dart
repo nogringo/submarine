@@ -4,6 +4,7 @@ import 'package:ndk/ndk.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
 
 import '../context.dart';
+import '../router.dart';
 import '../theme/theme.dart';
 import '../vaults/vault_controller.dart';
 import '../vaults/vault_storage.dart';
@@ -35,7 +36,7 @@ Future<void> addVaultWith(BuildContext context, AddVaultChoice choice) async {
       builder: (context) => _VaultKeyDialog(vault: vault),
     );
   }
-  if (context.mounted) context.go('/vaults/${vault.pubkey}');
+  if (context.mounted) context.go(vaultPath(vault.pubkey));
 }
 
 class _ChoiceDialog extends StatelessWidget {

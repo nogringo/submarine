@@ -121,5 +121,17 @@
   "birthPlace": "Lieu de naissance",
   "nationality": "Nationalité",
   "passportType": "Type",
-  "nationalId": "Numéro d'identification national"
+  "nationalId": "Numéro d'identification national",
+  "filterAllItems": "Tous les éléments",
+  "filterFavorites": "Favoris",
+  "filterLogins": "Identifiants",
+  "filterSecureNotes": "Notes sécurisées",
+  "filterCards": "Cartes",
+  "filterIdentities": "Identités",
+  "filterSshKeys": "Clés SSH",
+  "filterBankAccounts": "Comptes bancaires",
+  "filterDriversLicenses": "Permis de conduire",
+  "filterPassports": "Passeports",
+  "filterTrash": "Corbeille",
+  "noItemsHere": "Aucun élément ici."
 }

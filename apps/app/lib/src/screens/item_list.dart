@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../context.dart';
+import '../items/item_filter.dart';
+import '../router.dart';
 import '../vaults/vaults.dart';
 import '../widgets/item_icon.dart';
 import '../widgets/sync_status.dart';
@@ -9,24 +11,38 @@ import '../widgets/vault_avatar.dart';
 import 'add_vault.dart';
 import 'vault_navigation.dart';
 
-/// Wide layout: the items, between the rail and the selected item.
+/// Wide layout: the items, between the rail or the filters and the selected
+/// item.
 class ItemListPane extends StatelessWidget {
   const ItemListPane({
     super.key,
     required this.vaultId,
+    required this.filter,
     required this.selectedItemId,
+    required this.titledByFilter,
   });
 
   final String vaultId;
+  final ItemFilter filter;
   final String? selectedItemId;
+
+  /// Whether the filter column already names the vault and shows its sync.
+  final bool titledByFilter;
 
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      _Header(vaultId: vaultId),
+      if (titledByFilter)
+        _FilterHeader(filter: filter)
+      else
+        _Header(vaultId: vaultId),
       Expanded(
-        child: _Items(vaultId: vaultId, selectedItemId: selectedItemId),
+        child: _Items(
+          vaultId: vaultId,
+          filter: filter,
+          selectedItemId: selectedItemId,
+        ),
       ),
     ],
   );
@@ -34,9 +50,14 @@ class ItemListPane extends StatelessWidget {
 
 /// Narrow layout: the items on the whole screen, the vaults in a drawer.
 class ItemListScreen extends StatelessWidget {
-  const ItemListScreen({super.key, required this.vaultId});
+  const ItemListScreen({
+    super.key,
+    required this.vaultId,
+    required this.filter,
+  });
 
   final String vaultId;
+  final ItemFilter filter;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -50,7 +71,9 @@ class ItemListScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _Header(vaultId: vaultId, withDrawer: true),
-          Expanded(child: _Items(vaultId: vaultId)),
+          Expanded(
+            child: _Items(vaultId: vaultId, filter: filter),
+          ),
         ],
       ),
     ),
@@ -117,17 +140,43 @@ class _Header extends StatelessWidget {
   }
 }
 
+class _FilterHeader extends StatelessWidget {
+  const _FilterHeader({required this.filter});
+
+  final ItemFilter filter;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(20, 18, 16, 14),
+    child: Text(
+      filter.label(context.l10n),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: const TextStyle(
+        fontSize: 22,
+        fontWeight: FontWeight.w700,
+        height: 1.25,
+      ),
+    ),
+  );
+}
+
 class _Items extends StatelessWidget {
-  const _Items({required this.vaultId, this.selectedItemId});
+  const _Items({
+    required this.vaultId,
+    required this.filter,
+    this.selectedItemId,
+  });
 
   final String vaultId;
+  final ItemFilter filter;
   final String? selectedItemId;
 
   @override
   Widget build(BuildContext context) {
     final vaults = Vaults.of(context);
-    final items = vaults.itemsOf(vaultId);
-    if (items.isEmpty) return _Empty(vaultId: vaultId);
+    final items = vaults.itemsOf(vaultId, filter);
+    if (items.isEmpty) return _Empty(vaultId: vaultId, filter: filter);
     // A badge tells the vaults apart, which a single vault does not need.
     final showVault = vaultId == allVaultsId && vaults.all.length > 1;
     return ListView.builder(
@@ -139,7 +188,9 @@ class _Items extends StatelessWidget {
           entry: entry,
           showVault: showVault,
           selected: entry.item.id == selectedItemId,
-          onTap: () => context.go('/vaults/$vaultId/items/${entry.item.id}'),
+          onTap: () => context.go(
+            vaultPath(vaultId, filter: filter, itemId: entry.item.id),
+          ),
         );
       },
     );
@@ -215,12 +266,14 @@ class _ItemRow extends StatelessWidget {
 }
 
 class _Empty extends StatelessWidget {
-  const _Empty({required this.vaultId});
+  const _Empty({required this.vaultId, required this.filter});
 
   final String vaultId;
+  final ItemFilter filter;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final palette = context.palette;
     final selection = Vaults.of(context).select(vaultId);
     if (selection.any((vault) => !vault.loaded)) return const SizedBox.shrink();
@@ -229,7 +282,11 @@ class _Empty extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Text(
-          neverSynced ? context.l10n.lookingForItems : context.l10n.noItems,
+          neverSynced
+              ? l10n.lookingForItems
+              : filter == ItemFilter.all
+              ? l10n.noItems
+              : l10n.noItemsHere,
           textAlign: TextAlign.center,
           style: TextStyle(color: palette.muted),
         ),

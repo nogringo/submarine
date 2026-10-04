@@ -829,6 +829,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'National ID number'**
   String get nationalId;
+
+  /// Filter: every item outside the trash.
+  ///
+  /// In en, this message translates to:
+  /// **'All items'**
+  String get filterAllItems;
+
+  /// Filter: the items marked as favorite.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get filterFavorites;
+
+  /// Filter: the logins.
+  ///
+  /// In en, this message translates to:
+  /// **'Logins'**
+  String get filterLogins;
+
+  /// Filter: the secure notes.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure notes'**
+  String get filterSecureNotes;
+
+  /// Filter: the payment cards.
+  ///
+  /// In en, this message translates to:
+  /// **'Cards'**
+  String get filterCards;
+
+  /// Filter: the identities.
+  ///
+  /// In en, this message translates to:
+  /// **'Identities'**
+  String get filterIdentities;
+
+  /// Filter: the SSH keys.
+  ///
+  /// In en, this message translates to:
+  /// **'SSH keys'**
+  String get filterSshKeys;
+
+  /// Filter: the bank accounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank accounts'**
+  String get filterBankAccounts;
+
+  /// Filter: the driver's licenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver\'s licenses'**
+  String get filterDriversLicenses;
+
+  /// Filter: the passports.
+  ///
+  /// In en, this message translates to:
+  /// **'Passports'**
+  String get filterPassports;
+
+  /// Filter: the items in the trash.
+  ///
+  /// In en, this message translates to:
+  /// **'Trash'**
+  String get filterTrash;
+
+  /// Shown in place of the list when a filter matches no item.
+  ///
+  /// In en, this message translates to:
+  /// **'No items here.'**
+  String get noItemsHere;
 }
 
 class _AppLocalizationsDelegate

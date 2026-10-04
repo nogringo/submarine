@@ -413,4 +413,40 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nationalId => 'National ID number';
+
+  @override
+  String get filterAllItems => 'All items';
+
+  @override
+  String get filterFavorites => 'Favorites';
+
+  @override
+  String get filterLogins => 'Logins';
+
+  @override
+  String get filterSecureNotes => 'Secure notes';
+
+  @override
+  String get filterCards => 'Cards';
+
+  @override
+  String get filterIdentities => 'Identities';
+
+  @override
+  String get filterSshKeys => 'SSH keys';
+
+  @override
+  String get filterBankAccounts => 'Bank accounts';
+
+  @override
+  String get filterDriversLicenses => 'Driver\'s licenses';
+
+  @override
+  String get filterPassports => 'Passports';
+
+  @override
+  String get filterTrash => 'Trash';
+
+  @override
+  String get noItemsHere => 'No items here.';
 }

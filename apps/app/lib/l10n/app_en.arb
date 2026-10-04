@@ -539,5 +539,53 @@
   "nationalId": "National ID number",
   "@nationalId": {
     "description": "Field label: the national identification number on a passport."
+  },
+  "filterAllItems": "All items",
+  "@filterAllItems": {
+    "description": "Filter: every item outside the trash."
+  },
+  "filterFavorites": "Favorites",
+  "@filterFavorites": {
+    "description": "Filter: the items marked as favorite."
+  },
+  "filterLogins": "Logins",
+  "@filterLogins": {
+    "description": "Filter: the logins."
+  },
+  "filterSecureNotes": "Secure notes",
+  "@filterSecureNotes": {
+    "description": "Filter: the secure notes."
+  },
+  "filterCards": "Cards",
+  "@filterCards": {
+    "description": "Filter: the payment cards."
+  },
+  "filterIdentities": "Identities",
+  "@filterIdentities": {
+    "description": "Filter: the identities."
+  },
+  "filterSshKeys": "SSH keys",
+  "@filterSshKeys": {
+    "description": "Filter: the SSH keys."
+  },
+  "filterBankAccounts": "Bank accounts",
+  "@filterBankAccounts": {
+    "description": "Filter: the bank accounts."
+  },
+  "filterDriversLicenses": "Driver's licenses",
+  "@filterDriversLicenses": {
+    "description": "Filter: the driver's licenses."
+  },
+  "filterPassports": "Passports",
+  "@filterPassports": {
+    "description": "Filter: the passports."
+  },
+  "filterTrash": "Trash",
+  "@filterTrash": {
+    "description": "Filter: the items in the trash."
+  },
+  "noItemsHere": "No items here.",
+  "@noItemsHere": {
+    "description": "Shown in place of the list when a filter matches no item."
   }
 }

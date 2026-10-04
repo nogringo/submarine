@@ -30,7 +30,7 @@ class VaultController extends ChangeNotifier {
   String get name => record.name;
   Color get color => record.color;
 
-  /// Neither in the trash nor archived, sorted by name.
+  /// Every item, trash included, sorted by name.
   List<Item> get items => _items;
   List<Item> _items = const [];
 
@@ -71,10 +71,7 @@ class VaultController extends ChangeNotifier {
         final items = await vault.items();
         final lastSync = await vault.lastSync(_engine);
         if (_disposed) return;
-        _items = [
-          for (final item in items)
-            if (!item.cipher.isDeleted && !item.cipher.isArchived) item,
-        ]..sort(compareByName);
+        _items = items..sort(compareByName);
         _lastSync = lastSync;
         _loaded = true;
         notifyListeners();

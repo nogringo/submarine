@@ -3,6 +3,7 @@ import 'package:ndk/ndk.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
 import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
 
+import '../items/item_filter.dart';
 import 'vault_controller.dart';
 import 'vault_storage.dart';
 
@@ -86,9 +87,13 @@ class Vaults extends ChangeNotifier {
   List<VaultController> select(String vaultId) =>
       vaultId == allVaultsId ? all : [?byPubkey(vaultId)];
 
-  List<VaultItem> itemsOf(String vaultId) => [
+  List<VaultItem> itemsOf(
+    String vaultId, [
+    ItemFilter filter = ItemFilter.all,
+  ]) => [
     for (final vault in select(vaultId))
-      for (final item in vault.items) VaultItem(vault, item),
+      for (final item in vault.items)
+        if (filter.matches(item.cipher)) VaultItem(vault, item),
   ]..sort((a, b) => compareByName(a.item, b.item));
 
   VaultItem? findItem(String vaultId, String itemId) {

@@ -63,6 +63,11 @@ As in Bitwarden, the replaced password goes to the item's password history,
 which keeps the last 5, and `edit` refuses an item that changed since it was
 read.
 
+`delete` moves an item to the trash, which `list items --trash` shows and
+`restore` takes it out of. `delete --permanent` asks the relays to delete every
+version of the item, and other devices drop them at their next sync. Unlike
+Bitwarden, the trash is never emptied on its own.
+
 ### Bitwarden CLI compatibility
 
 These commands behave like their `bw` counterparts, so a script written for
@@ -76,6 +81,8 @@ the Bitwarden CLI runs on Submarine as long as it sticks to them:
   a search term
 - `edit item <id> [encodedJson]`, where `<id>` is an item id
 - `encode`
+- `delete item <id>`, with `--permanent`, and `restore item <id>`, where
+  `<id>` is an item id
 - the global flags `--pretty`, `--raw` and `--quiet`
 
 Output is the same: JSON items, bare values for `get password` and the like,
@@ -84,9 +91,10 @@ piped. Searching ignores case and accents and looks in the name, username,
 hostnames and notes. Other `bw` commands and objects fail with an error.
 
 `list` and `get` read the local cache only, they never go to the relays.
-`sync` fetches what changed on the relays since the last sync, and `edit` does
-it before saving. Until the first sync, `list` and `get` refuse to run. Items
-saved with `add` or `edit` are in the cache right away.
+`sync` fetches what changed on the relays since the last sync, and `edit`,
+`delete` and `restore` do it before changing an item. Until the first sync,
+`list` and `get` refuse to run. What a command changes is in the cache right
+away.
 
 The vault's gift wraps, still encrypted, are cached in `~/.cache/submarine`
 (under `$XDG_CACHE_HOME` or `%LOCALAPPDATA%` when set). Passwords are decrypted

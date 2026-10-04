@@ -184,6 +184,100 @@ void main() {
     });
   });
 
+  test('trashItem and restoreItem set and clear deletedDate', () async {
+    await vault.createItem(boulanger);
+    final [item] = await vault.items();
+
+    final trashed = await vault.trashItem(item);
+
+    expect(trashed.parents, [item.current.rev]);
+    final [inTrash] = await vault.items();
+    expect(inTrash.cipher.isDeleted, isTrue);
+    expect(inTrash.cipher.deletedDate, inTrash.cipher.revisionDate);
+
+    await vault.restoreItem(inTrash);
+
+    final [restored] = await vault.items();
+    expect(restored.cipher.isDeleted, isFalse);
+    expect(restored.cipher.name, 'Boulanger');
+  });
+
+  group('deleteItem', () {
+    int seconds() => DateTime.now().millisecondsSinceEpoch ~/ 1000;
+
+    test('asks the relays to delete each gift wrap of the item', () async {
+      await vault.createItem(boulanger);
+      final [item] = await vault.items();
+      await vault.updateItem(item, item.cipher..notes = 'Loyalty card 1234');
+      final boulangerWraps = [for (final wrap in relay.receivedEvents) wrap.id];
+      await vault.createItem(
+        Cipher(type: CipherType.secureNote, name: 'Wi-Fi'),
+      );
+
+      final before = seconds();
+      await vault.deleteItem(item);
+      final after = seconds();
+
+      final requests = [
+        for (final event in relay.receivedEvents)
+          if (event.kind == 5) event,
+      ];
+      expect([
+        for (final request in requests) ...request.getTags('e'),
+      ], unorderedEquals(boulangerWraps));
+      for (final request in requests) {
+        expect(request.pubKey, signer.getPublicKey());
+        expect(request.getTags('k'), ['1059']);
+        expect(request.content, isEmpty);
+        expect(
+          request.createdAt,
+          inInclusiveRange(before - 2 * 24 * 60 * 60, after),
+        );
+        expect(await Bip340EventVerifier().verify(request), isTrue);
+      }
+      final [left] = await vault.items();
+      expect(left.cipher.name, 'Wi-Fi');
+      expect(await ndk.config.cache.loadEvents(ids: boulangerWraps), isEmpty);
+    });
+
+    test('a version published afterwards brings the item back', () async {
+      await vault.createItem(boulanger);
+      final [item] = await vault.items();
+      await vault.deleteItem(item);
+      expect(await vault.items(), isEmpty);
+
+      final late = await vault.updateItem(
+        item,
+        Cipher.fromJson(item.current.data)..notes = 'Edited offline',
+      );
+
+      final [back] = await vault.items();
+      expect(back.current.rev, late.rev);
+    });
+
+    test('items ignore deletion requests the vault did not sign', () async {
+      await vault.createItem(boulanger);
+      final [wrap] = relay.receivedEvents;
+      final attacker = const Bip340EventSignerFactory().createWithNewKeyPair();
+      await ndk.config.cache.saveEvent(
+        await attacker.sign(
+          Nip01Event(
+            pubKey: attacker.getPublicKey(),
+            kind: 5,
+            tags: [
+              ['e', wrap.id],
+              ['k', '1059'],
+            ],
+            content: '',
+          ),
+        ),
+      );
+
+      final [item] = await vault.items();
+      expect(item.cipher.name, 'Boulanger');
+    });
+  });
+
   group('on another device', () {
     late Ndk otherNdk;
     late SyncEngine engine;
@@ -225,6 +319,30 @@ void main() {
       final [item] = await syncedItems();
       expect(item.id, created.id);
       expect(item.cipher.name, 'Boulanger');
+    });
+
+    test('items drop what the vault deleted for good', () async {
+      await vault.createItem(boulanger);
+      await syncedItems();
+      final [item] = await vault.items();
+      await vault.deleteItem(item);
+
+      // This engine deems the vault synced for 5 more minutes.
+      await engine.dispose();
+      engine = SyncEngine(
+        otherNdk,
+        store: SembastSyncStore(
+          await newDatabaseFactoryMemory().openDatabase('sync.db'),
+        ),
+      );
+
+      expect(await syncedItems(), isEmpty);
+      expect(
+        await otherNdk.config.cache.loadEvents(
+          kinds: [GiftWrap.kGiftWrapEventkind],
+        ),
+        isEmpty,
+      );
     });
 
     test('lastSync is null before the first sync', () async {

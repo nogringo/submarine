@@ -78,6 +78,15 @@ class VaultSession {
     return vault.items();
   }
 
+  /// The item [id], trash included, after a [sync]: a command that changes an
+  /// item syncs first, so that its version does not miss a head another device
+  /// published.
+  Future<Item> syncedItem(String id) async {
+    await sync();
+    return (await items()).where((item) => item.id == id).firstOrNull ??
+        (throw CliException('Not found.'));
+  }
+
   Future<void> close() async {
     await _engine.dispose();
     await ndk.destroy();

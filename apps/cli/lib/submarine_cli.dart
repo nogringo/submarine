@@ -3,10 +3,12 @@ library;
 import 'package:args/command_runner.dart';
 
 import 'src/commands/add_command.dart';
+import 'src/commands/delete_command.dart';
 import 'src/commands/edit_command.dart';
 import 'src/commands/encode_command.dart';
 import 'src/commands/get_command.dart';
 import 'src/commands/list_command.dart';
+import 'src/commands/restore_command.dart';
 import 'src/commands/status_command.dart';
 import 'src/commands/sync_command.dart';
 import 'src/commands/vault_command.dart';
@@ -30,6 +32,8 @@ class SubmarineCommandRunner extends CommandRunner<void> {
     addCommand(ListCommand());
     addCommand(GetCommand());
     addCommand(EditCommand());
+    addCommand(DeleteCommand());
+    addCommand(RestoreCommand());
     addCommand(StatusCommand());
     addCommand(SyncCommand());
     addCommand(EncodeCommand());

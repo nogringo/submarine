@@ -59,10 +59,17 @@ Future<void> main() async {
 
   // The replaced password goes to the item's password history.
   final boulanger = found.first;
-  await vault.updateItem(
+  final updated = await vault.updateItem(
     boulanger,
     boulanger.cipher..login!.password = 'Tr0ub4dor&3',
   );
+
+  // A published version replaces every head of the item.
+  final trashed = await vault.trashItem(Item([updated]));
+  await vault.restoreItem(Item([trashed]));
+
+  // Asks the relays to delete every version of the item, for good.
+  await vault.deleteItem(boulanger);
 
   await engine.dispose();
   await ndk.destroy();

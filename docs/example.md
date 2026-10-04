@@ -58,3 +58,65 @@ Envelope, the version event's `content`:
   }
 }
 ```
+
+## Move a password to the trash
+
+A new version of the item, wrapped and published like the first one. Its envelope names the current version as parent (every head, if there is a conflict) and sets `deletedDate`:
+
+```jsonc
+{
+  "v": 1,
+  "id": "<item id>",
+  "type": "item",
+  "rev": "<new revision id>",
+  "parents": ["<current revision id>"],
+  "modified_at": 1790848800000,
+  "data": {
+    // the rest of the item, unchanged
+    "revisionDate": "2026-10-01T10:00:00.000Z",
+    "deletedDate": "2026-10-01T10:00:00.000Z"
+  }
+}
+```
+
+## Restore a password
+
+Another version, which clears `deletedDate`:
+
+```jsonc
+{
+  "v": 1,
+  "id": "<item id>",
+  "type": "item",
+  "rev": "<new revision id>",
+  "parents": ["<revision id of the trashed version>"],
+  "modified_at": 1790935200000,
+  "data": {
+    // the rest of the item, unchanged
+    "revisionDate": "2026-10-02T10:00:00.000Z",
+    "deletedDate": null
+  }
+}
+```
+
+## Delete a password permanently
+
+A NIP-09 deletion request for each gift wrap of the item, one per version:
+
+```jsonc
+{
+  "kind": 5,
+  "pubkey": "<pk_vault>",
+  "created_at": "<random time in the last two days>",
+  "tags": [
+    ["e", "<gift wrap id>"],
+    ["k", "1059"]
+  ],
+  "content": "",
+  "sig": "..."
+}
+```
+
+It names the gift wrap, the only event relays hold. The gift wrap is signed by a one-time key, but NIP-59 has relays delete a `kind:1059` whose `p` tag matches the signer of the deletion request, here the vault. One request per gift wrap, with a random `created_at` as for gift wraps, keeps the requests from tying the versions of an item together.
+
+Other devices fetch the vault's `kind:5` events when they sync, and drop the gift wraps they name from their cache.

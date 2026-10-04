@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -27,6 +29,13 @@ class ItemForm extends StatelessWidget {
   final ItemFilter filter;
   final String? itemId;
 
+  /// Whether the form on screen may be left, asking first if that loses changes.
+  static FutureOr<bool> confirmExit() {
+    final form = _FormState._shown;
+    if (form == null || form._leaving || !form._changed) return true;
+    return form._confirmDiscard();
+  }
+
   @override
   Widget build(BuildContext context) {
     final itemId = this.itemId;
@@ -51,6 +60,8 @@ class _Form extends StatefulWidget {
 }
 
 class _FormState extends State<_Form> {
+  static _FormState? _shown;
+
   /// The version being edited, rather than one synced meanwhile: saving over
   /// it keeps both, as a conflict, instead of losing the other.
   late final VaultItem? _original = widget.entry;
@@ -73,6 +84,9 @@ class _FormState extends State<_Form> {
   VaultController? _chosenVault;
   var _passwordHidden = true;
   var _saving = false;
+
+  /// Set by Cancel or a save, which leave without asking.
+  var _leaving = false;
   String? _nameError;
   String? _saveError;
   late final List<Object?> _initialValues;
@@ -105,6 +119,7 @@ class _FormState extends State<_Form> {
   @override
   void initState() {
     super.initState();
+    _shown = this;
     final cipher = _cipher;
     final login = cipher?.login;
     _name.text = cipher?.name ?? '';
@@ -123,6 +138,7 @@ class _FormState extends State<_Form> {
 
   @override
   void dispose() {
+    if (identical(_shown, this)) _shown = null;
     for (final controller in _controllers) {
       controller.dispose();
     }
@@ -135,13 +151,44 @@ class _FormState extends State<_Form> {
       vaults.byPubkey(widget.vaultId) ??
       vaults.all.first;
 
-  void _close() => context.go(
+  void _leave(String location) {
+    _leaving = true;
+    context.go(location);
+  }
+
+  void _close() => _leave(
     vaultPath(
       widget.vaultId,
       filter: widget.filter,
       itemId: _original?.item.id,
     ),
   );
+
+  Future<bool> _confirmDiscard() async {
+    final l10n = context.l10n;
+    final colors = Theme.of(context).colorScheme;
+    final discard = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.discardChanges),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.keepEditing),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: colors.error,
+              foregroundColor: colors.onError,
+            ),
+            child: Text(l10n.discard),
+          ),
+        ],
+      ),
+    );
+    return discard ?? false;
+  }
 
   Future<void> _save() async {
     if (_saving) return;
@@ -179,7 +226,7 @@ class _FormState extends State<_Form> {
         null => await vault.createItem(cipher),
       };
       if (!mounted) return;
-      context.go(
+      _leave(
         vaultPath(
           widget.vaultId == allVaultsId ? allVaultsId : vault.pubkey,
           filter: widget.filter.matches(item.cipher)

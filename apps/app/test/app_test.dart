@@ -484,6 +484,106 @@ void main() {
     await close(tester);
   });
 
+  testWidgets('asks before another item drops an edit on a desktop', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(
+      tester,
+      items: [
+        github,
+        Cipher(
+          type: CipherType.secureNote,
+          name: 'Alarm code',
+          secureNote: SecureNote(),
+        ),
+      ],
+    );
+    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await settle(tester);
+
+    await tester.tap(find.text('GitHub'));
+    await settle(tester);
+    await tester.tap(find.text('Edit'));
+    await settle(tester);
+    await tester.tap(find.text('Alarm code'));
+    await settle(tester);
+    expect(find.text('Discard your changes?'), findsNothing);
+    expect(find.text('Alarm code'), findsNWidgets(2));
+
+    await tester.tap(find.text('GitHub'));
+    await settle(tester);
+    await tester.tap(find.text('Edit'));
+    await settle(tester);
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Password'),
+      'correct horse',
+    );
+    await tester.tap(find.text('Alarm code'));
+    await settle(tester);
+    expect(find.text('Discard your changes?'), findsOneWidget);
+    await tester.tap(find.text('Keep editing'));
+    await settle(tester);
+    expect(find.text('Edit item'), findsOneWidget);
+    expect(find.text('correct horse'), findsOneWidget);
+
+    await tester.tap(find.text('Alarm code'));
+    await settle(tester);
+    await tester.tap(find.text('Discard'));
+    await settle(tester);
+    expect(find.text('Edit item'), findsNothing);
+    expect(find.text('Alarm code'), findsNWidgets(2));
+    final items = (await tester.runAsync(vaults.all.single.vault.items))!;
+    final saved = items.singleWhere((item) => item.cipher.name == 'GitHub');
+    expect(saved.cipher.login!.password, 'Tr0ub4dor&3');
+
+    await tester.tap(find.text('GitHub'));
+    await settle(tester);
+    await tester.tap(find.text('Edit'));
+    await settle(tester);
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Password'),
+      'correct horse',
+    );
+    await tester.tap(find.text('Cancel'));
+    await settle(tester);
+    expect(find.text('Discard your changes?'), findsNothing);
+    expect(find.text('Edit item'), findsNothing);
+    await close(tester);
+  });
+
+  testWidgets('asks before the back button drops an edit on a phone', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(390, 844), locale: const Locale('fr'));
+    await open(tester, items: [github]);
+    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await settle(tester);
+
+    await tester.tap(find.text('GitHub'));
+    await settle(tester);
+    await tester.tap(find.text('Modifier'));
+    await settle(tester);
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Mot de passe'),
+      'correct horse',
+    );
+    await tester.binding.handlePopRoute();
+    await settle(tester);
+    expect(find.text('Abandonner vos modifications ?'), findsOneWidget);
+    await tester.tap(find.text('Continuer la modification'));
+    await settle(tester);
+    expect(find.text('Modifier l\'élément'), findsOneWidget);
+
+    await tester.binding.handlePopRoute();
+    await settle(tester);
+    await tester.tap(find.text('Abandonner'));
+    await settle(tester);
+    expect(find.text('Modifier l\'élément'), findsNothing);
+    expect(find.text('Modifier'), findsOneWidget);
+    await close(tester);
+  });
+
   testWidgets('marks an item as a favorite', (tester) async {
     setScreen(tester, const Size(1280, 800));
     await open(tester, items: [github]);

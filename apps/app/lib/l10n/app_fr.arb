@@ -152,5 +152,8 @@
   "addWebsite": "Ajouter un site web",
   "favorite": "Favori",
   "addToFavorites": "Ajouter aux favoris",
-  "removeFromFavorites": "Retirer des favoris"
+  "removeFromFavorites": "Retirer des favoris",
+  "discardChanges": "Abandonner vos modifications ?",
+  "keepEditing": "Continuer la modification",
+  "discard": "Abandonner"
 }

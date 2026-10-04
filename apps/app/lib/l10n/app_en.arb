@@ -673,5 +673,17 @@
   "removeFromFavorites": "Remove from favorites",
   "@removeFromFavorites": {
     "description": "Tooltip of the star of a favorite item."
+  },
+  "discardChanges": "Discard your changes?",
+  "@discardChanges": {
+    "description": "Title of the dialog shown when leaving the item form with changes not saved."
+  },
+  "keepEditing": "Keep editing",
+  "@keepEditing": {
+    "description": "Button of that dialog that stays in the item form."
+  },
+  "discard": "Discard",
+  "@discard": {
+    "description": "Button of that dialog that leaves the item form and loses the changes."
   }
 }

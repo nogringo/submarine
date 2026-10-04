@@ -84,6 +84,7 @@ GoRouter buildRouter(Vaults vaults) => GoRouter(
             GoRoute(
               path: 'new',
               pageBuilder: (context, state) => _formPage(context, state),
+              onExit: (context, state) => ItemForm.confirmExit(),
             ),
             GoRoute(
               path: ':itemId',
@@ -113,6 +114,7 @@ GoRouter buildRouter(Vaults vaults) => GoRouter(
                 GoRoute(
                   path: 'edit',
                   pageBuilder: (context, state) => _formPage(context, state),
+                  onExit: (context, state) => ItemForm.confirmExit(),
                 ),
               ],
             ),

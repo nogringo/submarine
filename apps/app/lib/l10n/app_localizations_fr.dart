@@ -528,4 +528,13 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get removeFromFavorites => 'Retirer des favoris';
+
+  @override
+  String get discardChanges => 'Abandonner vos modifications ?';
+
+  @override
+  String get keepEditing => 'Continuer la modification';
+
+  @override
+  String get discard => 'Abandonner';
 }

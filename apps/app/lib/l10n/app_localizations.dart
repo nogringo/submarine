@@ -1015,6 +1015,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove from favorites'**
   String get removeFromFavorites;
+
+  /// Title of the dialog shown when leaving the item form with changes not saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard your changes?'**
+  String get discardChanges;
+
+  /// Button of that dialog that stays in the item form.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get keepEditing;
+
+  /// Button of that dialog that leaves the item form and loses the changes.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get discard;
 }
 
 class _AppLocalizationsDelegate

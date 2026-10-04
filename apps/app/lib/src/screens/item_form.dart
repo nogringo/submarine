@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
@@ -74,8 +75,32 @@ class _FormState extends State<_Form> {
   var _saving = false;
   String? _nameError;
   String? _saveError;
+  late final List<Object?> _initialValues;
 
   bool get _isLogin => (_cipher?.type ?? CipherType.login) == CipherType.login;
+
+  List<TextEditingController> get _controllers => [
+    _name,
+    _username,
+    _password,
+    _totp,
+    _notes,
+    for (final (_, controller) in _uris) controller,
+  ];
+
+  /// What [_save] would write, so an empty website field changes nothing.
+  List<Object?> get _values => [
+    _name.text.trim(),
+    _username.text,
+    _password.text,
+    _totp.text,
+    _notes.text,
+    _favorite,
+    for (final (_, controller) in _uris)
+      if (controller.text.trim() case final text when text.isNotEmpty) text,
+  ];
+
+  bool get _changed => !listEquals(_values, _initialValues);
 
   @override
   void initState() {
@@ -93,18 +118,12 @@ class _FormState extends State<_Form> {
         (uri, TextEditingController(text: uri.uri)),
     ]);
     if (_uris.isEmpty) _uris.add((null, TextEditingController()));
+    _initialValues = _values;
   }
 
   @override
   void dispose() {
-    for (final controller in [
-      _name,
-      _username,
-      _password,
-      _totp,
-      _notes,
-      for (final (_, controller) in _uris) controller,
-    ]) {
+    for (final controller in _controllers) {
       controller.dispose();
     }
     super.dispose();
@@ -209,12 +228,15 @@ class _FormState extends State<_Form> {
                       ),
                     ),
                   ),
-                  FilledButton(
-                    onPressed: _saving ? null : _save,
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size(0, 44),
+                  ListenableBuilder(
+                    listenable: Listenable.merge(_controllers),
+                    builder: (context, _) => FilledButton(
+                      onPressed: _saving || !_changed ? null : _save,
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(0, 44),
+                      ),
+                      child: Text(l10n.save),
                     ),
-                    child: Text(l10n.save),
                   ),
                 ],
               ),

@@ -115,8 +115,13 @@ void main() {
     }
   }
 
+  bool saveEnabled(WidgetTester tester) => tester
+      .widget<FilledButton>(find.widgetWithText(FilledButton, 'Save'))
+      .enabled;
+
   /// Taps [button], whose write needs real time to reach the cache.
   Future<void> write(WidgetTester tester, Finder button) async {
+    await tester.pump();
     await tester.runAsync(() async {
       await tester.tap(button);
       await Future<void>.delayed(const Duration(milliseconds: 200));
@@ -385,6 +390,8 @@ void main() {
     await tester.tap(find.text('New item'));
     await settle(tester);
     expect(find.text('New login'), findsOneWidget);
+    expect(saveEnabled(tester), isFalse);
+    await tester.enterText(find.widgetWithText(TextField, 'Username'), 'bob');
     await write(tester, find.text('Save'));
     expect(find.text('Give the item a name.'), findsOneWidget);
 
@@ -393,7 +400,6 @@ void main() {
     await tester.tap(find.text('Family').last);
     await settle(tester);
     await tester.enterText(find.widgetWithText(TextField, 'Name'), 'Netflix');
-    await tester.enterText(find.widgetWithText(TextField, 'Username'), 'bob');
     await tester.enterText(
       find.widgetWithText(TextField, 'Password'),
       'hunter2',
@@ -444,6 +450,22 @@ void main() {
     await tester.tap(find.text('Edit'));
     await settle(tester);
     expect(find.text('Edit item'), findsOneWidget);
+    expect(saveEnabled(tester), isFalse);
+    await tester.tap(find.text('Add a website'));
+    await settle(tester);
+    expect(saveEnabled(tester), isFalse);
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Password'),
+      'correct horse',
+    );
+    await tester.pump();
+    expect(saveEnabled(tester), isTrue);
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Password'),
+      'Tr0ub4dor&3',
+    );
+    await tester.pump();
+    expect(saveEnabled(tester), isFalse);
     await tester.enterText(
       find.widgetWithText(TextField, 'Password'),
       'correct horse',

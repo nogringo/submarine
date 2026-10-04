@@ -639,4 +639,79 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get increase => 'Increase';
+
+  @override
+  String get settings => 'Settings';
+
+  @override
+  String get security => 'Security';
+
+  @override
+  String get unlockWithBiometrics => 'Unlock with biometrics';
+
+  @override
+  String get unlockWithBiometricsDescription =>
+      'Or with the code or password of this device. Vault keys stay in its secure storage.';
+
+  @override
+  String get lockNeedsScreenLock =>
+      'Set up a screen lock on this device first.';
+
+  @override
+  String get lockUnavailable => 'Not available on this system.';
+
+  @override
+  String get lockAfter => 'Lock after';
+
+  @override
+  String get lockImmediately => 'Immediately';
+
+  @override
+  String get lockOnRestart => 'On app restart';
+
+  @override
+  String minutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count minutes',
+      one: '1 minute',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hours',
+      one: '1 hour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get lock => 'Lock';
+
+  @override
+  String get unlock => 'Unlock';
+
+  @override
+  String get vaultsLocked => 'Your vaults are locked.';
+
+  @override
+  String get unlockReason => 'Unlock your vaults';
+
+  @override
+  String get enableLockReason => 'Turn on the lock';
+
+  @override
+  String get authLockedOut => 'Too many attempts. Try again later.';
+
+  @override
+  String get authFailed => 'This device could not check it\'s you.';
+
+  @override
+  String get vaultTab => 'Vault';
 }

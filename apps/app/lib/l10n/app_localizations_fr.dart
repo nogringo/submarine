@@ -644,4 +644,79 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get increase => 'Augmenter';
+
+  @override
+  String get settings => 'Réglages';
+
+  @override
+  String get security => 'Sécurité';
+
+  @override
+  String get unlockWithBiometrics => 'Déverrouiller avec la biométrie';
+
+  @override
+  String get unlockWithBiometricsDescription =>
+      'Ou avec le code ou le mot de passe de cet appareil. Les clés des coffres restent dans son stockage sécurisé.';
+
+  @override
+  String get lockNeedsScreenLock =>
+      'Configurez d\'abord un verrouillage de l\'écran sur cet appareil.';
+
+  @override
+  String get lockUnavailable => 'Indisponible sur ce système.';
+
+  @override
+  String get lockAfter => 'Verrouiller après';
+
+  @override
+  String get lockImmediately => 'Immédiatement';
+
+  @override
+  String get lockOnRestart => 'Au redémarrage de l\'application';
+
+  @override
+  String minutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count minutes',
+      one: '1 minute',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count heures',
+      one: '1 heure',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get lock => 'Verrouiller';
+
+  @override
+  String get unlock => 'Déverrouiller';
+
+  @override
+  String get vaultsLocked => 'Vos coffres sont verrouillés.';
+
+  @override
+  String get unlockReason => 'Déverrouiller vos coffres';
+
+  @override
+  String get enableLockReason => 'Activer le verrouillage';
+
+  @override
+  String get authLockedOut => 'Trop de tentatives. Réessayez plus tard.';
+
+  @override
+  String get authFailed => 'Cet appareil n\'a pas pu vérifier que c\'est vous.';
+
+  @override
+  String get vaultTab => 'Coffre';
 }

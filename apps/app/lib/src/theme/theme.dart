@@ -171,5 +171,32 @@ ThemeData buildTheme(Palette palette, Brightness brightness) {
       overlayColor: palette.signal.withValues(alpha: 0.12),
     ),
     progressIndicatorTheme: ProgressIndicatorThemeData(color: palette.muted),
+    navigationBarTheme: NavigationBarThemeData(
+      backgroundColor: palette.surface,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      indicatorColor: palette.accent,
+      iconTheme: WidgetStateProperty.resolveWith(
+        (states) => IconThemeData(
+          color: states.contains(WidgetState.selected)
+              ? palette.onAccent
+              : palette.muted,
+        ),
+      ),
+      labelTextStyle: WidgetStateProperty.resolveWith(
+        (states) => states.contains(WidgetState.selected)
+            ? TextStyle(
+                fontFamily: textFont,
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: palette.text,
+              )
+            : TextStyle(
+                fontFamily: textFont,
+                fontSize: 13,
+                color: palette.muted,
+              ),
+      ),
+    ),
   );
 }

@@ -825,5 +825,91 @@
   "increase": "Increase",
   "@increase": {
     "description": "Tooltip of the button raising a number by one."
+  },
+  "settings": "Settings",
+  "@settings": {
+    "description": "Title of the app settings, and tooltip of the button opening them."
+  },
+  "security": "Security",
+  "@security": {
+    "description": "Section of the settings about locking the app."
+  },
+  "unlockWithBiometrics": "Unlock with biometrics",
+  "@unlockWithBiometrics": {
+    "description": "Switch of the settings that turns the app lock on: the app then locks, and unlocks with the device's biometrics."
+  },
+  "unlockWithBiometricsDescription": "Or with the code or password of this device. Vault keys stay in its secure storage.",
+  "@unlockWithBiometricsDescription": {
+    "description": "Explains the lock switch: the device's code is a fallback, and nothing is encrypted with a master password."
+  },
+  "lockNeedsScreenLock": "Set up a screen lock on this device first.",
+  "@lockNeedsScreenLock": {
+    "description": "Why the lock cannot be turned on: the device has no code, password or biometrics."
+  },
+  "lockUnavailable": "Not available on this system.",
+  "@lockUnavailable": {
+    "description": "Why the lock cannot be turned on: the platform (Linux, web) has no device check."
+  },
+  "lockAfter": "Lock after",
+  "@lockAfter": {
+    "description": "Setting choosing how long the app may go unused before it locks."
+  },
+  "lockImmediately": "Immediately",
+  "@lockImmediately": {
+    "description": "Lock delay: the app locks as soon as it leaves the screen."
+  },
+  "lockOnRestart": "On app restart",
+  "@lockOnRestart": {
+    "description": "Lock delay: the app locks only when it starts again."
+  },
+  "minutes": "{count, plural, =1{1 minute} other{{count} minutes}}",
+  "@minutes": {
+    "description": "A lock delay in minutes.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "hours": "{count, plural, =1{1 hour} other{{count} hours}}",
+  "@hours": {
+    "description": "A lock delay in hours.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "lock": "Lock",
+  "@lock": {
+    "description": "Tooltip of the button locking the app now."
+  },
+  "unlock": "Unlock",
+  "@unlock": {
+    "description": "Button of the lock screen asking the device to check the user."
+  },
+  "vaultsLocked": "Your vaults are locked.",
+  "@vaultsLocked": {
+    "description": "Line under the wordmark on the lock screen."
+  },
+  "unlockReason": "Unlock your vaults",
+  "@unlockReason": {
+    "description": "Reason shown in the system dialog of biometrics when unlocking. The title of the dialog on macOS: no final period."
+  },
+  "enableLockReason": "Turn on the lock",
+  "@enableLockReason": {
+    "description": "Reason shown in the system dialog of biometrics when turning the lock on. The title of the dialog on macOS: no final period."
+  },
+  "authLockedOut": "Too many attempts. Try again later.",
+  "@authLockedOut": {
+    "description": "Error when the device refuses to check the user for a while."
+  },
+  "authFailed": "This device could not check it's you.",
+  "@authFailed": {
+    "description": "Error when the device check failed for another reason."
+  },
+  "vaultTab": "Vault",
+  "@vaultTab": {
+    "description": "Label of the bottom bar tab listing the items of the vaults."
   }
 }

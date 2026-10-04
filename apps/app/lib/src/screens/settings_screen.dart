@@ -1,0 +1,172 @@
+import 'package:flutter/material.dart';
+import 'package:local_auth/local_auth.dart';
+
+import '../context.dart';
+import '../items/field_tile.dart';
+import '../lock/app_lock.dart';
+import '../lock/lock_screen.dart';
+import '../widgets/settings_tile.dart';
+import 'app_navigation.dart';
+
+/// The settings of the app.
+class SettingsScreen extends StatelessWidget {
+  const SettingsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) => const DestinationScaffold(
+    destination: AppDestination.settings,
+    child: _Settings(),
+  );
+}
+
+class _Settings extends StatelessWidget {
+  const _Settings();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final lock = AppLock.of(context);
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 720),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                l10n.settings,
+                style: const TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w700,
+                  height: 1.2,
+                ),
+              ),
+              SettingsSection(
+                title: l10n.security,
+                child: FieldCard(
+                  children: [
+                    const _LockTile(),
+                    if (lock.enabled) _LockAfterTile(lock: lock),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LockTile extends StatefulWidget {
+  const _LockTile();
+
+  @override
+  State<_LockTile> createState() => _LockTileState();
+}
+
+class _LockTileState extends State<_LockTile> {
+  Future<bool>? _available;
+  String? _error;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _available ??= AppLock.of(context).isAvailable();
+  }
+
+  Future<void> _toggle(AppLock lock, bool enabled) async {
+    final l10n = context.l10n;
+    setState(() => _error = null);
+    if (!enabled) return lock.disable();
+    try {
+      await lock.enable(l10n.enableLockReason);
+    } on LocalAuthException catch (error) {
+      if (mounted) setState(() => _error = authErrorMessage(l10n, error));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final palette = context.palette;
+    final lock = AppLock.of(context);
+    return FutureBuilder(
+      future: _available,
+      builder: (context, snapshot) {
+        // Turning the lock off never waits for the device.
+        final canToggle = lock.enabled || snapshot.data == true;
+        final unavailable = snapshot.data == false && !lock.enabled;
+        final error = _error;
+        return SettingsTile(
+          title: Text(l10n.unlockWithBiometrics),
+          subtitle: error != null
+              ? Text(error, style: TextStyle(color: palette.danger))
+              : Text(
+                  !unavailable
+                      ? l10n.unlockWithBiometricsDescription
+                      : DeviceAuth.supportedPlatform
+                      ? l10n.lockNeedsScreenLock
+                      : l10n.lockUnavailable,
+                ),
+          trailing: Switch(
+            value: lock.enabled,
+            onChanged: canToggle && !lock.checking
+                ? (enabled) => _toggle(lock, enabled)
+                : null,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _LockAfterTile extends StatelessWidget {
+  const _LockAfterTile({required this.lock});
+
+  final AppLock lock;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return SettingsTile(
+      title: Text(l10n.lockAfter),
+      trailing: PopupMenuButton<LockTimeout>(
+        initialValue: lock.timeout,
+        tooltip: l10n.lockAfter,
+        onSelected: lock.setTimeout,
+        itemBuilder: (context) => [
+          for (final timeout in LockTimeout.values)
+            PopupMenuItem(
+              value: timeout,
+              child: Text(lockTimeoutLabel(l10n, timeout)),
+            ),
+        ],
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 8, 4, 8),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                lockTimeoutLabel(l10n, lock.timeout),
+                style: const TextStyle(fontSize: 15),
+              ),
+              const SizedBox(width: 4),
+              Icon(Icons.arrow_drop_down_rounded, color: context.palette.muted),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+String lockTimeoutLabel(AppLocalizations l10n, LockTimeout timeout) =>
+    switch (timeout.idle) {
+      null when timeout == LockTimeout.immediately => l10n.lockImmediately,
+      null => l10n.lockOnRestart,
+      final idle when idle.inHours > 0 => l10n.hours(idle.inHours),
+      final idle => l10n.minutes(idle.inMinutes),
+    };

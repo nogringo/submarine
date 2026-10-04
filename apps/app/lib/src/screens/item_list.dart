@@ -4,6 +4,7 @@ import 'package:nostr_passwords/nostr_passwords.dart';
 
 import '../context.dart';
 import '../items/item_filter.dart';
+import '../lock/app_lock.dart';
 import '../router.dart';
 import '../vaults/vaults.dart';
 import '../widgets/item_icon.dart';
@@ -11,6 +12,7 @@ import '../widgets/search_field.dart';
 import '../widgets/sync_status.dart';
 import '../widgets/vault_avatar.dart';
 import 'add_vault.dart';
+import 'app_navigation.dart';
 import 'filter_chips.dart';
 import 'vault_navigation.dart';
 
@@ -75,6 +77,7 @@ class ItemListScreen extends StatelessWidget {
       onPressed: () => context.go(newItemPath(vaultId, filter)),
       child: const Icon(Icons.add_rounded),
     ),
+    bottomNavigationBar: const AppNavigationBar(current: AppDestination.vaults),
     body: SafeArea(
       bottom: false,
       child: Column(
@@ -107,6 +110,7 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final lock = AppLock.of(context);
     final selection = Vaults.of(context).select(vaultId);
     final all = vaultId == allVaultsId;
     final vault = selection.firstOrNull;
@@ -182,6 +186,13 @@ class _Header extends StatelessWidget {
                   ),
           ),
           SyncButton(vaults: selection),
+          // The rail has the lock in the wide layout.
+          if (withDrawer && lock.enabled)
+            IconButton(
+              tooltip: l10n.lock,
+              onPressed: lock.lock,
+              icon: const Icon(Icons.lock_outline_rounded),
+            ),
           if (!withDrawer) ...[
             const SizedBox(width: 4),
             _NewItemButton(vaultId: vaultId, filter: filter),

@@ -19,26 +19,55 @@ Future<String?> showGenerator(BuildContext context) async {
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
-    builder: (context) => _GeneratorSheet(
-      settings: initial,
-      onChanged: (changed) => settings = changed,
+    builder: (context) => SafeArea(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(
+          20,
+          0,
+          20,
+          20 + MediaQuery.viewInsetsOf(context).bottom,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              context.l10n.generator,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 16),
+            GeneratorView(
+              settings: initial,
+              onChanged: (changed) => settings = changed,
+              onUse: (value) => Navigator.pop(context, value),
+            ),
+          ],
+        ),
+      ),
     ),
   );
   if (!identical(settings, initial)) await settings.write();
   return value;
 }
 
-class _GeneratorSheet extends StatefulWidget {
-  const _GeneratorSheet({required this.settings, required this.onChanged});
+/// A value generated with [settings], the options to change them, and a
+/// button to [onUse] the value if given.
+class GeneratorView extends StatefulWidget {
+  const GeneratorView({
+    super.key,
+    required this.settings,
+    required this.onChanged,
+    this.onUse,
+  });
 
   final GeneratorSettings settings;
   final ValueChanged<GeneratorSettings> onChanged;
+  final ValueChanged<String>? onUse;
 
   @override
-  State<_GeneratorSheet> createState() => _GeneratorSheetState();
+  State<GeneratorView> createState() => _GeneratorViewState();
 }
 
-class _GeneratorSheetState extends State<_GeneratorSheet> {
+class _GeneratorViewState extends State<GeneratorView> {
   late var _settings = widget.settings;
   late var _value = _settings.generate();
   late final _separator = TextEditingController(
@@ -74,63 +103,51 @@ class _GeneratorSheetState extends State<_GeneratorSheet> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final isPassword = _settings.type == GeneratorType.password;
-    return SafeArea(
-      child: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(
-          20,
-          0,
-          20,
-          20 + MediaQuery.viewInsetsOf(context).bottom,
+    final onUse = widget.onUse;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _Preview(
+          value: _value,
+          onRegenerate: () => setState(() => _value = _settings.generate()),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        const SizedBox(height: 16),
+        Row(
           children: [
-            Text(
-              l10n.generator,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+            SelectChip(
+              label: l10n.password,
+              selected: isPassword,
+              onTap: isPassword
+                  ? null
+                  : () => _change(
+                      _settings.copyWith(type: GeneratorType.password),
+                    ),
             ),
-            const SizedBox(height: 16),
-            _Preview(
-              value: _value,
-              onRegenerate: () => setState(() => _value = _settings.generate()),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                SelectChip(
-                  label: l10n.password,
-                  selected: isPassword,
-                  onTap: isPassword
-                      ? null
-                      : () => _change(
-                          _settings.copyWith(type: GeneratorType.password),
-                        ),
-                ),
-                const SizedBox(width: 8),
-                SelectChip(
-                  label: l10n.passphrase,
-                  selected: !isPassword,
-                  onTap: isPassword
-                      ? () => _change(
-                          _settings.copyWith(type: GeneratorType.passphrase),
-                        )
-                      : null,
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            if (isPassword)
-              ..._passwordOptions(l10n)
-            else
-              ..._passphraseOptions(l10n),
-            const SizedBox(height: 20),
-            FilledButton(
-              onPressed: () => Navigator.pop(context, _value),
-              child: Text(isPassword ? l10n.usePassword : l10n.usePassphrase),
+            const SizedBox(width: 8),
+            SelectChip(
+              label: l10n.passphrase,
+              selected: !isPassword,
+              onTap: isPassword
+                  ? () => _change(
+                      _settings.copyWith(type: GeneratorType.passphrase),
+                    )
+                  : null,
             ),
           ],
         ),
-      ),
+        const SizedBox(height: 12),
+        if (isPassword)
+          ..._passwordOptions(l10n)
+        else
+          ..._passphraseOptions(l10n),
+        if (onUse != null) ...[
+          const SizedBox(height: 20),
+          FilledButton(
+            onPressed: () => onUse(_value),
+            child: Text(isPassword ? l10n.usePassword : l10n.usePassphrase),
+          ),
+        ],
+      ],
     );
   }
 

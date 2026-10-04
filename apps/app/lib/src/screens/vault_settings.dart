@@ -9,6 +9,7 @@ import '../theme/theme.dart';
 import '../vaults/vault_controller.dart';
 import '../vaults/vaults.dart';
 import '../widgets/copy_button.dart';
+import '../widgets/settings_tile.dart';
 import '../widgets/sync_status.dart';
 import '../widgets/vault_avatar.dart';
 import '../widgets/vault_color_picker.dart';
@@ -115,7 +116,7 @@ class _VaultSettingsState extends State<_VaultSettings> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _Header(vault: vault),
-              _Section(
+              SettingsSection(
                 title: l10n.vaultNameAndColor,
                 description: l10n.vaultNameHelper,
                 child: FieldCard(
@@ -152,11 +153,11 @@ class _VaultSettingsState extends State<_VaultSettings> {
                   ],
                 ),
               ),
-              _Section(
+              SettingsSection(
                 title: l10n.vaultKey,
                 child: FieldCard(
                   children: [
-                    _Tile(
+                    SettingsTile(
                       title: Text(l10n.vaultPublicKey),
                       subtitle: SelectableText(
                         npub,
@@ -168,7 +169,7 @@ class _VaultSettingsState extends State<_VaultSettings> {
                   ],
                 ),
               ),
-              _Section(
+              SettingsSection(
                 title: l10n.sync,
                 child: FieldCard(children: [_SyncTile(vault: vault)]),
               ),
@@ -215,101 +216,6 @@ class _Header extends StatelessWidget {
   );
 }
 
-class _Section extends StatelessWidget {
-  const _Section({required this.title, this.description, required this.child});
-
-  final String title;
-  final String? description;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final description = this.description;
-    return Padding(
-      padding: const EdgeInsets.only(top: 28),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
-          ),
-          if (description != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              description,
-              style: TextStyle(fontSize: 13, color: context.palette.muted),
-            ),
-          ],
-          const SizedBox(height: 12),
-          child,
-        ],
-      ),
-    );
-  }
-}
-
-/// A row of a settings card, [below] spanning it whole.
-class _Tile extends StatelessWidget {
-  const _Tile({required this.title, this.subtitle, this.trailing, this.below});
-
-  final Widget title;
-  final Widget? subtitle;
-  final Widget? trailing;
-  final Widget? below;
-
-  @override
-  Widget build(BuildContext context) {
-    final subtitle = this.subtitle;
-    final trailing = this.trailing;
-    final below = this.below;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    DefaultTextStyle.merge(
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      child: title,
-                    ),
-                    if (subtitle != null) ...[
-                      const SizedBox(height: 4),
-                      DefaultTextStyle.merge(
-                        style: TextStyle(
-                          fontSize: 13,
-                          height: 1.4,
-                          color: context.palette.muted,
-                        ),
-                        child: subtitle,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              if (trailing != null) ...[const SizedBox(width: 12), trailing],
-            ],
-          ),
-          if (below != null) ...[const SizedBox(height: 12), below],
-        ],
-      ),
-    );
-  }
-}
-
-final _tileButtonStyle = OutlinedButton.styleFrom(
-  minimumSize: const Size(0, 40),
-  padding: const EdgeInsets.symmetric(horizontal: 16),
-);
-
 /// Hides the key until asked, as a password field does.
 class _VaultKeyTile extends StatefulWidget {
   const _VaultKeyTile({required this.vault});
@@ -326,12 +232,12 @@ class _VaultKeyTileState extends State<_VaultKeyTile> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return _Tile(
+    return SettingsTile(
       title: Text(l10n.vaultKey),
       subtitle: Text(l10n.vaultKeyDescription),
       trailing: OutlinedButton(
         onPressed: () => setState(() => _shown = !_shown),
-        style: _tileButtonStyle,
+        style: settingsButtonStyle,
         child: Text(_shown ? l10n.hide : l10n.show),
       ),
       below: _shown ? VaultKeyBox(vault: widget.vault) : null,
@@ -351,7 +257,7 @@ class _SyncTile extends StatelessWidget {
     final summary = SyncSummary([vault]);
     final allSent =
         summary.lastSync != null && summary.unsent == 0 && !summary.failed;
-    return _Tile(
+    return SettingsTile(
       title: SyncStatusText(
         vaults: [vault],
         maxLines: 2,
@@ -364,7 +270,7 @@ class _SyncTile extends StatelessWidget {
       subtitle: allSent ? Text(l10n.syncAllSent) : null,
       trailing: OutlinedButton.icon(
         onPressed: summary.syncing ? null : vault.sync,
-        style: _tileButtonStyle,
+        style: settingsButtonStyle,
         icon: summary.syncing
             ? SizedBox.square(
                 dimension: 16,

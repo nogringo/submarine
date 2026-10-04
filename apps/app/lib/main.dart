@@ -5,6 +5,7 @@ import 'package:ndk_flutter/ndk_flutter.dart';
 import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
 
 import 'src/app.dart';
+import 'src/lock/app_lock.dart';
 import 'src/sync/sync_database.dart';
 import 'src/vaults/vault_storage.dart';
 import 'src/vaults/vaults.dart';
@@ -26,5 +27,5 @@ Future<void> main() async {
     engine: SyncEngine(ndk, store: SembastSyncStore(await openSyncDatabase())),
     storage: VaultStorage(),
   );
-  runApp(SubmarineApp(vaults: vaults));
+  runApp(SubmarineApp(vaults: vaults, lock: await AppLock.load()));
 }

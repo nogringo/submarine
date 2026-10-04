@@ -1243,6 +1243,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Increase'**
   String get increase;
+
+  /// Title of the app settings, and tooltip of the button opening them.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settings;
+
+  /// Section of the settings about locking the app.
+  ///
+  /// In en, this message translates to:
+  /// **'Security'**
+  String get security;
+
+  /// Switch of the settings that turns the app lock on: the app then locks, and unlocks with the device's biometrics.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock with biometrics'**
+  String get unlockWithBiometrics;
+
+  /// Explains the lock switch: the device's code is a fallback, and nothing is encrypted with a master password.
+  ///
+  /// In en, this message translates to:
+  /// **'Or with the code or password of this device. Vault keys stay in its secure storage.'**
+  String get unlockWithBiometricsDescription;
+
+  /// Why the lock cannot be turned on: the device has no code, password or biometrics.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up a screen lock on this device first.'**
+  String get lockNeedsScreenLock;
+
+  /// Why the lock cannot be turned on: the platform (Linux, web) has no device check.
+  ///
+  /// In en, this message translates to:
+  /// **'Not available on this system.'**
+  String get lockUnavailable;
+
+  /// Setting choosing how long the app may go unused before it locks.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock after'**
+  String get lockAfter;
+
+  /// Lock delay: the app locks as soon as it leaves the screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Immediately'**
+  String get lockImmediately;
+
+  /// Lock delay: the app locks only when it starts again.
+  ///
+  /// In en, this message translates to:
+  /// **'On app restart'**
+  String get lockOnRestart;
+
+  /// A lock delay in minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 minute} other{{count} minutes}}'**
+  String minutes(int count);
+
+  /// A lock delay in hours.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 hour} other{{count} hours}}'**
+  String hours(int count);
+
+  /// Tooltip of the button locking the app now.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock'**
+  String get lock;
+
+  /// Button of the lock screen asking the device to check the user.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get unlock;
+
+  /// Line under the wordmark on the lock screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Your vaults are locked.'**
+  String get vaultsLocked;
+
+  /// Reason shown in the system dialog of biometrics when unlocking. The title of the dialog on macOS: no final period.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock your vaults'**
+  String get unlockReason;
+
+  /// Reason shown in the system dialog of biometrics when turning the lock on. The title of the dialog on macOS: no final period.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on the lock'**
+  String get enableLockReason;
+
+  /// Error when the device refuses to check the user for a while.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Try again later.'**
+  String get authLockedOut;
+
+  /// Error when the device check failed for another reason.
+  ///
+  /// In en, this message translates to:
+  /// **'This device could not check it\'s you.'**
+  String get authFailed;
+
+  /// Label of the bottom bar tab listing the items of the vaults.
+  ///
+  /// In en, this message translates to:
+  /// **'Vault'**
+  String get vaultTab;
 }
 
 class _AppLocalizationsDelegate

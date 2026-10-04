@@ -3,9 +3,11 @@ import 'package:go_router/go_router.dart';
 
 import 'context.dart';
 import 'items/item_filter.dart';
+import 'screens/generator_screen.dart';
 import 'screens/item_detail.dart';
 import 'screens/item_form.dart';
 import 'screens/item_list.dart';
+import 'screens/settings_screen.dart';
 import 'screens/vault_settings.dart';
 import 'screens/vault_shell.dart';
 import 'screens/welcome_screen.dart';
@@ -46,6 +48,10 @@ String editItemPath(String vaultId, ItemFilter filter, String itemId) =>
 
 String vaultSettingsPath(String vaultId) => '/vaults/$vaultId/settings';
 
+const generatorPath = '/generator';
+
+const settingsPath = '/settings';
+
 ItemFilter _filterOf(GoRouterState state) =>
     ItemFilter.fromSlug(state.pathParameters['filter']!)!;
 
@@ -85,74 +91,114 @@ GoRouter buildRouter(Vaults vaults) => GoRouter(
             : MaterialPage(key: state.pageKey, child: screen);
       },
     ),
-    ShellRoute(
-      pageBuilder: (context, state, child) => NoTransitionPage(
-        key: state.pageKey,
-        child: VaultShell(
-          vaultId: state.pathParameters['vaultId']!,
-          filter: _filterOf(state),
-          itemId: state.pathParameters['itemId'],
-          child: child,
-        ),
-      ),
-      routes: [
-        GoRoute(
-          path: '/vaults/:vaultId/:filter',
-          redirect: (context, state) {
-            final vaultId = state.pathParameters['vaultId']!;
-            if (vaultId != allVaultsId && vaults.byPubkey(vaultId) == null) {
-              return vaultPath(allVaultsId);
-            }
-            final filter = ItemFilter.fromSlug(state.pathParameters['filter']!);
-            return filter == null ? vaultPath(vaultId) : null;
-          },
-          pageBuilder: (context, state) => NoTransitionPage(
-            key: state.pageKey,
-            child: context.isWide
-                ? const NoItemSelected()
-                : ItemListScreen(
-                    vaultId: state.pathParameters['vaultId']!,
-                    filter: _filterOf(state),
-                  ),
-          ),
+    // Each branch keeps its screens as they were left, in the order of
+    // AppDestination.
+    StatefulShellRoute.indexedStack(
+      pageBuilder: (context, state, navigationShell) =>
+          NoTransitionPage(key: state.pageKey, child: navigationShell),
+      branches: [
+        StatefulShellBranch(
+          initialLocation: vaultPath(allVaultsId),
           routes: [
-            // Before ':itemId', which would take "new" for an id.
-            GoRoute(
-              path: 'new',
-              pageBuilder: (context, state) => _formPage(context, state),
-              onExit: (context, state) => ItemForm.confirmExit(),
-            ),
-            GoRoute(
-              path: ':itemId',
-              pageBuilder: (context, state) {
-                final vaultId = state.pathParameters['vaultId']!;
-                final filter = _filterOf(state);
-                final itemId = state.pathParameters['itemId']!;
-                return context.isWide
-                    ? NoTransitionPage(
-                        key: state.pageKey,
-                        child: ItemDetailPane(
-                          vaultId: vaultId,
-                          filter: filter,
-                          itemId: itemId,
-                        ),
-                      )
-                    : MaterialPage(
-                        key: state.pageKey,
-                        child: ItemScreen(
-                          vaultId: vaultId,
-                          filter: filter,
-                          itemId: itemId,
-                        ),
-                      );
-              },
+            ShellRoute(
+              pageBuilder: (context, state, child) => NoTransitionPage(
+                key: state.pageKey,
+                child: VaultShell(
+                  vaultId: state.pathParameters['vaultId']!,
+                  filter: _filterOf(state),
+                  itemId: state.pathParameters['itemId'],
+                  child: child,
+                ),
+              ),
               routes: [
                 GoRoute(
-                  path: 'edit',
-                  pageBuilder: (context, state) => _formPage(context, state),
-                  onExit: (context, state) => ItemForm.confirmExit(),
+                  path: '/vaults/:vaultId/:filter',
+                  redirect: (context, state) {
+                    final vaultId = state.pathParameters['vaultId']!;
+                    if (vaultId != allVaultsId &&
+                        vaults.byPubkey(vaultId) == null) {
+                      return vaultPath(allVaultsId);
+                    }
+                    final filter = ItemFilter.fromSlug(
+                      state.pathParameters['filter']!,
+                    );
+                    return filter == null ? vaultPath(vaultId) : null;
+                  },
+                  pageBuilder: (context, state) => NoTransitionPage(
+                    key: state.pageKey,
+                    child: context.isWide
+                        ? const NoItemSelected()
+                        : ItemListScreen(
+                            vaultId: state.pathParameters['vaultId']!,
+                            filter: _filterOf(state),
+                          ),
+                  ),
+                  routes: [
+                    // Before ':itemId', which would take "new" for an id.
+                    GoRoute(
+                      path: 'new',
+                      pageBuilder: (context, state) =>
+                          _formPage(context, state),
+                      onExit: (context, state) => ItemForm.confirmExit(),
+                    ),
+                    GoRoute(
+                      path: ':itemId',
+                      pageBuilder: (context, state) {
+                        final vaultId = state.pathParameters['vaultId']!;
+                        final filter = _filterOf(state);
+                        final itemId = state.pathParameters['itemId']!;
+                        return context.isWide
+                            ? NoTransitionPage(
+                                key: state.pageKey,
+                                child: ItemDetailPane(
+                                  vaultId: vaultId,
+                                  filter: filter,
+                                  itemId: itemId,
+                                ),
+                              )
+                            : MaterialPage(
+                                key: state.pageKey,
+                                child: ItemScreen(
+                                  vaultId: vaultId,
+                                  filter: filter,
+                                  itemId: itemId,
+                                ),
+                              );
+                      },
+                      routes: [
+                        GoRoute(
+                          path: 'edit',
+                          pageBuilder: (context, state) =>
+                              _formPage(context, state),
+                          onExit: (context, state) => ItemForm.confirmExit(),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ],
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: generatorPath,
+              pageBuilder: (context, state) => NoTransitionPage(
+                key: state.pageKey,
+                child: const GeneratorScreen(),
+              ),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: settingsPath,
+              pageBuilder: (context, state) => NoTransitionPage(
+                key: state.pageKey,
+                child: const SettingsScreen(),
+              ),
             ),
           ],
         ),

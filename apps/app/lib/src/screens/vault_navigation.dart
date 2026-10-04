@@ -2,27 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../context.dart';
+import '../lock/app_lock.dart';
 import '../router.dart';
 import '../vaults/vaults.dart';
 import '../widgets/vault_avatar.dart';
 import 'add_vault.dart';
+import 'app_navigation.dart';
 
-/// Wide layout: the vaults in a rail, as Discord shows its servers.
+/// Wide layout: the vaults in a rail, as Discord shows its servers, the
+/// generator, the settings and the lock at the bottom.
 class VaultRail extends StatelessWidget {
   const VaultRail({
     super.key,
     required this.selectedVaultId,
     required this.selectedItemId,
+    this.destination = AppDestination.vaults,
   });
 
-  final String selectedVaultId;
+  final String? selectedVaultId;
   final String? selectedItemId;
+  final AppDestination destination;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final palette = context.palette;
     final vaults = Vaults.of(context);
+    final lock = AppLock.of(context);
     void select(String vaultId) =>
         context.go(vaultPathKeeping(vaults, vaultId, itemId: selectedItemId));
     return SizedBox(
@@ -66,7 +72,62 @@ class VaultRail extends StatelessWidget {
               ],
             ),
           ),
+          _RailButton(
+            icon: Icons.casino_outlined,
+            tooltip: l10n.generator,
+            selected: destination == AppDestination.generator,
+            onPressed: () => context.go(generatorPath),
+          ),
+          _RailButton(
+            icon: Icons.tune_rounded,
+            tooltip: l10n.settings,
+            selected: destination == AppDestination.settings,
+            onPressed: () => context.go(settingsPath),
+          ),
+          if (lock.enabled)
+            _RailButton(
+              icon: Icons.lock_outline_rounded,
+              tooltip: l10n.lock,
+              onPressed: lock.lock,
+            ),
+          const SizedBox(height: 12),
         ],
+      ),
+    );
+  }
+}
+
+class _RailButton extends StatelessWidget {
+  const _RailButton({
+    required this.icon,
+    required this.tooltip,
+    this.selected = false,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final bool selected;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: IconButton(
+        tooltip: tooltip,
+        isSelected: selected,
+        onPressed: onPressed,
+        style: IconButton.styleFrom(
+          fixedSize: const Size.square(48),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          foregroundColor: selected ? palette.text : palette.muted,
+          backgroundColor: selected ? palette.selected : null,
+        ),
+        icon: Icon(icon),
       ),
     );
   }

@@ -8,7 +8,9 @@ import 'package:ndk/ndk.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
 import 'package:sembast/sembast_memory.dart' show newDatabaseFactoryMemory;
 import 'package:submarine/src/app.dart';
+import 'package:submarine/src/generator/generator_settings.dart';
 import 'package:submarine/src/items/field_tile.dart';
+import 'package:submarine/src/lock/app_lock.dart';
 import 'package:submarine/src/screens/filter_column.dart';
 import 'package:submarine/src/vaults/vault_storage.dart';
 import 'package:submarine/src/vaults/vaults.dart';
@@ -17,6 +19,8 @@ import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
 void main() {
   late Ndk ndk;
   late Vaults vaults;
+  late AppLock lock;
+  late FakeDeviceAuth deviceAuth;
 
   final github = Cipher(
     type: CipherType.login,
@@ -31,11 +35,13 @@ void main() {
 
   /// Vaults with no relay, whose cache already holds [items] in a vault named
   /// Personal when there are any, next to an empty Family vault if
-  /// [withFamily].
+  /// [withFamily]. The app locks as [lockSettings] say, behind a device that
+  /// lets the user in until told otherwise.
   Future<void> open(
     WidgetTester tester, {
     List<Cipher> items = const [],
     bool withFamily = false,
+    LockSettings? lockSettings,
   }) => tester.runAsync(() async {
     ndk = Ndk(
       NdkConfig(
@@ -75,6 +81,7 @@ void main() {
     FlutterSecureStorage.setMockInitialValues({
       if (records.isNotEmpty)
         'vaults': jsonEncode([for (final r in records) r.toJson()]),
+      if (lockSettings != null) 'lock': jsonEncode(lockSettings.toJson()),
     });
     vaults = await Vaults.load(
       ndk: ndk,
@@ -90,10 +97,12 @@ void main() {
     while (vaults.all.any((vault) => !vault.loaded)) {
       await Future<void>.delayed(const Duration(milliseconds: 10));
     }
+    lock = await AppLock.load(auth: deviceAuth = FakeDeviceAuth());
   });
 
   Future<void> close(WidgetTester tester) async {
     await tester.pumpWidget(const SizedBox());
+    lock.dispose();
     await tester.runAsync(() async {
       await vaults.pauseSync();
       vaults.dispose();
@@ -140,7 +149,7 @@ void main() {
   ) async {
     setScreen(tester, const Size(390, 844));
     await open(tester);
-    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
     await settle(tester);
 
     expect(find.text('SUBMARINE'), findsOneWidget);
@@ -178,7 +187,7 @@ void main() {
   testWidgets('reads an item on a phone, in French', (tester) async {
     setScreen(tester, const Size(390, 844), locale: const Locale('fr'));
     await open(tester, items: [github]);
-    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
     await settle(tester);
 
     expect(find.text('Tous les coffres'), findsOneWidget);
@@ -205,7 +214,7 @@ void main() {
   ) async {
     setScreen(tester, const Size(1280, 800));
     await open(tester, items: [github]);
-    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
     await settle(tester);
 
     expect(find.byTooltip('Personal'), findsOneWidget);
@@ -245,7 +254,7 @@ void main() {
         ),
       ],
     );
-    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
     await settle(tester);
 
     Finder countOf(String filter) => find.descendant(
@@ -304,7 +313,7 @@ void main() {
       ],
       withFamily: true,
     );
-    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
     await settle(tester);
 
     await tester.tap(find.text('GitHub'));
@@ -334,7 +343,7 @@ void main() {
   ) async {
     setScreen(tester, const Size(900, 800));
     await open(tester, items: [github]);
-    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
     await settle(tester);
 
     expect(find.byType(FilterColumn), findsNothing);
@@ -356,7 +365,7 @@ void main() {
         ),
       ],
     );
-    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
     await settle(tester);
 
     expect(find.text('Search 2 items'), findsOneWidget);
@@ -411,7 +420,7 @@ void main() {
         ),
       ],
     );
-    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
     await settle(tester);
 
     expect(find.text('Rechercher parmi 2 éléments'), findsOneWidget);
@@ -436,7 +445,7 @@ void main() {
   ) async {
     setScreen(tester, const Size(1280, 800));
     await open(tester, items: [github], withFamily: true);
-    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
     await settle(tester);
 
     await tester.tap(find.text('New item'));
@@ -494,7 +503,7 @@ void main() {
         ),
       ],
     );
-    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
     await settle(tester);
 
     await tester.tap(find.text('GitHub'));
@@ -551,7 +560,7 @@ void main() {
         ),
       ],
     );
-    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
     await settle(tester);
 
     await tester.tap(find.text('GitHub'));
@@ -609,7 +618,7 @@ void main() {
   ) async {
     setScreen(tester, const Size(390, 844), locale: const Locale('fr'));
     await open(tester, items: [github]);
-    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
     await settle(tester);
 
     await tester.tap(find.text('GitHub'));
@@ -661,7 +670,7 @@ void main() {
         ..setMockMethodCallHandler(SystemChannels.platform, null);
     });
     await open(tester, items: [github]);
-    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
     await settle(tester);
     Finder copyOf(String label) => find.descendant(
       of: find.ancestor(of: find.text(label), matching: find.byType(FieldTile)),
@@ -684,7 +693,7 @@ void main() {
   ) async {
     setScreen(tester, const Size(1280, 800));
     await open(tester, items: [github]);
-    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
     await settle(tester);
 
     await tester.tap(find.text('GitHub'));
@@ -717,7 +726,7 @@ void main() {
         Cipher.fromJson(github.toJson())..deletedDate = DateTime.utc(2026, 10),
       ],
     );
-    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
     await settle(tester);
 
     await tester.tap(find.text('Trash'));
@@ -745,7 +754,7 @@ void main() {
   ) async {
     setScreen(tester, const Size(390, 844), locale: const Locale('fr'));
     await open(tester, items: [github]);
-    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
     await settle(tester);
 
     await tester.tap(find.text('GitHub'));
@@ -771,7 +780,7 @@ void main() {
   testWidgets('marks an item as a favorite', (tester) async {
     setScreen(tester, const Size(1280, 800));
     await open(tester, items: [github]);
-    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
     await settle(tester);
 
     await tester.tap(find.text('GitHub'));
@@ -788,7 +797,7 @@ void main() {
   testWidgets('creates a login on a phone, in French', (tester) async {
     setScreen(tester, const Size(390, 844), locale: const Locale('fr'));
     await open(tester, items: [github]);
-    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
     await settle(tester);
 
     await tester.tap(find.byTooltip('Nouvel élément'));
@@ -812,7 +821,7 @@ void main() {
   ) async {
     setScreen(tester, const Size(390, 844));
     await open(tester, items: [github]);
-    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
     await settle(tester);
 
     String generated() =>
@@ -868,7 +877,7 @@ void main() {
   ) async {
     setScreen(tester, const Size(1280, 800));
     await open(tester, items: [github], withFamily: true);
-    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
     await settle(tester);
 
     expect(find.text('All vaults'), findsOneWidget);
@@ -891,7 +900,7 @@ void main() {
   ) async {
     setScreen(tester, const Size(390, 844), locale: const Locale('fr'));
     await open(tester, withFamily: true);
-    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
     await settle(tester);
 
     await tester.tap(find.byTooltip('Coffres'));
@@ -918,7 +927,7 @@ void main() {
   ) async {
     setScreen(tester, const Size(1280, 800));
     await open(tester, withFamily: true);
-    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
     await settle(tester);
     Future<Map<String, dynamic>> saved() async =>
         (jsonDecode(
@@ -959,4 +968,243 @@ void main() {
     expect(find.text('Home'), findsOneWidget);
     await close(tester);
   });
+
+  testWidgets('turns the lock on in the settings, then locks from the rail', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(tester, items: [github]);
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
+    await settle(tester);
+    expect(find.byTooltip('Lock'), findsNothing);
+
+    await tester.tap(find.byTooltip('Settings'));
+    await settle(tester);
+    expect(find.text('Lock after'), findsNothing);
+    await tester.tap(find.byType(Switch));
+    await settle(tester);
+    expect(deviceAuth.asked, 1);
+    expect(find.text('5 minutes'), findsOneWidget);
+    expect((await LockSettings.read()).enabled, isTrue);
+
+    await tester.tap(find.byTooltip('Lock'));
+    await settle(tester);
+    expect(deviceAuth.asked, 1);
+    expect(find.text('Your vaults are locked.'), findsOneWidget);
+    expect(find.text('Security'), findsNothing);
+
+    await tester.tap(find.text('Unlock'));
+    await settle(tester);
+    expect(find.text('Your vaults are locked.'), findsNothing);
+    expect(find.text('Security'), findsOneWidget);
+
+    await tester.tap(find.byType(Switch));
+    await settle(tester);
+    expect(find.byTooltip('Lock'), findsNothing);
+    expect((await LockSettings.read()).enabled, isFalse);
+    await close(tester);
+  });
+
+  testWidgets('keeps the lock off on a device without a screen lock', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(tester, items: [github]);
+    deviceAuth.available = false;
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
+    await settle(tester);
+
+    await tester.tap(find.byTooltip('Settings'));
+    await settle(tester);
+    expect(tester.widget<Switch>(find.byType(Switch)).onChanged, isNull);
+    expect(
+      find.text('Set up a screen lock on this device first.'),
+      findsOneWidget,
+    );
+    await close(tester);
+  });
+
+  testWidgets('locks after five minutes without use, and asks only on a tap', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(
+      tester,
+      items: [github],
+      lockSettings: const LockSettings(enabled: true),
+    );
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
+    await settle(tester);
+    expect(find.text('Your vaults are locked.'), findsOneWidget);
+    expect(find.text('GitHub'), findsNothing);
+    expect(deviceAuth.asked, 0);
+
+    await tester.tap(find.text('Unlock'));
+    await settle(tester);
+    expect(find.text('GitHub'), findsOneWidget);
+
+    await tester.pump(const Duration(minutes: 4));
+    await tester.tap(find.text('GitHub'));
+    await tester.pump(const Duration(minutes: 4));
+    expect(find.text('Your vaults are locked.'), findsNothing);
+
+    // The user works in another app, then focuses the window back.
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    await tester.pump(const Duration(minutes: 1));
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await settle(tester);
+    expect(find.text('Your vaults are locked.'), findsOneWidget);
+    expect(deviceAuth.asked, 1);
+    await close(tester);
+  });
+
+  testWidgets('locks as soon as it leaves the screen on a phone, in French', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(390, 844), locale: const Locale('fr'));
+    await open(
+      tester,
+      items: [github],
+      lockSettings: const LockSettings(
+        enabled: true,
+        timeout: LockTimeout.immediately,
+      ),
+    );
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
+    await settle(tester);
+    await tester.tap(find.text('Déverrouiller'));
+    await settle(tester);
+    expect(find.text('GitHub'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Verrouiller'));
+    await settle(tester);
+    expect(find.text('Vos coffres sont verrouillés.'), findsOneWidget);
+
+    await tester.tap(find.text('Déverrouiller'));
+    await settle(tester);
+    expect(find.text('GitHub'), findsOneWidget);
+
+    void moveTo(List<AppLifecycleState> states) {
+      for (final state in states) {
+        tester.binding.handleAppLifecycleStateChanged(state);
+      }
+    }
+
+    final asked = deviceAuth.asked;
+    moveTo([AppLifecycleState.inactive, AppLifecycleState.hidden]);
+    // No frame gets drawn while the app is hidden.
+    expect(lock.locked, isTrue);
+    moveTo([AppLifecycleState.inactive, AppLifecycleState.resumed]);
+    await settle(tester);
+    expect(find.text('Vos coffres sont verrouillés.'), findsOneWidget);
+    expect(deviceAuth.asked, asked);
+    await close(tester);
+  });
+
+  testWidgets('goes from tab to tab on a phone, each where it was left', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(390, 844));
+    await open(tester, items: [github], withFamily: true);
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
+    await settle(tester);
+
+    await tester.tap(find.byTooltip('Vaults'));
+    await settle(tester);
+    await tester.tap(find.text('Family'));
+    await settle(tester);
+    expect(find.text('Family'), findsOneWidget);
+
+    await tester.tap(find.text('Generator'));
+    await settle(tester);
+    expect(find.text('Passphrase'), findsOneWidget);
+    expect(find.text('Family'), findsNothing);
+
+    await tester.tap(find.text('Settings'));
+    await settle(tester);
+    expect(find.text('Security'), findsOneWidget);
+
+    await tester.tap(find.text('Vault'));
+    await settle(tester);
+    expect(find.text('Family'), findsOneWidget);
+
+    await tester.tap(find.text('Settings'));
+    await settle(tester);
+    await tester.binding.handlePopRoute();
+    await settle(tester);
+    expect(find.text('Security'), findsNothing);
+    expect(find.text('Family'), findsOneWidget);
+    await close(tester);
+  });
+
+  testWidgets('opens the generator from the rail on a desktop', (tester) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(tester, items: [github]);
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
+    await settle(tester);
+
+    await tester.tap(find.byTooltip('Generator'));
+    await settle(tester);
+    expect(find.text('Passphrase'), findsOneWidget);
+    expect(find.text('GitHub'), findsNothing);
+    expect(find.byType(NavigationBar), findsNothing);
+
+    await tester.tap(find.byTooltip('Personal'));
+    await settle(tester);
+    expect(find.text('GitHub'), findsOneWidget);
+    await close(tester);
+  });
+
+  testWidgets('shares the options of the generator tab with its sheet', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(390, 844));
+    await open(tester, items: [github]);
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
+    await settle(tester);
+
+    await tester.tap(find.text('Generator'));
+    await settle(tester);
+    expect(find.text('Number of words'), findsNothing);
+    await tester.tap(find.text('Passphrase'));
+    await settle(tester);
+    expect(find.text('Number of words'), findsOneWidget);
+    expect((await GeneratorSettings.read()).type, GeneratorType.passphrase);
+
+    await tester.tap(find.text('Vault'));
+    await settle(tester);
+    await tester.tap(find.byTooltip('New item'));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Generate a password'));
+    await settle(tester);
+    expect(find.text('Use this passphrase'), findsOneWidget);
+    await tester.tap(find.text('Password').last);
+    await settle(tester);
+    // Closes the sheet from its barrier, then the untouched form.
+    await tester.tapAt(const Offset(195, 20));
+    await settle(tester);
+    await tester.binding.handlePopRoute();
+    await settle(tester);
+
+    await tester.tap(find.text('Generator'));
+    await settle(tester);
+    expect(find.text('Number of words'), findsNothing);
+    expect(find.text('Length'), findsOneWidget);
+    await close(tester);
+  });
+}
+
+/// Lets the user in every time, and counts how often it was asked to.
+class FakeDeviceAuth implements DeviceAuth {
+  var available = true;
+  var asked = 0;
+
+  @override
+  Future<bool> isAvailable() async => available;
+
+  @override
+  Future<bool> authenticate(String reason) async {
+    asked++;
+    return true;
+  }
 }

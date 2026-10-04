@@ -31,7 +31,7 @@ class VaultKeyBox extends StatelessWidget {
               style: monoStyle.copyWith(fontSize: 14, height: 1.4),
             ),
           ),
-          CopyButton(value: nsec),
+          CopyButton(value: nsec, sensitive: true),
         ],
       ),
     );

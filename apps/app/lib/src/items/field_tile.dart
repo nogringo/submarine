@@ -90,7 +90,7 @@ class _FieldTileState extends State<FieldTile> {
                 launchUrl(website, mode: LaunchMode.externalApplication),
             icon: const Icon(Icons.open_in_new_rounded, size: 20),
           ),
-        if (row.copyable) CopyButton(value: row.value),
+        if (row.copyable) CopyButton(value: row.value, sensitive: hidden),
       ],
     );
   }
@@ -244,7 +244,7 @@ class _TotpTileState extends State<_TotpTile> {
           _TotpRing(remaining: period - elapsed, period: period),
         ],
       ),
-      actions: [CopyButton(value: totp.code)],
+      actions: [CopyButton(value: totp.code, sensitive: true)],
     );
   }
 

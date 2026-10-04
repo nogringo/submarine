@@ -8,6 +8,7 @@ import 'package:ndk/ndk.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
 import 'package:sembast/sembast_memory.dart' show newDatabaseFactoryMemory;
 import 'package:submarine/src/app.dart';
+import 'package:submarine/src/items/field_tile.dart';
 import 'package:submarine/src/screens/filter_column.dart';
 import 'package:submarine/src/vaults/vault_storage.dart';
 import 'package:submarine/src/vaults/vaults.dart';
@@ -627,6 +628,49 @@ void main() {
     await settle(tester);
     expect(find.text('Modifier l\'élément'), findsNothing);
     expect(find.text('Modifier'), findsOneWidget);
+    await close(tester);
+  });
+
+  testWidgets('keeps a copied password out of the preview of Android', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    final messenger = tester.binding.defaultBinaryMessenger;
+    const clipboard = MethodChannel('submarine/clipboard');
+    final sensitive = <Object?>[];
+    final plain = <Object?>[];
+    messenger
+      ..setMockMethodCallHandler(clipboard, (call) async {
+        sensitive.add(call.arguments);
+        return null;
+      })
+      ..setMockMethodCallHandler(SystemChannels.platform, (call) async {
+        if (call.method == 'Clipboard.setData') {
+          plain.add((call.arguments as Map)['text']);
+        }
+        return null;
+      });
+    addTearDown(() {
+      messenger
+        ..setMockMethodCallHandler(clipboard, null)
+        ..setMockMethodCallHandler(SystemChannels.platform, null);
+    });
+    await open(tester, items: [github]);
+    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await settle(tester);
+    Finder copyOf(String label) => find.descendant(
+      of: find.ancestor(of: find.text(label), matching: find.byType(FieldTile)),
+      matching: find.byTooltip('Copy'),
+    );
+
+    await tester.tap(find.text('GitHub'));
+    await settle(tester);
+    await tester.tap(copyOf('Password'));
+    await tester.tap(copyOf('Username'));
+    await settle(tester);
+
+    expect(sensitive, ['Tr0ub4dor&3']);
+    expect(plain, ['alice-dev']);
     await close(tester);
   });
 

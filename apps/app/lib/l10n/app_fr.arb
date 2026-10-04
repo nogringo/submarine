@@ -161,5 +161,12 @@
   "removeFromFavorites": "Retirer des favoris",
   "discardChanges": "Abandonner vos modifications ?",
   "keepEditing": "Continuer la modification",
-  "discard": "Abandonner"
+  "discard": "Abandonner",
+  "moreActions": "Plus d'actions",
+  "moveToTrash": "Mettre à la corbeille",
+  "restore": "Restaurer",
+  "deletePermanently": "Supprimer définitivement",
+  "deleteItemTitle": "Supprimer définitivement cet élément ?",
+  "deleteItemBody": "Il sera effacé de cet appareil et de vos relais. Vous ne pourrez pas revenir en arrière.",
+  "delete": "Supprimer"
 }

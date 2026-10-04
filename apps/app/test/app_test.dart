@@ -130,6 +130,11 @@ void main() {
     await settle(tester);
   }
 
+  /// Opens the menu of [button] in real time, where the callback of its items
+  /// gets registered, so that they write in real time too.
+  Future<void> openMenu(WidgetTester tester, Finder button) =>
+      write(tester, button);
+
   testWidgets('welcomes a device without vaults, then creates one', (
     tester,
   ) async {
@@ -671,6 +676,85 @@ void main() {
 
     expect(sensitive, ['Tr0ub4dor&3']);
     expect(plain, ['alice-dev']);
+    await close(tester);
+  });
+
+  testWidgets('moves an item to the trash and back on a desktop', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(tester, items: [github]);
+    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await settle(tester);
+
+    await tester.tap(find.text('GitHub'));
+    await settle(tester);
+    await openMenu(tester, find.byTooltip('More actions'));
+    await write(tester, find.text('Move to trash'));
+
+    expect(find.text('GitHub'), findsNothing);
+    expect(find.text('Select an item to see it here.'), findsOneWidget);
+    await tester.tap(find.text('Trash'));
+    await settle(tester);
+    await tester.tap(find.text('GitHub'));
+    await settle(tester);
+    expect(find.text('Edit'), findsNothing);
+    await write(tester, find.text('Restore'));
+
+    expect(find.text('GitHub'), findsNothing);
+    await tester.tap(find.text('All items'));
+    await settle(tester);
+    expect(find.text('GitHub'), findsOneWidget);
+    expect(vaults.all.single.items.single.cipher.isDeleted, isFalse);
+    await close(tester);
+  });
+
+  testWidgets('deletes an item in the trash for good', (tester) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(
+      tester,
+      items: [
+        Cipher.fromJson(github.toJson())..deletedDate = DateTime.utc(2026, 10),
+      ],
+    );
+    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await settle(tester);
+
+    await tester.tap(find.text('Trash'));
+    await settle(tester);
+    await tester.tap(find.text('GitHub'));
+    await settle(tester);
+    await openMenu(tester, find.byTooltip('More actions'));
+    await write(tester, find.text('Delete permanently'));
+    await tester.tap(find.text('Cancel'));
+    await settle(tester);
+    expect(vaults.all.single.items, hasLength(1));
+
+    await openMenu(tester, find.byTooltip('More actions'));
+    await write(tester, find.text('Delete permanently'));
+    expect(find.text('Delete this item permanently?'), findsOneWidget);
+    await write(tester, find.text('Delete'));
+
+    expect(find.text('GitHub'), findsNothing);
+    expect(vaults.all.single.items, isEmpty);
+    await close(tester);
+  });
+
+  testWidgets('moves an item to the trash on a phone, in French', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(390, 844), locale: const Locale('fr'));
+    await open(tester, items: [github]);
+    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await settle(tester);
+
+    await tester.tap(find.text('GitHub'));
+    await settle(tester);
+    await openMenu(tester, find.byTooltip('Plus d\'actions'));
+    await write(tester, find.text('Mettre à la corbeille'));
+
+    expect(find.text('Tous les coffres'), findsOneWidget);
+    expect(find.text('GitHub'), findsNothing);
     await close(tester);
   });
 

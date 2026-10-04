@@ -709,5 +709,33 @@
   "discard": "Discard",
   "@discard": {
     "description": "Button of that dialog that leaves the item form and loses the changes."
+  },
+  "moreActions": "More actions",
+  "@moreActions": {
+    "description": "Tooltip of the button opening the menu of an item's other actions."
+  },
+  "moveToTrash": "Move to trash",
+  "@moveToTrash": {
+    "description": "Menu action moving an item to the trash."
+  },
+  "restore": "Restore",
+  "@restore": {
+    "description": "Button taking an item out of the trash."
+  },
+  "deletePermanently": "Delete permanently",
+  "@deletePermanently": {
+    "description": "Menu action deleting an item in the trash for good."
+  },
+  "deleteItemTitle": "Delete this item permanently?",
+  "@deleteItemTitle": {
+    "description": "Title of the dialog confirming that an item in the trash is deleted for good."
+  },
+  "deleteItemBody": "It is erased from this device and from your relays. This cannot be undone.",
+  "@deleteItemBody": {
+    "description": "Body of that dialog."
+  },
+  "delete": "Delete",
+  "@delete": {
+    "description": "Button of that dialog that deletes the item for good."
   }
 }

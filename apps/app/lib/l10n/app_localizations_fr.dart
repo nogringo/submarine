@@ -556,4 +556,26 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get discard => 'Abandonner';
+
+  @override
+  String get moreActions => 'Plus d\'actions';
+
+  @override
+  String get moveToTrash => 'Mettre à la corbeille';
+
+  @override
+  String get restore => 'Restaurer';
+
+  @override
+  String get deletePermanently => 'Supprimer définitivement';
+
+  @override
+  String get deleteItemTitle => 'Supprimer définitivement cet élément ?';
+
+  @override
+  String get deleteItemBody =>
+      'Il sera effacé de cet appareil et de vos relais. Vous ne pourrez pas revenir en arrière.';
+
+  @override
+  String get delete => 'Supprimer';
 }

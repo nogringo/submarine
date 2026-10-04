@@ -87,6 +87,21 @@ class VaultController extends ChangeNotifier {
   Future<Item> updateItem(Item item, Cipher cipher) =>
       _write(vault.updateItem(item, cipher));
 
+  Future<Item> trashItem(Item item) => _write(vault.trashItem(item));
+
+  Future<Item> restoreItem(Item item) => _write(vault.restoreItem(item));
+
+  /// Deletes [item] for good, from the cache and from the relays.
+  Future<void> deleteItem(Item item) async {
+    await vault.deleteItem(item);
+    _items = [
+      for (final other in _items)
+        if (other.id != item.id) other,
+    ];
+    notifyListeners();
+    unawaited(_reload());
+  }
+
   Future<Item> _write(Future<Envelope> saving) async {
     // The single version a write leaves is the item, as a read would find it.
     final item = Item([await saving]);

@@ -551,4 +551,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get discard => 'Discard';
+
+  @override
+  String get moreActions => 'More actions';
+
+  @override
+  String get moveToTrash => 'Move to trash';
+
+  @override
+  String get restore => 'Restore';
+
+  @override
+  String get deletePermanently => 'Delete permanently';
+
+  @override
+  String get deleteItemTitle => 'Delete this item permanently?';
+
+  @override
+  String get deleteItemBody =>
+      'It is erased from this device and from your relays. This cannot be undone.';
+
+  @override
+  String get delete => 'Delete';
 }

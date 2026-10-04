@@ -78,6 +78,17 @@ ThemeData buildTheme(Palette palette, Brightness brightness) {
         color: palette.text,
       ),
     ),
+    popupMenuTheme: PopupMenuThemeData(
+      color: palette.raised,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: palette.line),
+      ),
+      labelTextStyle: WidgetStatePropertyAll(
+        TextStyle(fontFamily: textFont, fontSize: 15, color: palette.text),
+      ),
+    ),
     drawerTheme: DrawerThemeData(
       backgroundColor: palette.surface,
       surfaceTintColor: Colors.transparent,

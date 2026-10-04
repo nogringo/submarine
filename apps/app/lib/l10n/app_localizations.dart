@@ -1069,6 +1069,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Discard'**
   String get discard;
+
+  /// Tooltip of the button opening the menu of an item's other actions.
+  ///
+  /// In en, this message translates to:
+  /// **'More actions'**
+  String get moreActions;
+
+  /// Menu action moving an item to the trash.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to trash'**
+  String get moveToTrash;
+
+  /// Button taking an item out of the trash.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get restore;
+
+  /// Menu action deleting an item in the trash for good.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete permanently'**
+  String get deletePermanently;
+
+  /// Title of the dialog confirming that an item in the trash is deleted for good.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this item permanently?'**
+  String get deleteItemTitle;
+
+  /// Body of that dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'It is erased from this device and from your relays. This cannot be undone.'**
+  String get deleteItemBody;
+
+  /// Button of that dialog that deletes the item for good.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
 }
 
 class _AppLocalizationsDelegate

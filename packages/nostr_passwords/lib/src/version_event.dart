@@ -6,7 +6,13 @@ import 'envelope.dart';
 
 const versionEventKind = 21270;
 
-Future<Nip01Event> wrapEnvelope(Envelope envelope, EventSigner vault) async {
+/// [signerFactory] makes the one-time key of the gift wrap: on web, ndk_flutter
+/// has a faster one than the pure Dart default.
+Future<Nip01Event> wrapEnvelope(
+  Envelope envelope,
+  EventSigner vault, {
+  LocalEventSignerFactory signerFactory = const Bip340EventSignerFactory(),
+}) async {
   final version = await vault.sign(
     Nip01Event(
       pubKey: vault.getPublicKey(),
@@ -21,7 +27,7 @@ Future<Nip01Event> wrapEnvelope(Envelope envelope, EventSigner vault) async {
   return GiftWrap.wrapEvent(
     recipientPublicKey: vault.getPublicKey(),
     sealEvent: version,
-    eventSignerFactory: const Bip340EventSignerFactory(),
+    eventSignerFactory: signerFactory,
     randomizeCreatedAtBefore: version.createdAt,
   );
 }

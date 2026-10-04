@@ -219,7 +219,13 @@ class Vault {
   }
 
   Future<void> _saveVersion(Envelope envelope) async {
-    await _save(await wrapEnvelope(envelope, signer));
+    await _save(
+      await wrapEnvelope(
+        envelope,
+        signer,
+        signerFactory: ndk.config.eventSignerFactory,
+      ),
+    );
   }
 
   Future<void> _requestDeletion(String wrapId) async {

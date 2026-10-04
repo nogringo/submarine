@@ -48,6 +48,30 @@ void main() {
     expect(unsent.event?.kind, 1059);
   });
 
+  test(
+    'createItem makes the gift wrap key with the signer factory of ndk',
+    () async {
+      final factory = _CountingSignerFactory();
+      final counted = Ndk(
+        NdkConfig(
+          eventVerifier: Bip340EventVerifier(),
+          cache: MemCacheManager(),
+          bootstrapRelays: [],
+          eventSignerFactory: factory,
+        ),
+      );
+      addTearDown(counted.destroy);
+
+      await Vault(
+        ndk: counted,
+        signer: signer,
+        relays: [relay.url],
+      ).createItem(boulanger);
+
+      expect(factory.keyPairs, 1);
+    },
+  );
+
   test('push sends what createItem saved as a gift wrap', () async {
     final item = await vault.createItem(boulanger);
 
@@ -482,4 +506,14 @@ void main() {
       );
     });
   });
+}
+
+class _CountingSignerFactory extends Bip340EventSignerFactory {
+  var keyPairs = 0;
+
+  @override
+  EventSigner createWithNewKeyPair() {
+    keyPairs++;
+    return super.createWithNewKeyPair();
+  }
 }

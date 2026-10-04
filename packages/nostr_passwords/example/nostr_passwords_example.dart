@@ -57,6 +57,13 @@ Future<void> main() async {
   final found = searchItems(items, 'boulanger alice');
   print('Found ${found.length} item(s) for "boulanger alice"');
 
+  // The replaced password goes to the item's password history.
+  final boulanger = found.first;
+  await vault.updateItem(
+    boulanger,
+    boulanger.cipher..login!.password = 'Tr0ub4dor&3',
+  );
+
   await engine.dispose();
   await ndk.destroy();
 }

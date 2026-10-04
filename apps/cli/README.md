@@ -49,6 +49,20 @@ dart run bin/submarine.dart get password boulanger
 `add` asks for whatever the options leave out, and always for the password,
 which is not echoed. When stdin is piped, it reads one line per question.
 
+`edit` replaces an item with the JSON `get item` prints, base64 encoded by
+`encode`, as `bw edit` does. To change the password of the Boulanger item:
+
+```sh
+dart run bin/submarine.dart get item boulanger \
+  | jq '.login.password = "Tr0ub4dor&3"' \
+  | dart run bin/submarine.dart encode \
+  | dart run bin/submarine.dart edit item <id>
+```
+
+As in Bitwarden, the replaced password goes to the item's password history,
+which keeps the last 5, and `edit` refuses an item that changed since it was
+read.
+
 ### Bitwarden CLI compatibility
 
 These commands behave like their `bw` counterparts, so a script written for
@@ -60,6 +74,8 @@ the Bitwarden CLI runs on Submarine as long as it sticks to them:
 - `list items`, with `--search` and `--trash`
 - `get item|username|password|uri|notes <id>`, where `<id>` is an item id or
   a search term
+- `edit item <id> [encodedJson]`, where `<id>` is an item id
+- `encode`
 - the global flags `--pretty`, `--raw` and `--quiet`
 
 Output is the same: JSON items, bare values for `get password` and the like,
@@ -68,9 +84,9 @@ piped. Searching ignores case and accents and looks in the name, username,
 hostnames and notes. Other `bw` commands and objects fail with an error.
 
 `list` and `get` read the local cache only, they never go to the relays.
-`sync` fetches what changed on the relays since the last sync. Until the first
-sync, `list` and `get` refuse to run. Items saved with `add` are in the cache
-right away.
+`sync` fetches what changed on the relays since the last sync, and `edit` does
+it before saving. Until the first sync, `list` and `get` refuse to run. Items
+saved with `add` or `edit` are in the cache right away.
 
 The vault's gift wraps, still encrypted, are cached in `~/.cache/submarine`
 (under `$XDG_CACHE_HOME` or `%LOCALAPPDATA%` when set). Passwords are decrypted

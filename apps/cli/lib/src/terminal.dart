@@ -18,3 +18,7 @@ String promptSecret(String label) {
     stdout.writeln();
   }
 }
+
+/// All of stdin, up to its end.
+Future<String> readStdin() =>
+    stdin.transform(const Utf8Decoder(allowMalformed: true)).join();

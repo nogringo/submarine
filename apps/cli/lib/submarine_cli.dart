@@ -3,6 +3,8 @@ library;
 import 'package:args/command_runner.dart';
 
 import 'src/commands/add_command.dart';
+import 'src/commands/edit_command.dart';
+import 'src/commands/encode_command.dart';
 import 'src/commands/get_command.dart';
 import 'src/commands/list_command.dart';
 import 'src/commands/status_command.dart';
@@ -27,7 +29,9 @@ class SubmarineCommandRunner extends CommandRunner<void> {
     addCommand(AddCommand());
     addCommand(ListCommand());
     addCommand(GetCommand());
+    addCommand(EditCommand());
     addCommand(StatusCommand());
     addCommand(SyncCommand());
+    addCommand(EncodeCommand());
   }
 }

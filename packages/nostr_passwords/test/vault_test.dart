@@ -68,6 +68,122 @@ void main() {
     expect(item.cipher.login?.password, 'hunter2');
   });
 
+  group('updateItem', () {
+    /// The data updateItem publishes once [edit] changed [original].
+    Future<Cipher> saveEdited(
+      Cipher original,
+      void Function(Cipher cipher) edit,
+    ) async {
+      await vault.createItem(original);
+      final [item] = await vault.items();
+      edit(item.cipher);
+      return Cipher.fromJson((await vault.updateItem(item, item.cipher)).data);
+    }
+
+    test('publishes a version that replaces the current one', () async {
+      final created = await vault.createItem(boulanger);
+      final [item] = await vault.items();
+
+      final updated = await vault.updateItem(
+        item,
+        item.cipher..name = 'Boulanger.com',
+      );
+
+      expect(updated.id, created.id);
+      expect(updated.parents, [created.rev]);
+      final [current] = await vault.items();
+      expect(current.heads.single.rev, updated.rev);
+      expect(current.cipher.name, 'Boulanger.com');
+    });
+
+    test('replaces every head of a conflict', () async {
+      await vault.createItem(boulanger);
+      final [item] = await vault.items();
+      final first = await vault.updateItem(
+        item,
+        Cipher.fromJson(item.current.data)..notes = 'first',
+      );
+      final second = await vault.updateItem(
+        item,
+        Cipher.fromJson(item.current.data)..notes = 'second',
+      );
+      final [conflicted] = await vault.items();
+      expect(conflicted.hasConflict, isTrue);
+
+      final merged = await vault.updateItem(conflicted, conflicted.cipher);
+
+      expect(merged.parents, unorderedEquals([first.rev, second.rev]));
+      final [resolved] = await vault.items();
+      expect(resolved.hasConflict, isFalse);
+    });
+
+    test('records the replaced password', () async {
+      final before = DateTime.now().toUtc();
+
+      final saved = await saveEdited(
+        boulanger,
+        (cipher) => cipher.login!.password = 'hunter3',
+      );
+
+      final [entry] = saved.passwordHistory;
+      expect(entry.password, 'hunter2');
+      expect(entry.lastUsedDate!.isBefore(before), isFalse);
+      expect(saved.revisionDate, entry.lastUsedDate);
+    });
+
+    test('leaves the history alone when no password changes', () async {
+      final saved = await saveEdited(
+        boulanger,
+        (cipher) => cipher.notes = 'Loyalty card 1234',
+      );
+
+      expect(saved.passwordHistory, isEmpty);
+    });
+
+    test('records the hidden fields that change', () async {
+      final saved = await saveEdited(
+        Cipher(
+          type: CipherType.login,
+          name: 'Bank',
+          fields: [
+            Field(name: 'PIN', value: '1234', type: FieldType.hidden),
+            Field(name: 'Code', value: '42', type: FieldType.hidden),
+            Field(name: 'Branch', value: 'Paris'),
+          ],
+        ),
+        (cipher) => cipher.fields = [
+          Field(name: 'Code', value: '42', type: FieldType.hidden),
+        ],
+      );
+
+      expect(
+        [for (final entry in saved.passwordHistory) entry.password],
+        ['PIN: 1234'],
+      );
+    });
+
+    test('keeps the 5 latest entries, whatever history it is given', () async {
+      final saved = await saveEdited(
+        Cipher(
+          type: CipherType.login,
+          name: 'Boulanger',
+          login: Login(password: 'hunter2'),
+          passwordHistory: [
+            for (var i = 5; i > 0; i--) PasswordHistory(password: 'old$i'),
+          ],
+        ),
+        (cipher) => cipher
+          ..login!.password = 'hunter3'
+          ..passwordHistory = [],
+      );
+
+      expect(
+        [for (final entry in saved.passwordHistory) entry.password],
+        ['hunter2', 'old5', 'old4', 'old3', 'old2'],
+      );
+    });
+  });
+
   group('on another device', () {
     late Ndk otherNdk;
     late SyncEngine engine;

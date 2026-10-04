@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:nostr_passwords/nostr_passwords.dart';
 
 import '../cli_exception.dart';
 import '../output.dart';
@@ -66,6 +67,14 @@ abstract class VaultCommand extends Command<void> {
     );
     try {
       return await action(session);
+    } on PublishException catch (error) {
+      throw CliException(
+        [
+          'No relay accepted ${error.envelope.data['name']}:',
+          for (final MapEntry(:key, :value) in error.relayMessages.entries)
+            '  $key: $value',
+        ].join('\n'),
+      );
     } finally {
       await session.close();
     }

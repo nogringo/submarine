@@ -39,17 +39,7 @@ class AddCommand extends VaultCommand {
         password: password,
       ),
     );
-    try {
-      await withVault((session) => session.vault.createItem(cipher));
-    } on PublishException catch (error) {
-      throw CliException(
-        [
-          'No relay accepted $itemName:',
-          for (final MapEntry(:key, :value) in error.relayMessages.entries)
-            '  $key: $value',
-        ].join('\n'),
-      );
-    }
+    await withVault((session) => session.vault.createItem(cipher));
     output.message('Saved $itemName.');
   }
 }

@@ -55,7 +55,7 @@ class EditCommand extends VaultCommand {
 
 /// Saves [cipher] over the item [id], as bw and its server would.
 Future<Item> _edit(VaultSession session, String id, Cipher cipher) async {
-  final item = await session.syncedItem(id);
+  final item = await session.item(id);
   final current = item.cipher;
   if (current.isDeleted) {
     throw CliException(

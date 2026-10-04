@@ -37,7 +37,7 @@ class DeleteCommand extends VaultCommand {
 
     final permanent = argResults!.flag('permanent');
     await withVault((session) async {
-      final item = await session.syncedItem(id);
+      final item = await session.item(id);
       if (permanent) {
         await session.vault.deleteItem(item);
       } else if (!item.cipher.isDeleted) {

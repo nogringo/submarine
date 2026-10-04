@@ -9,8 +9,8 @@ class StatusCommand extends VaultCommand {
 
   @override
   final description =
-      'Show the last sync, the vault public key, and whether the vault key '
-      'is set.';
+      'Show the last sync, the vault public key, whether the vault key is '
+      'set, and how many events no relay accepted yet.';
 
   @override
   Future<void> execute() async {
@@ -26,6 +26,7 @@ class StatusCommand extends VaultCommand {
           'lastSync': (await session.lastSync())?.toIso8601String(),
           'userId': session.vault.signer.getPublicKey(),
           'status': 'unlocked',
+          'unsentEvents': (await session.vault.unsent()).length,
         },
       ),
     );

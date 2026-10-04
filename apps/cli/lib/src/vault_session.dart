@@ -43,8 +43,15 @@ class VaultSession {
   late final Vault vault;
   late final SyncEngine _engine;
 
-  /// Fetches from the relays what changed since the last sync.
+  /// Sends to the relays the changes none accepted yet, then fetches what
+  /// changed since the last sync.
   Future<void> sync() async {
+    final unsent = await vault.push();
+    await _fetch();
+    if (unsent.isNotEmpty) throw CliException(_unsentMessage(unsent));
+  }
+
+  Future<void> _fetch() async {
     final handle = vault.sync(_engine);
     _engine.start();
     final status = await _engine
@@ -78,20 +85,30 @@ class VaultSession {
     return vault.items();
   }
 
-  /// The item [id], trash included, after a [sync]: a command that changes an
-  /// item syncs first, so that its version does not miss a head another device
-  /// published.
-  Future<Item> syncedItem(String id) async {
-    await sync();
-    return (await items()).where((item) => item.id == id).firstOrNull ??
-        (throw CliException('Not found.'));
-  }
+  /// The item [id], trash included, as of the last [sync].
+  Future<Item> item(String id) async =>
+      (await items()).where((item) => item.id == id).firstOrNull ??
+      (throw CliException('Not found.'));
 
   Future<void> close() async {
     await _engine.dispose();
     await ndk.destroy();
     await _cache.close();
   }
+}
+
+String _unsentMessage(List<EventDeliverySnapshot> unsent) {
+  final answers = {
+    for (final delivery in unsent)
+      for (final target in delivery.relayTargets)
+        target.relayUrl: target.lastError ?? target.lastOkMessage ?? '',
+  };
+  final events = unsent.length == 1 ? '1 event' : '${unsent.length} events';
+  return [
+    'Syncing failed: no relay accepted $events, still saved locally:',
+    for (final MapEntry(:key, :value) in answers.entries)
+      '  $key: ${value.isEmpty ? 'no answer' : value}',
+  ].join('\n');
 }
 
 Database _openDatabase(Directory directory) {
@@ -112,6 +129,8 @@ Ndk _quietNdk(CacheManager cache) {
       cache: cache,
       bootstrapRelays: [],
       logLevel: LogLevel.off,
+      // A command never waits for the relays: sync sends what is pending.
+      pendingDeliveryRetriesEnabled: false,
     ),
   );
 }

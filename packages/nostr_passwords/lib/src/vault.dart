@@ -12,6 +12,9 @@ import 'envelope.dart';
 import 'item.dart';
 import 'version_event.dart';
 
+/// A vault, local first: a change is done once it is saved in the ndk cache,
+/// the local relay. ndk then sends it to [relays] in the background, unless
+/// `NdkConfig.pendingDeliveryRetriesEnabled` is off, and [push] sends it now.
 class Vault {
   Vault({required this.ndk, required this.signer, required this.relays});
 
@@ -95,11 +98,11 @@ class Vault {
       modifiedAt: DateTime.now().toUtc(),
       data: cipher.toJson(),
     );
-    await _publish(envelope);
+    await _saveVersion(envelope);
     return envelope;
   }
 
-  /// Publishes [cipher] as the new version of [item]. It replaces all the
+  /// Saves [cipher] as the new version of [item]. It replaces all the
   /// heads of [item], which resolves a conflict.
   ///
   /// As in Bitwarden, the password history is the one of [item], plus the
@@ -134,11 +137,36 @@ class Vault {
       for (final wrap in await _loadWraps())
         if ((await _open(wrap))?.id == item.id) wrap.id,
     ];
-    await Future.wait([
-      for (final wrapId in wrapIds) _requestDeletion(wrapId, item.current),
-    ]);
+    await Future.wait([for (final wrapId in wrapIds) _requestDeletion(wrapId)]);
     await _drop(wrapIds);
   }
+
+  /// Sends to [relays] the changes no relay accepted yet, and returns those
+  /// still left.
+  Future<List<EventDeliverySnapshot>> push() async {
+    await Future.wait([
+      for (final delivery in await unsent()) _send(delivery.event!),
+    ]);
+    return unsent();
+  }
+
+  /// The changes saved in the cache that no relay accepted yet.
+  Future<List<EventDeliverySnapshot>> unsent() async => [
+    for (final delivery in await ndk.broadcast.loadPendingDeliveries())
+      if (delivery.event case final event?
+          when _isOwn(event) &&
+              !delivery.relayTargets.any(
+                (target) => target.state == RelayDeliveryState.acked,
+              ))
+        delivery,
+  ];
+
+  /// Whether [event] is one of this vault's: the cache may hold other vaults.
+  bool _isOwn(Nip01Event event) => switch (event.kind) {
+    GiftWrap.kGiftWrapEventkind => event.pTags.contains(signer.getPublicKey()),
+    Deletion.kKind => event.pubKey == signer.getPublicKey(),
+    _ => false,
+  };
 
   Future<Envelope> _update(Item item, Cipher cipher, DateTime now) async {
     // item.cipher may be the very object the caller edited.
@@ -159,7 +187,7 @@ class Vault {
         'revisionDate': formatDate(now),
       },
     );
-    await _publish(envelope);
+    await _saveVersion(envelope);
     return envelope;
   }
 
@@ -190,11 +218,11 @@ class Vault {
     }
   }
 
-  Future<void> _publish(Envelope envelope) async {
-    await _broadcast(await wrapEnvelope(envelope, signer), envelope);
+  Future<void> _saveVersion(Envelope envelope) async {
+    await _save(await wrapEnvelope(envelope, signer));
   }
 
-  Future<void> _requestDeletion(String wrapId, Envelope envelope) async {
+  Future<void> _requestDeletion(String wrapId) async {
     final request = await signer.sign(
       Nip01Event(
         pubKey: signer.getPublicKey(),
@@ -209,16 +237,23 @@ class Vault {
         createdAt: _randomPastTime(),
       ),
     );
-    await _broadcast(request, envelope);
+    await _save(request);
   }
 
-  /// Throws a [PublishException] about [envelope] when no relay accepts
-  /// [event].
-  Future<void> _broadcast(Nip01Event event, Envelope envelope) async {
-    final responses = await ndk.broadcast
+  Future<void> _save(Nip01Event event) async {
+    await ndk.config.cache.saveEvent(event);
+    // A zero timeout enrolls the event in ndk's pending delivery without
+    // waiting for the relays.
+    await _send(event, timeout: Duration.zero);
+  }
+
+  Future<void> _send(Nip01Event event, {Duration? timeout}) async {
+    await ndk.broadcast
         .broadcast(
           nostrEvent: event,
           specificRelays: relays,
+          timeout: timeout,
+          saveToCache: false,
           // Without it, a relay asking for AUTH would see the logged account.
           auth: AuthPolicy.allow(
             Account(
@@ -229,26 +264,7 @@ class Vault {
           ),
         )
         .broadcastDoneFuture;
-    if (!responses.any((response) => response.broadcastSuccessful)) {
-      throw PublishException(envelope, {
-        for (final response in responses) response.relayUrl: response.msg,
-      });
-    }
   }
-}
-
-/// No relay accepted an event about [envelope]: one of its versions, or a
-/// deletion request.
-class PublishException implements Exception {
-  PublishException(this.envelope, this.relayMessages);
-
-  final Envelope envelope;
-  final Map<String, String> relayMessages;
-
-  @override
-  String toString() =>
-      'PublishException: no relay accepted an event about rev ${envelope.rev} '
-      'of ${envelope.id}';
 }
 
 /// Bitwarden's CipherService.updateModelfromExistingCipher, then

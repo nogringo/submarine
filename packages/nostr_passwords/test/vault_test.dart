@@ -33,31 +33,51 @@ void main() {
     await relay.stopServer();
   });
 
-  test('createItem publishes the item as a gift wrap', () async {
+  test('createItem saves the item without waiting for the relays', () async {
+    final offline = Vault(
+      ndk: ndk,
+      signer: signer,
+      relays: ['ws://127.0.0.1:1'],
+    );
+
+    await offline.createItem(boulanger).timeout(const Duration(seconds: 2));
+
+    final [item] = await offline.items();
+    expect(item.cipher.name, 'Boulanger');
+    final [unsent] = await offline.unsent();
+    expect(unsent.event?.kind, 1059);
+  });
+
+  test('push sends what createItem saved as a gift wrap', () async {
     final item = await vault.createItem(boulanger);
 
-    final [wrap] = relay.receivedEvents;
+    expect(await vault.push(), isEmpty);
+
+    final wrap = relay.receivedEvents.last;
     expect(wrap.kind, 1059);
     expect((await unwrapEnvelope(wrap, signer)).toJson(), item.toJson());
+    expect(await vault.unsent(), isEmpty);
   });
 
-  test('createItem throws when no relay accepts the item', () async {
-    relay.rejectFirstEventPublishes = 1;
-
-    await expectLater(
-      vault.createItem(boulanger),
-      throwsA(isA<PublishException>()),
-    );
-  });
-
-  test('createItem authenticates as the vault when the relay asks', () async {
-    relay.requireAuthForEvents = true;
-
+  test('push returns what no relay accepted', () async {
+    relay.rejectFirstEventPublishes = 1000;
     await vault.createItem(boulanger);
+
+    final [left] = await vault.push();
+
+    expect(left.event?.kind, 1059);
+    expect(left.relayTargets.single.lastError, contains('rate-limited'));
+  });
+
+  test('push authenticates as the vault when the relay asks', () async {
+    relay.requireAuthForEvents = true;
+    await vault.createItem(boulanger);
+
+    await vault.push();
 
     expect(
       relay.eventsAuthenticatedAs(signer.getPublicKey()),
-      contains(relay.receivedEvents.first.id),
+      contains(relay.receivedEvents.last.id),
     );
   });
 
@@ -209,7 +229,10 @@ void main() {
       await vault.createItem(boulanger);
       final [item] = await vault.items();
       await vault.updateItem(item, item.cipher..notes = 'Loyalty card 1234');
-      final boulangerWraps = [for (final wrap in relay.receivedEvents) wrap.id];
+      final boulangerWraps = [
+        for (final wrap in await ndk.config.cache.loadEvents(kinds: [1059]))
+          wrap.id,
+      ];
       await vault.createItem(
         Cipher(type: CipherType.secureNote, name: 'Wi-Fi'),
       );
@@ -217,11 +240,12 @@ void main() {
       final before = seconds();
       await vault.deleteItem(item);
       final after = seconds();
+      await vault.push();
 
-      final requests = [
+      final requests = {
         for (final event in relay.receivedEvents)
-          if (event.kind == 5) event,
-      ];
+          if (event.kind == 5) event.id: event,
+      }.values;
       expect([
         for (final request in requests) ...request.getTags('e'),
       ], unorderedEquals(boulangerWraps));
@@ -238,6 +262,23 @@ void main() {
       final [left] = await vault.items();
       expect(left.cipher.name, 'Wi-Fi');
       expect(await ndk.config.cache.loadEvents(ids: boulangerWraps), isEmpty);
+    });
+
+    test('leaves out of unsent the gift wraps it drops', () async {
+      final offline = Vault(
+        ndk: ndk,
+        signer: signer,
+        relays: ['ws://127.0.0.1:1'],
+      );
+      await offline.createItem(boulanger);
+      final [item] = await offline.items();
+
+      await offline.deleteItem(item);
+
+      expect(
+        [for (final delivery in await offline.unsent()) delivery.event?.kind],
+        [5],
+      );
     });
 
     test('a version published afterwards brings the item back', () async {
@@ -257,7 +298,7 @@ void main() {
 
     test('items ignore deletion requests the vault did not sign', () async {
       await vault.createItem(boulanger);
-      final [wrap] = relay.receivedEvents;
+      final [wrap] = await ndk.config.cache.loadEvents(kinds: [1059]);
       final attacker = const Bip340EventSignerFactory().createWithNewKeyPair();
       await ndk.config.cache.saveEvent(
         await attacker.sign(
@@ -304,7 +345,9 @@ void main() {
       await otherNdk.destroy();
     });
 
+    /// What this device gets once the first one pushed its changes.
     Future<List<Item>> syncedItems() async {
+      await vault.push();
       final handle = otherVault.sync(engine);
       engine.start();
       await engine

@@ -34,6 +34,11 @@ Future<void> main() async {
   );
   print('Saved ${saved.data['name']} as item ${saved.id}');
 
+  // Saved in the ndk cache, which ndk sends in the background: push sends it
+  // now, and returns what no relay accepted.
+  final unsent = await vault.push();
+  print('${unsent.length} change(s) left to send');
+
   final engine = SyncEngine(
     ndk,
     store: SembastSyncStore(await databaseFactoryIo.openDatabase('sync.db')),
@@ -70,6 +75,7 @@ Future<void> main() async {
 
   // Asks the relays to delete every version of the item, for good.
   await vault.deleteItem(boulanger);
+  await vault.push();
 
   await engine.dispose();
   await ndk.destroy();

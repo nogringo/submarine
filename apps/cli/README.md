@@ -75,7 +75,8 @@ the Bitwarden CLI runs on Submarine as long as it sticks to them:
 
 - `sync`, `sync --last`
 - `status`: `unlocked` when `SUBMARINE_NSEC` is set, `unauthenticated`
-  otherwise. `userId` is the vault's public key, in hex.
+  otherwise. `userId` is the vault's public key, in hex. `unsentEvents` counts
+  the changes no relay accepted yet.
 - `list items`, with `--search` and `--trash`
 - `get item|username|password|uri|notes <id>`, where `<id>` is an item id or
   a search term
@@ -90,11 +91,11 @@ errors on stderr with exit code 1, and no final newline when the output is
 piped. Searching ignores case and accents and looks in the name, username,
 hostnames and notes. Other `bw` commands and objects fail with an error.
 
-`list` and `get` read the local cache only, they never go to the relays.
-`sync` fetches what changed on the relays since the last sync, and `edit`,
-`delete` and `restore` do it before changing an item. Until the first sync,
-`list` and `get` refuse to run. What a command changes is in the cache right
-away.
+Submarine is local first: its cache is a local relay. `add`, `edit`, `delete`
+and `restore` save their change in it and never wait for the network. `sync`
+sends to the relays the changes none accepted yet, then fetches what changed
+since the last sync. `list` and `get` read the cache only. Until the first
+sync, `list` and `get` refuse to run.
 
 The vault's gift wraps, still encrypted, are cached in `~/.cache/submarine`
 (under `$XDG_CACHE_HOME` or `%LOCALAPPDATA%` when set). Passwords are decrypted

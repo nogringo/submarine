@@ -21,7 +21,7 @@ class RestoreCommand extends VaultCommand {
     if (object != 'item') throw CliException('Unknown object.');
 
     await withVault((session) async {
-      final item = await session.syncedItem(id);
+      final item = await session.item(id);
       if (!item.cipher.isDeleted) {
         throw CliException('Cipher is not in trash.');
       }

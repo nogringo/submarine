@@ -1,39 +1,60 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# nostr_passwords
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/tools/pub/writing-package-pages).
+Reference Dart implementation of a password manager protocol built on [Nostr](https://nostr.how/). It powers [Submarine](../..), but carries no Submarine branding so that any client can use it.
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/tools/pub/create-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/to/develop-packages).
--->
+> **Status:** early development. The protocol may still change, and nothing should hold real passwords yet.
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+The protocol is specified in [`docs`](../../docs).
 
 ## Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+- **Bitwarden items.** An item's data is Bitwarden's cipher JSON: logins, secure notes, cards, identities, SSH keys, bank accounts, driver's licenses and passports.
+- **Private on relays.** Each version of an item is an event signed by the vault key and gift wrapped to that same key (NIP-59). Relays see a one-time key, the vault's public key and a randomized date, never the content.
+- **History and conflicts.** A version names the versions it replaces. Edits made concurrently on several devices are all kept as the item's heads, and the next edit resolves them.
+- **Local first.** A change is done once it is saved in the ndk cache. ndk sends it to the relays afterwards, and the vault lists what no relay accepted yet.
+- **Sync.** Keeps the vault synced from its relays with [`sync_engine_shim_for_ndk`](https://pub.dev/packages/sync_engine_shim_for_ndk), and authenticates as the vault (NIP-42) to relays that serve gift wraps to their recipient only.
+- **Trash and deletion.** Items go to the trash and come back out of it, as in Bitwarden. Deleting one permanently asks the relays to delete each of its gift wraps (NIP-09).
+- **Bitwarden behavior.** Password history and search work as in Bitwarden: the last 5 replaced passwords are kept, and search ignores case and accents.
 
 ## Getting started
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+A `Vault` needs:
+
+- an `Ndk` instance with a persistent cache: the cache is where the vault lives on the device;
+- the vault's `EventSigner`, also added to `ndk.accounts` so that sync can authenticate as the vault;
+- the vault's relays.
+
+To sync, it also needs a `SyncEngine` and a `SyncStore` from `sync_engine_shim_for_ndk`.
 
 ## Usage
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
-
 ```dart
-const like = 'sample';
+final vault = Vault(
+  ndk: ndk,
+  signer: signer,
+  relays: ['wss://nos.lol', 'wss://relay.primal.net'],
+);
+
+await vault.createItem(
+  Cipher(
+    type: CipherType.login,
+    name: 'Boulanger',
+    login: Login(
+      uris: [LoginUri('https://www.boulanger.com')],
+      username: 'alice@example.com',
+      password: 'correct horse battery staple',
+    ),
+  ),
+);
+
+final items = await vault.items();
+for (final item in searchItems(items, 'boulanger')) {
+  print('${item.cipher.name}: ${item.cipher.subtitle}');
+}
 ```
 
-## Additional information
+[`example/nostr_passwords_example.dart`](example/nostr_passwords_example.dart) goes through the whole flow: setup, sync, edit, trash, restore and permanent deletion.
 
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+## License
+
+[MIT](../../LICENSE)

@@ -18,7 +18,7 @@ Future<void> main() async {
   final vault = Vault(
     ndk: ndk,
     signer: signer,
-    relays: ['wss://relay.damus.io', 'wss://nos.lol'],
+    relays: ['wss://nos.lol', 'wss://relay.primal.net'],
   );
 
   final saved = await vault.createItem(

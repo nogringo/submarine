@@ -14,7 +14,7 @@ This repository is a Dart [pub workspace](https://dart.dev/go/pub-workspaces).
 | [`apps/app`](apps/app) | `submarine` | Flutter app for Android, iOS, macOS, Windows, Linux and web. |
 | [`apps/cli`](apps/cli) | `submarine_cli` | Command-line client. |
 
-The protocol specification will live in its own repository.
+The protocol specification lives in [`docs`](docs).
 
 ## Development
 
@@ -36,7 +36,7 @@ flutter run
 Run the CLI:
 
 ```sh
-dart run apps/cli/bin/submarine_cli.dart --help
+dart run apps/cli/bin/submarine.dart --help
 ```
 
 Analyze the whole workspace from the root:

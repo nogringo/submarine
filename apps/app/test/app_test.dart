@@ -807,6 +807,62 @@ void main() {
     await close(tester);
   });
 
+  testWidgets('generates a password with the options of its sheet', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(390, 844));
+    await open(tester, items: [github]);
+    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await settle(tester);
+
+    String generated() =>
+        tester.widget<PasswordText>(find.byType(PasswordText)).value;
+    Future<void> tapInSheet(Finder finder) async {
+      await tester.ensureVisible(finder);
+      await tester.tap(finder);
+      await settle(tester);
+    }
+
+    await tester.tap(find.byTooltip('New item'));
+    await settle(tester);
+    await tester.enterText(find.widgetWithText(TextField, 'Name'), 'Netflix');
+    await tester.tap(find.byTooltip('Generate a password'));
+    await settle(tester);
+    expect(find.text('Generator'), findsOneWidget);
+    expect(generated(), matches(RegExp(r'^[A-Za-z0-9]{14}$')));
+
+    await tapInSheet(find.text(r'!@#$%^&*'));
+    await tapInSheet(find.byTooltip('Increase').first);
+    final password = generated();
+    expect(password, hasLength(15));
+    expect(password, contains(RegExp(r'[!@#$%^&*]')));
+    await tapInSheet(find.text('Use this password'));
+    expect(find.text('Generator'), findsNothing);
+    expect(
+      tester
+          .widget<TextField>(find.widgetWithText(TextField, 'Password'))
+          .controller!
+          .text,
+      password,
+    );
+    await write(tester, find.text('Save'));
+    final items = (await tester.runAsync(vaults.all.single.vault.items))!;
+    final netflix = items.singleWhere((item) => item.cipher.name == 'Netflix');
+    expect(netflix.cipher.login!.password, password);
+
+    await tester.tap(find.text('Edit'));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Generate a password'));
+    await settle(tester);
+    expect(generated(), hasLength(15));
+    expect(generated(), contains(RegExp(r'[!@#$%^&*]')));
+    await tapInSheet(find.text('Passphrase'));
+    expect(generated().split('-'), hasLength(6));
+    await tapInSheet(find.text('Use this passphrase'));
+    expect(saveEnabled(tester), isTrue);
+    await close(tester);
+  });
+
   testWidgets('keeps the items in place from all vaults to one vault', (
     tester,
   ) async {

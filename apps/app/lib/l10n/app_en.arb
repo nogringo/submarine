@@ -741,5 +741,89 @@
   "delete": "Delete",
   "@delete": {
     "description": "Button of that dialog that deletes the item for good."
+  },
+  "generatePassword": "Generate a password",
+  "@generatePassword": {
+    "description": "Tooltip of the button next to the password field that opens the generator."
+  },
+  "generator": "Generator",
+  "@generator": {
+    "description": "Title of the sheet generating a password or a passphrase."
+  },
+  "passphrase": "Passphrase",
+  "@passphrase": {
+    "description": "Choice in the generator for words joined by a separator, rather than a password."
+  },
+  "regenerate": "Regenerate",
+  "@regenerate": {
+    "description": "Tooltip of the button generating another value with the same options."
+  },
+  "passwordLength": "Length",
+  "@passwordLength": {
+    "description": "Label of the length of a generated password."
+  },
+  "includeCharacters": "Include",
+  "@includeCharacters": {
+    "description": "Label above the character sets a generated password takes its characters from."
+  },
+  "uppercaseLetters": "Uppercase letters",
+  "@uppercaseLetters": {
+    "description": "Accessibility label of the A-Z choice of the generator."
+  },
+  "lowercaseLetters": "Lowercase letters",
+  "@lowercaseLetters": {
+    "description": "Accessibility label of the a-z choice of the generator."
+  },
+  "digits": "Digits",
+  "@digits": {
+    "description": "Accessibility label of the 0-9 choice of the generator."
+  },
+  "specialCharacters": "Special characters",
+  "@specialCharacters": {
+    "description": "Accessibility label of the !@#$%^&* choice of the generator."
+  },
+  "minNumbers": "Minimum digits",
+  "@minNumbers": {
+    "description": "Label of the fewest digits a generated password has."
+  },
+  "minSpecial": "Minimum special characters",
+  "@minSpecial": {
+    "description": "Label of the fewest special characters a generated password has."
+  },
+  "avoidAmbiguous": "Avoid ambiguous characters",
+  "@avoidAmbiguous": {
+    "description": "Switch leaving out I, O, l, 0 and 1, easily mistaken for one another."
+  },
+  "numberOfWords": "Number of words",
+  "@numberOfWords": {
+    "description": "Label of the number of words of a generated passphrase."
+  },
+  "wordSeparator": "Word separator",
+  "@wordSeparator": {
+    "description": "Label of the character between the words of a generated passphrase."
+  },
+  "capitalize": "Capitalize",
+  "@capitalize": {
+    "description": "Switch capitalizing the first letter of each word of a passphrase."
+  },
+  "includeNumber": "Include a number",
+  "@includeNumber": {
+    "description": "Switch adding a digit at the end of one word of a passphrase."
+  },
+  "usePassword": "Use this password",
+  "@usePassword": {
+    "description": "Button of the generator that puts the password in the password field."
+  },
+  "usePassphrase": "Use this passphrase",
+  "@usePassphrase": {
+    "description": "Button of the generator that puts the passphrase in the password field."
+  },
+  "decrease": "Decrease",
+  "@decrease": {
+    "description": "Tooltip of the button lowering a number by one."
+  },
+  "increase": "Increase",
+  "@increase": {
+    "description": "Tooltip of the button raising a number by one."
   }
 }

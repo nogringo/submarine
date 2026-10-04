@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/painting.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../secure_storage.dart';
+
 /// A vault opened on this device. Its name and color stay on the device:
 /// someone the vault is shared with names it their own way.
 class VaultRecord {
@@ -38,12 +40,7 @@ class VaultRecord {
 /// Keeps the vaults of this device, keys included, in its secure storage.
 class VaultStorage {
   VaultStorage([FlutterSecureStorage? storage])
-    : _storage =
-          storage ??
-          const FlutterSecureStorage(
-            // The data protection keychain needs a provisioning profile.
-            mOptions: MacOsOptions(usesDataProtectionKeychain: false),
-          );
+    : _storage = storage ?? secureStorage;
 
   static const _key = 'vaults';
 

@@ -68,14 +68,20 @@ Future<void> main() async {
   final found = searchItems(items, 'boulanger alice');
   print('Found ${found.length} item(s) for "boulanger alice"');
 
-  // The replaced password goes to the item's password history.
   final boulanger = found.first;
   final totp = generateTotp(boulanger.cipher.login!.totp!);
   print('TOTP code ${totp.code}, renewed every ${totp.period.inSeconds} s');
 
+  // Bitwarden's generator, options and defaults included.
+  final password = generatePassword(
+    const PasswordGeneratorOptions(length: 20, special: true),
+  );
+  print('Or a passphrase: ${generatePassphrase()}');
+
+  // The replaced password goes to the item's password history.
   final updated = await vault.updateItem(
     boulanger,
-    boulanger.cipher..login!.password = 'Tr0ub4dor&3',
+    boulanger.cipher..login!.password = password,
   );
 
   // A published version replaces every head of the item.

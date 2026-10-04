@@ -89,6 +89,14 @@ ThemeData buildTheme(Palette palette, Brightness brightness) {
         TextStyle(fontFamily: textFont, fontSize: 15, color: palette.text),
       ),
     ),
+    bottomSheetTheme: BottomSheetThemeData(
+      backgroundColor: palette.surface,
+      surfaceTintColor: Colors.transparent,
+      dragHandleColor: palette.line,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+    ),
     drawerTheme: DrawerThemeData(
       backgroundColor: palette.surface,
       surfaceTintColor: Colors.transparent,
@@ -154,6 +162,13 @@ ThemeData buildTheme(Palette palette, Brightness brightness) {
         color: palette.background,
       ),
       waitDuration: const Duration(milliseconds: 400),
+    ),
+    // Signal rather than accent: a slider is read, not filled.
+    sliderTheme: SliderThemeData(
+      activeTrackColor: palette.signal,
+      inactiveTrackColor: palette.line,
+      thumbColor: palette.signal,
+      overlayColor: palette.signal.withValues(alpha: 0.12),
     ),
     progressIndicatorTheme: ProgressIndicatorThemeData(color: palette.muted),
   );

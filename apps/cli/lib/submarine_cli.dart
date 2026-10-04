@@ -7,6 +7,7 @@ import 'src/commands/create_command.dart';
 import 'src/commands/delete_command.dart';
 import 'src/commands/edit_command.dart';
 import 'src/commands/encode_command.dart';
+import 'src/commands/generate_command.dart';
 import 'src/commands/get_command.dart';
 import 'src/commands/list_command.dart';
 import 'src/commands/restore_command.dart';
@@ -38,6 +39,7 @@ class SubmarineCommandRunner extends CommandRunner<void> {
     addCommand(RestoreCommand());
     addCommand(StatusCommand());
     addCommand(SyncCommand());
+    addCommand(GenerateCommand());
     addCommand(EncodeCommand());
   }
 }

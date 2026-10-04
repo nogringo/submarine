@@ -1117,6 +1117,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete'**
   String get delete;
+
+  /// Tooltip of the button next to the password field that opens the generator.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate a password'**
+  String get generatePassword;
+
+  /// Title of the sheet generating a password or a passphrase.
+  ///
+  /// In en, this message translates to:
+  /// **'Generator'**
+  String get generator;
+
+  /// Choice in the generator for words joined by a separator, rather than a password.
+  ///
+  /// In en, this message translates to:
+  /// **'Passphrase'**
+  String get passphrase;
+
+  /// Tooltip of the button generating another value with the same options.
+  ///
+  /// In en, this message translates to:
+  /// **'Regenerate'**
+  String get regenerate;
+
+  /// Label of the length of a generated password.
+  ///
+  /// In en, this message translates to:
+  /// **'Length'**
+  String get passwordLength;
+
+  /// Label above the character sets a generated password takes its characters from.
+  ///
+  /// In en, this message translates to:
+  /// **'Include'**
+  String get includeCharacters;
+
+  /// Accessibility label of the A-Z choice of the generator.
+  ///
+  /// In en, this message translates to:
+  /// **'Uppercase letters'**
+  String get uppercaseLetters;
+
+  /// Accessibility label of the a-z choice of the generator.
+  ///
+  /// In en, this message translates to:
+  /// **'Lowercase letters'**
+  String get lowercaseLetters;
+
+  /// Accessibility label of the 0-9 choice of the generator.
+  ///
+  /// In en, this message translates to:
+  /// **'Digits'**
+  String get digits;
+
+  /// Accessibility label of the !@#$%^&* choice of the generator.
+  ///
+  /// In en, this message translates to:
+  /// **'Special characters'**
+  String get specialCharacters;
+
+  /// Label of the fewest digits a generated password has.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum digits'**
+  String get minNumbers;
+
+  /// Label of the fewest special characters a generated password has.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum special characters'**
+  String get minSpecial;
+
+  /// Switch leaving out I, O, l, 0 and 1, easily mistaken for one another.
+  ///
+  /// In en, this message translates to:
+  /// **'Avoid ambiguous characters'**
+  String get avoidAmbiguous;
+
+  /// Label of the number of words of a generated passphrase.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of words'**
+  String get numberOfWords;
+
+  /// Label of the character between the words of a generated passphrase.
+  ///
+  /// In en, this message translates to:
+  /// **'Word separator'**
+  String get wordSeparator;
+
+  /// Switch capitalizing the first letter of each word of a passphrase.
+  ///
+  /// In en, this message translates to:
+  /// **'Capitalize'**
+  String get capitalize;
+
+  /// Switch adding a digit at the end of one word of a passphrase.
+  ///
+  /// In en, this message translates to:
+  /// **'Include a number'**
+  String get includeNumber;
+
+  /// Button of the generator that puts the password in the password field.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this password'**
+  String get usePassword;
+
+  /// Button of the generator that puts the passphrase in the password field.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this passphrase'**
+  String get usePassphrase;
+
+  /// Tooltip of the button lowering a number by one.
+  ///
+  /// In en, this message translates to:
+  /// **'Decrease'**
+  String get decrease;
+
+  /// Tooltip of the button raising a number by one.
+  ///
+  /// In en, this message translates to:
+  /// **'Increase'**
+  String get increase;
 }
 
 class _AppLocalizationsDelegate

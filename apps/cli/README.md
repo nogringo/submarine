@@ -52,6 +52,8 @@ dart run bin/submarine.dart add Boulanger --uri https://www.boulanger.com --user
 dart run bin/submarine.dart list items --search boulanger
 dart run bin/submarine.dart get password boulanger
 dart run bin/submarine.dart get totp boulanger
+dart run bin/submarine.dart generate -ulns --length 20
+dart run bin/submarine.dart generate -p --words 5 --separator space
 ```
 
 `add` asks for whatever the options leave out, and always for the password,
@@ -104,6 +106,7 @@ the Bitwarden CLI runs on Submarine as long as it sticks to them:
 - `create item [encodedJson]`
 - `edit item <id> [encodedJson]`, where `<id>` is an item id
 - `encode`
+- `generate`, with all of its options and defaults, without a vault key
 - `delete item <id>`, with `--permanent`, and `restore item <id>`, where
   `<id>` is an item id
 - the global flags `--pretty`, `--raw` and `--quiet`

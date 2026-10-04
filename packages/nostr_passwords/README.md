@@ -14,7 +14,7 @@ The protocol is specified in [`docs`](../../docs).
 - **Local first.** A change is done once it is saved in the ndk cache. ndk sends it to the relays afterwards, and the vault lists what no relay accepted yet.
 - **Sync.** Keeps the vault synced from its relays with [`sync_engine_shim_for_ndk`](https://pub.dev/packages/sync_engine_shim_for_ndk), and authenticates as the vault (NIP-42) to relays that serve gift wraps to their recipient only. A live subscription brings in what other devices publish the moment they do.
 - **Trash and deletion.** Items go to the trash and come back out of it, as in Bitwarden. Deleting one permanently asks the relays to delete each of its gift wraps (NIP-09).
-- **Bitwarden behavior.** Password history, search and TOTP codes work as in Bitwarden: the last 5 replaced passwords are kept, search ignores case and accents, and TOTP keys can be base32 secrets, `otpauth://` or `steam://` URIs.
+- **Bitwarden behavior.** Password history, search, TOTP codes and the generator work as in Bitwarden: the last 5 replaced passwords are kept, search ignores case and accents, TOTP keys can be base32 secrets, `otpauth://` or `steam://` URIs, and passwords and passphrases are generated with Bitwarden's options and defaults.
 
 ## Getting started
 
@@ -53,7 +53,7 @@ for (final item in searchItems(items, 'boulanger')) {
 }
 ```
 
-[`example/nostr_passwords_example.dart`](example/nostr_passwords_example.dart) goes through the whole flow: setup, sync, edit, trash, restore and permanent deletion.
+[`example/nostr_passwords_example.dart`](example/nostr_passwords_example.dart) goes through the whole flow: setup, sync, generate a password, edit, trash, restore and permanent deletion.
 
 ## License
 

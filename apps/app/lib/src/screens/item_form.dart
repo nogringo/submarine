@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
 
 import '../context.dart';
+import '../generator/generator_sheet.dart';
 import '../items/item_filter.dart';
 import '../router.dart';
 import '../theme/theme.dart';
@@ -190,6 +191,11 @@ class _FormState extends State<_Form> {
     return discard ?? false;
   }
 
+  Future<void> _generatePassword() async {
+    final password = await showGenerator(context);
+    if (password != null && mounted) _password.text = password;
+  }
+
   Future<void> _save() async {
     if (_saving) return;
     final l10n = context.l10n;
@@ -366,16 +372,29 @@ class _FormState extends State<_Form> {
                           style: monoStyle,
                           decoration: InputDecoration(
                             labelText: l10n.password,
-                            suffixIcon: IconButton(
-                              tooltip: _passwordHidden ? l10n.show : l10n.hide,
-                              onPressed: () => setState(
-                                () => _passwordHidden = !_passwordHidden,
-                              ),
-                              icon: Icon(
-                                _passwordHidden
-                                    ? Icons.visibility_outlined
-                                    : Icons.visibility_off_outlined,
-                              ),
+                            suffixIcon: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  tooltip: _passwordHidden
+                                      ? l10n.show
+                                      : l10n.hide,
+                                  onPressed: () => setState(
+                                    () => _passwordHidden = !_passwordHidden,
+                                  ),
+                                  icon: Icon(
+                                    _passwordHidden
+                                        ? Icons.visibility_outlined
+                                        : Icons.visibility_off_outlined,
+                                  ),
+                                ),
+                                IconButton(
+                                  tooltip: l10n.generatePassword,
+                                  onPressed: _generatePassword,
+                                  icon: const Icon(Icons.casino_outlined),
+                                ),
+                                const SizedBox(width: 4),
+                              ],
                             ),
                           ),
                         ),

@@ -581,4 +581,67 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get delete => 'Supprimer';
+
+  @override
+  String get generatePassword => 'Générer un mot de passe';
+
+  @override
+  String get generator => 'Générateur';
+
+  @override
+  String get passphrase => 'Phrase de passe';
+
+  @override
+  String get regenerate => 'Régénérer';
+
+  @override
+  String get passwordLength => 'Longueur';
+
+  @override
+  String get includeCharacters => 'Inclure';
+
+  @override
+  String get uppercaseLetters => 'Lettres majuscules';
+
+  @override
+  String get lowercaseLetters => 'Lettres minuscules';
+
+  @override
+  String get digits => 'Chiffres';
+
+  @override
+  String get specialCharacters => 'Caractères spéciaux';
+
+  @override
+  String get minNumbers => 'Minimum de chiffres';
+
+  @override
+  String get minSpecial => 'Minimum de caractères spéciaux';
+
+  @override
+  String get avoidAmbiguous => 'Éviter les caractères ambigus';
+
+  @override
+  String get numberOfWords => 'Nombre de mots';
+
+  @override
+  String get wordSeparator => 'Séparateur de mots';
+
+  @override
+  String get capitalize => 'Majuscule à chaque mot';
+
+  @override
+  String get includeNumber => 'Inclure un chiffre';
+
+  @override
+  String get usePassword => 'Utiliser ce mot de passe';
+
+  @override
+  String get usePassphrase => 'Utiliser cette phrase de passe';
+
+  @override
+  String get decrease => 'Diminuer';
+
+  @override
+  String get increase => 'Augmenter';
 }

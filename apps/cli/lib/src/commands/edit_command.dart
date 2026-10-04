@@ -1,10 +1,7 @@
-import 'dart:io';
-
 import 'package:nostr_passwords/nostr_passwords.dart';
 
 import '../cli_exception.dart';
 import '../item_json.dart';
-import '../terminal.dart';
 import '../vault_session.dart';
 import 'vault_command.dart';
 
@@ -37,15 +34,7 @@ class EditCommand extends VaultCommand {
     }
     if (object != 'item') throw CliException('Unknown object.');
 
-    if (encoded.isEmpty && !stdin.hasTerminal) encoded = await readStdin();
-    if (encoded.isEmpty) throw CliException('`requestJson` was not provided.');
-    final Cipher cipher;
-    try {
-      cipher = decodeItemJson(encoded);
-    } on FormatException {
-      throw CliException('Error parsing the encoded request data.');
-    }
-
+    final cipher = await readItemRequest(encoded);
     final item = await withVault(
       (session) => _edit(session, id.toLowerCase(), cipher),
     );

@@ -44,10 +44,21 @@ dart run bin/submarine.dart sync
 dart run bin/submarine.dart add Boulanger --uri https://www.boulanger.com --username alice@example.com
 dart run bin/submarine.dart list items --search boulanger
 dart run bin/submarine.dart get password boulanger
+dart run bin/submarine.dart get totp boulanger
 ```
 
 `add` asks for whatever the options leave out, and always for the password,
 which is not echoed. When stdin is piped, it reads one line per question.
+
+`create` saves an item from its JSON, base64 encoded by `encode`, as
+`bw create` does. `get template` prints JSON to start from:
+
+```sh
+dart run bin/submarine.dart get template item \
+  | jq '.name = "Boulanger" | .login = {username: "alice@example.com", password: "Tr0ub4dor&3"}' \
+  | dart run bin/submarine.dart encode \
+  | dart run bin/submarine.dart create item
+```
 
 `edit` replaces an item with the JSON `get item` prints, base64 encoded by
 `encode`, as `bw edit` does. To change the password of the Boulanger item:
@@ -78,8 +89,12 @@ the Bitwarden CLI runs on Submarine as long as it sticks to them:
   otherwise. `userId` is the vault's public key, in hex. `unsentEvents` counts
   the changes no relay accepted yet.
 - `list items`, with `--search` and `--trash`
-- `get item|username|password|uri|notes <id>`, where `<id>` is an item id or
-  a search term
+- `get item|username|password|uri|totp|notes <id>`, where `<id>` is an item
+  id or a search term
+- `get template <object>`, for `item`, `item.field`, `item.login`,
+  `item.login.uri`, `item.card`, `item.identity`, `item.securenote`,
+  `item.bankaccount`, `item.driverslicense` and `item.passport`
+- `create item [encodedJson]`
 - `edit item <id> [encodedJson]`, where `<id>` is an item id
 - `encode`
 - `delete item <id>`, with `--permanent`, and `restore item <id>`, where
@@ -91,11 +106,11 @@ errors on stderr with exit code 1, and no final newline when the output is
 piped. Searching ignores case and accents and looks in the name, username,
 hostnames and notes. Other `bw` commands and objects fail with an error.
 
-Submarine is local first: its cache is a local relay. `add`, `edit`, `delete`
-and `restore` save their change in it and never wait for the network. `sync`
-sends to the relays the changes none accepted yet, then fetches what changed
-since the last sync. `list` and `get` read the cache only. Until the first
-sync, `list` and `get` refuse to run.
+Submarine is local first: its cache is a local relay. `add`, `create`, `edit`,
+`delete` and `restore` save their change in it and never wait for the network.
+`sync` sends to the relays the changes none accepted yet, then fetches what
+changed since the last sync. `list` and `get` read the cache only. Until the
+first sync, they refuse to run, except `get template`.
 
 The vault's gift wraps, still encrypted, are cached in `~/.cache/submarine`
 (under `$XDG_CACHE_HOME` or `%LOCALAPPDATA%` when set). Passwords are decrypted

@@ -29,6 +29,7 @@ Future<void> main() async {
         uris: [LoginUri('https://www.boulanger.com')],
         username: 'alice@example.com',
         password: 'correct horse battery staple',
+        totp: 'otpauth://totp/Boulanger:alice?secret=JBSWY3DPEHPK3PXP',
       ),
     ),
   );
@@ -64,6 +65,9 @@ Future<void> main() async {
 
   // The replaced password goes to the item's password history.
   final boulanger = found.first;
+  final totp = generateTotp(boulanger.cipher.login!.totp!);
+  print('TOTP code ${totp.code}, renewed every ${totp.period.inSeconds} s');
+
   final updated = await vault.updateItem(
     boulanger,
     boulanger.cipher..login!.password = 'Tr0ub4dor&3',

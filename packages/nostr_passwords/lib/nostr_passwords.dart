@@ -14,5 +14,6 @@ export 'src/cipher/ssh_key.dart';
 export 'src/envelope.dart';
 export 'src/item.dart';
 export 'src/search.dart';
+export 'src/totp.dart';
 export 'src/vault.dart';
 export 'src/version_event.dart';

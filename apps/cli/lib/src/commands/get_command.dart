@@ -3,17 +3,16 @@ import 'package:nostr_passwords/nostr_passwords.dart';
 import '../cli_exception.dart';
 import '../find_item.dart';
 import '../item_json.dart';
+import '../templates.dart';
 import 'vault_command.dart';
 
 const _bwOnlyObjects = {
-  'totp',
   'exposed',
   'attachment',
   'folder',
   'collection',
   'org-collection',
   'organization',
-  'template',
   'fingerprint',
   'send',
 };
@@ -24,7 +23,8 @@ class GetCommand extends VaultCommand {
 
   @override
   final description =
-      'Get an object from the vault: item, username, password, uri or notes.';
+      'Get an object from the vault: item, username, password, uri, totp, '
+      'notes or template.';
 
   @override
   String get invocation => 'submarine get <object> <id>';
@@ -57,9 +57,18 @@ class GetCommand extends VaultCommand {
           (item) => _isPresent(_login(item)?.uris.firstOrNull?.uri),
         );
         output.string(_login(item)!.uris.first.uri);
+      case 'totp':
+        final item = await find((item) => _isPresent(_login(item)?.totp));
+        try {
+          output.string(generateTotp(_login(item)!.totp!).code);
+        } on FormatException {
+          throw CliException("Couldn't generate TOTP code.");
+        }
       case 'notes':
         final item = await find((item) => _isPresent(item.cipher.notes));
         output.string(item.cipher.notes);
+      case 'template':
+        output.json(template(query));
       case final object when _bwOnlyObjects.contains(object):
         throw CliException('Submarine does not support `get $object`.');
       default:

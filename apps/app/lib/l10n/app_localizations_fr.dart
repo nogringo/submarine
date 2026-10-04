@@ -453,4 +453,23 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get noItemsHere => 'Aucun élément ici.';
+
+  @override
+  String searchItems(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Rechercher parmi $count éléments',
+      one: 'Rechercher dans 1 élément',
+      zero: 'Rechercher',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get clearSearch => 'Effacer la recherche';
+
+  @override
+  String get noSearchResults =>
+      'Aucun élément ne correspond à votre recherche.';
 }

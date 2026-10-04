@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:nostr_passwords/nostr_passwords.dart';
 
 import '../context.dart';
 import '../items/item_filter.dart';
 import '../router.dart';
 import '../vaults/vaults.dart';
 import '../widgets/item_icon.dart';
+import '../widgets/search_field.dart';
 import '../widgets/sync_status.dart';
 import '../widgets/vault_avatar.dart';
 import 'add_vault.dart';
@@ -161,7 +163,7 @@ class _FilterHeader extends StatelessWidget {
   );
 }
 
-class _Items extends StatelessWidget {
+class _Items extends StatefulWidget {
   const _Items({
     required this.vaultId,
     required this.filter,
@@ -173,26 +175,68 @@ class _Items extends StatelessWidget {
   final String? selectedItemId;
 
   @override
+  State<_Items> createState() => _ItemsState();
+}
+
+/// Keeps the search as items get selected, and from a vault or a filter to
+/// another.
+class _ItemsState extends State<_Items> {
+  var _query = '';
+
+  @override
   Widget build(BuildContext context) {
     final vaults = Vaults.of(context);
-    final items = vaults.itemsOf(vaultId, filter);
-    if (items.isEmpty) return _Empty(vaultId: vaultId, filter: filter);
+    final items = vaults.itemsOf(widget.vaultId, widget.filter);
+    final found = searchItems([
+      for (final entry in items) entry.item,
+    ], _query).toSet();
+    final shown = [
+      for (final entry in items)
+        if (found.contains(entry.item)) entry,
+    ];
     // A badge tells the vaults apart, which a single vault does not need.
-    final showVault = vaultId == allVaultsId && vaults.all.length > 1;
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(8, 0, 8, 16),
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final entry = items[index];
-        return _ItemRow(
-          entry: entry,
-          showVault: showVault,
-          selected: entry.item.id == selectedItemId,
-          onTap: () => context.go(
-            vaultPath(vaultId, filter: filter, itemId: entry.item.id),
+    final showVault = widget.vaultId == allVaultsId && vaults.all.length > 1;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+          child: SearchField(
+            hint: context.l10n.searchItems(items.length),
+            showsShortcut: context.isWide,
+            onChanged: (query) => setState(() => _query = query),
           ),
-        );
-      },
+        ),
+        Expanded(
+          child: shown.isEmpty
+              ? _Empty(
+                  vaultId: widget.vaultId,
+                  filter: widget.filter,
+                  searched: items.isNotEmpty,
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 16),
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  itemCount: shown.length,
+                  itemBuilder: (context, index) {
+                    final entry = shown[index];
+                    return _ItemRow(
+                      entry: entry,
+                      showVault: showVault,
+                      selected: entry.item.id == widget.selectedItemId,
+                      onTap: () => context.go(
+                        vaultPath(
+                          widget.vaultId,
+                          filter: widget.filter,
+                          itemId: entry.item.id,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ],
     );
   }
 }
@@ -266,23 +310,34 @@ class _ItemRow extends StatelessWidget {
 }
 
 class _Empty extends StatelessWidget {
-  const _Empty({required this.vaultId, required this.filter});
+  const _Empty({
+    required this.vaultId,
+    required this.filter,
+    required this.searched,
+  });
 
   final String vaultId;
   final ItemFilter filter;
+
+  /// Whether there are items, but none the search matches.
+  final bool searched;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final palette = context.palette;
     final selection = Vaults.of(context).select(vaultId);
-    if (selection.any((vault) => !vault.loaded)) return const SizedBox.shrink();
+    if (!searched && selection.any((vault) => !vault.loaded)) {
+      return const SizedBox.shrink();
+    }
     final neverSynced = selection.any((vault) => vault.lastSync == null);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Text(
-          neverSynced
+          searched
+              ? l10n.noSearchResults
+              : neverSynced
               ? l10n.lookingForItems
               : filter == ItemFilter.all
               ? l10n.noItems

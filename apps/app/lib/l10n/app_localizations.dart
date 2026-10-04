@@ -901,6 +901,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No items here.'**
   String get noItemsHere;
+
+  /// Placeholder of the search box above the items, with the number of items listed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Search} =1{Search 1 item} other{Search {count} items}}'**
+  String searchItems(int count);
+
+  /// Tooltip of the button emptying the search box.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear the search'**
+  String get clearSearch;
+
+  /// Shown in place of the list when the search matches no item.
+  ///
+  /// In en, this message translates to:
+  /// **'No items match your search.'**
+  String get noSearchResults;
 }
 
 class _AppLocalizationsDelegate

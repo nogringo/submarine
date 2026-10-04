@@ -133,5 +133,8 @@
   "filterDriversLicenses": "Permis de conduire",
   "filterPassports": "Passeports",
   "filterTrash": "Corbeille",
-  "noItemsHere": "Aucun élément ici."
+  "noItemsHere": "Aucun élément ici.",
+  "searchItems": "{count, plural, =0{Rechercher} =1{Rechercher dans 1 élément} other{Rechercher parmi {count} éléments}}",
+  "clearSearch": "Effacer la recherche",
+  "noSearchResults": "Aucun élément ne correspond à votre recherche."
 }

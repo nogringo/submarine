@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ndk/ndk.dart';
@@ -273,6 +274,94 @@ void main() {
     expect(find.text('Favorites'), findsNothing);
     expect(find.text('All vaults'), findsOneWidget);
     expect(find.byTooltip('Sync now'), findsOneWidget);
+    await close(tester);
+  });
+
+  testWidgets('searches the items from Ctrl+F on a desktop', (tester) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(
+      tester,
+      items: [
+        github,
+        Cipher(
+          type: CipherType.secureNote,
+          name: 'Alarm code',
+          secureNote: SecureNote(),
+        ),
+      ],
+    );
+    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await settle(tester);
+
+    expect(find.text('Search 2 items'), findsOneWidget);
+    expect(find.text('Ctrl+F'), findsOneWidget);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyF);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    expect(
+      tester.widget<TextField>(find.byType(TextField)).focusNode!.hasFocus,
+      isTrue,
+    );
+
+    await tester.enterText(find.byType(TextField), 'alarm');
+    await settle(tester);
+    expect(find.text('Alarm code'), findsOneWidget);
+    expect(find.text('GitHub'), findsNothing);
+    expect(find.text('Ctrl+F'), findsNothing);
+
+    await tester.enterText(find.byType(TextField), 'bank');
+    await settle(tester);
+    expect(find.text('No items match your search.'), findsOneWidget);
+    await tester.tap(find.byTooltip('Clear the search'));
+    await settle(tester);
+    expect(find.text('Alarm code'), findsOneWidget);
+    expect(find.text('GitHub'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), 'github.com');
+    await settle(tester);
+    await tester.tap(find.text('GitHub'));
+    await settle(tester);
+    expect(find.text('Username'), findsOneWidget);
+    expect(find.text('Alarm code'), findsNothing);
+
+    await tester.tap(find.byType(TextField));
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await settle(tester);
+    expect(find.text('Alarm code'), findsOneWidget);
+    expect(find.text('github.com'), findsNothing);
+    await close(tester);
+  });
+
+  testWidgets('keeps the search on a phone, back from an item', (tester) async {
+    setScreen(tester, const Size(390, 844), locale: const Locale('fr'));
+    await open(
+      tester,
+      items: [
+        github,
+        Cipher(
+          type: CipherType.secureNote,
+          name: 'Alarm code',
+          secureNote: SecureNote(),
+        ),
+      ],
+    );
+    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await settle(tester);
+
+    expect(find.text('Rechercher parmi 2 éléments'), findsOneWidget);
+    expect(find.text('Ctrl+F'), findsNothing);
+    await tester.enterText(find.byType(TextField), 'git');
+    await settle(tester);
+    expect(find.text('Alarm code'), findsNothing);
+    await tester.tap(find.text('GitHub'));
+    await settle(tester);
+    expect(find.text('Nom d\'utilisateur'), findsOneWidget);
+
+    await tester.tap(find.byType(BackButton));
+    await settle(tester);
+    expect(find.text('git'), findsOneWidget);
+    expect(find.text('GitHub'), findsOneWidget);
+    expect(find.text('Alarm code'), findsNothing);
     await close(tester);
   });
 

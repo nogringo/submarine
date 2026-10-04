@@ -277,6 +277,52 @@ void main() {
     await close(tester);
   });
 
+  testWidgets('keeps the item open in the lists that hold it on a desktop', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(
+      tester,
+      items: [
+        Cipher(
+          type: CipherType.login,
+          name: 'GitHub',
+          favorite: true,
+          login: Login(username: 'alice-dev'),
+        ),
+        Cipher(
+          type: CipherType.secureNote,
+          name: 'Alarm code',
+          secureNote: SecureNote(),
+        ),
+      ],
+      withFamily: true,
+    );
+    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await settle(tester);
+
+    await tester.tap(find.text('GitHub'));
+    await settle(tester);
+    await tester.tap(find.text('Favorites'));
+    await settle(tester);
+    expect(find.text('alice-dev'), findsNWidgets(2));
+    await tester.tap(find.byTooltip('Personal'));
+    await settle(tester);
+    expect(find.text('alice-dev'), findsNWidgets(2));
+    await tester.tap(find.text('Secure notes'));
+    await settle(tester);
+    expect(find.text('Select an item to see it here.'), findsOneWidget);
+
+    await tester.tap(find.text('All items'));
+    await settle(tester);
+    await tester.tap(find.text('GitHub'));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Family'));
+    await settle(tester);
+    expect(find.text('Select an item to see it here.'), findsOneWidget);
+    await close(tester);
+  });
+
   testWidgets('leaves the filter column out below a desktop width', (
     tester,
   ) async {
@@ -597,7 +643,7 @@ void main() {
     expect(find.byTooltip('Remove from favorites'), findsOneWidget);
     await tester.tap(find.text('Favorites'));
     await settle(tester);
-    expect(find.text('GitHub'), findsOneWidget);
+    expect(find.text('GitHub'), findsNWidgets(2));
     await close(tester);
   });
 

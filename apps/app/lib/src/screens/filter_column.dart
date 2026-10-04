@@ -11,10 +11,16 @@ import '../widgets/sync_status.dart';
 /// Desktop layout: the filters of the selected vault, with their counts, and
 /// its sync at the bottom.
 class FilterColumn extends StatelessWidget {
-  const FilterColumn({super.key, required this.vaultId, required this.filter});
+  const FilterColumn({
+    super.key,
+    required this.vaultId,
+    required this.filter,
+    required this.selectedItemId,
+  });
 
   final String vaultId;
   final ItemFilter filter;
+  final String? selectedItemId;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +35,14 @@ class FilterColumn extends StatelessWidget {
       filter: option,
       count: count(option),
       selected: option == filter,
-      onTap: () => context.go(vaultPath(vaultId, filter: option)),
+      onTap: () => context.go(
+        vaultPathKeeping(
+          vaults,
+          vaultId,
+          filter: option,
+          itemId: selectedItemId,
+        ),
+      ),
     );
     // Only the types the vault holds, and the one selected even if emptied.
     final types = [

@@ -9,15 +9,22 @@ import 'add_vault.dart';
 
 /// Wide layout: the vaults in a rail, as Discord shows its servers.
 class VaultRail extends StatelessWidget {
-  const VaultRail({super.key, required this.selectedVaultId});
+  const VaultRail({
+    super.key,
+    required this.selectedVaultId,
+    required this.selectedItemId,
+  });
 
   final String selectedVaultId;
+  final String? selectedItemId;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final palette = context.palette;
     final vaults = Vaults.of(context);
+    void select(String vaultId) =>
+        context.go(vaultPathKeeping(vaults, vaultId, itemId: selectedItemId));
     return SizedBox(
       width: 76,
       child: Column(
@@ -26,7 +33,7 @@ class VaultRail extends StatelessWidget {
           _RailTile(
             tooltip: l10n.allVaults,
             selected: selectedVaultId == allVaultsId,
-            onTap: () => context.go(vaultPath(allVaultsId)),
+            onTap: () => select(allVaultsId),
             builder: (highlighted) => AllVaultsAvatar(selected: highlighted),
           ),
           Container(
@@ -46,7 +53,7 @@ class VaultRail extends StatelessWidget {
                   _RailTile(
                     tooltip: vault.name,
                     selected: selectedVaultId == vault.pubkey,
-                    onTap: () => context.go(vaultPath(vault.pubkey)),
+                    onTap: () => select(vault.pubkey),
                     builder: (highlighted) =>
                         VaultAvatar(vault: vault, selected: highlighted),
                   ),

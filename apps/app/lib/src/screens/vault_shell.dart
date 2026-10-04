@@ -32,12 +32,16 @@ class VaultShell extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            VaultRail(selectedVaultId: vaultId),
+            VaultRail(selectedVaultId: vaultId, selectedItemId: itemId),
             const VerticalDivider(width: 1),
             if (showsFilters) ...[
               SizedBox(
                 width: 240,
-                child: FilterColumn(vaultId: vaultId, filter: filter),
+                child: FilterColumn(
+                  vaultId: vaultId,
+                  filter: filter,
+                  selectedItemId: itemId,
+                ),
               ),
               const VerticalDivider(width: 1),
             ],

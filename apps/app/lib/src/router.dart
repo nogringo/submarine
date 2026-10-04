@@ -18,6 +18,23 @@ String vaultPath(
   String? itemId,
 }) => ['/vaults/$vaultId/${filter.slug}', ?itemId].join('/');
 
+/// [vaultPath], keeping [itemId] open if that list holds it.
+String vaultPathKeeping(
+  Vaults vaults,
+  String vaultId, {
+  ItemFilter filter = ItemFilter.all,
+  required String? itemId,
+}) {
+  final cipher = itemId == null
+      ? null
+      : vaults.findItem(vaultId, itemId)?.item.cipher;
+  return vaultPath(
+    vaultId,
+    filter: filter,
+    itemId: cipher != null && filter.matches(cipher) ? itemId : null,
+  );
+}
+
 /// Where a login is created, next to the items of [vaultId] that [filter]
 /// keeps.
 String newItemPath(String vaultId, ItemFilter filter) =>

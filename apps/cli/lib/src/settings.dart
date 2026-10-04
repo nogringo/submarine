@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:ndk/ndk.dart';
+import 'package:nostr_passwords/nostr_passwords.dart';
 import 'package:path/path.dart' as p;
 
 import 'cli_exception.dart';
@@ -18,24 +18,18 @@ const defaultRelays = [
   'wss://relay.ditto.pub',
 ];
 
-final _hexKey = RegExp(r'^[0-9a-f]{64}$');
-
 /// Whether `SUBMARINE_NSEC` is set, valid or not.
 bool hasVaultKey(Map<String, String> environment) =>
     environment['SUBMARINE_NSEC']?.trim().isNotEmpty ?? false;
 
 /// The vault's private key, in hex, from `SUBMARINE_NSEC` (an nsec or hex).
 String vaultPrivateKey(Map<String, String> environment) {
-  final value = environment['SUBMARINE_NSEC']?.trim().toLowerCase() ?? '';
+  final value = environment['SUBMARINE_NSEC']?.trim() ?? '';
   if (value.isEmpty) {
     throw CliException('Set SUBMARINE_NSEC to the nsec of your vault key.');
   }
-  // Nip19.decode decodes an npub too, and returns '' when it fails.
-  final key = value.startsWith('nsec1') ? Nip19.decode(value) : value;
-  if (!_hexKey.hasMatch(key)) {
-    throw CliException('SUBMARINE_NSEC is not a valid nsec.');
-  }
-  return key;
+  return parseVaultKey(value) ??
+      (throw CliException('SUBMARINE_NSEC is not a valid nsec.'));
 }
 
 File configFile(Map<String, String> environment) {

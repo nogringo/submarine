@@ -5,9 +5,9 @@ import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
 
 Future<void> main() async {
   final ndk = Ndk.defaultConfig();
-  final signer = Bip340EventSigner(
-    privateKey: '<vault private key, hex>',
-    publicKey: '<vault public key, hex>',
+  // A vault key, as an nsec or in hex.
+  final signer = const Bip340EventSignerFactory().create(
+    privateKey: parseVaultKey('<vault key, nsec1...>')!,
   );
   // vault.sync authenticates as the vault, which ndk must know.
   ndk.accounts.addAccount(

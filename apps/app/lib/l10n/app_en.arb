@@ -1,0 +1,543 @@
+{
+  "@@locale": "en",
+  "allVaults": "All vaults",
+  "@allVaults": {
+    "description": "Name of the view showing the items of every vault at once."
+  },
+  "vaults": "Vaults",
+  "@vaults": {
+    "description": "Title of the drawer listing the vaults, and tooltip of the button opening it."
+  },
+  "addVault": "Add a vault",
+  "@addVault": {
+    "description": "Button and dialog title to add a vault to this device."
+  },
+  "createVault": "Create a vault",
+  "@createVault": {
+    "description": "Choice and dialog title to create a new vault with a new key."
+  },
+  "createVaultDescription": "A new, empty vault with its own key.",
+  "@createVaultDescription": {
+    "description": "Explains the choice to create a vault."
+  },
+  "openVault": "Open a vault with its key",
+  "@openVault": {
+    "description": "Choice to open an existing vault by entering its key."
+  },
+  "openVaultDescription": "From another device, or shared with you.",
+  "@openVaultDescription": {
+    "description": "Explains the choice to open a vault with its key."
+  },
+  "openVaultTitle": "Open a vault",
+  "@openVaultTitle": {
+    "description": "Title of the dialog opening a vault with its key."
+  },
+  "vaultName": "Name",
+  "@vaultName": {
+    "description": "Label of the field naming a vault."
+  },
+  "vaultNameHelper": "Only on this device. Someone you share the vault with names it their own way.",
+  "@vaultNameHelper": {
+    "description": "Help under the vault name field: the name is local to the device."
+  },
+  "vaultNameRequired": "Give the vault a name.",
+  "@vaultNameRequired": {
+    "description": "Error when the vault name is empty."
+  },
+  "vaultColor": "Color",
+  "@vaultColor": {
+    "description": "Label above the color choices of a vault."
+  },
+  "vaultColorOption": "Color {number}",
+  "@vaultColorOption": {
+    "description": "Accessibility label of one color choice, numbered from 1.",
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "vaultKey": "Vault key",
+  "@vaultKey": {
+    "description": "Label of the field where the vault key (an nsec) is entered."
+  },
+  "vaultKeyInvalid": "This is not a vault key. It starts with nsec1.",
+  "@vaultKeyInvalid": {
+    "description": "Error when the entered text is not a vault key."
+  },
+  "vaultAlreadyOpen": "This vault is already open, as {name}.",
+  "@vaultAlreadyOpen": {
+    "description": "Error when the entered key belongs to a vault already on this device, named name.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "vaultSaveFailed": "The vault could not be saved on this device.",
+  "@vaultSaveFailed": {
+    "description": "Error when the vault could not be written to the device's secure storage."
+  },
+  "saveVaultKeyTitle": "Save the vault key",
+  "@saveVaultKeyTitle": {
+    "description": "Title of the dialog showing the key of a vault just created."
+  },
+  "saveVaultKeyBody": "Anyone who has this key can open the vault. Keep it somewhere safe: you need it to open the vault on another device, or to share it.",
+  "@saveVaultKeyBody": {
+    "description": "Asks to keep the key of a vault just created somewhere safe."
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Button closing a dialog without doing anything."
+  },
+  "create": "Create",
+  "@create": {
+    "description": "Button confirming the creation of a vault."
+  },
+  "open": "Open",
+  "@open": {
+    "description": "Button confirming the opening of a vault with its key."
+  },
+  "done": "Done",
+  "@done": {
+    "description": "Button closing the dialog that shows a new vault key."
+  },
+  "welcomeTagline": "A password manager built on Nostr.",
+  "@welcomeTagline": {
+    "description": "Tagline under the Submarine wordmark on the welcome screen."
+  },
+  "itemCount": "{count, plural, =0{No items} =1{1 item} other{{count} items}}",
+  "@itemCount": {
+    "description": "Number of items in a vault, under its name in the drawer.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncNow": "Sync now",
+  "@syncNow": {
+    "description": "Tooltip of the button fetching changes from the relays now."
+  },
+  "syncing": "Syncing",
+  "@syncing": {
+    "description": "Sync status while a vault is fetched from its relays for the first time."
+  },
+  "syncNever": "Never synced",
+  "@syncNever": {
+    "description": "Sync status of a vault that never reached a relay."
+  },
+  "syncFailed": "Relays unreachable",
+  "@syncFailed": {
+    "description": "Sync status when no relay answers."
+  },
+  "syncedJustNow": "Synced just now",
+  "@syncedJustNow": {
+    "description": "Sync status when the last sync was less than a minute ago."
+  },
+  "syncedMinutesAgo": "Synced {minutes} min ago",
+  "@syncedMinutesAgo": {
+    "description": "Sync status when the last sync was minutes ago.",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "syncedHoursAgo": "Synced {hours} h ago",
+  "@syncedHoursAgo": {
+    "description": "Sync status when the last sync was hours ago.",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "syncedOn": "Synced on {date}",
+  "@syncedOn": {
+    "description": "Sync status when the last sync was more than a day ago.",
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMMMd"
+      }
+    }
+  },
+  "noItems": "No items in this vault yet.",
+  "@noItems": {
+    "description": "Shown in place of the list when a synced vault has no items."
+  },
+  "lookingForItems": "Looking for items on the relays",
+  "@lookingForItems": {
+    "description": "Shown in place of the list while a vault was never synced."
+  },
+  "selectItem": "Select an item to see it here.",
+  "@selectItem": {
+    "description": "Shown in the item pane of the wide layout when no item is selected."
+  },
+  "itemNotFound": "This item is no longer in the vault.",
+  "@itemNotFound": {
+    "description": "Shown when the item asked for is not in the vault, for example deleted on another device."
+  },
+  "typeLogin": "Login",
+  "@typeLogin": {
+    "description": "Item type: a login with a username and a password."
+  },
+  "typeSecureNote": "Secure note",
+  "@typeSecureNote": {
+    "description": "Item type: a note."
+  },
+  "typeCard": "Card",
+  "@typeCard": {
+    "description": "Item type: a payment card."
+  },
+  "typeIdentity": "Identity",
+  "@typeIdentity": {
+    "description": "Item type: a person's identity details."
+  },
+  "typeSshKey": "SSH key",
+  "@typeSshKey": {
+    "description": "Item type: an SSH key pair."
+  },
+  "typeBankAccount": "Bank account",
+  "@typeBankAccount": {
+    "description": "Item type: a bank account."
+  },
+  "typeDriversLicense": "Driver's license",
+  "@typeDriversLicense": {
+    "description": "Item type: a driver's license."
+  },
+  "typePassport": "Passport",
+  "@typePassport": {
+    "description": "Item type: a passport."
+  },
+  "typeUnknown": "Item",
+  "@typeUnknown": {
+    "description": "Item type unknown to this version of the app."
+  },
+  "copy": "Copy",
+  "@copy": {
+    "description": "Tooltip of the button copying a value."
+  },
+  "copied": "Copied",
+  "@copied": {
+    "description": "Tooltip of the copy button right after copying."
+  },
+  "show": "Show",
+  "@show": {
+    "description": "Tooltip of the button showing a hidden value."
+  },
+  "hide": "Hide",
+  "@hide": {
+    "description": "Tooltip of the button hiding a shown value."
+  },
+  "openWebsite": "Open website",
+  "@openWebsite": {
+    "description": "Tooltip of the button opening a login's website in the browser."
+  },
+  "username": "Username",
+  "@username": {
+    "description": "Field label: the username of a login or an identity."
+  },
+  "password": "Password",
+  "@password": {
+    "description": "Field label: the password of a login."
+  },
+  "verificationCode": "Verification code",
+  "@verificationCode": {
+    "description": "Field label: the current two-step verification code (TOTP) of a login."
+  },
+  "totpInvalid": "This verification key cannot be read.",
+  "@totpInvalid": {
+    "description": "Shown in place of the verification code when its key cannot be read."
+  },
+  "website": "Website",
+  "@website": {
+    "description": "Field label: a website of a login."
+  },
+  "passkey": "Passkey",
+  "@passkey": {
+    "description": "Field label: a passkey saved with a login."
+  },
+  "passkeyCreated": "Created on {date}",
+  "@passkeyCreated": {
+    "description": "Value of a passkey field: when the passkey was created.",
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMMMd"
+      }
+    }
+  },
+  "notes": "Notes",
+  "@notes": {
+    "description": "Field label: the notes of an item."
+  },
+  "customFields": "Custom fields",
+  "@customFields": {
+    "description": "Title of the custom fields of an item."
+  },
+  "passwordHistory": "Password history",
+  "@passwordHistory": {
+    "description": "Title of the list of passwords an item used before."
+  },
+  "itemDates": "Updated {updated}, created {created}",
+  "@itemDates": {
+    "description": "When an item was last updated and created, at the bottom of its details.",
+    "placeholders": {
+      "updated": {
+        "type": "DateTime",
+        "format": "yMMMd"
+      },
+      "created": {
+        "type": "DateTime",
+        "format": "yMMMd"
+      }
+    }
+  },
+  "yes": "Yes",
+  "@yes": {
+    "description": "Value of a checked boolean custom field."
+  },
+  "no": "No",
+  "@no": {
+    "description": "Value of an unchecked boolean custom field."
+  },
+  "linkedTo": "Linked to {field}",
+  "@linkedTo": {
+    "description": "Value of a custom field linked to another field of the item, named field.",
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "cardholderName": "Cardholder name",
+  "@cardholderName": {
+    "description": "Field label: the name on a payment card."
+  },
+  "cardBrand": "Brand",
+  "@cardBrand": {
+    "description": "Field label: the brand of a payment card, like Visa."
+  },
+  "cardNumber": "Number",
+  "@cardNumber": {
+    "description": "Field label: the number of a payment card."
+  },
+  "cardExpiration": "Expiration",
+  "@cardExpiration": {
+    "description": "Field label: the expiration month and year of a payment card."
+  },
+  "cardExpMonth": "Expiration month",
+  "@cardExpMonth": {
+    "description": "Field label: the expiration month of a payment card."
+  },
+  "cardExpYear": "Expiration year",
+  "@cardExpYear": {
+    "description": "Field label: the expiration year of a payment card."
+  },
+  "cardCode": "Security code",
+  "@cardCode": {
+    "description": "Field label: the security code (CVV) of a payment card."
+  },
+  "fullName": "Name",
+  "@fullName": {
+    "description": "Field label: a person's full name."
+  },
+  "identityTitle": "Title",
+  "@identityTitle": {
+    "description": "Field label: a person's title, like Mr or Ms."
+  },
+  "firstName": "First name",
+  "@firstName": {
+    "description": "Field label: a person's first name."
+  },
+  "middleName": "Middle name",
+  "@middleName": {
+    "description": "Field label: a person's middle name."
+  },
+  "lastName": "Last name",
+  "@lastName": {
+    "description": "Field label: a person's last name."
+  },
+  "company": "Company",
+  "@company": {
+    "description": "Field label: the company of an identity."
+  },
+  "email": "Email",
+  "@email": {
+    "description": "Field label: an email address."
+  },
+  "phone": "Phone",
+  "@phone": {
+    "description": "Field label: a phone number."
+  },
+  "address": "Address",
+  "@address": {
+    "description": "Field label: a postal address."
+  },
+  "city": "City",
+  "@city": {
+    "description": "Field label: the city of an address."
+  },
+  "state": "State or region",
+  "@state": {
+    "description": "Field label: the state or region of an address."
+  },
+  "postalCode": "Postal code",
+  "@postalCode": {
+    "description": "Field label: the postal code of an address."
+  },
+  "country": "Country",
+  "@country": {
+    "description": "Field label: the country of an address."
+  },
+  "ssn": "Social security number",
+  "@ssn": {
+    "description": "Field label: a social security number."
+  },
+  "passportNumber": "Passport number",
+  "@passportNumber": {
+    "description": "Field label: a passport number."
+  },
+  "licenseNumber": "License number",
+  "@licenseNumber": {
+    "description": "Field label: a driver's license number."
+  },
+  "privateKey": "Private key",
+  "@privateKey": {
+    "description": "Field label: the private part of an SSH key."
+  },
+  "publicKey": "Public key",
+  "@publicKey": {
+    "description": "Field label: the public part of an SSH key."
+  },
+  "fingerprint": "Fingerprint",
+  "@fingerprint": {
+    "description": "Field label: the fingerprint of an SSH key."
+  },
+  "bankName": "Bank",
+  "@bankName": {
+    "description": "Field label: the name of a bank."
+  },
+  "accountHolder": "Account holder",
+  "@accountHolder": {
+    "description": "Field label: the name on a bank account."
+  },
+  "accountType": "Account type",
+  "@accountType": {
+    "description": "Field label: the type of a bank account."
+  },
+  "accountNumber": "Account number",
+  "@accountNumber": {
+    "description": "Field label: the number of a bank account."
+  },
+  "routingNumber": "Routing number",
+  "@routingNumber": {
+    "description": "Field label: the routing number of a bank account."
+  },
+  "branchNumber": "Branch number",
+  "@branchNumber": {
+    "description": "Field label: the branch number of a bank account."
+  },
+  "pin": "PIN",
+  "@pin": {
+    "description": "Field label: the PIN of a bank account."
+  },
+  "swiftCode": "SWIFT code",
+  "@swiftCode": {
+    "description": "Field label: the SWIFT code of a bank."
+  },
+  "iban": "IBAN",
+  "@iban": {
+    "description": "Field label: the IBAN of a bank account."
+  },
+  "bankPhone": "Bank phone",
+  "@bankPhone": {
+    "description": "Field label: the phone number of a bank."
+  },
+  "accountTypeChecking": "Checking",
+  "@accountTypeChecking": {
+    "description": "Bank account type: checking account."
+  },
+  "accountTypeSavings": "Savings",
+  "@accountTypeSavings": {
+    "description": "Bank account type: savings account."
+  },
+  "accountTypeCertificateOfDeposit": "Certificate of deposit",
+  "@accountTypeCertificateOfDeposit": {
+    "description": "Bank account type: certificate of deposit."
+  },
+  "accountTypeLineOfCredit": "Line of credit",
+  "@accountTypeLineOfCredit": {
+    "description": "Bank account type: line of credit."
+  },
+  "accountTypeInvestmentBrokerage": "Brokerage",
+  "@accountTypeInvestmentBrokerage": {
+    "description": "Bank account type: brokerage account."
+  },
+  "accountTypeMoneyMarket": "Money market",
+  "@accountTypeMoneyMarket": {
+    "description": "Bank account type: money market account."
+  },
+  "accountTypeOther": "Other",
+  "@accountTypeOther": {
+    "description": "Bank account type: any other type."
+  },
+  "dateOfBirth": "Date of birth",
+  "@dateOfBirth": {
+    "description": "Field label: a person's date of birth."
+  },
+  "issuingCountry": "Issuing country",
+  "@issuingCountry": {
+    "description": "Field label: the country that issued a document."
+  },
+  "issuingState": "Issuing state or region",
+  "@issuingState": {
+    "description": "Field label: the state or region that issued a document."
+  },
+  "issueDate": "Issue date",
+  "@issueDate": {
+    "description": "Field label: when a document was issued."
+  },
+  "expirationDate": "Expiration date",
+  "@expirationDate": {
+    "description": "Field label: when a document expires."
+  },
+  "issuingAuthority": "Issuing authority",
+  "@issuingAuthority": {
+    "description": "Field label: the authority that issued a document."
+  },
+  "licenseClass": "Class",
+  "@licenseClass": {
+    "description": "Field label: the class of a driver's license."
+  },
+  "surname": "Surname",
+  "@surname": {
+    "description": "Field label: the surname on a passport."
+  },
+  "givenName": "Given name",
+  "@givenName": {
+    "description": "Field label: the given name on a passport."
+  },
+  "sex": "Sex",
+  "@sex": {
+    "description": "Field label: the sex on a passport."
+  },
+  "birthPlace": "Place of birth",
+  "@birthPlace": {
+    "description": "Field label: the place of birth on a passport."
+  },
+  "nationality": "Nationality",
+  "@nationality": {
+    "description": "Field label: the nationality on a passport."
+  },
+  "passportType": "Type",
+  "@passportType": {
+    "description": "Field label: the type of a passport."
+  },
+  "nationalId": "National ID number",
+  "@nationalId": {
+    "description": "Field label: the national identification number on a passport."
+  }
+}

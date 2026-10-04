@@ -115,6 +115,15 @@ void main() {
     }
   }
 
+  /// Taps [button], whose write needs real time to reach the cache.
+  Future<void> write(WidgetTester tester, Finder button) async {
+    await tester.runAsync(() async {
+      await tester.tap(button);
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+    });
+    await settle(tester);
+  }
+
   testWidgets('welcomes a device without vaults, then creates one', (
     tester,
   ) async {
@@ -362,6 +371,133 @@ void main() {
     expect(find.text('git'), findsOneWidget);
     expect(find.text('GitHub'), findsOneWidget);
     expect(find.text('Alarm code'), findsNothing);
+    await close(tester);
+  });
+
+  testWidgets('creates a login in the vault of choice on a desktop', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(tester, items: [github], withFamily: true);
+    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await settle(tester);
+
+    await tester.tap(find.text('New item'));
+    await settle(tester);
+    expect(find.text('New login'), findsOneWidget);
+    await write(tester, find.text('Save'));
+    expect(find.text('Give the item a name.'), findsOneWidget);
+
+    await tester.tap(find.text('Personal'));
+    await settle(tester);
+    await tester.tap(find.text('Family').last);
+    await settle(tester);
+    await tester.enterText(find.widgetWithText(TextField, 'Name'), 'Netflix');
+    await tester.enterText(find.widgetWithText(TextField, 'Username'), 'bob');
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Password'),
+      'hunter2',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Website'),
+      'netflix.com',
+    );
+    await write(tester, find.text('Save'));
+
+    expect(find.text('Netflix'), findsNWidgets(2));
+    expect(find.text('Username'), findsOneWidget);
+    final [item] = (await tester.runAsync(vaults.all.last.vault.items))!;
+    expect(item.cipher.name, 'Netflix');
+    expect(item.cipher.login!.username, 'bob');
+    expect(item.cipher.login!.password, 'hunter2');
+    expect(item.cipher.login!.uris.single.uri, 'netflix.com');
+    await close(tester);
+  });
+
+  testWidgets('edits a login, and keeps what the form leaves out', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(
+      tester,
+      items: [
+        Cipher(
+          type: CipherType.login,
+          name: 'GitHub',
+          notes: 'Recovery codes are in the safe.',
+          login: Login(
+            uris: [
+              LoginUri('https://github.com', match: UriMatchStrategy.host),
+            ],
+            username: 'alice-dev',
+            password: 'Tr0ub4dor&3',
+          ),
+          fields: [Field(name: 'PIN', value: '1234')],
+        ),
+      ],
+    );
+    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await settle(tester);
+
+    await tester.tap(find.text('GitHub'));
+    await settle(tester);
+    await tester.tap(find.text('Edit'));
+    await settle(tester);
+    expect(find.text('Edit item'), findsOneWidget);
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Password'),
+      'correct horse',
+    );
+    await write(tester, find.text('Save'));
+
+    expect(find.text('Password history'), findsOneWidget);
+    final [item] = (await tester.runAsync(vaults.all.single.vault.items))!;
+    expect(item.hasConflict, isFalse);
+    final cipher = item.cipher;
+    expect(cipher.login!.password, 'correct horse');
+    expect(cipher.passwordHistory.single.password, 'Tr0ub4dor&3');
+    expect(cipher.login!.uris.single.match, UriMatchStrategy.host);
+    expect(cipher.fields.single.value, '1234');
+    expect(cipher.notes, 'Recovery codes are in the safe.');
+    await close(tester);
+  });
+
+  testWidgets('marks an item as a favorite', (tester) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(tester, items: [github]);
+    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await settle(tester);
+
+    await tester.tap(find.text('GitHub'));
+    await settle(tester);
+    await write(tester, find.byTooltip('Add to favorites'));
+
+    expect(find.byTooltip('Remove from favorites'), findsOneWidget);
+    await tester.tap(find.text('Favorites'));
+    await settle(tester);
+    expect(find.text('GitHub'), findsOneWidget);
+    await close(tester);
+  });
+
+  testWidgets('creates a login on a phone, in French', (tester) async {
+    setScreen(tester, const Size(390, 844), locale: const Locale('fr'));
+    await open(tester, items: [github]);
+    await tester.pumpWidget(SubmarineApp(vaults: vaults));
+    await settle(tester);
+
+    await tester.tap(find.byTooltip('Nouvel élément'));
+    await settle(tester);
+    expect(find.text('Nouvel identifiant'), findsOneWidget);
+    expect(find.text('Coffre'), findsNothing);
+    await tester.enterText(find.widgetWithText(TextField, 'Nom'), 'Netflix');
+    await write(tester, find.text('Enregistrer'));
+
+    expect(find.text('Netflix'), findsOneWidget);
+    expect(find.text('Modifier'), findsOneWidget);
+    await tester.tap(find.byType(BackButton));
+    await settle(tester);
+    expect(find.text('Netflix'), findsOneWidget);
+    expect(find.text('GitHub'), findsOneWidget);
     await close(tester);
   });
 

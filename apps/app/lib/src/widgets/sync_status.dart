@@ -6,11 +6,12 @@ import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
 import '../context.dart';
 import '../vaults/vault_controller.dart';
 
-/// Where the sync of several vaults stands, as one: the oldest last sync, and
-/// a failure as soon as one vault reaches no relay.
+/// Where the sync of several vaults stands, as one: the changes still to send,
+/// the oldest last sync, and a failure as soon as one vault reaches no relay.
 class SyncSummary {
   SyncSummary(List<VaultController> vaults)
-    : failed = vaults.any((vault) => vault.phase == SyncRequestPhase.failed),
+    : unsent = vaults.fold(0, (sum, vault) => sum + vault.unsent),
+      failed = vaults.any((vault) => vault.phase == SyncRequestPhase.failed),
       syncing = vaults.any((vault) => vault.phase == SyncRequestPhase.syncing),
       lastSync = vaults.any((vault) => vault.lastSync == null)
           ? null
@@ -18,6 +19,7 @@ class SyncSummary {
                 .map((vault) => vault.lastSync!)
                 .reduce((a, b) => a.isBefore(b) ? a : b);
 
+  final int unsent;
   final bool failed;
   final bool syncing;
 
@@ -25,6 +27,7 @@ class SyncSummary {
   final DateTime? lastSync;
 
   String describe(AppLocalizations l10n) {
+    if (unsent > 0) return l10n.changesNotSent(unsent);
     if (failed) return l10n.syncFailed;
     final lastSync = this.lastSync;
     if (lastSync == null) return syncing ? l10n.syncing : l10n.syncNever;
@@ -37,10 +40,16 @@ class SyncSummary {
 }
 
 class SyncStatusText extends StatefulWidget {
-  const SyncStatusText({super.key, required this.vaults, this.maxLines = 1});
+  const SyncStatusText({
+    super.key,
+    required this.vaults,
+    this.maxLines = 1,
+    this.showsUnsentIcon = true,
+  });
 
   final List<VaultController> vaults;
   final int maxLines;
+  final bool showsUnsentIcon;
 
   @override
   State<SyncStatusText> createState() => _SyncStatusTextState();
@@ -69,14 +78,23 @@ class _SyncStatusTextState extends State<SyncStatusText> {
   Widget build(BuildContext context) {
     final palette = context.palette;
     final summary = SyncSummary(widget.vaults);
-    return Text(
+    final unsent = summary.unsent > 0;
+    final text = Text(
       summary.describe(context.l10n),
       maxLines: widget.maxLines,
       overflow: TextOverflow.ellipsis,
       style: TextStyle(
         fontSize: 13,
-        color: summary.failed ? palette.danger : palette.muted,
+        color: summary.failed && !unsent ? palette.danger : palette.muted,
       ),
+    );
+    if (!unsent || !widget.showsUnsentIcon) return text;
+    return Row(
+      children: [
+        Icon(Icons.upload_rounded, size: 15, color: palette.muted),
+        const SizedBox(width: 4),
+        Flexible(child: text),
+      ],
     );
   }
 }
@@ -117,7 +135,9 @@ class SyncCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.palette;
     final summary = SyncSummary(vaults);
-    final icon = summary.failed
+    final icon = summary.unsent > 0
+        ? Icon(Icons.upload_rounded, size: 18, color: palette.muted)
+        : summary.failed
         ? Icon(Icons.cloud_off_rounded, size: 18, color: palette.danger)
         : summary.lastSync != null
         ? Icon(Icons.check_rounded, size: 18, color: palette.muted)
@@ -132,7 +152,13 @@ class SyncCard extends StatelessWidget {
       child: Row(
         children: [
           if (icon != null) ...[icon, const SizedBox(width: 10)],
-          Expanded(child: SyncStatusText(vaults: vaults, maxLines: 2)),
+          Expanded(
+            child: SyncStatusText(
+              vaults: vaults,
+              maxLines: 2,
+              showsUnsentIcon: false,
+            ),
+          ),
           SyncButton(vaults: vaults),
         ],
       ),

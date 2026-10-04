@@ -136,5 +136,21 @@
   "noItemsHere": "Aucun élément ici.",
   "searchItems": "{count, plural, =0{Rechercher} =1{Rechercher dans 1 élément} other{Rechercher parmi {count} éléments}}",
   "clearSearch": "Effacer la recherche",
-  "noSearchResults": "Aucun élément ne correspond à votre recherche."
+  "noSearchResults": "Aucun élément ne correspond à votre recherche.",
+  "changesNotSent": "{count, plural, =1{1 modification pas encore envoyée} other{{count} modifications pas encore envoyées}}",
+  "newItem": "Nouvel élément",
+  "newLogin": "Nouvel identifiant",
+  "editItem": "Modifier l'élément",
+  "edit": "Modifier",
+  "save": "Enregistrer",
+  "itemSaveFailed": "L'élément n'a pas pu être enregistré.",
+  "vault": "Coffre",
+  "itemName": "Nom",
+  "itemNameRequired": "Donnez un nom à l'élément.",
+  "authenticatorKey": "Clé d'authentification",
+  "authenticatorKeyHint": "Secret base32 ou URI otpauth://",
+  "addWebsite": "Ajouter un site web",
+  "favorite": "Favori",
+  "addToFavorites": "Ajouter aux favoris",
+  "removeFromFavorites": "Retirer des favoris"
 }

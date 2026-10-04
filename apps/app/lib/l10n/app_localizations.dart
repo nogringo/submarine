@@ -919,6 +919,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No items match your search.'**
   String get noSearchResults;
+
+  /// Sync status when changes saved on this device have reached no relay yet.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 change not sent yet} other{{count} changes not sent yet}}'**
+  String changesNotSent(int count);
+
+  /// Button adding an item to a vault.
+  ///
+  /// In en, this message translates to:
+  /// **'New item'**
+  String get newItem;
+
+  /// Title of the form creating a login.
+  ///
+  /// In en, this message translates to:
+  /// **'New login'**
+  String get newLogin;
+
+  /// Title of the form editing an item.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit item'**
+  String get editItem;
+
+  /// Button opening the form that edits an item.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// Button saving an item.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// Shown in the item form when saving failed.
+  ///
+  /// In en, this message translates to:
+  /// **'The item could not be saved.'**
+  String get itemSaveFailed;
+
+  /// Label of the vault an item is created in.
+  ///
+  /// In en, this message translates to:
+  /// **'Vault'**
+  String get vault;
+
+  /// Label of an item's name in the item form.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get itemName;
+
+  /// Error when saving an item without a name.
+  ///
+  /// In en, this message translates to:
+  /// **'Give the item a name.'**
+  String get itemNameRequired;
+
+  /// Label of the TOTP secret of a login in the item form.
+  ///
+  /// In en, this message translates to:
+  /// **'Authenticator key'**
+  String get authenticatorKey;
+
+  /// Placeholder of the authenticator key field.
+  ///
+  /// In en, this message translates to:
+  /// **'Base32 secret or otpauth:// URI'**
+  String get authenticatorKeyHint;
+
+  /// Button adding a website field to a login in the item form.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a website'**
+  String get addWebsite;
+
+  /// Switch marking an item as favorite in the item form.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite'**
+  String get favorite;
+
+  /// Tooltip of the star of an item that is not a favorite.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to favorites'**
+  String get addToFavorites;
+
+  /// Tooltip of the star of a favorite item.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from favorites'**
+  String get removeFromFavorites;
 }
 
 class _AppLocalizationsDelegate

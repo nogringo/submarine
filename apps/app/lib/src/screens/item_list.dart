@@ -36,9 +36,9 @@ class ItemListPane extends StatelessWidget {
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       if (titledByFilter)
-        _FilterHeader(filter: filter)
+        _FilterHeader(vaultId: vaultId, filter: filter)
       else
-        _Header(vaultId: vaultId),
+        _Header(vaultId: vaultId, filter: filter),
       Expanded(
         child: _Items(
           vaultId: vaultId,
@@ -67,12 +67,19 @@ class ItemListScreen extends StatelessWidget {
       selectedVaultId: vaultId,
       onAddVault: () => addVault(context),
     ),
+    floatingActionButton: FloatingActionButton(
+      tooltip: context.l10n.newItem,
+      backgroundColor: context.palette.accent,
+      foregroundColor: context.palette.onAccent,
+      onPressed: () => context.go(newItemPath(vaultId, filter)),
+      child: const Icon(Icons.add_rounded),
+    ),
     body: SafeArea(
       bottom: false,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _Header(vaultId: vaultId, withDrawer: true),
+          _Header(vaultId: vaultId, filter: filter, withDrawer: true),
           Expanded(
             child: _Items(vaultId: vaultId, filter: filter),
           ),
@@ -83,11 +90,17 @@ class ItemListScreen extends StatelessWidget {
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.vaultId, this.withDrawer = false});
+  const _Header({
+    required this.vaultId,
+    required this.filter,
+    this.withDrawer = false,
+  });
 
   final String vaultId;
+  final ItemFilter filter;
 
-  /// Whether the vault's avatar opens the drawer of the vaults.
+  /// Whether the vault's avatar opens the drawer of the vaults, and a floating
+  /// button adds an item.
   final bool withDrawer;
 
   @override
@@ -97,7 +110,12 @@ class _Header extends StatelessWidget {
     final all = vaultId == allVaultsId;
     final vault = selection.firstOrNull;
     return Padding(
-      padding: EdgeInsets.fromLTRB(withDrawer ? 12 : 20, 16, 8, 12),
+      padding: EdgeInsets.fromLTRB(
+        withDrawer ? 12 : 20,
+        16,
+        withDrawer ? 8 : 16,
+        12,
+      ),
       child: Row(
         children: [
           if (withDrawer) ...[
@@ -136,6 +154,10 @@ class _Header extends StatelessWidget {
             ),
           ),
           SyncButton(vaults: selection),
+          if (!withDrawer) ...[
+            const SizedBox(width: 4),
+            _NewItemButton(vaultId: vaultId, filter: filter),
+          ],
         ],
       ),
     );
@@ -143,23 +165,49 @@ class _Header extends StatelessWidget {
 }
 
 class _FilterHeader extends StatelessWidget {
-  const _FilterHeader({required this.filter});
+  const _FilterHeader({required this.vaultId, required this.filter});
 
+  final String vaultId;
   final ItemFilter filter;
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(20, 18, 16, 14),
-    child: Text(
-      filter.label(context.l10n),
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: const TextStyle(
-        fontSize: 22,
-        fontWeight: FontWeight.w700,
-        height: 1.25,
-      ),
+    padding: const EdgeInsets.fromLTRB(20, 14, 16, 14),
+    child: Row(
+      children: [
+        Expanded(
+          child: Text(
+            filter.label(context.l10n),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+              height: 1.25,
+            ),
+          ),
+        ),
+        _NewItemButton(vaultId: vaultId, filter: filter),
+      ],
     ),
+  );
+}
+
+class _NewItemButton extends StatelessWidget {
+  const _NewItemButton({required this.vaultId, required this.filter});
+
+  final String vaultId;
+  final ItemFilter filter;
+
+  @override
+  Widget build(BuildContext context) => FilledButton.icon(
+    onPressed: () => context.go(newItemPath(vaultId, filter)),
+    style: FilledButton.styleFrom(
+      minimumSize: const Size(0, 40),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+    ),
+    icon: const Icon(Icons.add_rounded, size: 20),
+    label: Text(context.l10n.newItem),
   );
 }
 
@@ -215,7 +263,13 @@ class _ItemsState extends State<_Items> {
                   searched: items.isNotEmpty,
                 )
               : ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 16),
+                  // Clear of the floating button on a phone.
+                  padding: EdgeInsets.fromLTRB(
+                    8,
+                    0,
+                    8,
+                    context.isWide ? 16 : 88,
+                  ),
                   keyboardDismissBehavior:
                       ScrollViewKeyboardDismissBehavior.onDrag,
                   itemCount: shown.length,

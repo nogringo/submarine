@@ -467,4 +467,60 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noSearchResults => 'No items match your search.';
+
+  @override
+  String changesNotSent(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count changes not sent yet',
+      one: '1 change not sent yet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get newItem => 'New item';
+
+  @override
+  String get newLogin => 'New login';
+
+  @override
+  String get editItem => 'Edit item';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get itemSaveFailed => 'The item could not be saved.';
+
+  @override
+  String get vault => 'Vault';
+
+  @override
+  String get itemName => 'Name';
+
+  @override
+  String get itemNameRequired => 'Give the item a name.';
+
+  @override
+  String get authenticatorKey => 'Authenticator key';
+
+  @override
+  String get authenticatorKeyHint => 'Base32 secret or otpauth:// URI';
+
+  @override
+  String get addWebsite => 'Add a website';
+
+  @override
+  String get favorite => 'Favorite';
+
+  @override
+  String get addToFavorites => 'Add to favorites';
+
+  @override
+  String get removeFromFavorites => 'Remove from favorites';
 }

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
 
 import '../context.dart';
 import '../items/field_tile.dart';
 import '../items/item_fields.dart';
+import '../items/item_filter.dart';
+import '../router.dart';
 import '../vaults/vaults.dart';
 import '../widgets/item_icon.dart';
 import '../widgets/vault_avatar.dart';
@@ -14,29 +17,56 @@ class ItemDetailPane extends StatelessWidget {
   const ItemDetailPane({
     super.key,
     required this.vaultId,
+    required this.filter,
     required this.itemId,
   });
 
   final String vaultId;
+  final ItemFilter filter;
   final String itemId;
 
   @override
-  Widget build(BuildContext context) =>
-      _ItemOrMissing(vaultId: vaultId, itemId: itemId);
+  Widget build(BuildContext context) => ItemOrMissing(
+    vaultId: vaultId,
+    itemId: itemId,
+    builder: (entry) => ItemDetail(
+      entry: entry,
+      actions: ItemActions(vaultId: vaultId, filter: filter, entry: entry),
+    ),
+  );
 }
 
 /// Narrow layout: the item on a screen of its own.
 class ItemScreen extends StatelessWidget {
-  const ItemScreen({super.key, required this.vaultId, required this.itemId});
+  const ItemScreen({
+    super.key,
+    required this.vaultId,
+    required this.filter,
+    required this.itemId,
+  });
 
   final String vaultId;
+  final ItemFilter filter;
   final String itemId;
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(),
-    body: _ItemOrMissing(vaultId: vaultId, itemId: itemId),
-  );
+  Widget build(BuildContext context) {
+    final entry = Vaults.of(context).findItem(vaultId, itemId);
+    return Scaffold(
+      appBar: AppBar(
+        actions: [
+          if (entry != null)
+            ItemActions(vaultId: vaultId, filter: filter, entry: entry),
+          const SizedBox(width: 12),
+        ],
+      ),
+      body: ItemOrMissing(
+        vaultId: vaultId,
+        itemId: itemId,
+        builder: (entry) => ItemDetail(entry: entry),
+      ),
+    );
+  }
 }
 
 /// Wide layout, when no item is selected.
@@ -48,17 +78,24 @@ class NoItemSelected extends StatelessWidget {
       _Placeholder(icon: Icons.key_rounded, text: context.l10n.selectItem);
 }
 
-class _ItemOrMissing extends StatelessWidget {
-  const _ItemOrMissing({required this.vaultId, required this.itemId});
+/// What [builder] makes of the item, or why there is none.
+class ItemOrMissing extends StatelessWidget {
+  const ItemOrMissing({
+    super.key,
+    required this.vaultId,
+    required this.itemId,
+    required this.builder,
+  });
 
   final String vaultId;
   final String itemId;
+  final Widget Function(VaultItem entry) builder;
 
   @override
   Widget build(BuildContext context) {
     final vaults = Vaults.of(context);
     if (vaults.findItem(vaultId, itemId) case final entry?) {
-      return ItemDetail(entry: entry);
+      return builder(entry);
     }
     // Not read from the cache yet, rather than gone.
     if (vaults.select(vaultId).any((vault) => !vault.loaded)) {
@@ -101,9 +138,12 @@ class _Placeholder extends StatelessWidget {
 }
 
 class ItemDetail extends StatelessWidget {
-  const ItemDetail({super.key, required this.entry});
+  const ItemDetail({super.key, required this.entry, this.actions});
 
   final VaultItem entry;
+
+  /// Above the item, unless an app bar holds them.
+  final ItemActions? actions;
 
   @override
   Widget build(BuildContext context) {
@@ -118,12 +158,14 @@ class ItemDetail extends StatelessWidget {
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
       child: Align(
-        alignment: Alignment.topLeft,
+        alignment: Alignment.topCenter,
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 760),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              if (actions case final actions? when actions.isAvailable)
+                Align(alignment: Alignment.centerRight, child: actions),
               _Header(entry: entry),
               const SizedBox(height: 20),
               if (fields.isNotEmpty) ...[_Fields(rows: fields), gap],
@@ -149,6 +191,79 @@ class ItemDetail extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Marks the item as a favorite, and opens the form that edits a login. None
+/// for an item in the trash.
+class ItemActions extends StatefulWidget {
+  const ItemActions({
+    super.key,
+    required this.vaultId,
+    required this.filter,
+    required this.entry,
+  });
+
+  final String vaultId;
+  final ItemFilter filter;
+  final VaultItem entry;
+
+  bool get isAvailable => !entry.item.cipher.isDeleted;
+
+  @override
+  State<ItemActions> createState() => _ItemActionsState();
+}
+
+class _ItemActionsState extends State<ItemActions> {
+  /// A second write before the first one ends would fork the item.
+  var _saving = false;
+
+  Future<void> _toggleFavorite() async {
+    final VaultItem(:vault, :item) = widget.entry;
+    setState(() => _saving = true);
+    try {
+      await vault.updateItem(
+        item,
+        Cipher.fromJson(item.current.data)..favorite = !item.cipher.favorite,
+      );
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!widget.isAvailable) return const SizedBox.shrink();
+    final l10n = context.l10n;
+    final cipher = widget.entry.item.cipher;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          tooltip: cipher.favorite
+              ? l10n.removeFromFavorites
+              : l10n.addToFavorites,
+          onPressed: _saving ? null : _toggleFavorite,
+          icon: cipher.favorite
+              ? Icon(Icons.star_rounded, color: context.palette.signal)
+              : const Icon(Icons.star_outline_rounded),
+        ),
+        if (cipher.type == CipherType.login) ...[
+          const SizedBox(width: 4),
+          OutlinedButton.icon(
+            onPressed: () => context.go(
+              editItemPath(widget.vaultId, widget.filter, widget.entry.item.id),
+            ),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(0, 40),
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+            ),
+            icon: const Icon(Icons.edit_rounded, size: 18),
+            label: Text(l10n.edit),
+          ),
+        ],
+      ],
     );
   }
 }

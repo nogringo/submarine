@@ -45,8 +45,53 @@ class VaultController extends ChangeNotifier {
   DateTime? get lastSync => _lastSync;
   DateTime? _lastSync;
 
-  /// Fetches what changed on the relays now, rather than at the next pass.
-  Future<void> sync() => _engine.refresh(_handle);
+  /// Changes saved on this device that no relay accepted yet. ndk keeps
+  /// sending them in the background.
+  int get unsent => _unsent;
+  var _unsent = 0;
+  Timer? _unsentCheck;
+
+  /// Sends the unsent changes and fetches what changed on the relays now,
+  /// rather than at the next pass.
+  Future<void> sync() => Future.wait([
+    vault.push().then((_) => _checkUnsent()),
+    _engine.refresh(_handle),
+  ]);
+
+  /// Saved once in the ndk cache, then sent to the relays.
+  Future<Item> createItem(Cipher cipher) => _write(vault.createItem(cipher));
+
+  Future<Item> updateItem(Item item, Cipher cipher) =>
+      _write(vault.updateItem(item, cipher));
+
+  Future<Item> _write(Future<Envelope> saving) async {
+    // The single version a write leaves is the item, as a read would find it.
+    final item = Item([await saving]);
+    _items = [
+      for (final other in _items)
+        if (other.id != item.id) other,
+      item,
+    ]..sort(compareByName);
+    notifyListeners();
+    unawaited(_reload());
+    return item;
+  }
+
+  /// Looks again while changes wait, as nothing tells when ndk sent them.
+  Future<void> _checkUnsent() async {
+    final unsent = (await vault.unsent()).length;
+    if (_disposed) return;
+    _unsentCheck?.cancel();
+    if (unsent > 0) {
+      _unsentCheck = Timer(
+        const Duration(seconds: 5),
+        () => unawaited(_checkUnsent()),
+      );
+    }
+    if (unsent == _unsent) return;
+    _unsent = unsent;
+    notifyListeners();
+  }
 
   void _onStatus(SyncRequestStatus status) {
     _phase = status.phase;
@@ -75,6 +120,7 @@ class VaultController extends ChangeNotifier {
         _lastSync = lastSync;
         _loaded = true;
         notifyListeners();
+        await _checkUnsent();
       } while (_reloadAgain);
     } catch (error, stack) {
       FlutterError.reportError(
@@ -93,6 +139,7 @@ class VaultController extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    _unsentCheck?.cancel();
     unawaited(_statuses.cancel());
     _engine.release(_handle);
     super.dispose();

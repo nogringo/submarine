@@ -604,5 +604,74 @@
   "noSearchResults": "No items match your search.",
   "@noSearchResults": {
     "description": "Shown in place of the list when the search matches no item."
+  },
+  "changesNotSent": "{count, plural, =1{1 change not sent yet} other{{count} changes not sent yet}}",
+  "@changesNotSent": {
+    "description": "Sync status when changes saved on this device have reached no relay yet.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "newItem": "New item",
+  "@newItem": {
+    "description": "Button adding an item to a vault."
+  },
+  "newLogin": "New login",
+  "@newLogin": {
+    "description": "Title of the form creating a login."
+  },
+  "editItem": "Edit item",
+  "@editItem": {
+    "description": "Title of the form editing an item."
+  },
+  "edit": "Edit",
+  "@edit": {
+    "description": "Button opening the form that edits an item."
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Button saving an item."
+  },
+  "itemSaveFailed": "The item could not be saved.",
+  "@itemSaveFailed": {
+    "description": "Shown in the item form when saving failed."
+  },
+  "vault": "Vault",
+  "@vault": {
+    "description": "Label of the vault an item is created in."
+  },
+  "itemName": "Name",
+  "@itemName": {
+    "description": "Label of an item's name in the item form."
+  },
+  "itemNameRequired": "Give the item a name.",
+  "@itemNameRequired": {
+    "description": "Error when saving an item without a name."
+  },
+  "authenticatorKey": "Authenticator key",
+  "@authenticatorKey": {
+    "description": "Label of the TOTP secret of a login in the item form."
+  },
+  "authenticatorKeyHint": "Base32 secret or otpauth:// URI",
+  "@authenticatorKeyHint": {
+    "description": "Placeholder of the authenticator key field."
+  },
+  "addWebsite": "Add a website",
+  "@addWebsite": {
+    "description": "Button adding a website field to a login in the item form."
+  },
+  "favorite": "Favorite",
+  "@favorite": {
+    "description": "Switch marking an item as favorite in the item form."
+  },
+  "addToFavorites": "Add to favorites",
+  "@addToFavorites": {
+    "description": "Tooltip of the star of an item that is not a favorite."
+  },
+  "removeFromFavorites": "Remove from favorites",
+  "@removeFromFavorites": {
+    "description": "Tooltip of the star of a favorite item."
   }
 }

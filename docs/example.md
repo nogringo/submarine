@@ -1,3 +1,31 @@
+## Set the vault's relays
+
+NIP-65 relay list, signed by the vault and published as is:
+
+```jsonc
+{
+  "kind": 10002,
+  "pubkey": "<pk_vault>",
+  "created_at": 1790676000,
+  "tags": [
+    ["r", "wss://relay.primal.net"],
+    ["r", "wss://relay.nos.social"]
+  ],
+  "content": "<nip44_encrypt(sk_vault, pk_vault, private relays)>",
+  "sig": "..."
+}
+```
+
+Private relays, the `content` once decrypted, in the same tag format, as NIP-51 does for private list items:
+
+```jsonc
+[
+  ["r", "wss://relay.alice.example"]
+]
+```
+
+Anyone can read the public relays in the tags. Only the vault key decrypts the private ones. No `read` or `write` marker: the vault reads and writes on every relay. The event is replaceable, so its `created_at` is the real time, not a random one as for gift wraps: relays keep the newest list.
+
 ## Create a password
 
 Gift wrap, the only event published:

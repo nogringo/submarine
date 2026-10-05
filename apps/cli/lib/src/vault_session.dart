@@ -43,9 +43,10 @@ class VaultSession {
   late final Vault vault;
   late final SyncEngine _engine;
 
-  /// Sends to the relays the changes none accepted yet, then fetches what
-  /// changed since the last sync.
+  /// Fetches the vault's relay list, sends to its relays the changes none
+  /// accepted yet, then fetches what changed since the last sync.
   Future<void> sync() async {
+    await vault.fetchRelayList();
     final unsent = await vault.push();
     await _fetch();
     if (unsent.isNotEmpty) throw CliException(_unsentMessage(unsent));

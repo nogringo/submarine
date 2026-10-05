@@ -42,6 +42,11 @@ To use other relays, list them in `~/.config/submarine/config.json` (under
 
 `--relay` overrides both for one command, and can be repeated.
 
+Once the vault has a relay list (NIP-65), it lives on the relays the list
+names instead. `sync` fetches that list from the relays above, from the relays
+of the list it already knows and from the indexers `purplepag.es`,
+`user.kindpag.es` and `indexer.coracle.social`.
+
 ## Usage
 
 From `apps/cli`:
@@ -118,8 +123,8 @@ hostnames and notes. Other `bw` commands and objects fail with an error.
 
 Submarine is local first: its cache is a local relay. `add`, `create`, `edit`,
 `delete` and `restore` save their change in it and never wait for the network.
-`sync` sends to the relays the changes none accepted yet, then fetches what
-changed since the last sync. `list` and `get` read the cache only. Until the
+`sync` fetches the vault's relay list, sends to its relays the changes none
+accepted yet, then fetches what changed since the last sync. `list` and `get` read the cache only. Until the
 first sync, they refuse to run, except `get template`.
 
 The vault's gift wraps, still encrypted, are cached in `~/.cache/submarine`

@@ -6,25 +6,6 @@ import 'package:path/path.dart' as p;
 
 import 'cli_exception.dart';
 
-const defaultRelays = [
-  'wss://relay.nmail.li',
-  'wss://relay.primal.net',
-  'wss://relay.nos.social',
-  'wss://relay.coinos.io',
-  'wss://relay.ditto.pub',
-  'wss://auth.nostr1.com',
-  'wss://chat.wisp.talk',
-  'wss://relay.nostrfeed.com',
-  'wss://relay.nostr.net',
-  'wss://relay.nostr.com',
-  'wss://nostr.oxtr.dev',
-  'wss://nostr.bitcoiner.social',
-  'wss://nostr.data.haus',
-  'wss://purplerelay.com',
-  'wss://relay.nostr.wirednet.jp',
-  'wss://nip17.com',
-];
-
 /// Whether `SUBMARINE_NSEC` is set, valid or not.
 bool hasVaultKey(Map<String, String> environment) =>
     environment['SUBMARINE_NSEC']?.trim().isNotEmpty ?? false;

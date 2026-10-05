@@ -18,15 +18,21 @@ class VaultController extends ChangeNotifier {
     required SyncEngine engine,
   }) : _engine = engine {
     _handle = vault.sync(engine);
-    // Replays the current status, which triggers the first read.
-    _statuses = engine.watchStatus(_handle).listen(_onStatus);
+    unawaited(
+      _handle.then((handle) {
+        // Replays the current status, which triggers the first read.
+        if (!_disposed) {
+          _statuses = engine.watchStatus(handle).listen(_onStatus);
+        }
+      }),
+    );
     subscribe();
   }
 
   final Vault vault;
   final SyncEngine _engine;
-  late final SyncHandle _handle;
-  late final StreamSubscription<SyncRequestStatus> _statuses;
+  late final Future<SyncHandle> _handle;
+  StreamSubscription<SyncRequestStatus>? _statuses;
   StreamSubscription<Nip01Event>? _live;
 
   /// Changed through [Vaults.edit], which saves it.
@@ -67,7 +73,7 @@ class VaultController extends ChangeNotifier {
   /// rather than at the next pass.
   Future<void> sync() => Future.wait([
     vault.push().then((_) => _checkUnsent()),
-    _engine.refresh(_handle),
+    _handle.then(_engine.refresh),
   ]);
 
   /// Shows what other devices change the moment they publish it, until
@@ -212,9 +218,9 @@ class VaultController extends ChangeNotifier {
   void dispose() {
     _disposed = true;
     _unsentCheck?.cancel();
-    unawaited(_statuses.cancel());
+    unawaited(_statuses?.cancel());
     unawaited(unsubscribe());
-    _engine.release(_handle);
+    unawaited(_handle.then(_engine.release));
     super.dispose();
   }
 }

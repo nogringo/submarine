@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:ndk/ndk.dart';
+import 'package:nostr_passwords/nostr_passwords.dart';
 import 'package:path/path.dart' as p;
 import 'package:submarine_cli/src/settings.dart';
 import 'package:submarine_cli/submarine_cli.dart';

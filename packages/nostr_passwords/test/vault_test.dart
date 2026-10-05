@@ -21,13 +21,23 @@ void main() {
     name: 'Boulanger',
     login: Login(username: 'alice@example.com', password: 'hunter2'),
   );
+  // Unreachable: setRelayList publishes on the relays of the list.
+  const relays = RelayList(
+    public: ['ws://127.0.0.1:2'],
+    private: ['ws://127.0.0.1:3'],
+  );
 
   setUp(() async {
     relay = MockRelay(name: 'vault relay');
     await relay.startServer();
     ndk = Ndk.emptyBootstrapRelaysConfig();
     signer = const Bip340EventSignerFactory().createWithNewKeyPair();
-    vault = Vault(ndk: ndk, signer: signer, relays: [relay.url]);
+    vault = Vault(
+      ndk: ndk,
+      signer: signer,
+      relays: [relay.url],
+      indexers: const [],
+    );
   });
 
   tearDown(() async {
@@ -345,6 +355,89 @@ void main() {
     });
   });
 
+  group('relay list', () {
+    test('relayList is null before setRelayList', () async {
+      expect(await vault.relayList(), isNull);
+    });
+
+    test('setRelayList saves the list, which push sends', () async {
+      await vault.setRelayList(relays);
+
+      final saved = await vault.relayList();
+      expect(saved?.public, relays.public);
+      expect(saved?.private, relays.private);
+      expect((await vault.unsent()).single.event?.kind, 10002);
+      expect(await vault.push(), isEmpty);
+      expect(relay.receivedEvents.last.kind, 10002);
+    });
+
+    test('the list also goes to its own relays and the indexers', () async {
+      final private = await _startRelay('private relay');
+      final indexer = await _startRelay('indexer');
+      vault = Vault(
+        ndk: ndk,
+        signer: signer,
+        relays: [relay.url],
+        indexers: [indexer.url],
+      );
+
+      await vault.setRelayList(RelayList(private: [private.url]));
+      await vault.createItem(boulanger);
+      await vault.push();
+
+      bool hasList(MockRelay to) =>
+          to.receivedEvents.any((event) => event.kind == 10002);
+      await _until(
+        () => hasList(relay) && hasList(private) && hasList(indexer),
+      );
+      expect(
+        indexer.receivedEvents.map((event) => event.kind),
+        everyElement(10002),
+      );
+    });
+
+    test('items go to the relays of the list once there is one', () async {
+      final listed = await _startRelay('listed relay');
+      await vault.setRelayList(RelayList(public: [listed.url]));
+
+      await vault.createItem(boulanger);
+      await vault.push();
+
+      expect(await vault.currentRelays(), [listed.url]);
+      bool hasWrap(MockRelay to) =>
+          to.receivedEvents.any((event) => event.kind == 1059);
+      await _until(() => hasWrap(listed));
+      expect(hasWrap(relay), isFalse);
+    });
+
+    test('setRelayList copies the vault to the relays it adds', () async {
+      await vault.createItem(boulanger);
+      await vault.createItem(Cipher(type: CipherType.login, name: 'Old'));
+      final old = (await vault.items()).firstWhere(
+        (item) => item.cipher.name == 'Old',
+      );
+      await vault.deleteItem(old);
+      final added = await _startRelay('added relay');
+
+      await vault.setRelayList(RelayList(public: [relay.url, added.url]));
+
+      List<int> kinds() => [
+        for (final event in added.receivedEvents) event.kind,
+      ];
+      await _until(() => kinds().contains(1059) && kinds().contains(5));
+      expect(kinds().where((kind) => kind == 1059), hasLength(1));
+    });
+
+    test('a list replaces the one set the same second', () async {
+      await vault.setRelayList(relays);
+      await vault.setRelayList(const RelayList(public: ['ws://127.0.0.1:4']));
+
+      final saved = await vault.relayList();
+      expect(saved?.public, ['ws://127.0.0.1:4']);
+      expect(saved?.private, isEmpty);
+    });
+  });
+
   group('on another device', () {
     late Ndk otherNdk;
     late SyncEngine engine;
@@ -363,7 +456,12 @@ void main() {
           await newDatabaseFactoryMemory().openDatabase('sync.db'),
         ),
       );
-      otherVault = Vault(ndk: otherNdk, signer: signer, relays: [relay.url]);
+      otherVault = Vault(
+        ndk: otherNdk,
+        signer: signer,
+        relays: [relay.url],
+        indexers: const [],
+      );
     });
 
     tearDown(() async {
@@ -374,7 +472,7 @@ void main() {
     /// What this device gets once the first one pushed its changes.
     Future<List<Item>> syncedItems() async {
       await vault.push();
-      final handle = otherVault.sync(engine);
+      final handle = await otherVault.sync(engine);
       engine.start();
       await engine
           .watchStatus(handle)
@@ -414,6 +512,76 @@ void main() {
       );
     });
 
+    test('the relay list comes with fetchRelayList, not sync', () async {
+      await vault.setRelayList(relays);
+
+      await syncedItems();
+      expect(await otherVault.relayList(), isNull);
+
+      final fetched = await otherVault.fetchRelayList();
+      expect(fetched?.public, relays.public);
+      expect(fetched?.private, relays.private);
+    });
+
+    test('fetchRelayList also asks the indexers', () async {
+      final indexer = await _startRelay('indexer');
+      await ndk.broadcast
+          .broadcast(
+            nostrEvent: await signRelayList(relays, signer),
+            specificRelays: [indexer.url],
+          )
+          .broadcastDoneFuture;
+
+      final fetched = await Vault(
+        ndk: otherNdk,
+        signer: signer,
+        relays: [relay.url],
+        indexers: [indexer.url],
+      ).fetchRelayList();
+
+      expect(fetched?.private, relays.private);
+    });
+
+    test('fetchRelayList also asks the relays of the list it knows', () async {
+      final private = await _startRelay('private relay');
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      await otherNdk.config.cache.saveEvent(
+        await signRelayList(
+          RelayList(private: [private.url]),
+          signer,
+          createdAt: now - 10,
+        ),
+      );
+      await ndk.broadcast
+          .broadcast(
+            nostrEvent: await signRelayList(
+              RelayList(public: [private.url]),
+              signer,
+              createdAt: now,
+            ),
+            specificRelays: [private.url],
+          )
+          .broadcastDoneFuture;
+
+      final fetched = await otherVault.fetchRelayList();
+
+      expect(fetched?.public, [private.url]);
+      expect(fetched?.private, isEmpty);
+    });
+
+    test('sync follows the relay list', () async {
+      final listed = await _startRelay('listed relay');
+      await vault.setRelayList(RelayList(public: [listed.url]));
+      final created = await vault.createItem(boulanger);
+      await _until(
+        () => relay.receivedEvents.any((event) => event.kind == 10002),
+      );
+      await otherVault.fetchRelayList();
+
+      final [item] = await syncedItems();
+      expect(item.id, created.id);
+    });
+
     test('lastSync is null before the first sync', () async {
       expect(await otherVault.lastSync(engine), isNull);
     });
@@ -437,7 +605,7 @@ void main() {
         signer: signer,
         relays: ['ws://127.0.0.1:1'],
       );
-      final handle = offline.sync(engine);
+      final handle = await offline.sync(engine);
       engine.start();
       await engine
           .watchStatus(handle)
@@ -489,6 +657,22 @@ void main() {
           () => received.any((event) => event.kind == Deletion.kKind),
         );
         expect(await otherVault.items(), isEmpty);
+      });
+
+      test('moves to the relays of a new relay list', () async {
+        final listed = await _startRelay('listed relay');
+        await vault.setRelayList(RelayList(public: [listed.url]));
+        await _until(
+          () => relay.receivedEvents.any((event) => event.kind == 10002),
+        );
+
+        await otherVault.fetchRelayList();
+
+        await _until(
+          () =>
+              listed.activeSubscriptionCount == 2 &&
+              relay.activeSubscriptionCount == 0,
+        );
       });
 
       test('closes the subscriptions once cancelled', () async {
@@ -629,6 +813,14 @@ class _CountingSignerFactory extends Bip340EventSignerFactory {
     keyPairs++;
     return super.createWithNewKeyPair();
   }
+}
+
+/// A relay of its own, stopped with the test.
+Future<MockRelay> _startRelay(String name) async {
+  final relay = MockRelay(name: name);
+  await relay.startServer();
+  addTearDown(relay.stopServer);
+  return relay;
 }
 
 /// Polls [condition], as the mock relay tells nothing when it changes.

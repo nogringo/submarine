@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:ndk/domain_layer/entities/nip_65.dart';
 import 'package:ndk/ndk.dart';
 import 'package:ndk/shared/nips/nip09/deletion.dart';
 import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
@@ -11,31 +12,48 @@ import 'cipher/json.dart';
 import 'cipher/password_history.dart';
 import 'envelope.dart';
 import 'item.dart';
+import 'relay_list.dart';
 import 'version_event.dart';
 
 /// A vault, local first: a change is done once it is saved in the ndk cache,
-/// the local relay. ndk then sends it to [relays] in the background, unless
-/// `NdkConfig.pendingDeliveryRetriesEnabled` is off, and [push] sends it now.
+/// the local relay. ndk then sends it to [currentRelays] in the background,
+/// unless `NdkConfig.pendingDeliveryRetriesEnabled` is off, and [push] sends it
+/// now.
 class Vault {
-  Vault({required this.ndk, required this.signer, required this.relays});
+  Vault({
+    required this.ndk,
+    required this.signer,
+    required this.relays,
+    this.indexers = indexerRelays,
+  });
 
   final Ndk ndk;
   final EventSigner signer;
+
+  /// Where the vault lives until it has a relay list, and where its relay list
+  /// always goes, for a new device to find it.
   final List<String> relays;
+
+  /// Where [setRelayList] publishes too.
+  final List<String> indexers;
 
   /// Decrypted on demand and kept in memory only: ndk's own decrypted payload
   /// cache would write the passwords to disk in clear.
   final _versions = <String, Envelope>{};
 
-  /// Keeps the vault's gift wraps and deletion requests synced from [relays]
-  /// into the ndk cache.
+  /// Keeps the vault's gift wraps and deletion requests synced from
+  /// [currentRelays] into the ndk cache. The relay list is left to
+  /// [fetchRelayList].
+  ///
+  /// The handle holds the relays of the moment: once the relay list changed,
+  /// call it again, and release the previous handle.
   ///
   /// Some relays serve gift wraps to their recipient only, so this
   /// authenticates as the vault (NIP-42): [signer] must be in `ndk.accounts`.
-  SyncHandle sync(SyncEngine engine) => engine.ensure(
+  Future<SyncHandle> sync(SyncEngine engine) async => engine.ensure(
     SyncRequest(
       filters: [_wraps, _deletions],
-      relays: relays,
+      relays: await currentRelays(),
       authPubkey: signer.getPublicKey(),
       // Deletion requests are backdated like gift wraps, but the engine only
       // reaches further back for a gift wrap filter.
@@ -43,27 +61,34 @@ class Vault {
     ),
   );
 
-  /// Holds a subscription open on [relays] for what other devices publish to
-  /// the vault from now on, and saves it in the ndk cache. An event comes out
-  /// of the stream once saved, for [items] to see it.
+  /// Holds a subscription open on [currentRelays] for what other devices
+  /// publish to the vault from now on, and saves it in the ndk cache. An event
+  /// comes out of the stream once saved, for [items] to see it.
   ///
   /// Every listener shares the same subscriptions: they open with the first
-  /// one, and close once the last one cancels.
+  /// one, close once the last one cancels, and move to the new relays when
+  /// [setRelayList] or [fetchRelayList] changes the relay list.
   ///
   /// What was published before, or while a relay was out of reach, is left to
   /// [sync]. It authenticates as the vault, like [sync].
-  Stream<Nip01Event> subscribe() =>
-      // Without explicit relays, ndk would ask its bootstrap relays.
-      relays.isEmpty ? const Stream.empty() : _live.stream;
+  Stream<Nip01Event> subscribe() => _live.stream;
 
   late final _live = StreamController<Nip01Event>.broadcast(
-    onListen: _openLive,
+    onListen: () => unawaited(_openLive()),
     onCancel: _closeLive,
   );
 
   var _liveRequests = <(String, StreamSubscription<Nip01Event>)>[];
 
-  void _openLive() {
+  /// Tells an opening that a close or another opening came while it read the
+  /// relays.
+  var _liveGeneration = 0;
+
+  Future<void> _openLive() async {
+    final generation = ++_liveGeneration;
+    final relays = await currentRelays();
+    // Without explicit relays, ndk would ask its bootstrap relays.
+    if (generation != _liveGeneration || relays.isEmpty) return;
     for (final filter in [_wraps, _deletions]) {
       final response = ndk.requests.subscription(
         // A limit holds for stored events only, while a `since` would also
@@ -81,6 +106,7 @@ class Vault {
   }
 
   void _closeLive() {
+    _liveGeneration++;
     final requests = _liveRequests;
     _liveRequests = [];
     for (final (requestId, listener) in requests) {
@@ -118,11 +144,9 @@ class Vault {
   /// Items found in the ndk cache, see [sync] to fill it. Drops from the cache
   /// the gift wraps the vault asked to delete.
   Future<List<Item>> items() async {
-    final deletions = await ndk.config.cache.loadEvents(
-      kinds: [Deletion.kKind],
-      pubKeys: [signer.getPublicKey()],
-    );
-    final deleted = {for (final request in deletions) ...request.getTags('e')};
+    final deleted = {
+      for (final request in await _loadDeletions()) ...request.getTags('e'),
+    };
     final versions = <Envelope>[];
     final dropped = <String>[];
     for (final wrap in await _loadWraps()) {
@@ -188,8 +212,77 @@ class Vault {
     await _drop(wrapIds);
   }
 
-  /// Sends to [relays] the changes no relay accepted yet, and returns those
-  /// still left.
+  /// The relays the vault lives on: those of its relay list in the ndk cache,
+  /// or [relays] while it has none.
+  Future<List<String>> currentRelays() async {
+    final list = await relayList();
+    final listed = {...?list?.public, ...?list?.private};
+    return listed.isEmpty ? relays : listed.toList();
+  }
+
+  /// The vault's relay list found in the ndk cache, see [fetchRelayList] to
+  /// fill it, or null if it has none.
+  Future<RelayList?> relayList() async {
+    if (await _loadRelayList() case final event?) {
+      return readRelayList(event, signer);
+    }
+    return null;
+  }
+
+  /// Fetches the vault's relay list into the ndk cache, from the relays
+  /// [setRelayList] publishes it to, and returns the newest one.
+  ///
+  /// Not part of [sync]: a replaceable event needs its newest version only,
+  /// and comes from more relays than the items.
+  Future<RelayList?> fetchRelayList() async {
+    final known = await _loadRelayList();
+    final targets = _relayListTargets(
+      known == null ? null : await readRelayList(known, signer),
+    );
+    if (targets.isNotEmpty) {
+      await ndk.requests
+          .query(
+            filter: Filter(
+              kinds: [Nip65.kKind],
+              authors: [signer.getPublicKey()],
+            ),
+            explicitRelays: targets,
+            auth: AuthPolicy.allow(_account),
+          )
+          .future;
+    }
+    if ((await _loadRelayList())?.id != known?.id) await _followRelays();
+    return relayList();
+  }
+
+  /// Saves [list] as the vault's relay list, in place of the previous one.
+  ///
+  /// A relay list goes as wide as it can (NIP-65): to [relays], to the relays
+  /// it lists and to [indexers]. The relays it adds get a copy of the vault's
+  /// gift wraps and deletion requests, which they do not hold yet.
+  Future<void> setRelayList(RelayList list) async {
+    final previous = await _loadRelayList();
+    final before = await currentRelays();
+    await _save(
+      await signRelayList(
+        list,
+        signer,
+        // Of two lists made in the same second, relays keep the lowest id.
+        createdAt: max(
+          DateTime.now().millisecondsSinceEpoch ~/ 1000,
+          (previous?.createdAt ?? 0) + 1,
+        ),
+      ),
+    );
+    await _copyTo([
+      for (final relay in await currentRelays())
+        if (!before.contains(relay)) relay,
+    ]);
+    await _followRelays();
+  }
+
+  /// Sends again the changes no relay accepted yet, and returns those still
+  /// left.
   Future<List<EventDeliverySnapshot>> push() async {
     await Future.wait([
       for (final delivery in await unsent()) _send(delivery.event!),
@@ -211,7 +304,7 @@ class Vault {
   /// Whether [event] is one of this vault's: the cache may hold other vaults.
   bool _isOwn(Nip01Event event) => switch (event.kind) {
     GiftWrap.kGiftWrapEventkind => event.pTags.contains(signer.getPublicKey()),
-    Deletion.kKind => event.pubKey == signer.getPublicKey(),
+    Deletion.kKind || Nip65.kKind => event.pubKey == signer.getPublicKey(),
     _ => false,
   };
 
@@ -244,6 +337,18 @@ class Vault {
       'p': [signer.getPublicKey()],
     },
   );
+
+  Future<List<Nip01Event>> _loadDeletions() => ndk.config.cache.loadEvents(
+    kinds: [Deletion.kKind],
+    pubKeys: [signer.getPublicKey()],
+  );
+
+  /// loadEvents returns the newest version of a replaceable event only.
+  Future<Nip01Event?> _loadRelayList() async =>
+      (await ndk.config.cache.loadEvents(
+        kinds: [Nip65.kKind],
+        pubKeys: [signer.getPublicKey()],
+      )).firstOrNull;
 
   Future<void> _drop(List<String> wrapIds) async {
     if (wrapIds.isEmpty) return;
@@ -300,11 +405,37 @@ class Vault {
     await _send(event, timeout: Duration.zero);
   }
 
-  Future<void> _send(Nip01Event event, {Duration? timeout}) async {
+  /// Sends the vault's events in the cache to [added], skipping the gift wraps
+  /// that do not open: anyone can send one to the vault.
+  Future<void> _copyTo(List<String> added) async {
+    if (added.isEmpty) return;
+    final events = [
+      for (final wrap in await _loadWraps())
+        if (await _open(wrap) != null) wrap,
+      ...await _loadDeletions(),
+    ];
+    await Future.wait([
+      for (final event in events)
+        _send(event, to: added, timeout: Duration.zero),
+    ]);
+  }
+
+  /// Moves the live subscriptions, if any, to [currentRelays].
+  Future<void> _followRelays() async {
+    if (!_live.hasListener) return;
+    _closeLive();
+    await _openLive();
+  }
+
+  Future<void> _send(
+    Nip01Event event, {
+    List<String>? to,
+    Duration? timeout,
+  }) async {
     await ndk.broadcast
         .broadcast(
           nostrEvent: event,
-          specificRelays: relays,
+          specificRelays: to ?? await _targets(event),
           timeout: timeout,
           saveToCache: false,
           // Without it, a relay asking for AUTH would see the logged account.
@@ -312,6 +443,14 @@ class Vault {
         )
         .broadcastDoneFuture;
   }
+
+  Future<List<String>> _targets(Nip01Event event) async =>
+      event.kind == Nip65.kKind
+      ? _relayListTargets(await readRelayList(event, signer))
+      : await currentRelays();
+
+  List<String> _relayListTargets(RelayList? list) =>
+      {...relays, ...?list?.public, ...?list?.private, ...indexers}.toList();
 
   Account get _account => Account(
     type: AccountType.externalSigner,

@@ -17,10 +17,16 @@ Future<void> main() async {
     type: AccountType.privateKey,
     signer: signer,
   );
-  final vault = Vault(
-    ndk: ndk,
-    signer: signer,
-    relays: ['wss://relay.primal.net'],
+  final vault = Vault(ndk: ndk, signer: signer, relays: defaultRelays);
+
+  // Its relay list (NIP-65), the private relays encrypted to the vault. It
+  // goes to vault.relays, to the relays it lists and to the indexers. From now
+  // on the vault lives on the relays it lists, which get a copy of the vault.
+  await vault.setRelayList(
+    const RelayList(
+      public: ['wss://relay.primal.net'],
+      private: ['wss://relay.alice.example'],
+    ),
   );
 
   final saved = await vault.createItem(
@@ -46,7 +52,7 @@ Future<void> main() async {
     ndk,
     store: SembastSyncStore(await databaseFactoryIo.openDatabase('sync.db')),
   );
-  final handle = vault.sync(engine);
+  final handle = await vault.sync(engine);
   engine.start();
   await engine
       .watchStatus(handle)
@@ -56,6 +62,9 @@ Future<void> main() async {
             status.phase == SyncRequestPhase.failed,
       );
   print('Synced up to ${await vault.lastSync(engine)}');
+  // Not part of the sync: fetched from where setRelayList publishes it.
+  final relayList = await vault.fetchRelayList();
+  print('Private relays: ${relayList?.private.join(', ')}');
 
   // What other devices publish from now on, the moment they do.
   final live = vault.subscribe().listen((_) async {

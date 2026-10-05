@@ -52,7 +52,7 @@ class VaultSession {
   }
 
   Future<void> _fetch() async {
-    final handle = vault.sync(_engine);
+    final handle = await vault.sync(_engine);
     _engine.start();
     final status = await _engine
         .watchStatus(handle)
@@ -68,7 +68,7 @@ class VaultSession {
         );
     if (status.phase == SyncRequestPhase.failed) {
       throw CliException(
-        'Syncing failed: no answer from ${vault.relays.join(', ')}.',
+        'Syncing failed: no answer from ${(await vault.currentRelays()).join(', ')}.',
       );
     }
   }

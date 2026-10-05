@@ -723,6 +723,13 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get allowScreenCapture => 'Autoriser la capture d\'écran';
+
+  @override
+  String get allowScreenCaptureDescription =>
+      'Permet aux captures, aux enregistrements et au partage d\'écran de montrer vos mots de passe.';
+
+  @override
   String get lock => 'Verrouiller';
 
   @override

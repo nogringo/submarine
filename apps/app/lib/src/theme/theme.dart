@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'palette.dart';
 
@@ -8,6 +9,21 @@ const wordmarkFont = 'Saira Stencil One';
 
 /// Secrets, keys and codes, where every character must read unambiguously.
 const monoStyle = TextStyle(fontFamily: monoFont);
+
+/// Transparent system bars over the app, with icons that suit its theme.
+SystemUiOverlayStyle systemBarsStyle(Brightness brightness) {
+  final icons = brightness == Brightness.dark
+      ? Brightness.light
+      : Brightness.dark;
+  return SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness: icons,
+    statusBarBrightness: brightness,
+    systemNavigationBarColor: Colors.transparent,
+    systemNavigationBarIconBrightness: icons,
+    systemNavigationBarContrastEnforced: false,
+  );
+}
 
 /// Material widgets underneath, themed into Submarine's own look.
 ThemeData buildTheme(Palette palette, Brightness brightness) {

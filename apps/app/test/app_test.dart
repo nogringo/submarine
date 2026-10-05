@@ -15,11 +15,13 @@ import 'package:submarine/src/clipboard.dart';
 import 'package:submarine/src/generator/generator_settings.dart';
 import 'package:submarine/src/items/field_tile.dart';
 import 'package:submarine/src/lock/app_lock.dart';
+import 'package:submarine/src/screen_capture.dart';
 import 'package:submarine/src/screens/filter_column.dart';
 import 'package:submarine/src/storage_error_app.dart';
 import 'package:submarine/src/theme/appearance.dart';
 import 'package:submarine/src/vaults/vault_storage.dart';
 import 'package:submarine/src/vaults/vaults.dart';
+import 'package:submarine/src/widgets/settings_tile.dart';
 import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
 
 void main() {
@@ -29,6 +31,7 @@ void main() {
   late FakeDeviceAuth deviceAuth;
   late Appearance appearance;
   late AppClipboard clipboard;
+  late ScreenCapture screenCapture;
 
   final github = Cipher(
     type: CipherType.login,
@@ -108,6 +111,7 @@ void main() {
     lock = await AppLock.load(auth: deviceAuth = FakeDeviceAuth());
     appearance = await Appearance.load();
     clipboard = await AppClipboard.load();
+    screenCapture = await ScreenCapture.load();
   });
 
   Future<void> close(WidgetTester tester) async {
@@ -115,6 +119,7 @@ void main() {
     lock.dispose();
     appearance.dispose();
     clipboard.dispose();
+    screenCapture.dispose();
     await tester.runAsync(() async {
       await vaults.pauseSync();
       vaults.dispose();
@@ -187,6 +192,11 @@ void main() {
     return copies;
   }
 
+  Finder settingsSwitch(String title) => find.descendant(
+    of: find.widgetWithText(SettingsTile, title),
+    matching: find.byType(Switch),
+  );
+
   /// Opens the menu of the row of [name] in real time, as [openMenu] does,
   /// from a right click or else a long press.
   Future<void> openRowMenu(
@@ -224,6 +234,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -269,6 +280,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -303,6 +315,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -350,6 +363,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -416,6 +430,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -453,6 +468,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -482,6 +498,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -544,6 +561,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -576,6 +594,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -641,6 +660,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -705,6 +725,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -770,6 +791,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -810,6 +832,7 @@ void main() {
           lock: lock,
           appearance: appearance,
           clipboard: clipboard,
+          screenCapture: screenCapture,
         ),
       );
       await settle(tester);
@@ -846,6 +869,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -886,6 +910,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -921,6 +946,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -956,6 +982,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -993,6 +1020,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -1031,6 +1059,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -1066,6 +1095,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -1090,6 +1120,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -1121,6 +1152,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -1184,6 +1216,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -1214,6 +1247,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -1248,6 +1282,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -1327,6 +1362,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -1376,6 +1412,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -1433,6 +1470,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -1495,6 +1533,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -1579,6 +1618,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -1587,7 +1627,7 @@ void main() {
     await tester.tap(find.byTooltip('Settings'));
     await settle(tester);
     expect(find.text('Lock after'), findsNothing);
-    await tester.tap(find.byType(Switch));
+    await tester.tap(settingsSwitch('Unlock with biometrics'));
     await settle(tester);
     expect(deviceAuth.asked, 1);
     expect(find.text('5 minutes'), findsOneWidget);
@@ -1604,7 +1644,7 @@ void main() {
     expect(find.text('Your vaults are locked.'), findsNothing);
     expect(find.text('Security'), findsOneWidget);
 
-    await tester.tap(find.byType(Switch));
+    await tester.tap(settingsSwitch('Unlock with biometrics'));
     await settle(tester);
     expect(find.byTooltip('Lock'), findsNothing);
     expect((await LockSettings.read()).enabled, isFalse);
@@ -1623,13 +1663,17 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
 
     await tester.tap(find.byTooltip('Settings'));
     await settle(tester);
-    expect(tester.widget<Switch>(find.byType(Switch)).onChanged, isNull);
+    expect(
+      tester.widget<Switch>(settingsSwitch('Unlock with biometrics')).onChanged,
+      isNull,
+    );
     expect(
       find.text('Set up a screen lock on this device first.'),
       findsOneWidget,
@@ -1652,6 +1696,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -1696,6 +1741,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -1739,6 +1785,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -1759,6 +1806,47 @@ void main() {
     await tester.tap(find.text('System'));
     await settle(tester);
     expect(brightness(), Brightness.light);
+    await close(tester);
+  });
+
+  testWidgets('blocks screen capture until the settings allow it', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    final messenger = tester.binding.defaultBinaryMessenger;
+    const channel = MethodChannel('submarine/screen_capture');
+    final allowed = <Object?>[];
+    messenger.setMockMethodCallHandler(channel, (call) async {
+      allowed.add(call.arguments);
+      return null;
+    });
+    addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
+    await open(tester, items: [github]);
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+      ),
+    );
+    await settle(tester);
+    expect(allowed, isEmpty);
+
+    await tester.tap(find.byTooltip('Settings'));
+    await settle(tester);
+    final toggle = settingsSwitch('Allow screen capture');
+    expect(tester.widget<Switch>(toggle).value, isFalse);
+
+    await tester.tap(toggle);
+    await settle(tester);
+    expect(tester.widget<Switch>(toggle).value, isTrue);
+    expect(allowed, [true]);
+    await tester.runAsync(() async {
+      expect((await ScreenCapture.load()).allowed, isTrue);
+    });
+    expect(allowed, [true, true]);
     await close(tester);
   });
 
@@ -1787,6 +1875,7 @@ void main() {
           lock: lock,
           appearance: appearance,
           clipboard: clipboard,
+          screenCapture: screenCapture,
         ),
       );
       await settle(tester);
@@ -1844,6 +1933,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -1885,6 +1975,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);
@@ -1912,6 +2003,7 @@ void main() {
         lock: lock,
         appearance: appearance,
         clipboard: clipboard,
+        screenCapture: screenCapture,
       ),
     );
     await settle(tester);

@@ -909,6 +909,14 @@
       }
     }
   },
+  "allowScreenCapture": "Allow screen capture",
+  "@allowScreenCapture": {
+    "description": "Switch of the settings, on Android only, that stops blocking screenshots, recordings and screen sharing of the app."
+  },
+  "allowScreenCaptureDescription": "Lets screenshots, recordings and screen sharing show your passwords.",
+  "@allowScreenCaptureDescription": {
+    "description": "Explains the screen capture switch: what turning it on exposes."
+  },
   "lock": "Lock",
   "@lock": {
     "description": "Tooltip of the button locking the app now."

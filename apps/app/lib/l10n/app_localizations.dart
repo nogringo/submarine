@@ -1346,6 +1346,18 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 second} other{{count} seconds}}'**
   String seconds(int count);
 
+  /// Switch of the settings, on Android only, that stops blocking screenshots, recordings and screen sharing of the app.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow screen capture'**
+  String get allowScreenCapture;
+
+  /// Explains the screen capture switch: what turning it on exposes.
+  ///
+  /// In en, this message translates to:
+  /// **'Lets screenshots, recordings and screen sharing show your passwords.'**
+  String get allowScreenCaptureDescription;
+
   /// Tooltip of the button locking the app now.
   ///
   /// In en, this message translates to:

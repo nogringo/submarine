@@ -8,6 +8,7 @@ import 'context.dart';
 import 'lock/app_lock.dart';
 import 'lock/lock_screen.dart';
 import 'router.dart';
+import 'screen_capture.dart';
 import 'theme/appearance.dart';
 import 'theme/theme.dart';
 import 'vaults/vaults.dart';
@@ -19,12 +20,14 @@ class SubmarineApp extends StatefulWidget {
     required this.lock,
     required this.appearance,
     required this.clipboard,
+    required this.screenCapture,
   });
 
   final Vaults vaults;
   final AppLock lock;
   final Appearance appearance;
   final AppClipboard clipboard;
+  final ScreenCapture screenCapture;
 
   @override
   State<SubmarineApp> createState() => _SubmarineAppState();
@@ -59,22 +62,27 @@ class _SubmarineAppState extends State<SubmarineApp> {
       lock: widget.lock,
       child: AppClipboardScope(
         clipboard: widget.clipboard,
-        child: AppearanceScope(
-          appearance: widget.appearance,
-          child: ListenableBuilder(
-            listenable: widget.appearance,
-            builder: (context, _) => MaterialApp.router(
-              title: 'Submarine',
-              debugShowCheckedModeBanner: false,
-              theme: buildTheme(Palette.light, Brightness.light),
-              darkTheme: buildTheme(Palette.dark, Brightness.dark),
-              themeMode: widget.appearance.themeMode,
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-              supportedLocales: AppLocalizations.supportedLocales,
-              routerConfig: _router,
-              // Above the navigator, so that dialogs and menus hide too.
-              builder: (context, child) =>
-                  LockGate(lock: widget.lock, child: child!),
+        child: ScreenCaptureScope(
+          screenCapture: widget.screenCapture,
+          child: AppearanceScope(
+            appearance: widget.appearance,
+            child: ListenableBuilder(
+              listenable: widget.appearance,
+              builder: (context, _) => MaterialApp.router(
+                title: 'Submarine',
+                debugShowCheckedModeBanner: false,
+                theme: buildTheme(Palette.light, Brightness.light),
+                darkTheme: buildTheme(Palette.dark, Brightness.dark),
+                themeMode: widget.appearance.themeMode,
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                supportedLocales: AppLocalizations.supportedLocales,
+                routerConfig: _router,
+                // Above the navigator, so that dialogs and menus hide too.
+                builder: (context, child) => AnnotatedRegion(
+                  value: systemBarsStyle(Theme.of(context).brightness),
+                  child: LockGate(lock: widget.lock, child: child!),
+                ),
+              ),
             ),
           ),
         ),

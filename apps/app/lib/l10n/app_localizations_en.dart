@@ -718,6 +718,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get allowScreenCapture => 'Allow screen capture';
+
+  @override
+  String get allowScreenCaptureDescription =>
+      'Lets screenshots, recordings and screen sharing show your passwords.';
+
+  @override
   String get lock => 'Lock';
 
   @override

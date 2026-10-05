@@ -6,6 +6,7 @@ import '../context.dart';
 import '../items/field_tile.dart';
 import '../lock/app_lock.dart';
 import '../lock/lock_screen.dart';
+import '../screen_capture.dart';
 import '../theme/appearance.dart';
 import '../widgets/settings_tile.dart';
 import 'app_navigation.dart';
@@ -30,6 +31,7 @@ class _Settings extends StatelessWidget {
     final l10n = context.l10n;
     final lock = AppLock.of(context);
     final clipboard = AppClipboard.of(context);
+    final screenCapture = ScreenCapture.of(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
       child: Align(
@@ -67,6 +69,15 @@ class _Settings extends StatelessWidget {
                       label: (timeout) => _clipboardTimeoutLabel(l10n, timeout),
                       onSelected: clipboard.setTimeout,
                     ),
+                    if (ScreenCapture.supported)
+                      SettingsTile(
+                        title: Text(l10n.allowScreenCapture),
+                        subtitle: Text(l10n.allowScreenCaptureDescription),
+                        trailing: Switch(
+                          value: screenCapture.allowed,
+                          onChanged: screenCapture.setAllowed,
+                        ),
+                      ),
                   ],
                 ),
               ),

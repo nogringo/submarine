@@ -208,6 +208,8 @@
   "clearClipboardAfter": "Effacer les mots de passe copiés après",
   "never": "Jamais",
   "seconds": "{count, plural, =1{1 seconde} other{{count} secondes}}",
+  "allowScreenCapture": "Autoriser la capture d'écran",
+  "allowScreenCaptureDescription": "Permet aux captures, aux enregistrements et au partage d'écran de montrer vos mots de passe.",
   "lock": "Verrouiller",
   "unlock": "Déverrouiller",
   "vaultsLocked": "Vos coffres sont verrouillés.",

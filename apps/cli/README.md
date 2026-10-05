@@ -109,7 +109,7 @@ the Bitwarden CLI runs on Submarine as long as it sticks to them:
 - `generate`, with all of its options and defaults, without a vault key
 - `delete item <id>`, with `--permanent`, and `restore item <id>`, where
   `<id>` is an item id
-- the global flags `--pretty`, `--raw` and `--quiet`
+- the global flags `--pretty`, `--raw`, `--quiet` and `--version`
 
 Output is the same: JSON items, bare values for `get password` and the like,
 errors on stderr with exit code 1, and no final newline when the output is

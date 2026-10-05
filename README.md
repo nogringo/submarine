@@ -51,6 +51,19 @@ Run the tests from a package directory: `dart test` for Dart packages, `flutter 
 
 Commit messages follow [Conventional Commits](https://www.conventionalcommits.org). Use the package as scope when a change targets one: `feat(cli): ...`, `fix(app): ...`, `docs(nostr_passwords): ...`.
 
+## Releasing
+
+The app, the CLI and `nostr_passwords` share one version, and the tag `v<version>` marks a release, for example `v0.1.0`. Versions below 1.0.0 are pre-releases.
+
+1. Set the version in `apps/app/pubspec.yaml`, `apps/cli/pubspec.yaml`, `apps/cli/lib/src/version.dart` and `packages/nostr_passwords/pubspec.yaml`. In the app, also raise the build number after the `+`: the stores refuse a build number they already have.
+2. Add the changes of the version to each `CHANGELOG.md`.
+3. Commit as `chore: release <version>`, then tag that commit and push the tag:
+
+```sh
+git tag -a v0.1.0 -m "Submarine 0.1.0"
+git push origin v0.1.0
+```
+
 ## License
 
 [MIT](LICENSE)

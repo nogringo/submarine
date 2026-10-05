@@ -1,5 +1,8 @@
 library;
 
+import 'dart:io';
+
+import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 
 import 'src/commands/add_command.dart';
@@ -14,6 +17,7 @@ import 'src/commands/restore_command.dart';
 import 'src/commands/status_command.dart';
 import 'src/commands/sync_command.dart';
 import 'src/commands/vault_command.dart';
+import 'src/version.dart';
 
 export 'src/cli_exception.dart';
 
@@ -30,6 +34,7 @@ class SubmarineCommandRunner extends CommandRunner<void> {
     for (final MapEntry(key: flag, value: help) in outputFlags.entries) {
       argParser.addFlag(flag, negatable: false, help: help);
     }
+    argParser.addFlag('version', negatable: false, help: 'Print the version.');
     addCommand(AddCommand());
     addCommand(ListCommand());
     addCommand(GetCommand());
@@ -41,5 +46,14 @@ class SubmarineCommandRunner extends CommandRunner<void> {
     addCommand(SyncCommand());
     addCommand(GenerateCommand());
     addCommand(EncodeCommand());
+  }
+
+  @override
+  Future<void> runCommand(ArgResults topLevelResults) async {
+    if (topLevelResults.flag('version')) {
+      stdout.writeln(packageVersion);
+      return;
+    }
+    await super.runCommand(topLevelResults);
   }
 }

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'clipboard.dart';
 import 'context.dart';
 import 'lock/app_lock.dart';
 import 'lock/lock_screen.dart';
@@ -17,11 +18,13 @@ class SubmarineApp extends StatefulWidget {
     required this.vaults,
     required this.lock,
     required this.appearance,
+    required this.clipboard,
   });
 
   final Vaults vaults;
   final AppLock lock;
   final Appearance appearance;
+  final AppClipboard clipboard;
 
   @override
   State<SubmarineApp> createState() => _SubmarineAppState();
@@ -54,22 +57,25 @@ class _SubmarineAppState extends State<SubmarineApp> {
     vaults: widget.vaults,
     child: AppLockScope(
       lock: widget.lock,
-      child: AppearanceScope(
-        appearance: widget.appearance,
-        child: ListenableBuilder(
-          listenable: widget.appearance,
-          builder: (context, _) => MaterialApp.router(
-            title: 'Submarine',
-            debugShowCheckedModeBanner: false,
-            theme: buildTheme(Palette.light, Brightness.light),
-            darkTheme: buildTheme(Palette.dark, Brightness.dark),
-            themeMode: widget.appearance.themeMode,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            routerConfig: _router,
-            // Above the navigator, so that dialogs and menus hide too.
-            builder: (context, child) =>
-                LockGate(lock: widget.lock, child: child!),
+      child: AppClipboardScope(
+        clipboard: widget.clipboard,
+        child: AppearanceScope(
+          appearance: widget.appearance,
+          child: ListenableBuilder(
+            listenable: widget.appearance,
+            builder: (context, _) => MaterialApp.router(
+              title: 'Submarine',
+              debugShowCheckedModeBanner: false,
+              theme: buildTheme(Palette.light, Brightness.light),
+              darkTheme: buildTheme(Palette.dark, Brightness.dark),
+              themeMode: widget.appearance.themeMode,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              routerConfig: _router,
+              // Above the navigator, so that dialogs and menus hide too.
+              builder: (context, child) =>
+                  LockGate(lock: widget.lock, child: child!),
+            ),
           ),
         ),
       ),

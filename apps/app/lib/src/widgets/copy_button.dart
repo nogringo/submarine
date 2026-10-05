@@ -1,9 +1,8 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
+import '../clipboard.dart';
 import '../context.dart';
 
 /// Copies [value], and shows a check for a moment rather than a toast.
@@ -12,7 +11,8 @@ class CopyButton extends StatefulWidget {
 
   final String value;
 
-  /// Whether Android hides [value] in the preview it shows of a copy.
+  /// Whether [value] is a secret, which Android hides in the preview it shows
+  /// of a copy, and the clipboard drops after a while.
   final bool sensitive;
 
   @override
@@ -23,7 +23,8 @@ class _CopyButtonState extends State<CopyButton> {
   Timer? _reset;
 
   Future<void> _copy() async {
-    await copyText(widget.value, sensitive: widget.sensitive);
+    await AppClipboard.of(context)
+        .copy(widget.value, sensitive: widget.sensitive);
     _reset?.cancel();
     if (!mounted) return;
     setState(() {
@@ -49,17 +50,5 @@ class _CopyButtonState extends State<CopyButton> {
           ? Icon(Icons.check_rounded, color: context.palette.signal)
           : const Icon(Icons.content_copy_rounded, size: 20),
     );
-  }
-}
-
-const _clipboard = MethodChannel('submarine/clipboard');
-
-/// [Clipboard.setData] cannot mark a copy as sensitive, which Android needs to
-/// keep it out of its preview.
-Future<void> copyText(String text, {required bool sensitive}) async {
-  if (sensitive && !kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-    await _clipboard.invokeMethod<void>('copySensitive', text);
-  } else {
-    await Clipboard.setData(ClipboardData(text: text));
   }
 }

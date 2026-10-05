@@ -11,6 +11,7 @@ import 'package:ndk/ndk.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
 import 'package:sembast/sembast_memory.dart' show newDatabaseFactoryMemory;
 import 'package:submarine/src/app.dart';
+import 'package:submarine/src/clipboard.dart';
 import 'package:submarine/src/generator/generator_settings.dart';
 import 'package:submarine/src/items/field_tile.dart';
 import 'package:submarine/src/lock/app_lock.dart';
@@ -27,6 +28,7 @@ void main() {
   late AppLock lock;
   late FakeDeviceAuth deviceAuth;
   late Appearance appearance;
+  late AppClipboard clipboard;
 
   final github = Cipher(
     type: CipherType.login,
@@ -105,12 +107,14 @@ void main() {
     }
     lock = await AppLock.load(auth: deviceAuth = FakeDeviceAuth());
     appearance = await Appearance.load();
+    clipboard = await AppClipboard.load();
   });
 
   Future<void> close(WidgetTester tester) async {
     await tester.pumpWidget(const SizedBox());
     lock.dispose();
     appearance.dispose();
+    clipboard.dispose();
     await tester.runAsync(() async {
       await vaults.pauseSync();
       vaults.dispose();
@@ -170,32 +174,17 @@ void main() {
   Future<void> openMenu(WidgetTester tester, Finder button) =>
       write(tester, button);
 
-  /// What the app copies, on Android in tests: the copies kept out of the
-  /// preview of Android, and the others.
-  ({List<Object?> sensitive, List<Object?> plain}) watchClipboard(
-    WidgetTester tester,
-  ) {
+  /// What the app copies, through the clipboard of Android in tests.
+  List<Object?> watchClipboard(WidgetTester tester) {
     final messenger = tester.binding.defaultBinaryMessenger;
-    const clipboard = MethodChannel('submarine/clipboard');
-    final sensitive = <Object?>[];
-    final plain = <Object?>[];
-    messenger
-      ..setMockMethodCallHandler(clipboard, (call) async {
-        sensitive.add(call.arguments);
-        return null;
-      })
-      ..setMockMethodCallHandler(SystemChannels.platform, (call) async {
-        if (call.method == 'Clipboard.setData') {
-          plain.add((call.arguments as Map)['text']);
-        }
-        return null;
-      });
-    addTearDown(() {
-      messenger
-        ..setMockMethodCallHandler(clipboard, null)
-        ..setMockMethodCallHandler(SystemChannels.platform, null);
+    const channel = MethodChannel('submarine/clipboard');
+    final copies = <Object?>[];
+    messenger.setMockMethodCallHandler(channel, (call) async {
+      copies.add(call.arguments);
+      return null;
     });
-    return (sensitive: sensitive, plain: plain);
+    addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
+    return copies;
   }
 
   /// Opens the menu of the row of [name] in real time, as [openMenu] does,
@@ -230,7 +219,12 @@ void main() {
     setScreen(tester, const Size(390, 844));
     await open(tester);
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
 
@@ -270,7 +264,12 @@ void main() {
     setScreen(tester, const Size(390, 844), locale: const Locale('fr'));
     await open(tester, items: [github]);
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
 
@@ -299,7 +298,12 @@ void main() {
     setScreen(tester, const Size(1280, 800));
     await open(tester, items: [github]);
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
 
@@ -341,7 +345,12 @@ void main() {
       ],
     );
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
 
@@ -402,7 +411,12 @@ void main() {
       withFamily: true,
     );
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
 
@@ -434,7 +448,12 @@ void main() {
     setScreen(tester, const Size(900, 800));
     await open(tester, items: [github]);
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
 
@@ -458,7 +477,12 @@ void main() {
       ],
     );
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
 
@@ -515,7 +539,12 @@ void main() {
       ],
     );
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
 
@@ -542,7 +571,12 @@ void main() {
     setScreen(tester, const Size(1280, 800));
     await open(tester, items: [github], withFamily: true);
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
 
@@ -602,7 +636,12 @@ void main() {
       ],
     );
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
 
@@ -661,7 +700,12 @@ void main() {
       ],
     );
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
 
@@ -721,7 +765,12 @@ void main() {
     setScreen(tester, const Size(390, 844), locale: const Locale('fr'));
     await open(tester, items: [github]);
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
 
@@ -749,31 +798,42 @@ void main() {
     await close(tester);
   });
 
-  testWidgets('keeps a copied password out of the preview of Android', (
-    tester,
-  ) async {
-    setScreen(tester, const Size(1280, 800));
-    final (:sensitive, :plain) = watchClipboard(tester);
-    await open(tester, items: [github]);
-    await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
-    );
-    await settle(tester);
-    Finder copyOf(String label) => find.descendant(
-      of: find.ancestor(of: find.text(label), matching: find.byType(FieldTile)),
-      matching: find.byTooltip('Copy'),
-    );
+  testWidgets(
+    'keeps a copied password out of the preview of Android, and clears it',
+    (tester) async {
+      setScreen(tester, const Size(1280, 800));
+      final copies = watchClipboard(tester);
+      await open(tester, items: [github]);
+      await tester.pumpWidget(
+        SubmarineApp(
+          vaults: vaults,
+          lock: lock,
+          appearance: appearance,
+          clipboard: clipboard,
+        ),
+      );
+      await settle(tester);
+      Finder copyOf(String label) => find.descendant(
+        of: find.ancestor(
+          of: find.text(label),
+          matching: find.byType(FieldTile),
+        ),
+        matching: find.byTooltip('Copy'),
+      );
 
-    await tester.tap(find.text('GitHub'));
-    await settle(tester);
-    await tester.tap(copyOf('Password'));
-    await tester.tap(copyOf('Username'));
-    await settle(tester);
+      await tester.tap(find.text('GitHub'));
+      await settle(tester);
+      await tester.tap(copyOf('Password'));
+      await tester.tap(copyOf('Username'));
+      await settle(tester);
 
-    expect(sensitive, ['Tr0ub4dor&3']);
-    expect(plain, ['alice-dev']);
-    await close(tester);
-  });
+      expect(copies, [
+        {'text': 'Tr0ub4dor&3', 'sensitive': true, 'clearAfter': 30000},
+        {'text': 'alice-dev', 'sensitive': false, 'clearAfter': null},
+      ]);
+      await close(tester);
+    },
+  );
 
   testWidgets('moves an item to the trash and back on a desktop', (
     tester,
@@ -781,7 +841,12 @@ void main() {
     setScreen(tester, const Size(1280, 800));
     await open(tester, items: [github]);
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
 
@@ -816,7 +881,12 @@ void main() {
       ],
     );
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
 
@@ -846,7 +916,12 @@ void main() {
     setScreen(tester, const Size(390, 844), locale: const Locale('fr'));
     await open(tester, items: [github]);
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
 
@@ -876,7 +951,12 @@ void main() {
     setScreen(tester, const Size(1280, 800));
     await open(tester, items: [github]);
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
 
@@ -908,7 +988,12 @@ void main() {
     setScreen(tester, const Size(390, 844), locale: const Locale('fr'));
     await open(tester, items: [github]);
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
 
@@ -933,7 +1018,7 @@ void main() {
     tester,
   ) async {
     setScreen(tester, const Size(1280, 800));
-    final (:sensitive, :plain) = watchClipboard(tester);
+    final copies = watchClipboard(tester);
     await open(
       tester,
       items: [
@@ -941,7 +1026,12 @@ void main() {
       ],
     );
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
 
@@ -954,8 +1044,15 @@ void main() {
       await write(tester, find.text(copy));
     }
 
-    expect(plain, ['alice-dev']);
-    expect(sensitive, ['Tr0ub4dor&3', matches(RegExp(r'^\d{6}$'))]);
+    expect(copies, [
+      {'text': 'alice-dev', 'sensitive': false, 'clearAfter': null},
+      {'text': 'Tr0ub4dor&3', 'sensitive': true, 'clearAfter': 30000},
+      {
+        'text': matches(RegExp(r'^\d{6}$')),
+        'sensitive': true,
+        'clearAfter': 30000,
+      },
+    ]);
     expect(find.text('Select an item to see it here.'), findsOneWidget);
     await close(tester);
   });
@@ -964,7 +1061,12 @@ void main() {
     setScreen(tester, const Size(1280, 800));
     await open(tester, items: [github]);
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
 
@@ -983,7 +1085,12 @@ void main() {
     setScreen(tester, const Size(390, 844), locale: const Locale('fr'));
     await open(tester, items: [github]);
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
 
@@ -1009,7 +1116,12 @@ void main() {
     setScreen(tester, const Size(390, 844));
     await open(tester, items: [github]);
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
 
@@ -1067,7 +1179,12 @@ void main() {
     setScreen(tester, const Size(1280, 800));
     await open(tester, items: [github], withFamily: true);
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
 
@@ -1092,7 +1209,12 @@ void main() {
     setScreen(tester, const Size(390, 844), locale: const Locale('fr'));
     await open(tester, withFamily: true);
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
 
@@ -1121,7 +1243,12 @@ void main() {
     setScreen(tester, const Size(1280, 800));
     await open(tester, withFamily: true);
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
     Future<Map<String, dynamic>> saved() async =>
@@ -1195,7 +1322,12 @@ void main() {
         }),
       );
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
     await tester.tap(find.byTooltip('Settings'));
@@ -1239,7 +1371,12 @@ void main() {
     final picker = FakeFilePicker();
     FilePickerPlatform.instance = picker;
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
     await tester.tap(find.text('Réglages'));
@@ -1291,7 +1428,12 @@ void main() {
     final picker = FakeFilePicker();
     FilePickerPlatform.instance = picker;
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
     await tester.tap(find.byTooltip('Settings'));
@@ -1348,7 +1490,12 @@ void main() {
     final picker = FakeFilePicker();
     FilePickerPlatform.instance = picker;
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
     await tester.tap(find.byTooltip('Settings'));
@@ -1427,7 +1574,12 @@ void main() {
     setScreen(tester, const Size(1280, 800));
     await open(tester, items: [github]);
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
     expect(find.byTooltip('Lock'), findsNothing);
@@ -1466,7 +1618,12 @@ void main() {
     await open(tester, items: [github]);
     deviceAuth.available = false;
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
 
@@ -1490,7 +1647,12 @@ void main() {
       lockSettings: const LockSettings(enabled: true),
     );
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
     expect(find.text('Your vaults are locked.'), findsOneWidget);
@@ -1529,7 +1691,12 @@ void main() {
       ),
     );
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
     await tester.tap(find.text('Déverrouiller'));
@@ -1567,7 +1734,12 @@ void main() {
     setScreen(tester, const Size(1280, 800));
     await open(tester, items: [github]);
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
     Brightness brightness() =>
@@ -1590,13 +1762,89 @@ void main() {
     await close(tester);
   });
 
+  testWidgets(
+    'clears a copied password after the delay of the settings on Linux',
+    (tester) async {
+      setScreen(tester, const Size(1280, 800));
+      String? copied;
+      final messenger = tester.binding.defaultBinaryMessenger;
+      messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+        switch (call.method) {
+          case 'Clipboard.setData':
+            copied = (call.arguments as Map)['text'] as String;
+          case 'Clipboard.getData':
+            return {'text': copied};
+        }
+        return null;
+      });
+      addTearDown(
+        () => messenger.setMockMethodCallHandler(SystemChannels.platform, null),
+      );
+      await open(tester, items: [github]);
+      await tester.pumpWidget(
+        SubmarineApp(
+          vaults: vaults,
+          lock: lock,
+          appearance: appearance,
+          clipboard: clipboard,
+        ),
+      );
+      await settle(tester);
+      Finder copyOf(String label) => find.descendant(
+        of: find.ancestor(
+          of: find.text(label),
+          matching: find.byType(FieldTile),
+        ),
+        matching: find.byTooltip('Copy'),
+      );
+
+      await tester.tap(find.byTooltip('Settings'));
+      await settle(tester);
+      await tester.tap(find.text('30 seconds'));
+      await settle(tester);
+      await tester.tap(find.text('10 seconds'));
+      await settle(tester);
+      await tester.runAsync(() async {
+        expect(
+          (await AppClipboard.load()).timeout,
+          ClipboardTimeout.tenSeconds,
+        );
+      });
+
+      await tester.tap(find.byTooltip('Personal'));
+      await settle(tester);
+      await tester.tap(find.text('GitHub'));
+      await settle(tester);
+      await tester.tap(copyOf('Password'));
+      await tester.pump(const Duration(seconds: 9));
+      expect(copied, 'Tr0ub4dor&3');
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump();
+      expect(copied, '');
+
+      await tester.tap(copyOf('Password'));
+      await tester.pump();
+      await tester.tap(copyOf('Username'));
+      await tester.pump(const Duration(seconds: 10));
+      await tester.pump();
+      expect(copied, 'alice-dev');
+      await close(tester);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.linux),
+  );
+
   testWidgets('goes from tab to tab on a phone, each where it was left', (
     tester,
   ) async {
     setScreen(tester, const Size(390, 844));
     await open(tester, items: [github], withFamily: true);
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
 
@@ -1632,7 +1880,12 @@ void main() {
     setScreen(tester, const Size(1280, 800));
     await open(tester, items: [github]);
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
 
@@ -1654,7 +1907,12 @@ void main() {
     setScreen(tester, const Size(390, 844));
     await open(tester, items: [github]);
     await tester.pumpWidget(
-      SubmarineApp(vaults: vaults, lock: lock, appearance: appearance),
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+      ),
     );
     await settle(tester);
 

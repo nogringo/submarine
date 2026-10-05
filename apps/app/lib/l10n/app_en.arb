@@ -876,7 +876,7 @@
   },
   "minutes": "{count, plural, =1{1 minute} other{{count} minutes}}",
   "@minutes": {
-    "description": "A lock delay in minutes.",
+    "description": "A lock or clipboard delay in minutes.",
     "placeholders": {
       "count": {
         "type": "int"
@@ -886,6 +886,23 @@
   "hours": "{count, plural, =1{1 hour} other{{count} hours}}",
   "@hours": {
     "description": "A lock delay in hours.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "clearClipboardAfter": "Clear copied passwords after",
+  "@clearClipboardAfter": {
+    "description": "Setting choosing how long a copied password, code or vault key stays in the clipboard."
+  },
+  "never": "Never",
+  "@never": {
+    "description": "Clipboard delay: copied passwords stay in the clipboard."
+  },
+  "seconds": "{count, plural, =1{1 second} other{{count} seconds}}",
+  "@seconds": {
+    "description": "A clipboard delay in seconds.",
     "placeholders": {
       "count": {
         "type": "int"

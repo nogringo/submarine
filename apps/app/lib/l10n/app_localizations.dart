@@ -1316,7 +1316,7 @@ abstract class AppLocalizations {
   /// **'On app restart'**
   String get lockOnRestart;
 
-  /// A lock delay in minutes.
+  /// A lock or clipboard delay in minutes.
   ///
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 minute} other{{count} minutes}}'**
@@ -1327,6 +1327,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 hour} other{{count} hours}}'**
   String hours(int count);
+
+  /// Setting choosing how long a copied password, code or vault key stays in the clipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear copied passwords after'**
+  String get clearClipboardAfter;
+
+  /// Clipboard delay: copied passwords stay in the clipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Never'**
+  String get never;
+
+  /// A clipboard delay in seconds.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 second} other{{count} seconds}}'**
+  String seconds(int count);
 
   /// Tooltip of the button locking the app now.
   ///

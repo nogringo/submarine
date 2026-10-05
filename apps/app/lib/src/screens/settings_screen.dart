@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
 
+import '../clipboard.dart';
 import '../context.dart';
 import '../items/field_tile.dart';
 import '../lock/app_lock.dart';
@@ -28,6 +29,7 @@ class _Settings extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final lock = AppLock.of(context);
+    final clipboard = AppClipboard.of(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
       child: Align(
@@ -50,7 +52,21 @@ class _Settings extends StatelessWidget {
                 child: FieldCard(
                   children: [
                     const _LockTile(),
-                    if (lock.enabled) _LockAfterTile(lock: lock),
+                    if (lock.enabled)
+                      _MenuTile(
+                        title: l10n.lockAfter,
+                        value: lock.timeout,
+                        values: LockTimeout.values,
+                        label: (timeout) => lockTimeoutLabel(l10n, timeout),
+                        onSelected: lock.setTimeout,
+                      ),
+                    _MenuTile(
+                      title: l10n.clearClipboardAfter,
+                      value: clipboard.timeout,
+                      values: ClipboardTimeout.values,
+                      label: (timeout) => _clipboardTimeoutLabel(l10n, timeout),
+                      onSelected: clipboard.setTimeout,
+                    ),
                   ],
                 ),
               ),
@@ -130,36 +146,40 @@ class _LockTileState extends State<_LockTile> {
   }
 }
 
-class _LockAfterTile extends StatelessWidget {
-  const _LockAfterTile({required this.lock});
+/// A setting picked from a menu of [values].
+class _MenuTile<T> extends StatelessWidget {
+  const _MenuTile({
+    required this.title,
+    required this.value,
+    required this.values,
+    required this.label,
+    required this.onSelected,
+  });
 
-  final AppLock lock;
+  final String title;
+  final T value;
+  final List<T> values;
+  final String Function(T value) label;
+  final ValueChanged<T> onSelected;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
     return SettingsTile(
-      title: Text(l10n.lockAfter),
-      trailing: PopupMenuButton<LockTimeout>(
-        initialValue: lock.timeout,
-        tooltip: l10n.lockAfter,
-        onSelected: lock.setTimeout,
+      title: Text(title),
+      trailing: PopupMenuButton<T>(
+        initialValue: value,
+        tooltip: title,
+        onSelected: onSelected,
         itemBuilder: (context) => [
-          for (final timeout in LockTimeout.values)
-            PopupMenuItem(
-              value: timeout,
-              child: Text(lockTimeoutLabel(l10n, timeout)),
-            ),
+          for (final value in values)
+            PopupMenuItem(value: value, child: Text(label(value))),
         ],
         child: Padding(
           padding: const EdgeInsets.fromLTRB(12, 8, 4, 8),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                lockTimeoutLabel(l10n, lock.timeout),
-                style: const TextStyle(fontSize: 15),
-              ),
+              Text(label(value), style: const TextStyle(fontSize: 15)),
               const SizedBox(width: 4),
               Icon(Icons.arrow_drop_down_rounded, color: context.palette.muted),
             ],
@@ -205,3 +225,12 @@ String lockTimeoutLabel(AppLocalizations l10n, LockTimeout timeout) =>
       final idle when idle.inHours > 0 => l10n.hours(idle.inHours),
       final idle => l10n.minutes(idle.inMinutes),
     };
+
+String _clipboardTimeoutLabel(
+  AppLocalizations l10n,
+  ClipboardTimeout timeout,
+) => switch (timeout.delay) {
+  null => l10n.never,
+  final delay when delay.inMinutes > 0 => l10n.minutes(delay.inMinutes),
+  final delay => l10n.seconds(delay.inSeconds),
+};

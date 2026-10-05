@@ -701,6 +701,23 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get clearClipboardAfter => 'Clear copied passwords after';
+
+  @override
+  String get never => 'Never';
+
+  @override
+  String seconds(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count seconds',
+      one: '1 second',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get lock => 'Lock';
 
   @override

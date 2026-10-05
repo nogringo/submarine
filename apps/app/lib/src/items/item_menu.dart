@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
 
+import '../clipboard.dart';
 import '../context.dart';
 import '../router.dart';
 import '../vaults/vaults.dart';
-import '../widgets/copy_button.dart';
 import 'item_filter.dart';
 
 /// What the item's own actions, and the menu of its row, do to an item.
@@ -130,7 +130,8 @@ Future<void> runItemAction(
         ItemAction.copyPassword ||
         ItemAction.copyTotp:
       if (action.copiedFrom(item.cipher) case final value?) {
-        await copyText(value, sensitive: action != ItemAction.copyUsername);
+        await AppClipboard.of(context)
+            .copy(value, sensitive: action != ItemAction.copyUsername);
       }
       return;
     case ItemAction.favorite:

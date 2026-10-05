@@ -97,9 +97,8 @@ Future<void> main() async {
     }
   }
   final export = writeBitwardenExport(await vault.items());
-  await File(
-    'vault_export.json',
-  ).writeAsString(await encryptBitwardenExport(export, '<file password>'));
+  await File('vault_export.json')
+      .writeAsString(await encryptBitwardenExport(export, '<file password>'));
 
   // The replaced password goes to the item's password history.
   final updated = await vault.updateItem(

@@ -7,9 +7,17 @@ import '../context.dart';
 
 /// Copies [value], and shows a check for a moment rather than a toast.
 class CopyButton extends StatefulWidget {
-  const CopyButton({super.key, required this.value, this.sensitive = false});
+  const CopyButton({
+    super.key,
+    required this.value,
+    this.sensitive = false,
+    this.tooltip,
+  });
 
   final String value;
+
+  /// Says what the button copies, where the field it sits in does not.
+  final String? tooltip;
 
   /// Whether [value] is a secret, which Android hides in the preview it shows
   /// of a copy, and the clipboard drops after a while.
@@ -44,7 +52,9 @@ class _CopyButtonState extends State<CopyButton> {
   Widget build(BuildContext context) {
     final copied = _reset != null;
     return IconButton(
-      tooltip: copied ? context.l10n.copied : context.l10n.copy,
+      tooltip: copied
+          ? context.l10n.copied
+          : widget.tooltip ?? context.l10n.copy,
       onPressed: _copy,
       icon: copied
           ? Icon(Icons.check_rounded, color: context.palette.signal)

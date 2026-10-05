@@ -167,6 +167,7 @@
   "copyUsername": "Copier le nom d'utilisateur",
   "copyPassword": "Copier le mot de passe",
   "copyTotp": "Copier le code de vérification",
+  "copyNumber": "Copier le numéro",
   "moveToTrash": "Mettre à la corbeille",
   "restore": "Restaurer",
   "deletePermanently": "Supprimer définitivement",

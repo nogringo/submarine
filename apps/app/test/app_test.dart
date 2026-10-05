@@ -21,6 +21,7 @@ import 'package:submarine/src/storage_error_app.dart';
 import 'package:submarine/src/theme/appearance.dart';
 import 'package:submarine/src/vaults/vault_storage.dart';
 import 'package:submarine/src/vaults/vaults.dart';
+import 'package:submarine/src/widgets/copy_button.dart';
 import 'package:submarine/src/widgets/settings_tile.dart';
 import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
 
@@ -1067,6 +1068,7 @@ void main() {
       ),
     );
     await settle(tester);
+    expect(find.byType(CopyButton), findsNothing);
 
     for (final copy in [
       'Copy username',
@@ -1087,6 +1089,46 @@ void main() {
       },
     ]);
     expect(find.text('Select an item to see it here.'), findsOneWidget);
+    await close(tester);
+  });
+
+  testWidgets('copies the password or the card number from a row on a phone', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(390, 844));
+    final copies = watchClipboard(tester);
+    await open(
+      tester,
+      items: [
+        github,
+        Cipher(
+          type: CipherType.card,
+          name: 'Joint account card',
+          card: PaymentCard(brand: 'Mastercard', number: '5555555555554444'),
+        ),
+        Cipher(type: CipherType.secureNote, name: 'Alarm code', notes: '1234'),
+      ],
+    );
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+      ),
+    );
+    await settle(tester);
+    expect(find.text('Alarm code'), findsOneWidget);
+    expect(find.byType(CopyButton), findsNWidgets(2));
+
+    await write(tester, find.byTooltip('Copy password'));
+    await write(tester, find.byTooltip('Copy number'));
+
+    expect(copies, [
+      {'text': 'Tr0ub4dor&3', 'sensitive': true, 'clearAfter': 30000},
+      {'text': '5555555555554444', 'sensitive': true, 'clearAfter': 30000},
+    ]);
     await close(tester);
   });
 

@@ -13,13 +13,14 @@ enum ItemAction {
   copyUsername,
   copyPassword,
   copyTotp,
+  copyNumber,
   favorite,
   edit,
   trash,
   restore,
   delete;
 
-  static const _copies = [copyUsername, copyPassword, copyTotp];
+  static const _copies = [copyUsername, copyPassword, copyTotp, copyNumber];
 
   /// The copies of what [cipher] holds, then the changes. In the trash:
   /// restore the item, or delete it for good. Only a login has a form to edit
@@ -32,6 +33,13 @@ enum ItemAction {
         : [favorite, if (cipher.type == CipherType.login) edit, trash],
   ];
 
+  /// What the copy button of [cipher]'s row copies: the secret a login or a
+  /// card is opened for.
+  static ItemAction? rowCopy(Cipher cipher) => [
+    copyPassword,
+    copyNumber,
+  ].where((copy) => copy.copiedFrom(cipher) != null).firstOrNull;
+
   bool get copies => _copies.contains(this);
 
   /// What this action copies from [cipher], the current code for the TOTP
@@ -42,6 +50,7 @@ enum ItemAction {
       copyUsername => login?.username,
       copyPassword => login?.password,
       copyTotp => _totpCode(login?.totp),
+      copyNumber => cipher.card?.number,
       _ => null,
     };
     return value == null || value.trim().isEmpty ? null : value;
@@ -75,6 +84,7 @@ PopupMenuItem<ItemAction> itemMenuItem(
       null,
     ),
     ItemAction.copyTotp => (Icons.timer_outlined, l10n.copyTotp, null),
+    ItemAction.copyNumber => (Icons.credit_card_rounded, l10n.copyNumber, null),
     ItemAction.favorite when cipher.favorite => (
       Icons.star_rounded,
       l10n.removeFromFavorites,
@@ -128,7 +138,8 @@ Future<void> runItemAction(
   switch (action) {
     case ItemAction.copyUsername ||
         ItemAction.copyPassword ||
-        ItemAction.copyTotp:
+        ItemAction.copyTotp ||
+        ItemAction.copyNumber:
       if (action.copiedFrom(item.cipher) case final value?) {
         await AppClipboard.of(context)
             .copy(value, sensitive: action != ItemAction.copyUsername);

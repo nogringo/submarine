@@ -1088,7 +1088,7 @@ abstract class AppLocalizations {
   /// **'Copy username'**
   String get copyUsername;
 
-  /// Menu action copying the password of a login.
+  /// Menu action copying the password of a login, and tooltip of the copy button of its row.
   ///
   /// In en, this message translates to:
   /// **'Copy password'**
@@ -1099,6 +1099,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Copy verification code'**
   String get copyTotp;
+
+  /// Menu action copying the number of a payment card, and tooltip of the copy button of its row.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy number'**
+  String get copyNumber;
 
   /// Menu action moving an item to the trash.
   ///

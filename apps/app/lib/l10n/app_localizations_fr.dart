@@ -573,6 +573,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get copyTotp => 'Copier le code de vérification';
 
   @override
+  String get copyNumber => 'Copier le numéro';
+
+  @override
   String get moveToTrash => 'Mettre à la corbeille';
 
   @override

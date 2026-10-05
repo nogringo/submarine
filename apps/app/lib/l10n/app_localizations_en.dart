@@ -568,6 +568,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get copyTotp => 'Copy verification code';
 
   @override
+  String get copyNumber => 'Copy number';
+
+  @override
   String get moveToTrash => 'Move to trash';
 
   @override

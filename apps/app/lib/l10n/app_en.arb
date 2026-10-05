@@ -724,11 +724,15 @@
   },
   "copyPassword": "Copy password",
   "@copyPassword": {
-    "description": "Menu action copying the password of a login."
+    "description": "Menu action copying the password of a login, and tooltip of the copy button of its row."
   },
   "copyTotp": "Copy verification code",
   "@copyTotp": {
     "description": "Menu action copying the current TOTP code of a login."
+  },
+  "copyNumber": "Copy number",
+  "@copyNumber": {
+    "description": "Menu action copying the number of a payment card, and tooltip of the copy button of its row."
   },
   "moveToTrash": "Move to trash",
   "@moveToTrash": {

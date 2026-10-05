@@ -8,6 +8,7 @@ import '../items/item_menu.dart';
 import '../lock/app_lock.dart';
 import '../router.dart';
 import '../vaults/vaults.dart';
+import '../widgets/copy_button.dart';
 import '../widgets/item_icon.dart';
 import '../widgets/no_browser_menu.dart';
 import '../widgets/search_field.dart';
@@ -295,6 +296,7 @@ class _ItemsState extends State<_Items> {
     ];
     // A badge tells the vaults apart, which a single vault does not need.
     final showVault = widget.vaultId == allVaultsId && vaults.all.length > 1;
+    final showCopy = !context.showsFilters;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -338,6 +340,7 @@ class _ItemsState extends State<_Items> {
                       return _ItemRow(
                         entry: entry,
                         showVault: showVault,
+                        showCopy: showCopy,
                         selected: entry.item.id == widget.selectedItemId,
                         onTap: () => context.go(
                           vaultPath(
@@ -361,6 +364,7 @@ class _ItemRow extends StatelessWidget {
   const _ItemRow({
     required this.entry,
     required this.showVault,
+    required this.showCopy,
     required this.selected,
     required this.onTap,
     required this.onAction,
@@ -368,6 +372,9 @@ class _ItemRow extends StatelessWidget {
 
   final VaultItem entry;
   final bool showVault;
+
+  /// Whether the row copies the password of a login, or the number of a card.
+  final bool showCopy;
   final bool selected;
   final VoidCallback onTap;
   final ValueChanged<ItemAction> onAction;
@@ -402,9 +409,11 @@ class _ItemRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final palette = context.palette;
     final cipher = entry.item.cipher;
     final subtitle = cipher.subtitle;
+    final copy = showCopy ? ItemAction.rowCopy(cipher) : null;
     return Padding(
       padding: const EdgeInsets.only(bottom: 2),
       child: Material(
@@ -417,39 +426,54 @@ class _ItemRow extends StatelessWidget {
           onLongPress: () => _openMenu(context),
           borderRadius: BorderRadius.circular(12),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            child: Row(
-              children: [
-                ItemIcon(
-                  cipher: cipher,
-                  vault: showVault ? entry.vault : null,
-                  highlighted: selected,
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        cipher.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      if (subtitle != null && subtitle.isNotEmpty)
+            padding: EdgeInsets.fromLTRB(10, 8, showCopy ? 4 : 10, 8),
+            child: ConstrainedBox(
+              // As high as a copy button, in every row.
+              constraints: BoxConstraints(minHeight: showCopy ? 48 : 0),
+              child: Row(
+                children: [
+                  ItemIcon(
+                    cipher: cipher,
+                    vault: showVault ? entry.vault : null,
+                    highlighted: selected,
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         Text(
-                          subtitle,
+                          cipher.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(fontSize: 13, color: palette.muted),
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                    ],
+                        if (subtitle != null && subtitle.isNotEmpty)
+                          Text(
+                            subtitle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: palette.muted,
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                  if (copy != null)
+                    CopyButton(
+                      value: copy.copiedFrom(cipher)!,
+                      sensitive: true,
+                      tooltip: copy == ItemAction.copyNumber
+                          ? l10n.copyNumber
+                          : l10n.copyPassword,
+                    ),
+                ],
+              ),
             ),
           ),
         ),

@@ -8,6 +8,7 @@ import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
 import 'src/app.dart';
 import 'src/lock/app_lock.dart';
 import 'src/storage_error_app.dart';
+import 'src/theme/appearance.dart';
 import 'src/sync/sync_database.dart';
 import 'src/vaults/vault_storage.dart';
 import 'src/vaults/vaults.dart';
@@ -36,12 +37,13 @@ Future<void> main() async {
 Future<void> _start(Ndk ndk, SyncEngine engine) async {
   try {
     final lock = await AppLock.load();
+    final appearance = await Appearance.load();
     final vaults = await Vaults.load(
       ndk: ndk,
       engine: engine,
       storage: VaultStorage(),
     );
-    runApp(SubmarineApp(vaults: vaults, lock: lock));
+    runApp(SubmarineApp(vaults: vaults, lock: lock, appearance: appearance));
   } on PlatformException catch (error) {
     runApp(StorageErrorApp(error: error, onRetry: () => _start(ndk, engine)));
   }

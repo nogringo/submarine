@@ -740,6 +740,21 @@ class AppLocalizationsFr extends AppLocalizations {
   String get tryAgain => 'Réessayer';
 
   @override
+  String get appearance => 'Apparence';
+
+  @override
+  String get theme => 'Thème';
+
+  @override
+  String get themeSystem => 'Système';
+
+  @override
+  String get themeLight => 'Clair';
+
+  @override
+  String get themeDark => 'Sombre';
+
+  @override
   String get importExport => 'Importer et exporter';
 
   @override

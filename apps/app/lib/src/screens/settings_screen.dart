@@ -5,6 +5,7 @@ import '../context.dart';
 import '../items/field_tile.dart';
 import '../lock/app_lock.dart';
 import '../lock/lock_screen.dart';
+import '../theme/appearance.dart';
 import '../widgets/settings_tile.dart';
 import 'app_navigation.dart';
 import 'import_export.dart';
@@ -52,6 +53,10 @@ class _Settings extends StatelessWidget {
                     if (lock.enabled) _LockAfterTile(lock: lock),
                   ],
                 ),
+              ),
+              SettingsSection(
+                title: l10n.appearance,
+                child: const FieldCard(children: [_ThemeTile()]),
               ),
               const ImportExportSection(),
             ],
@@ -161,6 +166,34 @@ class _LockAfterTile extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _ThemeTile extends StatelessWidget {
+  const _ThemeTile();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final appearance = Appearance.of(context);
+    final wide = context.isWide;
+    final picker = SegmentedButton<ThemeMode>(
+      showSelectedIcon: false,
+      expandedInsets: wide ? null : EdgeInsets.zero,
+      segments: [
+        ButtonSegment(value: ThemeMode.system, label: Text(l10n.themeSystem)),
+        ButtonSegment(value: ThemeMode.light, label: Text(l10n.themeLight)),
+        ButtonSegment(value: ThemeMode.dark, label: Text(l10n.themeDark)),
+      ],
+      selected: {appearance.themeMode},
+      onSelectionChanged: (selected) =>
+          appearance.setThemeMode(selected.single),
+    );
+    return SettingsTile(
+      title: Text(l10n.theme),
+      trailing: wide ? picker : null,
+      below: wide ? null : picker,
     );
   }
 }

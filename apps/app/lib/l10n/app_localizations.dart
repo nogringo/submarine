@@ -1394,6 +1394,36 @@ abstract class AppLocalizations {
   /// **'Try again'**
   String get tryAgain;
 
+  /// Section of the settings about the look of the app.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get appearance;
+
+  /// Setting choosing between the light and the dark theme.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get theme;
+
+  /// Theme option: light or dark as the system is.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get themeSystem;
+
+  /// Theme option: always light.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get themeLight;
+
+  /// Theme option: always dark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get themeDark;
+
   /// Section of the settings about Bitwarden files.
   ///
   /// In en, this message translates to:

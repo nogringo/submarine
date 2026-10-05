@@ -132,6 +132,28 @@ ThemeData buildTheme(Palette palette, Brightness brightness) {
     iconButtonTheme: IconButtonThemeData(
       style: IconButton.styleFrom(foregroundColor: palette.muted),
     ),
+    segmentedButtonTheme: SegmentedButtonThemeData(
+      style: ButtonStyle(
+        backgroundColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? palette.raised
+              : Colors.transparent,
+        ),
+        foregroundColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.selected)
+              ? palette.text
+              : palette.muted,
+        ),
+        side: WidgetStatePropertyAll(BorderSide(color: palette.line)),
+        textStyle: const WidgetStatePropertyAll(
+          TextStyle(
+            fontFamily: textFont,
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+      ),
+    ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: palette.background,

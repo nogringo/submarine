@@ -936,6 +936,26 @@
   "@tryAgain": {
     "description": "Button reading the device's secure storage again after it failed."
   },
+  "appearance": "Appearance",
+  "@appearance": {
+    "description": "Section of the settings about the look of the app."
+  },
+  "theme": "Theme",
+  "@theme": {
+    "description": "Setting choosing between the light and the dark theme."
+  },
+  "themeSystem": "System",
+  "@themeSystem": {
+    "description": "Theme option: light or dark as the system is."
+  },
+  "themeLight": "Light",
+  "@themeLight": {
+    "description": "Theme option: always light."
+  },
+  "themeDark": "Dark",
+  "@themeDark": {
+    "description": "Theme option: always dark."
+  },
   "importExport": "Import and export",
   "@importExport": {
     "description": "Section of the settings about Bitwarden files."

@@ -7,14 +7,21 @@ import 'context.dart';
 import 'lock/app_lock.dart';
 import 'lock/lock_screen.dart';
 import 'router.dart';
+import 'theme/appearance.dart';
 import 'theme/theme.dart';
 import 'vaults/vaults.dart';
 
 class SubmarineApp extends StatefulWidget {
-  const SubmarineApp({super.key, required this.vaults, required this.lock});
+  const SubmarineApp({
+    super.key,
+    required this.vaults,
+    required this.lock,
+    required this.appearance,
+  });
 
   final Vaults vaults;
   final AppLock lock;
+  final Appearance appearance;
 
   @override
   State<SubmarineApp> createState() => _SubmarineAppState();
@@ -47,16 +54,24 @@ class _SubmarineAppState extends State<SubmarineApp> {
     vaults: widget.vaults,
     child: AppLockScope(
       lock: widget.lock,
-      child: MaterialApp.router(
-        title: 'Submarine',
-        debugShowCheckedModeBanner: false,
-        theme: buildTheme(Palette.light, Brightness.light),
-        darkTheme: buildTheme(Palette.dark, Brightness.dark),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        routerConfig: _router,
-        // Above the navigator, so that dialogs and menus hide too.
-        builder: (context, child) => LockGate(lock: widget.lock, child: child!),
+      child: AppearanceScope(
+        appearance: widget.appearance,
+        child: ListenableBuilder(
+          listenable: widget.appearance,
+          builder: (context, _) => MaterialApp.router(
+            title: 'Submarine',
+            debugShowCheckedModeBanner: false,
+            theme: buildTheme(Palette.light, Brightness.light),
+            darkTheme: buildTheme(Palette.dark, Brightness.dark),
+            themeMode: widget.appearance.themeMode,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            routerConfig: _router,
+            // Above the navigator, so that dialogs and menus hide too.
+            builder: (context, child) =>
+                LockGate(lock: widget.lock, child: child!),
+          ),
+        ),
       ),
     ),
   );

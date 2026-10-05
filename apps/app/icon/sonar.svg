@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-512 -512 1024 1024">
+  <defs>
+    <radialGradient id="fade">
+      <stop offset="0" stop-color="#143651"/>
+      <stop offset="1" stop-color="#143651" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect class="background" x="-512" y="-512" width="1024" height="1024" fill="#0B1E2D"/>
+  <circle class="glow" r="512" fill="url(#fade)"/>
+  <g class="ring" fill="none" stroke-width="20">
+    <path d="M-400 0H400M0-400V400" stroke="#244868" stroke-width="12"/>
+    <circle r="100" stroke="#3B6F9A"/>
+    <circle r="200" stroke="#33628A"/>
+    <circle r="300" stroke="#2B5479"/>
+    <circle r="400" stroke="#244868"/>
+  </g>
+  <g class="signal" fill="#FFD23F">
+    <circle r="40"/>
+    <circle cx="140" cy="-185" r="28"/>
+  </g>
+</svg>

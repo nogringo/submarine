@@ -45,29 +45,35 @@ class SettingsSection extends StatelessWidget {
 class SettingsTile extends StatelessWidget {
   const SettingsTile({
     super.key,
+    this.leading,
     required this.title,
     this.subtitle,
     this.trailing,
     this.below,
+    this.onTap,
   });
 
+  final Widget? leading;
   final Widget title;
   final Widget? subtitle;
   final Widget? trailing;
   final Widget? below;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
+    final leading = this.leading;
     final subtitle = this.subtitle;
     final trailing = this.trailing;
     final below = this.below;
-    return Padding(
+    final tile = Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
+              if (leading != null) ...[leading, const SizedBox(width: 14)],
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,6 +105,12 @@ class SettingsTile extends StatelessWidget {
           if (below != null) ...[const SizedBox(height: 12), below],
         ],
       ),
+    );
+    if (onTap == null) return tile;
+    // The card's color would hide the ink of the Material below it.
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(onTap: onTap, child: tile),
     );
   }
 }

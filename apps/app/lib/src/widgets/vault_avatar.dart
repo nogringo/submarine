@@ -56,6 +56,27 @@ class AllVaultsAvatar extends StatelessWidget {
   }
 }
 
+/// Stands in the place of a vault's avatar, to add a vault.
+class AddVaultMark extends StatelessWidget {
+  const AddVaultMark({super.key, required this.size});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.palette;
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: palette.line, width: 1.5),
+      ),
+      child: Icon(Icons.add_rounded, color: palette.signal, size: size * 0.5),
+    );
+  }
+}
+
 class _AvatarTile extends StatelessWidget {
   const _AvatarTile({
     required this.color,

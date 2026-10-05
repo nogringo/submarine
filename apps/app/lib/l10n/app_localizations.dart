@@ -104,7 +104,7 @@ abstract class AppLocalizations {
   /// **'All vaults'**
   String get allVaults;
 
-  /// Title of the drawer listing the vaults, and tooltip of the button opening it.
+  /// Title of the drawer listing the vaults, of their section in the settings, and tooltip of the button opening the drawer.
   ///
   /// In en, this message translates to:
   /// **'Vaults'**

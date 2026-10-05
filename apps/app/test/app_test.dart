@@ -142,6 +142,10 @@ void main() {
     }
   }
 
+  /// [text] in the open dialog, not on the screen behind it.
+  Finder inDialog(String text) =>
+      find.descendant(of: find.byType(Dialog), matching: find.text(text));
+
   bool saveEnabled(WidgetTester tester) => tester
       .widget<FilledButton>(find.widgetWithText(FilledButton, 'Save'))
       .enabled;
@@ -1326,6 +1330,46 @@ void main() {
     await close(tester);
   });
 
+  testWidgets('lists the vaults in the settings on a phone, in French', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(390, 844), locale: const Locale('fr'));
+    await open(tester, items: [github], withFamily: true);
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+      ),
+    );
+    await settle(tester);
+
+    await tester.tap(find.text('Réglages'));
+    await settle(tester);
+    expect(find.text('Personal'), findsOneWidget);
+    expect(find.text('Family'), findsOneWidget);
+    expect(
+      find.text(Nip19.encodePubKey(vaults.all.last.pubkey)),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.text('Family'));
+    await settle(tester);
+    expect(find.text('Réglages du coffre'), findsOneWidget);
+
+    await tester.tap(find.byType(BackButton));
+    await settle(tester);
+    expect(find.text('Réglages du coffre'), findsNothing);
+    expect(find.text('Sécurité'), findsOneWidget);
+
+    await tester.tap(find.text('Ajouter un coffre'));
+    await settle(tester);
+    expect(find.text('Créer un coffre'), findsOneWidget);
+    await close(tester);
+  });
+
   testWidgets('imports a Bitwarden export into the vault of choice', (
     tester,
   ) async {
@@ -1368,13 +1412,15 @@ void main() {
     await settle(tester);
     await tester.tap(find.byTooltip('Settings'));
     await settle(tester);
+    await tester.ensureVisible(find.text('Import'));
+    await settle(tester);
 
     await write(tester, find.text('Import'));
     expect(
       find.text('2 items found in bitwarden_export.json.'),
       findsOneWidget,
     );
-    await tester.tap(find.text('Personal'));
+    await tester.tap(inDialog('Personal'));
     await settle(tester);
     await tester.tap(find.text('Family').last);
     await settle(tester);
@@ -1476,6 +1522,8 @@ void main() {
     await settle(tester);
     await tester.tap(find.byTooltip('Settings'));
     await settle(tester);
+    await tester.ensureVisible(find.text('Export'));
+    await settle(tester);
     bool exportEnabled() => tester
         .widget<FilledButton>(find.widgetWithText(FilledButton, 'Export'))
         .enabled;
@@ -1483,14 +1531,14 @@ void main() {
     await tester.tap(find.text('Export'));
     await settle(tester);
     expect(find.text('1 item. The trash is left out.'), findsOneWidget);
-    await tester.tap(find.text('Personal'));
+    await tester.tap(inDialog('Personal'));
     await settle(tester);
     await tester.tap(find.text('Family').last);
     await settle(tester);
     expect(find.text('This vault has no items to export.'), findsOneWidget);
     expect(exportEnabled(), isFalse);
 
-    await tester.tap(find.text('Family'));
+    await tester.tap(inDialog('Family'));
     await settle(tester);
     await tester.tap(find.text('Personal').last);
     await settle(tester);
@@ -1538,6 +1586,8 @@ void main() {
     );
     await settle(tester);
     await tester.tap(find.byTooltip('Settings'));
+    await settle(tester);
+    await tester.ensureVisible(find.text('Export'));
     await settle(tester);
     final exportButton = find.widgetWithText(FilledButton, 'Export');
     final filePassword = find.widgetWithText(TextField, 'File password');
@@ -1592,7 +1642,7 @@ void main() {
     );
     expect(find.text('1 item found in ${picker.savedName}.'), findsOneWidget);
 
-    await tester.tap(find.text('Personal'));
+    await tester.tap(inDialog('Personal'));
     await settle(tester);
     await tester.tap(find.text('Family').last);
     await settle(tester);

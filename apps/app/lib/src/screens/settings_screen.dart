@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:ndk/ndk.dart' show Nip19;
 
 import '../clipboard.dart';
 import '../context.dart';
 import '../items/field_tile.dart';
 import '../lock/app_lock.dart';
 import '../lock/lock_screen.dart';
+import '../router.dart';
 import '../screen_capture.dart';
 import '../theme/appearance.dart';
+import '../theme/theme.dart';
+import '../vaults/vault_controller.dart';
+import '../vaults/vaults.dart';
 import '../widgets/settings_tile.dart';
+import '../widgets/vault_avatar.dart';
+import 'add_vault.dart';
 import 'app_navigation.dart';
 import 'import_export.dart';
 
@@ -32,6 +40,7 @@ class _Settings extends StatelessWidget {
     final lock = AppLock.of(context);
     final clipboard = AppClipboard.of(context);
     final screenCapture = ScreenCapture.of(context);
+    final vaults = Vaults.of(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
       child: Align(
@@ -47,6 +56,19 @@ class _Settings extends StatelessWidget {
                   fontSize: 26,
                   fontWeight: FontWeight.w700,
                   height: 1.2,
+                ),
+              ),
+              SettingsSection(
+                title: l10n.vaults,
+                child: FieldCard(
+                  children: [
+                    for (final vault in vaults.all) _VaultTile(vault: vault),
+                    SettingsTile(
+                      leading: const AddVaultMark(size: 36),
+                      title: Text(l10n.addVault),
+                      onTap: () => addVault(context),
+                    ),
+                  ],
                 ),
               ),
               SettingsSection(
@@ -92,6 +114,26 @@ class _Settings extends StatelessWidget {
       ),
     );
   }
+}
+
+class _VaultTile extends StatelessWidget {
+  const _VaultTile({required this.vault});
+
+  final VaultController vault;
+
+  @override
+  Widget build(BuildContext context) => SettingsTile(
+    leading: VaultAvatar(vault: vault, size: 36),
+    title: Text(vault.name, maxLines: 1, overflow: TextOverflow.ellipsis),
+    subtitle: Text(
+      Nip19.encodePubKey(vault.pubkey),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: monoStyle.copyWith(fontSize: 12),
+    ),
+    trailing: Icon(Icons.chevron_right_rounded, color: context.palette.muted),
+    onTap: () => context.push(vaultSettingsPath(vault.pubkey)),
+  );
 }
 
 class _LockTile extends StatefulWidget {

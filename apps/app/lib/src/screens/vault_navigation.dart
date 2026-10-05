@@ -67,7 +67,7 @@ class VaultRail extends StatelessWidget {
                   tooltip: l10n.addVault,
                   selected: false,
                   onTap: () => addVault(context),
-                  builder: (_) => const _AddVaultMark(size: 48),
+                  builder: (_) => const AddVaultMark(size: 48),
                 ),
               ],
             ),
@@ -199,26 +199,6 @@ class _RailTileState extends State<_RailTile> {
   }
 }
 
-class _AddVaultMark extends StatelessWidget {
-  const _AddVaultMark({required this.size});
-
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.palette;
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: palette.line, width: 1.5),
-      ),
-      child: Icon(Icons.add_rounded, color: palette.signal, size: size * 0.5),
-    );
-  }
-}
-
 /// Narrow layout: the vaults in a drawer, with their item counts.
 class VaultDrawer extends StatelessWidget {
   const VaultDrawer({
@@ -284,7 +264,7 @@ class VaultDrawer extends StatelessWidget {
                 ),
               ),
             _DrawerTile(
-              leading: const _AddVaultMark(size: 40),
+              leading: const AddVaultMark(size: 40),
               title: l10n.addVault,
               selected: false,
               onTap: () {

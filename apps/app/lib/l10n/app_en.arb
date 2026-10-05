@@ -6,7 +6,7 @@
   },
   "vaults": "Vaults",
   "@vaults": {
-    "description": "Title of the drawer listing the vaults, and tooltip of the button opening it."
+    "description": "Title of the drawer listing the vaults, of their section in the settings, and tooltip of the button opening the drawer."
   },
   "addVault": "Add a vault",
   "@addVault": {

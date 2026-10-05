@@ -719,4 +719,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get vaultTab => 'Coffre';
+
+  @override
+  String get storageReadFailed => 'Vos coffres n\'ont pas pu être lus.';
+
+  @override
+  String get storageReadFailedBody =>
+      'Le stockage sécurisé de cet appareil a refusé de les ouvrir. Rien n\'a été effacé : réessayez. Vos éléments restent sur les relais, et la clé d\'un coffre l\'ouvre sur n\'importe quel appareil.';
+
+  @override
+  String get tryAgain => 'Réessayer';
 }

@@ -209,5 +209,8 @@
   "enableLockReason": "Activer le verrouillage",
   "authLockedOut": "Trop de tentatives. Réessayez plus tard.",
   "authFailed": "Cet appareil n'a pas pu vérifier que c'est vous.",
-  "vaultTab": "Coffre"
+  "vaultTab": "Coffre",
+  "storageReadFailed": "Vos coffres n'ont pas pu être lus.",
+  "storageReadFailedBody": "Le stockage sécurisé de cet appareil a refusé de les ouvrir. Rien n'a été effacé : réessayez. Vos éléments restent sur les relais, et la clé d'un coffre l'ouvre sur n'importe quel appareil.",
+  "tryAgain": "Réessayer"
 }

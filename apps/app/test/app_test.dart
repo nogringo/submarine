@@ -12,6 +12,7 @@ import 'package:submarine/src/generator/generator_settings.dart';
 import 'package:submarine/src/items/field_tile.dart';
 import 'package:submarine/src/lock/app_lock.dart';
 import 'package:submarine/src/screens/filter_column.dart';
+import 'package:submarine/src/storage_error_app.dart';
 import 'package:submarine/src/vaults/vault_storage.dart';
 import 'package:submarine/src/vaults/vaults.dart';
 import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
@@ -1191,6 +1192,31 @@ void main() {
     expect(find.text('Number of words'), findsNothing);
     expect(find.text('Length'), findsOneWidget);
     await close(tester);
+  });
+
+  testWidgets('says why the vaults could not be read, and tries again', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(390, 844));
+    var retries = 0;
+    await tester.pumpWidget(
+      StorageErrorApp(
+        error: PlatformException(
+          code: 'Exception encountered',
+          message: 'Key mismatch after algorithm change',
+        ),
+        onRetry: () async {
+          retries++;
+        },
+      ),
+    );
+    await settle(tester);
+    expect(find.text('Your vaults could not be read.'), findsOneWidget);
+    expect(find.text('Key mismatch after algorithm change'), findsOneWidget);
+
+    await tester.tap(find.text('Try again'));
+    await settle(tester);
+    expect(retries, 1);
   });
 }
 

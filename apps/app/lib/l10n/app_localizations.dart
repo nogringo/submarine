@@ -1357,6 +1357,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Vault'**
   String get vaultTab;
+
+  /// Line under the wordmark when the device's secure storage failed to open at launch.
+  ///
+  /// In en, this message translates to:
+  /// **'Your vaults could not be read.'**
+  String get storageReadFailed;
+
+  /// Explanation under storageReadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The secure storage of this device refused to open them. Nothing was erased: try again. Your items stay on the relays, and a vault\'s key opens it on any device.'**
+  String get storageReadFailedBody;
+
+  /// Button reading the device's secure storage again after it failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get tryAgain;
 }
 
 class _AppLocalizationsDelegate

@@ -911,5 +911,17 @@
   "vaultTab": "Vault",
   "@vaultTab": {
     "description": "Label of the bottom bar tab listing the items of the vaults."
+  },
+  "storageReadFailed": "Your vaults could not be read.",
+  "@storageReadFailed": {
+    "description": "Line under the wordmark when the device's secure storage failed to open at launch."
+  },
+  "storageReadFailedBody": "The secure storage of this device refused to open them. Nothing was erased: try again. Your items stay on the relays, and a vault's key opens it on any device.",
+  "@storageReadFailedBody": {
+    "description": "Explanation under storageReadFailed."
+  },
+  "tryAgain": "Try again",
+  "@tryAgain": {
+    "description": "Button reading the device's secure storage again after it failed."
   }
 }

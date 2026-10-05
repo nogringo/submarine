@@ -714,4 +714,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vaultTab => 'Vault';
+
+  @override
+  String get storageReadFailed => 'Your vaults could not be read.';
+
+  @override
+  String get storageReadFailedBody =>
+      'The secure storage of this device refused to open them. Nothing was erased: try again. Your items stay on the relays, and a vault\'s key opens it on any device.';
+
+  @override
+  String get tryAgain => 'Try again';
 }

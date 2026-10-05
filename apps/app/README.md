@@ -12,6 +12,7 @@ Flutter app for Submarine, a password manager built on [Nostr](https://nostr.how
 - **Trash.** Items move to the trash, come back out of it, or are deleted for good.
 - **Generator.** Passwords and passphrases with Bitwarden's options and defaults. It opens with the options used last.
 - **Verification codes.** The TOTP code of a login, with the time it has left.
+- **Import and export.** Imports a JSON export from Bitwarden into the vault of your choice, and exports a vault in that format, which Bitwarden imports. Both ways, the file can be protected by a password as Bitwarden does it, and is by default. As in Bitwarden, the export leaves the trash out. Bitwarden exports restricted to their account cannot be imported, and folders are dropped.
 - **Sync.** A change is saved on the device first, then sent to the relays. What other devices publish shows up the moment they publish it, and the vault settings show what was not sent yet.
 - **Lock.** Optional: the device's biometrics or screen lock, after a delay you choose.
 - **Languages.** English and French.

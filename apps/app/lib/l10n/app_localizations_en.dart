@@ -724,4 +724,117 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tryAgain => 'Try again';
+
+  @override
+  String get importExport => 'Import and export';
+
+  @override
+  String get importFromBitwarden => 'Import from Bitwarden';
+
+  @override
+  String get importFromBitwardenDescription => 'A JSON export from Bitwarden.';
+
+  @override
+  String get importButton => 'Import';
+
+  @override
+  String get importReadFailed => 'The file could not be read.';
+
+  @override
+  String get importNotBitwarden =>
+      'This file is not a JSON export from Bitwarden.';
+
+  @override
+  String get importEncrypted =>
+      'This export is restricted to your Bitwarden account, and only Bitwarden opens it. Export your vault from Bitwarden again, password protected or in the .json format.';
+
+  @override
+  String get importEmpty => 'This export has no items.';
+
+  @override
+  String importFound(int count, String file) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items found in $file.',
+      one: '1 item found in $file.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String importProgress(int done, int total) {
+    return '$done of $total items imported';
+  }
+
+  @override
+  String importDone(int count, String vault) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items imported into $vault.',
+      one: '1 item imported into $vault.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String importFailed(int done, int total) {
+    return 'The import stopped: $done of $total items were saved.';
+  }
+
+  @override
+  String get exportVault => 'Export a vault';
+
+  @override
+  String get exportVaultDescription =>
+      'A Bitwarden JSON file, protected by a password or not encrypted.';
+
+  @override
+  String get exportButton => 'Export';
+
+  @override
+  String exportCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items. The trash is left out.',
+      one: '1 item. The trash is left out.',
+      zero: 'This vault has no items to export.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get exportWarning =>
+      'The file is not encrypted. Do not send it by email, and delete it once you are done with it.';
+
+  @override
+  String get exportFailed => 'The file could not be saved.';
+
+  @override
+  String get importPasswordBody =>
+      'This export is protected by a password. Enter it to open the file.';
+
+  @override
+  String get filePassword => 'File password';
+
+  @override
+  String get wrongFilePassword => 'This password does not open the file.';
+
+  @override
+  String get exportProtect => 'Protect with a password';
+
+  @override
+  String get confirmFilePassword => 'Confirm the file password';
+
+  @override
+  String get filePasswordHelper =>
+      'Submarine and Bitwarden ask for it to import the file. It cannot be recovered.';
+
+  @override
+  String get filePasswordRequired => 'Choose a password.';
+
+  @override
+  String get filePasswordMismatch => 'The passwords do not match.';
 }

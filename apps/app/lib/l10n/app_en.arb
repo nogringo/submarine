@@ -923,5 +923,146 @@
   "tryAgain": "Try again",
   "@tryAgain": {
     "description": "Button reading the device's secure storage again after it failed."
+  },
+  "importExport": "Import and export",
+  "@importExport": {
+    "description": "Section of the settings about Bitwarden files."
+  },
+  "importFromBitwarden": "Import from Bitwarden",
+  "@importFromBitwarden": {
+    "description": "Settings row, and title of the dialog importing a Bitwarden export."
+  },
+  "importFromBitwardenDescription": "A JSON export from Bitwarden.",
+  "@importFromBitwardenDescription": {
+    "description": "Explains the import row: the file it takes."
+  },
+  "importButton": "Import",
+  "@importButton": {
+    "description": "Button picking a Bitwarden export, then importing its items."
+  },
+  "importReadFailed": "The file could not be read.",
+  "@importReadFailed": {
+    "description": "Error when the picked file could not be opened."
+  },
+  "importNotBitwarden": "This file is not a JSON export from Bitwarden.",
+  "@importNotBitwarden": {
+    "description": "Error when the picked file is not a Bitwarden JSON export."
+  },
+  "importEncrypted": "This export is restricted to your Bitwarden account, and only Bitwarden opens it. Export your vault from Bitwarden again, password protected or in the .json format.",
+  "@importEncrypted": {
+    "description": "Error when the picked Bitwarden export is restricted to its Bitwarden account, with how to get one Submarine opens. \".json\" is the name of the format in Bitwarden."
+  },
+  "importEmpty": "This export has no items.",
+  "@importEmpty": {
+    "description": "Error when the picked Bitwarden export holds no items."
+  },
+  "importFound": "{count, plural, =1{1 item found in {file}.} other{{count} items found in {file}.}}",
+  "@importFound": {
+    "description": "What the picked export holds, before importing it.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "file": {
+        "type": "String"
+      }
+    }
+  },
+  "importProgress": "{done} of {total} items imported",
+  "@importProgress": {
+    "description": "Shown while importing.",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "importDone": "{count, plural, =1{1 item imported into {vault}.} other{{count} items imported into {vault}.}}",
+  "@importDone": {
+    "description": "Shown once the import is done.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "vault": {
+        "type": "String"
+      }
+    }
+  },
+  "importFailed": "The import stopped: {done} of {total} items were saved.",
+  "@importFailed": {
+    "description": "Shown when saving an item failed during the import. The items saved before stay in the vault.",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "exportVault": "Export a vault",
+  "@exportVault": {
+    "description": "Settings row, and title of the dialog exporting a vault."
+  },
+  "exportVaultDescription": "A Bitwarden JSON file, protected by a password or not encrypted.",
+  "@exportVaultDescription": {
+    "description": "Explains the export row."
+  },
+  "exportButton": "Export",
+  "@exportButton": {
+    "description": "Button exporting a vault to a file."
+  },
+  "exportCount": "{count, plural, =0{This vault has no items to export.} =1{1 item. The trash is left out.} other{{count} items. The trash is left out.}}",
+  "@exportCount": {
+    "description": "How many items the export holds, in the export dialog.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "exportWarning": "The file is not encrypted. Do not send it by email, and delete it once you are done with it.",
+  "@exportWarning": {
+    "description": "Warning of the export dialog."
+  },
+  "exportFailed": "The file could not be saved.",
+  "@exportFailed": {
+    "description": "Error when writing the export file failed."
+  },
+  "importPasswordBody": "This export is protected by a password. Enter it to open the file.",
+  "@importPasswordBody": {
+    "description": "Shown when the picked Bitwarden export is password protected."
+  },
+  "filePassword": "File password",
+  "@filePassword": {
+    "description": "Field of the password protecting an export file, as Bitwarden names it."
+  },
+  "wrongFilePassword": "This password does not open the file.",
+  "@wrongFilePassword": {
+    "description": "Error when the password does not decrypt the export."
+  },
+  "exportProtect": "Protect with a password",
+  "@exportProtect": {
+    "description": "Switch of the export dialog: on, the file is encrypted with a password."
+  },
+  "confirmFilePassword": "Confirm the file password",
+  "@confirmFilePassword": {
+    "description": "Second field of the file password, to catch a typo."
+  },
+  "filePasswordHelper": "Submarine and Bitwarden ask for it to import the file. It cannot be recovered.",
+  "@filePasswordHelper": {
+    "description": "Under the file password fields of the export dialog."
+  },
+  "filePasswordRequired": "Choose a password.",
+  "@filePasswordRequired": {
+    "description": "Error when the file password is empty."
+  },
+  "filePasswordMismatch": "The passwords do not match.",
+  "@filePasswordMismatch": {
+    "description": "Error when the confirmation differs from the file password."
   }
 }

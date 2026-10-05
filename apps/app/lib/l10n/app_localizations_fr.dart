@@ -729,4 +729,117 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get tryAgain => 'Réessayer';
+
+  @override
+  String get importExport => 'Importer et exporter';
+
+  @override
+  String get importFromBitwarden => 'Importer depuis Bitwarden';
+
+  @override
+  String get importFromBitwardenDescription => 'Un export JSON de Bitwarden.';
+
+  @override
+  String get importButton => 'Importer';
+
+  @override
+  String get importReadFailed => 'Le fichier n\'a pas pu être lu.';
+
+  @override
+  String get importNotBitwarden =>
+      'Ce fichier n\'est pas un export JSON de Bitwarden.';
+
+  @override
+  String get importEncrypted =>
+      'Cet export est restreint à votre compte Bitwarden, et seul Bitwarden peut l\'ouvrir. Exportez à nouveau votre coffre depuis Bitwarden, protégé par mot de passe ou au format .json.';
+
+  @override
+  String get importEmpty => 'Cet export ne contient aucun élément.';
+
+  @override
+  String importFound(int count, String file) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count éléments trouvés dans $file.',
+      one: '1 élément trouvé dans $file.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String importProgress(int done, int total) {
+    return '$done éléments importés sur $total';
+  }
+
+  @override
+  String importDone(int count, String vault) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count éléments importés dans $vault.',
+      one: '1 élément importé dans $vault.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String importFailed(int done, int total) {
+    return 'L\'import s\'est arrêté : $done éléments sur $total ont été enregistrés.';
+  }
+
+  @override
+  String get exportVault => 'Exporter un coffre';
+
+  @override
+  String get exportVaultDescription =>
+      'Un fichier JSON Bitwarden, protégé par un mot de passe ou non chiffré.';
+
+  @override
+  String get exportButton => 'Exporter';
+
+  @override
+  String exportCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count éléments. La corbeille n\'est pas exportée.',
+      one: '1 élément. La corbeille n\'est pas exportée.',
+      zero: 'Ce coffre n\'a aucun élément à exporter.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get exportWarning =>
+      'Le fichier n\'est pas chiffré. Ne l\'envoyez pas par e-mail, et supprimez-le dès que vous n\'en avez plus besoin.';
+
+  @override
+  String get exportFailed => 'Le fichier n\'a pas pu être enregistré.';
+
+  @override
+  String get importPasswordBody =>
+      'Cet export est protégé par un mot de passe. Saisissez-le pour ouvrir le fichier.';
+
+  @override
+  String get filePassword => 'Mot de passe du fichier';
+
+  @override
+  String get wrongFilePassword => 'Ce mot de passe n\'ouvre pas le fichier.';
+
+  @override
+  String get exportProtect => 'Protéger par un mot de passe';
+
+  @override
+  String get confirmFilePassword => 'Confirmez le mot de passe du fichier';
+
+  @override
+  String get filePasswordHelper =>
+      'Submarine et Bitwarden le demandent pour importer le fichier. Il ne peut pas être récupéré.';
+
+  @override
+  String get filePasswordRequired => 'Choisissez un mot de passe.';
+
+  @override
+  String get filePasswordMismatch => 'Les mots de passe ne correspondent pas.';
 }

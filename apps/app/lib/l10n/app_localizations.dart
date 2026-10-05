@@ -1375,6 +1375,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Try again'**
   String get tryAgain;
+
+  /// Section of the settings about Bitwarden files.
+  ///
+  /// In en, this message translates to:
+  /// **'Import and export'**
+  String get importExport;
+
+  /// Settings row, and title of the dialog importing a Bitwarden export.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from Bitwarden'**
+  String get importFromBitwarden;
+
+  /// Explains the import row: the file it takes.
+  ///
+  /// In en, this message translates to:
+  /// **'A JSON export from Bitwarden.'**
+  String get importFromBitwardenDescription;
+
+  /// Button picking a Bitwarden export, then importing its items.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get importButton;
+
+  /// Error when the picked file could not be opened.
+  ///
+  /// In en, this message translates to:
+  /// **'The file could not be read.'**
+  String get importReadFailed;
+
+  /// Error when the picked file is not a Bitwarden JSON export.
+  ///
+  /// In en, this message translates to:
+  /// **'This file is not a JSON export from Bitwarden.'**
+  String get importNotBitwarden;
+
+  /// Error when the picked Bitwarden export is restricted to its Bitwarden account, with how to get one Submarine opens. ".json" is the name of the format in Bitwarden.
+  ///
+  /// In en, this message translates to:
+  /// **'This export is restricted to your Bitwarden account, and only Bitwarden opens it. Export your vault from Bitwarden again, password protected or in the .json format.'**
+  String get importEncrypted;
+
+  /// Error when the picked Bitwarden export holds no items.
+  ///
+  /// In en, this message translates to:
+  /// **'This export has no items.'**
+  String get importEmpty;
+
+  /// What the picked export holds, before importing it.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item found in {file}.} other{{count} items found in {file}.}}'**
+  String importFound(int count, String file);
+
+  /// Shown while importing.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} items imported'**
+  String importProgress(int done, int total);
+
+  /// Shown once the import is done.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item imported into {vault}.} other{{count} items imported into {vault}.}}'**
+  String importDone(int count, String vault);
+
+  /// Shown when saving an item failed during the import. The items saved before stay in the vault.
+  ///
+  /// In en, this message translates to:
+  /// **'The import stopped: {done} of {total} items were saved.'**
+  String importFailed(int done, int total);
+
+  /// Settings row, and title of the dialog exporting a vault.
+  ///
+  /// In en, this message translates to:
+  /// **'Export a vault'**
+  String get exportVault;
+
+  /// Explains the export row.
+  ///
+  /// In en, this message translates to:
+  /// **'A Bitwarden JSON file, protected by a password or not encrypted.'**
+  String get exportVaultDescription;
+
+  /// Button exporting a vault to a file.
+  ///
+  /// In en, this message translates to:
+  /// **'Export'**
+  String get exportButton;
+
+  /// How many items the export holds, in the export dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{This vault has no items to export.} =1{1 item. The trash is left out.} other{{count} items. The trash is left out.}}'**
+  String exportCount(int count);
+
+  /// Warning of the export dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'The file is not encrypted. Do not send it by email, and delete it once you are done with it.'**
+  String get exportWarning;
+
+  /// Error when writing the export file failed.
+  ///
+  /// In en, this message translates to:
+  /// **'The file could not be saved.'**
+  String get exportFailed;
+
+  /// Shown when the picked Bitwarden export is password protected.
+  ///
+  /// In en, this message translates to:
+  /// **'This export is protected by a password. Enter it to open the file.'**
+  String get importPasswordBody;
+
+  /// Field of the password protecting an export file, as Bitwarden names it.
+  ///
+  /// In en, this message translates to:
+  /// **'File password'**
+  String get filePassword;
+
+  /// Error when the password does not decrypt the export.
+  ///
+  /// In en, this message translates to:
+  /// **'This password does not open the file.'**
+  String get wrongFilePassword;
+
+  /// Switch of the export dialog: on, the file is encrypted with a password.
+  ///
+  /// In en, this message translates to:
+  /// **'Protect with a password'**
+  String get exportProtect;
+
+  /// Second field of the file password, to catch a typo.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm the file password'**
+  String get confirmFilePassword;
+
+  /// Under the file password fields of the export dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Submarine and Bitwarden ask for it to import the file. It cannot be recovered.'**
+  String get filePasswordHelper;
+
+  /// Error when the file password is empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a password.'**
+  String get filePasswordRequired;
+
+  /// Error when the confirmation differs from the file password.
+  ///
+  /// In en, this message translates to:
+  /// **'The passwords do not match.'**
+  String get filePasswordMismatch;
 }
 
 class _AppLocalizationsDelegate

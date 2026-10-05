@@ -1,8 +1,10 @@
 import 'dart:convert';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart'
+    show FlutterSecureStorage;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ndk/ndk.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
@@ -137,6 +139,24 @@ void main() {
       await tester.tap(button);
       await Future<void>.delayed(const Duration(milliseconds: 200));
     });
+    await settle(tester);
+  }
+
+  /// Taps [button], then lets its work run in real time, frames in between,
+  /// until [done]: deriving the key of a file password takes an isolate.
+  Future<void> tapUntil(
+    WidgetTester tester,
+    Finder button,
+    bool Function() done,
+  ) async {
+    await tester.pump();
+    await tester.runAsync(() async => tester.tap(button));
+    for (var i = 0; i < 100 && !done(); i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
+      await tester.pump(const Duration(milliseconds: 50));
+    }
     await settle(tester);
   }
 
@@ -970,6 +990,253 @@ void main() {
     await close(tester);
   });
 
+  testWidgets('imports a Bitwarden export into the vault of choice', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(tester, items: [github], withFamily: true);
+    FilePickerPlatform.instance = FakeFilePicker()
+      ..picked = FakeFile(
+        'bitwarden_export.json',
+        jsonEncode({
+          'encrypted': false,
+          'folders': [],
+          'items': [
+            {
+              'id': 'bitwarden-id',
+              'organizationId': null,
+              'folderId': null,
+              'type': 1,
+              'name': 'Freebox',
+              'login': {'username': 'freebox', 'password': 'hunter2'},
+              'collectionIds': null,
+            },
+            {
+              'type': 2,
+              'name': 'Alarm code',
+              'notes': '1234',
+              'secureNote': {'type': 0},
+            },
+          ],
+        }),
+      );
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Settings'));
+    await settle(tester);
+
+    await write(tester, find.text('Import'));
+    expect(
+      find.text('2 items found in bitwarden_export.json.'),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('Personal'));
+    await settle(tester);
+    await tester.tap(find.text('Family').last);
+    await settle(tester);
+    final family = vaults.all.last;
+    await tester.runAsync(() async {
+      await tester.tap(find.widgetWithText(FilledButton, 'Import'));
+      while (family.items.length < 2) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+    });
+    await settle(tester);
+
+    expect(find.text('2 items imported into Family.'), findsOneWidget);
+    await tester.tap(find.text('Done'));
+    await settle(tester);
+    expect(find.text('2 items imported into Family.'), findsNothing);
+    expect(
+      [for (final item in family.items) item.cipher.name],
+      ['Alarm code', 'Freebox'],
+    );
+    expect(family.items.last.cipher.login!.password, 'hunter2');
+    expect(family.items.last.cipher.toJson(), isNot(contains('id')));
+    expect(vaults.all.first.items, hasLength(1));
+    await close(tester);
+  });
+
+  testWidgets('says why a file cannot be imported, in French', (tester) async {
+    setScreen(tester, const Size(390, 844), locale: const Locale('fr'));
+    await open(tester, items: [github]);
+    final picker = FakeFilePicker();
+    FilePickerPlatform.instance = picker;
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
+    await settle(tester);
+    await tester.tap(find.text('Réglages'));
+    await settle(tester);
+    const encrypted =
+        "Cet export est restreint à votre compte Bitwarden, et seul Bitwarden "
+        "peut l'ouvrir. Exportez à nouveau votre coffre depuis Bitwarden, "
+        'protégé par mot de passe ou au format .json.';
+
+    picker.picked = FakeFile(
+      'bitwarden_encrypted_export.json',
+      jsonEncode({
+        'encrypted': true,
+        'encKeyValidation_DO_NOT_EDIT': '2.abc|def|ghi',
+        'folders': [],
+        'items': [],
+      }),
+    );
+    await write(tester, find.text('Importer'));
+    expect(find.text(encrypted), findsOneWidget);
+
+    picker.picked = FakeFile('passwords.json', 'name,url,username,password');
+    await write(tester, find.text('Importer'));
+    expect(find.text(encrypted), findsNothing);
+    expect(
+      find.text("Ce fichier n'est pas un export JSON de Bitwarden."),
+      findsOneWidget,
+    );
+    expect(vaults.all.single.items, hasLength(1));
+    await close(tester);
+  });
+
+  testWidgets('exports a vault of choice, without its trash', (tester) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(
+      tester,
+      items: [
+        github,
+        Cipher(
+          type: CipherType.secureNote,
+          name: 'Old note',
+          deletedDate: DateTime.utc(2026, 10),
+        ),
+      ],
+      withFamily: true,
+    );
+    final picker = FakeFilePicker();
+    FilePickerPlatform.instance = picker;
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Settings'));
+    await settle(tester);
+    bool exportEnabled() => tester
+        .widget<FilledButton>(find.widgetWithText(FilledButton, 'Export'))
+        .enabled;
+
+    await tester.tap(find.text('Export'));
+    await settle(tester);
+    expect(find.text('1 item. The trash is left out.'), findsOneWidget);
+    await tester.tap(find.text('Personal'));
+    await settle(tester);
+    await tester.tap(find.text('Family').last);
+    await settle(tester);
+    expect(find.text('This vault has no items to export.'), findsOneWidget);
+    expect(exportEnabled(), isFalse);
+
+    await tester.tap(find.text('Family'));
+    await settle(tester);
+    await tester.tap(find.text('Personal').last);
+    await settle(tester);
+    expect(exportEnabled(), isTrue);
+    await tester.tap(
+      find.descendant(of: find.byType(Dialog), matching: find.byType(Switch)),
+    );
+    await settle(tester);
+    expect(find.widgetWithText(TextField, 'File password'), findsNothing);
+    expect(
+      find.text(
+        'The file is not encrypted. Do not send it by email, and delete it '
+        'once you are done with it.',
+      ),
+      findsOneWidget,
+    );
+    await write(tester, find.widgetWithText(FilledButton, 'Export'));
+
+    expect(find.text('1 item. The trash is left out.'), findsNothing);
+    expect(
+      picker.savedName,
+      matches(RegExp(r'^submarine_export_\d{14}\.json$')),
+    );
+    final [cipher] = parseBitwardenExport(utf8.decode(picker.savedBytes!));
+    expect(cipher.name, 'GitHub');
+    expect(cipher.login!.password, 'Tr0ub4dor&3');
+    await close(tester);
+  });
+
+  testWidgets('exports a vault protected by a password, then imports it', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(tester, items: [github], withFamily: true);
+    final picker = FakeFilePicker();
+    FilePickerPlatform.instance = picker;
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Settings'));
+    await settle(tester);
+    final exportButton = find.widgetWithText(FilledButton, 'Export');
+    final filePassword = find.widgetWithText(TextField, 'File password');
+    final confirmation = find.widgetWithText(
+      TextField,
+      'Confirm the file password',
+    );
+    final openButton = find.widgetWithText(FilledButton, 'Open');
+    const wrongPassword = 'This password does not open the file.';
+
+    await tester.tap(find.text('Export'));
+    await settle(tester);
+    await tester.tap(exportButton);
+    await settle(tester);
+    expect(find.text('Choose a password.'), findsOneWidget);
+    await tester.enterText(filePassword, 'hunter2');
+    await tester.enterText(confirmation, 'hunter3');
+    await tester.tap(exportButton);
+    await settle(tester);
+    expect(find.text('The passwords do not match.'), findsOneWidget);
+    await tester.enterText(confirmation, 'hunter2');
+    await tapUntil(tester, exportButton, () => picker.savedBytes != null);
+
+    expect(
+      picker.savedName,
+      matches(RegExp(r'^submarine_encrypted_export_\d{14}\.json$')),
+    );
+    final saved = utf8.decode(picker.savedBytes!);
+    expect(jsonDecode(saved), containsPair('passwordProtected', true));
+    expect(saved, isNot(contains('Tr0ub4dor&3')));
+
+    picker.picked = FakeFile(picker.savedName!, saved);
+    await write(tester, find.text('Import'));
+    expect(
+      find.text(
+        'This export is protected by a password. Enter it to open the file.',
+      ),
+      findsOneWidget,
+    );
+    await tester.enterText(filePassword, 'hunter3');
+    await tapUntil(
+      tester,
+      openButton,
+      () => find.text(wrongPassword).evaluate().isNotEmpty,
+    );
+    expect(find.text(wrongPassword), findsOneWidget);
+    await tester.enterText(filePassword, 'hunter2');
+    await tapUntil(
+      tester,
+      openButton,
+      () => find.textContaining('found in').evaluate().isNotEmpty,
+    );
+    expect(find.text('1 item found in ${picker.savedName}.'), findsOneWidget);
+
+    await tester.tap(find.text('Personal'));
+    await settle(tester);
+    await tester.tap(find.text('Family').last);
+    await settle(tester);
+    final family = vaults.all.last;
+    await tapUntil(
+      tester,
+      find.widgetWithText(FilledButton, 'Import'),
+      () => family.items.isNotEmpty,
+    );
+    expect(find.text('1 item imported into Family.'), findsOneWidget);
+    expect(family.items.single.cipher.login!.password, 'Tr0ub4dor&3');
+    await close(tester);
+  });
+
   testWidgets('turns the lock on in the settings, then locks from the rail', (
     tester,
   ) async {
@@ -1221,6 +1488,70 @@ void main() {
 }
 
 /// Lets the user in every time, and counts how often it was asked to.
+class FakeFilePicker extends FilePickerPlatform {
+  PlatformFile? picked;
+  String? savedName;
+  Uint8List? savedBytes;
+
+  @override
+  Future<PlatformFile?> pickFile({
+    String? dialogTitle,
+    String? initialDirectory,
+    FileType type = FileType.any,
+    List<String>? allowedExtensions,
+    Function(FilePickerStatus)? onFileLoading,
+    int compressionQuality = 0,
+    AndroidOptions androidOptions = const AndroidOptions(),
+    DarwinOptions darwinOptions = const DarwinOptions(),
+    WindowsOptions windowsOptions = const WindowsOptions(),
+    LinuxOptions linuxOptions = const LinuxOptions(),
+    WebOptions webOptions = const WebOptions(),
+  }) async => picked;
+
+  @override
+  Future<Uri?> saveFile({
+    required String fileName,
+    required Uint8List bytes,
+    required String mimeType,
+    String? dialogTitle,
+    String? initialDirectory,
+    Function(FilePickerStatus)? onFileSaving,
+    WindowsOptions windowsOptions = const WindowsOptions(),
+    LinuxOptions linuxOptions = const LinuxOptions(),
+    WebOptions webOptions = const WebOptions(),
+  }) async {
+    savedName = fileName;
+    savedBytes = bytes;
+    return Uri.file('/tmp/$fileName');
+  }
+}
+
+final class FakeFile extends PlatformFile {
+  FakeFile(this.name, String content) : _bytes = utf8.encode(content);
+
+  @override
+  final String name;
+  final Uint8List _bytes;
+
+  @override
+  Uri get uri => Uri.file('/tmp/$name');
+
+  @override
+  Never get xFile => throw UnimplementedError();
+
+  @override
+  int? lengthSync() => _bytes.length;
+
+  @override
+  Future<int?> length() async => _bytes.length;
+
+  @override
+  Future<Uint8List> readAsBytes() async => _bytes;
+
+  @override
+  Stream<Uint8List> readAsByteStream() => Stream.value(_bytes);
+}
+
 class FakeDeviceAuth implements DeviceAuth {
   var available = true;
   var asked = 0;

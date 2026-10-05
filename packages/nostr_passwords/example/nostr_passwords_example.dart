@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:ndk/ndk.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
 import 'package:sembast/sembast_io.dart' show databaseFactoryIo;
@@ -77,6 +79,27 @@ Future<void> main() async {
     const PasswordGeneratorOptions(length: 20, special: true),
   );
   print('Or a passphrase: ${generatePassphrase()}');
+
+  // Bitwarden's JSON export, both ways, password protected or not.
+  final bitwardenExport = File('bitwarden_export.json');
+  if (bitwardenExport.existsSync()) {
+    final source = await bitwardenExport.readAsString();
+    List<Cipher> ciphers;
+    try {
+      ciphers = parseBitwardenExport(source);
+    } on PasswordProtectedExportException {
+      ciphers = parseBitwardenExport(
+        await decryptBitwardenExport(source, '<file password>'),
+      );
+    }
+    for (final cipher in ciphers) {
+      await vault.createItem(cipher);
+    }
+  }
+  final export = writeBitwardenExport(await vault.items());
+  await File(
+    'vault_export.json',
+  ).writeAsString(await encryptBitwardenExport(export, '<file password>'));
 
   // The replaced password goes to the item's password history.
   final updated = await vault.updateItem(

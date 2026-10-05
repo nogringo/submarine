@@ -87,6 +87,22 @@ class VaultController extends ChangeNotifier {
   Future<Item> updateItem(Item item, Cipher cipher) =>
       _write(vault.updateItem(item, cipher));
 
+  /// Saves [ciphers] as new items one after the other, and tells [onSaved]
+  /// how many are saved after each. Reads the vault again once, at the end.
+  Future<void> importItems(
+    List<Cipher> ciphers, {
+    ValueChanged<int>? onSaved,
+  }) async {
+    try {
+      for (final (index, cipher) in ciphers.indexed) {
+        await vault.createItem(cipher);
+        onSaved?.call(index + 1);
+      }
+    } finally {
+      unawaited(_reload());
+    }
+  }
+
   Future<Item> trashItem(Item item) => _write(vault.trashItem(item));
 
   Future<Item> restoreItem(Item item) => _write(vault.restoreItem(item));

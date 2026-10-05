@@ -7,6 +7,7 @@ import '../lock/app_lock.dart';
 import '../lock/lock_screen.dart';
 import '../widgets/settings_tile.dart';
 import 'app_navigation.dart';
+import 'import_export.dart';
 
 /// The settings of the app.
 class SettingsScreen extends StatelessWidget {
@@ -52,6 +53,7 @@ class _Settings extends StatelessWidget {
                   ],
                 ),
               ),
+              const ImportExportSection(),
             ],
           ),
         ),

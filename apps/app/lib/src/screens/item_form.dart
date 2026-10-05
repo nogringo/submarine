@@ -12,7 +12,7 @@ import '../router.dart';
 import '../theme/theme.dart';
 import '../vaults/vault_controller.dart';
 import '../vaults/vaults.dart';
-import '../widgets/vault_avatar.dart';
+import '../widgets/vault_dropdown.dart';
 import 'item_detail.dart';
 
 /// Creates a login, or edits the item [itemId]. Only the name, the notes, the
@@ -319,23 +319,8 @@ class _FormState extends State<_Form> {
                         gap,
                       ],
                       if (_original == null && vaults.all.length > 1) ...[
-                        DropdownButtonFormField<VaultController>(
-                          initialValue: _vaultOf(vaults),
-                          borderRadius: BorderRadius.circular(12),
-                          decoration: InputDecoration(labelText: l10n.vault),
-                          items: [
-                            for (final vault in vaults.all)
-                              DropdownMenuItem(
-                                value: vault,
-                                child: Row(
-                                  children: [
-                                    VaultAvatar(vault: vault, size: 24),
-                                    const SizedBox(width: 12),
-                                    Text(vault.name),
-                                  ],
-                                ),
-                              ),
-                          ],
+                        VaultDropdown(
+                          value: _vaultOf(vaults),
                           onChanged: (vault) =>
                               setState(() => _chosenVault = vault),
                         ),

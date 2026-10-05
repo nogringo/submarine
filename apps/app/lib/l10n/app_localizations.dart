@@ -1082,6 +1082,24 @@ abstract class AppLocalizations {
   /// **'More actions'**
   String get moreActions;
 
+  /// Menu action copying the username of a login.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy username'**
+  String get copyUsername;
+
+  /// Menu action copying the password of a login.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy password'**
+  String get copyPassword;
+
+  /// Menu action copying the current TOTP code of a login.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy verification code'**
+  String get copyTotp;
+
   /// Menu action moving an item to the trash.
   ///
   /// In en, this message translates to:

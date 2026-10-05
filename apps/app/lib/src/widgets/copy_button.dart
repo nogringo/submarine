@@ -23,7 +23,7 @@ class _CopyButtonState extends State<CopyButton> {
   Timer? _reset;
 
   Future<void> _copy() async {
-    await _copyText(widget.value, sensitive: widget.sensitive);
+    await copyText(widget.value, sensitive: widget.sensitive);
     _reset?.cancel();
     if (!mounted) return;
     setState(() {
@@ -56,7 +56,7 @@ const _clipboard = MethodChannel('submarine/clipboard');
 
 /// [Clipboard.setData] cannot mark a copy as sensitive, which Android needs to
 /// keep it out of its preview.
-Future<void> _copyText(String text, {required bool sensitive}) async {
+Future<void> copyText(String text, {required bool sensitive}) async {
   if (sensitive && !kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
     await _clipboard.invokeMethod<void>('copySensitive', text);
   } else {

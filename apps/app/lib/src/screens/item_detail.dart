@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
 
@@ -7,8 +6,7 @@ import '../context.dart';
 import '../items/field_tile.dart';
 import '../items/item_fields.dart';
 import '../items/item_filter.dart';
-import '../router.dart';
-import '../vaults/vault_controller.dart';
+import '../items/item_menu.dart';
 import '../vaults/vaults.dart';
 import '../widgets/item_icon.dart';
 import '../widgets/vault_avatar.dart';
@@ -205,7 +203,7 @@ class ItemDetail extends StatelessWidget {
 /// Marks the item as a favorite, opens the form that edits a login, and moves
 /// the item to the trash. In the trash: restores the item, or deletes it for
 /// good.
-class ItemActions extends StatefulWidget {
+class ItemActions extends StatelessWidget {
   const ItemActions({
     super.key,
     required this.vaultId,
@@ -218,83 +216,20 @@ class ItemActions extends StatefulWidget {
   final VaultItem entry;
 
   @override
-  State<ItemActions> createState() => _ItemActionsState();
-}
-
-enum _MenuAction { trash, delete }
-
-class _ItemActionsState extends State<ItemActions> {
-  /// A second write before the first one ends would fork the item.
-  var _saving = false;
-
-  Future<void> _write(
-    Future<void> Function(VaultController vault, Item item) write, {
-    bool close = false,
-  }) async {
-    final VaultItem(:vault, :item) = widget.entry;
-    setState(() => _saving = true);
-    try {
-      await write(vault, item);
-      if (close && mounted) {
-        context.go(vaultPath(widget.vaultId, filter: widget.filter));
-      }
-    } finally {
-      if (mounted) setState(() => _saving = false);
-    }
-  }
-
-  Future<void> _toggleFavorite() => _write(
-    (vault, item) => vault.updateItem(
-      item,
-      Cipher.fromJson(item.current.data)..favorite = !item.cipher.favorite,
-    ),
-  );
-
-  // The item leaves the list it was opened from, which closes it.
-  Future<void> _trash() =>
-      _write((vault, item) => vault.trashItem(item), close: true);
-
-  Future<void> _restore() =>
-      _write((vault, item) => vault.restoreItem(item), close: true);
-
-  Future<void> _delete() async {
-    if (!await _confirmDelete()) return;
-    await _write((vault, item) => vault.deleteItem(item), close: true);
-  }
-
-  Future<bool> _confirmDelete() async {
-    final l10n = context.l10n;
-    final colors = Theme.of(context).colorScheme;
-    final delete = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.deleteItemTitle),
-        content: Text(l10n.deleteItemBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: FilledButton.styleFrom(
-              backgroundColor: colors.error,
-              foregroundColor: colors.onError,
-            ),
-            child: Text(l10n.delete),
-          ),
-        ],
-      ),
-    );
-    return delete ?? false;
-  }
-
-  @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final palette = context.palette;
-    final cipher = widget.entry.item.cipher;
+    final cipher = entry.item.cipher;
     final trashed = cipher.isDeleted;
+    final saving = entry.vault.isSaving(entry.item);
+    Future<void> run(ItemAction action) => runItemAction(
+      context,
+      action,
+      vaultId: vaultId,
+      filter: filter,
+      entry: entry,
+      close: true,
+    );
     final buttonStyle = OutlinedButton.styleFrom(
       minimumSize: const Size(0, 40),
       padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -307,43 +242,28 @@ class _ItemActionsState extends State<ItemActions> {
             tooltip: cipher.favorite
                 ? l10n.removeFromFavorites
                 : l10n.addToFavorites,
-            onPressed: _saving ? null : _toggleFavorite,
+            onPressed: saving ? null : () => run(ItemAction.favorite),
             icon: cipher.favorite
                 ? Icon(Icons.star_rounded, color: palette.signal)
                 : const Icon(Icons.star_outline_rounded),
           ),
-        PopupMenuButton<_MenuAction>(
+        PopupMenuButton<ItemAction>(
           tooltip: l10n.moreActions,
-          enabled: !_saving,
+          enabled: !saving,
           icon: const Icon(Icons.more_horiz_rounded),
-          onSelected: (action) => switch (action) {
-            _MenuAction.trash => _trash(),
-            _MenuAction.delete => _delete(),
-          },
+          onSelected: run,
           itemBuilder: (context) => [
-            if (trashed)
-              PopupMenuItem(
-                value: _MenuAction.delete,
-                child: _MenuRow(
-                  icon: Icons.delete_forever_outlined,
-                  text: l10n.deletePermanently,
-                  color: palette.danger,
-                ),
-              )
-            else
-              PopupMenuItem(
-                value: _MenuAction.trash,
-                child: _MenuRow(
-                  icon: Icons.delete_outline_rounded,
-                  text: l10n.moveToTrash,
-                ),
-              ),
+            itemMenuItem(
+              context,
+              trashed ? ItemAction.delete : ItemAction.trash,
+              cipher,
+            ),
           ],
         ),
         if (trashed) ...[
           const SizedBox(width: 4),
           OutlinedButton.icon(
-            onPressed: _saving ? null : _restore,
+            onPressed: saving ? null : () => run(ItemAction.restore),
             style: buttonStyle,
             icon: const Icon(Icons.restore_from_trash_rounded, size: 18),
             label: Text(l10n.restore),
@@ -351,9 +271,7 @@ class _ItemActionsState extends State<ItemActions> {
         ] else if (cipher.type == CipherType.login) ...[
           const SizedBox(width: 4),
           OutlinedButton.icon(
-            onPressed: () => context.go(
-              editItemPath(widget.vaultId, widget.filter, widget.entry.item.id),
-            ),
+            onPressed: () => run(ItemAction.edit),
             style: buttonStyle,
             icon: const Icon(Icons.edit_rounded, size: 18),
             label: Text(l10n.edit),
@@ -362,25 +280,6 @@ class _ItemActionsState extends State<ItemActions> {
       ],
     );
   }
-}
-
-class _MenuRow extends StatelessWidget {
-  const _MenuRow({required this.icon, required this.text, this.color});
-
-  final IconData icon;
-  final String text;
-  final Color? color;
-
-  @override
-  Widget build(BuildContext context) => Row(
-    children: [
-      Icon(icon, size: 20, color: color ?? context.palette.muted),
-      const SizedBox(width: 12),
-      Flexible(
-        child: Text(text, style: TextStyle(color: color)),
-      ),
-    ],
-  );
 }
 
 class _Header extends StatelessWidget {

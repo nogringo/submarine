@@ -559,6 +559,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moreActions => 'More actions';
 
   @override
+  String get copyUsername => 'Copy username';
+
+  @override
+  String get copyPassword => 'Copy password';
+
+  @override
+  String get copyTotp => 'Copy verification code';
+
+  @override
   String get moveToTrash => 'Move to trash';
 
   @override

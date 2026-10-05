@@ -81,11 +81,16 @@ class VaultController extends ChangeNotifier {
     await live?.cancel();
   }
 
+  /// Whether a change to [item] is being saved. Another change before it ends
+  /// would fork the item.
+  bool isSaving(Item item) => _saving.contains(item.id);
+  final _saving = <String>{};
+
   /// Saved once in the ndk cache, then sent to the relays.
   Future<Item> createItem(Cipher cipher) => _write(vault.createItem(cipher));
 
   Future<Item> updateItem(Item item, Cipher cipher) =>
-      _write(vault.updateItem(item, cipher));
+      _change(item, () => _write(vault.updateItem(item, cipher)));
 
   /// Saves [ciphers] as new items one after the other, and tells [onSaved]
   /// how many are saved after each. Reads the vault again once, at the end.
@@ -103,12 +108,14 @@ class VaultController extends ChangeNotifier {
     }
   }
 
-  Future<Item> trashItem(Item item) => _write(vault.trashItem(item));
+  Future<Item> trashItem(Item item) =>
+      _change(item, () => _write(vault.trashItem(item)));
 
-  Future<Item> restoreItem(Item item) => _write(vault.restoreItem(item));
+  Future<Item> restoreItem(Item item) =>
+      _change(item, () => _write(vault.restoreItem(item)));
 
   /// Deletes [item] for good, from the cache and from the relays.
-  Future<void> deleteItem(Item item) async {
+  Future<void> deleteItem(Item item) => _change(item, () async {
     await vault.deleteItem(item);
     _items = [
       for (final other in _items)
@@ -116,6 +123,17 @@ class VaultController extends ChangeNotifier {
     ];
     notifyListeners();
     unawaited(_reload());
+  });
+
+  Future<T> _change<T>(Item item, Future<T> Function() change) async {
+    _saving.add(item.id);
+    notifyListeners();
+    try {
+      return await change();
+    } finally {
+      _saving.remove(item.id);
+      if (!_disposed) notifyListeners();
+    }
   }
 
   Future<Item> _write(Future<Envelope> saving) async {

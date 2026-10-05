@@ -564,6 +564,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get moreActions => 'Plus d\'actions';
 
   @override
+  String get copyUsername => 'Copier le nom d\'utilisateur';
+
+  @override
+  String get copyPassword => 'Copier le mot de passe';
+
+  @override
+  String get copyTotp => 'Copier le code de vérification';
+
+  @override
   String get moveToTrash => 'Mettre à la corbeille';
 
   @override

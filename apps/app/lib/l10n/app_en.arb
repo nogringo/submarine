@@ -718,6 +718,18 @@
   "@moreActions": {
     "description": "Tooltip of the button opening the menu of an item's other actions."
   },
+  "copyUsername": "Copy username",
+  "@copyUsername": {
+    "description": "Menu action copying the username of a login."
+  },
+  "copyPassword": "Copy password",
+  "@copyPassword": {
+    "description": "Menu action copying the password of a login."
+  },
+  "copyTotp": "Copy verification code",
+  "@copyTotp": {
+    "description": "Menu action copying the current TOTP code of a login."
+  },
   "moveToTrash": "Move to trash",
   "@moveToTrash": {
     "description": "Menu action moving an item to the trash."

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart'
@@ -164,6 +165,60 @@ void main() {
   /// gets registered, so that they write in real time too.
   Future<void> openMenu(WidgetTester tester, Finder button) =>
       write(tester, button);
+
+  /// What the app copies, on Android in tests: the copies kept out of the
+  /// preview of Android, and the others.
+  ({List<Object?> sensitive, List<Object?> plain}) watchClipboard(
+    WidgetTester tester,
+  ) {
+    final messenger = tester.binding.defaultBinaryMessenger;
+    const clipboard = MethodChannel('submarine/clipboard');
+    final sensitive = <Object?>[];
+    final plain = <Object?>[];
+    messenger
+      ..setMockMethodCallHandler(clipboard, (call) async {
+        sensitive.add(call.arguments);
+        return null;
+      })
+      ..setMockMethodCallHandler(SystemChannels.platform, (call) async {
+        if (call.method == 'Clipboard.setData') {
+          plain.add((call.arguments as Map)['text']);
+        }
+        return null;
+      });
+    addTearDown(() {
+      messenger
+        ..setMockMethodCallHandler(clipboard, null)
+        ..setMockMethodCallHandler(SystemChannels.platform, null);
+    });
+    return (sensitive: sensitive, plain: plain);
+  }
+
+  /// Opens the menu of the row of [name] in real time, as [openMenu] does,
+  /// from a right click or else a long press.
+  Future<void> openRowMenu(
+    WidgetTester tester,
+    String name, {
+    bool longPress = false,
+  }) async {
+    final row = find.descendant(
+      of: find.byType(ListView),
+      matching: find.text(name),
+    );
+    await tester.pump();
+    await tester.runAsync(() async {
+      if (longPress) {
+        final gesture = await tester.startGesture(tester.getCenter(row));
+        await Future<void>.delayed(
+          kLongPressTimeout + const Duration(milliseconds: 100),
+        );
+        await gesture.up();
+      } else {
+        await tester.tap(row, buttons: kSecondaryButton);
+      }
+    });
+    await settle(tester);
+  }
 
   testWidgets('welcomes a device without vaults, then creates one', (
     tester,
@@ -670,26 +725,7 @@ void main() {
     tester,
   ) async {
     setScreen(tester, const Size(1280, 800));
-    final messenger = tester.binding.defaultBinaryMessenger;
-    const clipboard = MethodChannel('submarine/clipboard');
-    final sensitive = <Object?>[];
-    final plain = <Object?>[];
-    messenger
-      ..setMockMethodCallHandler(clipboard, (call) async {
-        sensitive.add(call.arguments);
-        return null;
-      })
-      ..setMockMethodCallHandler(SystemChannels.platform, (call) async {
-        if (call.method == 'Clipboard.setData') {
-          plain.add((call.arguments as Map)['text']);
-        }
-        return null;
-      });
-    addTearDown(() {
-      messenger
-        ..setMockMethodCallHandler(clipboard, null)
-        ..setMockMethodCallHandler(SystemChannels.platform, null);
-    });
+    final (:sensitive, :plain) = watchClipboard(tester);
     await open(tester, items: [github]);
     await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
     await settle(tester);
@@ -795,6 +831,90 @@ void main() {
     await tester.tap(find.text('Tous'));
     await settle(tester);
     expect(find.text('GitHub'), findsOneWidget);
+    await close(tester);
+  });
+
+  testWidgets('trashes and deletes an item from its row on a desktop', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(tester, items: [github]);
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
+    await settle(tester);
+
+    await tester.tap(find.text('GitHub'));
+    await settle(tester);
+    await openRowMenu(tester, 'GitHub');
+    expect(find.text('Add to favorites'), findsOneWidget);
+    expect(find.text('Copy verification code'), findsNothing);
+    await write(tester, find.text('Move to trash'));
+
+    expect(find.text('GitHub'), findsNothing);
+    expect(find.text('Select an item to see it here.'), findsOneWidget);
+    await tester.tap(find.text('Trash'));
+    await settle(tester);
+    await openRowMenu(tester, 'GitHub');
+    expect(find.text('Move to trash'), findsNothing);
+    await write(tester, find.text('Delete permanently'));
+    expect(find.text('Delete this item permanently?'), findsOneWidget);
+    await write(tester, find.text('Delete'));
+
+    expect(find.text('GitHub'), findsNothing);
+    expect(vaults.all.single.items, isEmpty);
+    await close(tester);
+  });
+
+  testWidgets('trashes and restores an item from its row on a phone', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(390, 844), locale: const Locale('fr'));
+    await open(tester, items: [github]);
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
+    await settle(tester);
+
+    await openRowMenu(tester, 'GitHub', longPress: true);
+    await write(tester, find.text('Mettre à la corbeille'));
+
+    expect(find.text('Tous les coffres'), findsOneWidget);
+    expect(find.text('GitHub'), findsNothing);
+    await tester.tap(find.text('Corbeille'));
+    await settle(tester);
+    await openRowMenu(tester, 'GitHub', longPress: true);
+    await write(tester, find.text('Restaurer'));
+
+    expect(find.text('GitHub'), findsNothing);
+    await tester.tap(find.text('Tous'));
+    await settle(tester);
+    expect(find.text('GitHub'), findsOneWidget);
+    await close(tester);
+  });
+
+  testWidgets('copies the username, the password and the code from a row', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    final (:sensitive, :plain) = watchClipboard(tester);
+    await open(
+      tester,
+      items: [
+        Cipher.fromJson(github.toJson())..login!.totp = 'JBSWY3DPEHPK3PXP',
+      ],
+    );
+    await tester.pumpWidget(SubmarineApp(vaults: vaults, lock: lock));
+    await settle(tester);
+
+    for (final copy in [
+      'Copy username',
+      'Copy password',
+      'Copy verification code',
+    ]) {
+      await openRowMenu(tester, 'GitHub');
+      await write(tester, find.text(copy));
+    }
+
+    expect(plain, ['alice-dev']);
+    expect(sensitive, ['Tr0ub4dor&3', matches(RegExp(r'^\d{6}$'))]);
+    expect(find.text('Select an item to see it here.'), findsOneWidget);
     await close(tester);
   });
 

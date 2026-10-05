@@ -4,10 +4,12 @@ import 'package:nostr_passwords/nostr_passwords.dart';
 
 import '../context.dart';
 import '../items/item_filter.dart';
+import '../items/item_menu.dart';
 import '../lock/app_lock.dart';
 import '../router.dart';
 import '../vaults/vaults.dart';
 import '../widgets/item_icon.dart';
+import '../widgets/no_browser_menu.dart';
 import '../widgets/search_field.dart';
 import '../widgets/sync_status.dart';
 import '../widgets/vault_avatar.dart';
@@ -270,6 +272,16 @@ class _Items extends StatefulWidget {
 class _ItemsState extends State<_Items> {
   var _query = '';
 
+  // Not the row's context, which goes away once its item leaves the list.
+  Future<void> _run(ItemAction action, VaultItem entry) => runItemAction(
+    context,
+    action,
+    vaultId: widget.vaultId,
+    filter: widget.filter,
+    entry: entry,
+    close: entry.item.id == widget.selectedItemId,
+  );
+
   @override
   Widget build(BuildContext context) {
     final vaults = Vaults.of(context);
@@ -309,32 +321,35 @@ class _ItemsState extends State<_Items> {
                   filter: widget.filter,
                   searched: items.isNotEmpty,
                 )
-              : ListView.builder(
-                  // Clear of the floating button on a phone.
-                  padding: EdgeInsets.fromLTRB(
-                    8,
-                    0,
-                    8,
-                    context.isWide ? 16 : 88,
-                  ),
-                  keyboardDismissBehavior:
-                      ScrollViewKeyboardDismissBehavior.onDrag,
-                  itemCount: shown.length,
-                  itemBuilder: (context, index) {
-                    final entry = shown[index];
-                    return _ItemRow(
-                      entry: entry,
-                      showVault: showVault,
-                      selected: entry.item.id == widget.selectedItemId,
-                      onTap: () => context.go(
-                        vaultPath(
-                          widget.vaultId,
-                          filter: widget.filter,
-                          itemId: entry.item.id,
+              : NoBrowserMenu(
+                  child: ListView.builder(
+                    // Clear of the floating button on a phone.
+                    padding: EdgeInsets.fromLTRB(
+                      8,
+                      0,
+                      8,
+                      context.isWide ? 16 : 88,
+                    ),
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    itemCount: shown.length,
+                    itemBuilder: (context, index) {
+                      final entry = shown[index];
+                      return _ItemRow(
+                        entry: entry,
+                        showVault: showVault,
+                        selected: entry.item.id == widget.selectedItemId,
+                        onTap: () => context.go(
+                          vaultPath(
+                            widget.vaultId,
+                            filter: widget.filter,
+                            itemId: entry.item.id,
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                        onAction: (action) => _run(action, entry),
+                      );
+                    },
+                  ),
                 ),
         ),
       ],
@@ -348,12 +363,42 @@ class _ItemRow extends StatelessWidget {
     required this.showVault,
     required this.selected,
     required this.onTap,
+    required this.onAction,
   });
 
   final VaultItem entry;
   final bool showVault;
   final bool selected;
   final VoidCallback onTap;
+  final ValueChanged<ItemAction> onAction;
+
+  /// Opens the menu of the item where the pointer clicked, or over the row
+  /// after a long press.
+  Future<void> _openMenu(BuildContext context, [Offset? pointer]) async {
+    final cipher = entry.item.cipher;
+    final actions = ItemAction.available(cipher);
+    final overlay =
+        Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
+    final row = context.findRenderObject()! as RenderBox;
+    final anchor = pointer != null
+        ? pointer & Size.zero
+        : row.localToGlobal(Offset.zero) & row.size;
+    final action = await showMenu<ItemAction>(
+      context: context,
+      position: RelativeRect.fromRect(
+        anchor.shift(-overlay.localToGlobal(Offset.zero)),
+        Offset.zero & overlay.size,
+      ),
+      items: [
+        for (final (index, action) in actions.indexed) ...[
+          if (index > 0 && action.copies != actions[index - 1].copies)
+            const PopupMenuDivider(),
+          itemMenuItem(context, action, cipher),
+        ],
+      ],
+    );
+    if (action != null) onAction(action);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -367,6 +412,9 @@ class _ItemRow extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
           onTap: onTap,
+          onSecondaryTapUp: (details) =>
+              _openMenu(context, details.globalPosition),
+          onLongPress: () => _openMenu(context),
           borderRadius: BorderRadius.circular(12),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),

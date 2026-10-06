@@ -20,4 +20,5 @@ export 'src/search.dart';
 export 'src/totp.dart';
 export 'src/vault.dart';
 export 'src/vault_key.dart';
+export 'src/version_cache.dart';
 export 'src/version_event.dart';

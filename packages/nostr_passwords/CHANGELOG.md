@@ -9,3 +9,4 @@
 - `Vault.currentRelayList()` gives the list to change, and `RelayList.withRelay()` and `without()` change it. `parseRelayUrl()` reads a relay address as a user types it.
 - Bitwarden's search, password history, TOTP codes and generator.
 - Vault keys as an nsec, in hex, or encrypted with a password (NIP-49). A vault takes any `EventSigner`, so a NIP-46 bunker or a NIP-07 extension can hold its key. `vaultSignerPermissions` lists what to ask a bunker for.
+- `VersionCache` keeps the versions a vault opened, encrypted, so that its signer opens each gift wrap once per device. Its key stays on the device, or is sealed for the signer with `sealCacheKey()`. `Vault.openedItems()` and `Vault.open()` show the items without waiting for the signer.

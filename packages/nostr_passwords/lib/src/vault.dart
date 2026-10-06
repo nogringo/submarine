@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:ndk/domain_layer/entities/broadcast_state.dart'
@@ -15,6 +16,7 @@ import 'cipher/password_history.dart';
 import 'envelope.dart';
 import 'item.dart';
 import 'relay_list.dart';
+import 'version_cache.dart';
 import 'version_event.dart';
 
 /// A vault, local first: a change is done once it is saved in the ndk cache,
@@ -27,6 +29,7 @@ class Vault {
     required this.signer,
     required this.relays,
     this.indexers = indexerRelays,
+    this.cache,
   });
 
   final Ndk ndk;
@@ -39,9 +42,19 @@ class Vault {
   /// Where [setRelayList] publishes too.
   final List<String> indexers;
 
-  /// Decrypted on demand and kept in memory only: ndk's own decrypted payload
-  /// cache would write the passwords to disk in clear.
+  /// Keeps what [signer] opened from one start to the next. Without it, each
+  /// start asks [signer] to open every gift wrap again.
+  final VersionCache? cache;
+
+  /// By gift wrap id. Not in ndk's own decrypted payload cache, which would
+  /// write the passwords to disk in clear.
   final _versions = <String, Envelope>{};
+
+  /// What [signer] is asked to open, for a gift wrap to be asked once at a
+  /// time.
+  final _opening = <String, Future<Envelope?>>{};
+
+  Future<void>? _cacheRead;
 
   /// Keeps the vault's gift wraps and deletion requests synced from
   /// [currentRelays] into the ndk cache. The relay list is left to
@@ -143,23 +156,49 @@ class Vault {
   Filter get _deletions =>
       Filter(kinds: [Deletion.kKind], authors: [signer.getPublicKey()]);
 
-  /// Items found in the ndk cache, see [sync] to fill it. Drops from the cache
-  /// the gift wraps the vault asked to delete.
+  /// Items found in the ndk cache, see [sync] to fill it, once [signer] opened
+  /// the gift wraps never opened on this device. Drops from the cache the gift
+  /// wraps the vault asked to delete.
+  ///
+  /// [openedItems] and [open] split the two, for the items to show without
+  /// waiting for [signer]. Throws a [CacheLockedException] while [cache] is
+  /// locked.
   Future<List<Item>> items() async {
-    final deleted = {
-      for (final request in await _loadDeletions()) ...request.getTags('e'),
-    };
-    final wraps = await _loadWraps();
-    // All at once: a remote signer answers each decryption over the network.
-    final versions = await Future.wait([
-      for (final wrap in wraps)
-        if (!deleted.contains(wrap.id)) _open(wrap),
+    await open();
+    return openedItems();
+  }
+
+  /// The items of the gift wraps opened so far on this device, without asking
+  /// [signer] anything. Drops from the cache the gift wraps the vault asked to
+  /// delete.
+  ///
+  /// Leaves out what [cache] holds while it is locked.
+  Future<List<Item>> openedItems() async {
+    await _readCache();
+    return resolveItems([
+      for (final wrap in await _liveWraps()) ?_versions[wrap.id],
     ]);
-    await _drop([
-      for (final wrap in wraps)
-        if (deleted.contains(wrap.id)) wrap.id,
+  }
+
+  /// Asks [signer] to open the gift wraps never opened on this device, all at
+  /// once as a remote signer answers each one over the network, and keeps them
+  /// in [cache]. Returns whether one did open.
+  ///
+  /// Throws a [CacheLockedException] while [cache] is locked, rather than ask
+  /// for every gift wrap.
+  Future<bool> open() async {
+    if (cache?.locked ?? false) throw const CacheLockedException();
+    await _readCache();
+    final opened = <String, Envelope>{};
+    await Future.wait([
+      for (final wrap in await _liveWraps())
+        if (!_versions.containsKey(wrap.id))
+          _open(wrap).then((version) {
+            if (version != null) opened[wrap.id] = version;
+          }),
     ]);
-    return resolveItems(versions.nonNulls);
+    await _cacheVersions(opened);
+    return opened.isNotEmpty;
   }
 
   Future<Envelope> createItem(Cipher cipher) async {
@@ -206,9 +245,10 @@ class Vault {
   /// A version published afterwards, by a device that missed the deletion,
   /// brings the item back.
   Future<void> deleteItem(Item item) async {
+    await open();
     final wrapIds = [
       for (final wrap in await _loadWraps())
-        if ((await _open(wrap))?.id == item.id) wrap.id,
+        if (_versions[wrap.id]?.id == item.id) wrap.id,
     ];
     await Future.wait([for (final wrapId in wrapIds) _requestDeletion(wrapId)]);
     await _drop(wrapIds);
@@ -427,14 +467,58 @@ class Vault {
         pubKeys: [signer.getPublicKey()],
       )).firstOrNull;
 
+  /// The vault's gift wraps in the ndk cache, once those the vault asked to
+  /// delete are dropped.
+  Future<List<Nip01Event>> _liveWraps() async {
+    final deleted = {
+      for (final request in await _loadDeletions()) ...request.getTags('e'),
+    };
+    final wraps = await _loadWraps();
+    await _drop([
+      for (final wrap in wraps)
+        if (deleted.contains(wrap.id)) wrap.id,
+    ]);
+    return [
+      for (final wrap in wraps)
+        if (!deleted.contains(wrap.id)) wrap,
+    ];
+  }
+
   Future<void> _drop(List<String> wrapIds) async {
     if (wrapIds.isEmpty) return;
     await ndk.config.cache.removeEvents(ids: wrapIds);
     wrapIds.forEach(_versions.remove);
+    await cache?.remove(wrapIds);
   }
 
-  Future<Envelope?> _open(Nip01Event wrap) async {
-    if (_versions[wrap.id] case final version?) return version;
+  /// Reads [cache] once it is unlocked, and once only.
+  Future<void> _readCache() async {
+    final cache = this.cache;
+    if (cache == null || cache.locked) return;
+    final read = _cacheRead ??= cache.read().then(_versions.addAll);
+    try {
+      await read;
+    } catch (_) {
+      _cacheRead = null;
+      rethrow;
+    }
+  }
+
+  Future<void> _cacheVersions(Map<String, Envelope> versions) async {
+    if (cache case final cache? when !cache.locked && versions.isNotEmpty) {
+      await cache.write(versions);
+    }
+  }
+
+  Future<Envelope?> _open(Nip01Event wrap) {
+    if (_opening[wrap.id] case final opening?) return opening;
+    final opening = _unwrap(wrap);
+    _opening[wrap.id] = opening;
+    unawaited(opening.whenComplete(() => _opening.remove(wrap.id)));
+    return opening;
+  }
+
+  Future<Envelope?> _unwrap(Nip01Event wrap) async {
     try {
       return _versions[wrap.id] = await unwrapEnvelope(
         wrap,
@@ -448,13 +532,16 @@ class Vault {
   }
 
   Future<void> _saveVersion(Envelope envelope) async {
-    await _save(
-      await wrapEnvelope(
-        envelope,
-        signer,
-        signerFactory: ndk.config.eventSignerFactory,
-      ),
+    final wrap = await wrapEnvelope(
+      envelope,
+      signer,
+      signerFactory: ndk.config.eventSignerFactory,
     );
+    await _save(wrap);
+    // As the gift wrap gives it, apart from the envelope the caller may edit.
+    final version = Envelope.fromJson(jsonDecode(jsonEncode(envelope)));
+    _versions[wrap.id] = version;
+    await _cacheVersions({wrap.id: version});
   }
 
   Future<void> _requestDeletion(String wrapId) async {
@@ -486,11 +573,12 @@ class Vault {
   /// requests, and the gift wraps they spare that open, as anyone can send one
   /// to the vault.
   Future<List<Nip01Event>> _shareable() async {
+    await open();
     final deletions = await _loadDeletions();
     final deleted = {for (final request in deletions) ...request.getTags('e')};
     return [
       for (final wrap in await _loadWraps())
-        if (!deleted.contains(wrap.id) && await _open(wrap) != null) wrap,
+        if (!deleted.contains(wrap.id) && _versions.containsKey(wrap.id)) wrap,
       ...deletions,
     ];
   }

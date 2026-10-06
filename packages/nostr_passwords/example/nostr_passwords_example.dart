@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:ndk/ndk.dart';
@@ -28,7 +29,24 @@ Future<void> main() async {
     type: AccountType.privateKey,
     signer: signer,
   );
-  final vault = Vault(ndk: ndk, signer: signer, relays: defaultRelays);
+  // Keeps what the signer opened from one start to the next, encrypted under
+  // a key the app keeps as safely as the vault key.
+  final store = JsonFileVersionStore(File('versions.json'));
+  final cacheKey = newCacheKey();
+  final vault = Vault(
+    ndk: ndk,
+    signer: signer,
+    relays: defaultRelays,
+    cache: VersionCache(store, cacheKey),
+  );
+  // Or the key sealed for the signer alone, which opens it at each start:
+  // until it does, the vault shows nothing, even what it opened before.
+  final sealed = VersionCache.sealed(
+    store,
+    await sealCacheKey(cacheKey, signer),
+    signer,
+  );
+  print('The signer opened the cache key: ${await sealed.unlock()}');
 
   // Its relay list (NIP-65), the private relays encrypted to the vault. It
   // goes to vault.relays, to the relays it lists and to the indexers. From now
@@ -99,6 +117,11 @@ Future<void> main() async {
     print('Now ${(await vault.items()).length} item(s)');
   });
 
+  // What this device opened before shows without waiting for the signer, the
+  // rest once it answers. items() does both.
+  print('${(await vault.openedItems()).length} item(s) opened before');
+  if (await vault.open()) print('The signer opened new versions');
+
   final items = await vault.items();
   for (final item in items) {
     print('${item.cipher.name}: ${item.cipher.subtitle}');
@@ -161,4 +184,28 @@ Future<void> main() async {
   await live.cancel();
   await engine.dispose();
   await ndk.destroy();
+}
+
+/// The entries of a VersionCache in a JSON file. An app would rather keep them
+/// in its database.
+class JsonFileVersionStore implements VersionStore {
+  JsonFileVersionStore(this.file);
+
+  final File file;
+
+  @override
+  Future<Map<String, String>> read() async => file.existsSync()
+      ? (jsonDecode(await file.readAsString()) as Map).cast<String, String>()
+      : {};
+
+  @override
+  Future<void> write(Map<String, String> entries) async =>
+      _save({...await read(), ...entries});
+
+  @override
+  Future<void> remove(Iterable<String> wrapIds) async =>
+      _save({...await read()}..removeWhere((id, _) => wrapIds.contains(id)));
+
+  Future<void> _save(Map<String, String> entries) =>
+      file.writeAsString(jsonEncode(entries));
 }

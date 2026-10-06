@@ -464,25 +464,24 @@ class _RelaysState extends State<_Relays> {
                 ),
               ),
             ],
-            if (_changed) ...[
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: _saving ? null : _discard,
-                    child: Text(l10n.cancel),
-                  ),
-                  const SizedBox(width: 8),
-                  FilledButton(
-                    onPressed: editable && !draft.isEmpty
-                        ? () => _save(draft)
-                        : null,
-                    child: Text(l10n.save),
-                  ),
-                ],
-              ),
-            ],
+            const SizedBox(height: 12),
+            // Always there: the page would scroll by itself as they go.
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: _changed && !_saving ? _discard : null,
+                  child: Text(l10n.cancel),
+                ),
+                const SizedBox(width: 8),
+                FilledButton(
+                  onPressed: _changed && editable && !draft.isEmpty
+                      ? () => _save(draft)
+                      : null,
+                  child: Text(l10n.save),
+                ),
+              ],
+            ),
           ],
         );
       },

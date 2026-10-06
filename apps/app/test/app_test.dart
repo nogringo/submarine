@@ -1468,7 +1468,7 @@ void main() {
     await tester.ensureVisible(find.text('Add a relay'));
     await settle(tester);
     expect(inRow(first.url, find.text('Connected')), findsOneWidget);
-    expect(find.text('Save'), findsNothing);
+    expect(saveEnabled(tester), isFalse);
     final rowHeight = tester.getSize(relayRow(first.url)).height;
 
     await tester.tap(inRow(first.url, find.byTooltip('Remove this relay')));
@@ -1479,7 +1479,7 @@ void main() {
     expect(saveEnabled(tester), isFalse);
     await tester.tap(inRow(first.url, find.byTooltip('Keep this relay')));
     await settle(tester);
-    expect(find.text('Save'), findsNothing);
+    expect(saveEnabled(tester), isFalse);
 
     await tester.tap(find.text('Add a relay'));
     await settle(tester);
@@ -1515,7 +1515,7 @@ void main() {
     expect(family.relayList?.private.keys, [second.url]);
     expect(relayRow(first.url), findsNothing);
     expect(inRow(second.url, find.text('Private')), findsOneWidget);
-    expect(find.text('Save'), findsNothing);
+    expect(saveEnabled(tester), isFalse);
     await tester.runAsync(() async {
       while (relayLists(first) == 0 || relayLists(second) == 0) {
         await Future<void>.delayed(const Duration(milliseconds: 10));
@@ -1525,6 +1525,55 @@ void main() {
     expect(relayLists(second), 1);
     await close(tester);
   }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+
+  testWidgets('keeps the page still as a relay removal is undone', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    final first = _EmptyRelay();
+    final second = _EmptyRelay();
+    await startRelays(tester, [first, second]);
+    await open(tester, withFamily: true, relays: [first.url, second.url]);
+    final family = vaults.all.single;
+    await tester.runAsync(() async {
+      while (!family.relaysEditable) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+    });
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+      ),
+    );
+    await settle(tester);
+    final row = find.widgetWithText(SettingsTile, first.url);
+
+    await tester.tap(find.byTooltip('Family'));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Vault settings'));
+    await settle(tester);
+    await tester.ensureVisible(row);
+    await settle(tester);
+    await tester.tap(
+      find.descendant(of: row, matching: find.byTooltip('Remove this relay')),
+    );
+    await settle(tester);
+    await tester.ensureVisible(find.text('Save'));
+    await settle(tester);
+    final position = tester.getTopLeft(row);
+
+    await tester.tap(
+      find.descendant(of: row, matching: find.byTooltip('Keep this relay')),
+    );
+    await settle(tester);
+    expect(tester.getTopLeft(row), position);
+    expect(saveEnabled(tester), isFalse);
+    await close(tester);
+  });
 
   testWidgets('keeps the relay draft when the window widens, then narrows', (
     tester,
@@ -1564,16 +1613,19 @@ void main() {
     );
     await settle(tester);
     expect(find.byTooltip('Removed'), findsOneWidget);
+    bool cancelEnabled() => tester
+        .widget<TextButton>(find.widgetWithText(TextButton, 'Cancel'))
+        .enabled;
 
     tester.view.physicalSize = const Size(1280, 800);
     await settle(tester);
     expect(find.text('Removed'), findsOneWidget);
-    expect(find.text('Save'), findsOneWidget);
+    expect(cancelEnabled(), isTrue);
 
     tester.view.physicalSize = const Size(390, 844);
     await settle(tester);
     expect(find.byTooltip('Removed'), findsOneWidget);
-    expect(find.text('Save'), findsOneWidget);
+    expect(cancelEnabled(), isTrue);
     await close(tester);
   });
 

@@ -70,6 +70,11 @@ Future<void> main() async {
   final relayList = await vault.fetchRelayList();
   print('Private relays: ${relayList?.private.keys.join(', ')}');
 
+  // Reads the whole vault from every relay, then gives the cache and each
+  // relay what it lacks, such as what a relay dropped over time.
+  final unsynced = await vault.reconcile();
+  unsynced.forEach((relay, reason) => print('$relay left out: $reason'));
+
   // What other devices publish from now on, the moment they do.
   final live = vault.subscribe().listen((_) async {
     print('Now ${(await vault.items()).length} item(s)');

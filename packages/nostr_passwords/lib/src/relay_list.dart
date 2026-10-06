@@ -29,7 +29,6 @@ const defaultRelays = [
   'wss://auth.nostr1.com',
   'wss://chat.wisp.talk',
   'wss://relay.nostrfeed.com',
-  'wss://relay.nostr.net',
   'wss://relay.nostr.com',
   'wss://nostr.oxtr.dev',
   'wss://nostr.bitcoiner.social',

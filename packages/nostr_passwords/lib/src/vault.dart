@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:ndk/domain_layer/entities/broadcast_state.dart'
+    show RelayBroadcastResponse;
 import 'package:ndk/domain_layer/entities/nip_65.dart';
 import 'package:ndk/ndk.dart';
 import 'package:ndk/shared/nips/nip09/deletion.dart';
@@ -281,6 +283,62 @@ class Vault {
     await _followRelays();
   }
 
+  /// Brings the ndk cache and every relay of [currentRelays] to the same gift
+  /// wraps and deletion requests, each one getting what it lacks, once
+  /// [fetchRelayList] fetched the newest relay list. That list then goes to
+  /// all the relays [setRelayList] publishes it to.
+  ///
+  /// Nothing is sent before every relay answered: what a relay lacks is only
+  /// known from what all the others hold, and a deletion request on a slow
+  /// relay must keep the gift wrap it deletes from spreading.
+  ///
+  /// Returns the relays left out of sync, with why. A relay that did not give
+  /// all it holds gets nothing, as what it lacks is unknown.
+  Future<Map<String, String>> reconcile() async {
+    await fetchRelayList();
+    final held = <String, Set<String>>{};
+    final unsynced = <String, String>{};
+    Future<void> fetch(String relay) async {
+      try {
+        held[relay] = {
+          for (final filter in [_wraps, _deletions])
+            ...await _fetchAll(relay, filter),
+        };
+      } on _LeftOut catch (leftOut) {
+        unsynced[relay] = leftOut.reason;
+      }
+    }
+
+    await Future.wait([
+      for (final relay in await currentRelays()) fetch(relay),
+    ]);
+    List<String> lacking(Nip01Event event) => [
+      for (final MapEntry(key: relay, value: ids) in held.entries)
+        if (!ids.contains(event.id)) relay,
+    ];
+    // ndk merges the broadcasts of an event, so each one goes out once.
+    final sent = await Future.wait([
+      for (final event in await _shareable())
+        if (lacking(event) case final to when to.isNotEmpty)
+          _send(event, to: to),
+      if (await _loadRelayList() case final relayList?) _send(relayList),
+    ]);
+    final refusals = <String, List<String>>{};
+    for (final response in sent.expand((responses) => responses)) {
+      if (!response.broadcastSuccessful) {
+        (refusals[response.relayUrl] ??= []).add(
+          response.msg.isEmpty ? 'no answer' : response.msg,
+        );
+      }
+    }
+    for (final MapEntry(key: relay, value: reasons) in refusals.entries) {
+      unsynced[relay] ??=
+          'refused ${reasons.length} event${reasons.length == 1 ? '' : 's'}: '
+          '${reasons.first}';
+    }
+    return unsynced;
+  }
+
   /// Sends again the changes no relay accepted yet, and returns those still
   /// left.
   Future<List<EventDeliverySnapshot>> push() async {
@@ -407,19 +465,57 @@ class Vault {
     await _send(event, timeout: Duration.zero);
   }
 
-  /// Sends the vault's events in the cache to [added], skipping the gift wraps
-  /// that do not open: anyone can send one to the vault.
+  /// The vault's events in the cache that belong on its relays: the deletion
+  /// requests, and the gift wraps they spare that open, as anyone can send one
+  /// to the vault.
+  Future<List<Nip01Event>> _shareable() async {
+    final deletions = await _loadDeletions();
+    final deleted = {for (final request in deletions) ...request.getTags('e')};
+    return [
+      for (final wrap in await _loadWraps())
+        if (!deleted.contains(wrap.id) && await _open(wrap) != null) wrap,
+      ...deletions,
+    ];
+  }
+
   Future<void> _copyTo(List<String> added) async {
     if (added.isEmpty) return;
-    final events = [
-      for (final wrap in await _loadWraps())
-        if (await _open(wrap) != null) wrap,
-      ...await _loadDeletions(),
-    ];
     await Future.wait([
-      for (final event in events)
+      for (final event in await _shareable())
         _send(event, to: added, timeout: Duration.zero),
     ]);
+  }
+
+  /// The ids of the events matching [filter] on [relay], fetched a page at a
+  /// time, and saved in the cache.
+  Future<Set<String>> _fetchAll(String relay, Filter filter) async {
+    final ids = <String>{};
+    int? until;
+    while (true) {
+      // Not through the cache, which could hide some of the page.
+      final response = ndk.requests.query(
+        filter: filter.clone()..until = until,
+        explicitRelays: [relay],
+        cacheRead: false,
+        cacheWrite: false,
+        auth: AuthPolicy.require(_account),
+      );
+      final page = await response.future;
+      final outcome = response.relayOutcomes.values.singleOrNull;
+      if (outcome?.status != RelayRequestStatus.eose) {
+        throw _LeftOut('${outcome ?? 'no answer'}');
+      }
+      final fresh = [
+        for (final event in page)
+          if (ids.add(event.id)) event,
+      ];
+      if (fresh.isEmpty) return ids;
+      for (final event in fresh) {
+        await ndk.config.cache.saveEventIfAbsent(event);
+      }
+      // Inclusive: a relay may cut its page in the middle of a second.
+      until = page.map((event) => event.createdAt).reduce(min);
+    }
   }
 
   /// Moves the live subscriptions, if any, to [currentRelays].
@@ -429,12 +525,12 @@ class Vault {
     await _openLive();
   }
 
-  Future<void> _send(
+  Future<List<RelayBroadcastResponse>> _send(
     Nip01Event event, {
     List<String>? to,
     Duration? timeout,
   }) async {
-    await ndk.broadcast
+    return ndk.broadcast
         .broadcast(
           nostrEvent: event,
           specificRelays: to ?? await _targets(event),
@@ -500,6 +596,13 @@ List<PasswordHistory> _passwordHistory(
     }
   }
   return history.take(5).toList();
+}
+
+/// Why [Vault.reconcile] left a relay out.
+class _LeftOut implements Exception {
+  _LeftOut(this.reason);
+
+  final String reason;
 }
 
 final _random = Random.secure();

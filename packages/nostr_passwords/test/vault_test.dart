@@ -453,6 +453,193 @@ void main() {
     });
   });
 
+  group('reconcile', () {
+    late MockRelay second;
+    late MockRelay third;
+
+    setUp(() async {
+      second = await _startRelay('second relay');
+      third = await _startRelay('third relay');
+      vault = Vault(
+        ndk: ndk,
+        signer: signer,
+        relays: [relay.url, second.url, third.url],
+        indexers: const [],
+      );
+    });
+
+    /// The gift wrap of a new item, as another device publishes it.
+    Future<Nip01Event> wrapItem(String name) => wrapEnvelope(
+      Envelope(
+        id: name,
+        type: 'item',
+        rev: name,
+        parents: const [],
+        modifiedAt: DateTime.now().toUtc(),
+        data: Cipher(type: CipherType.secureNote, name: name).toJson(),
+      ),
+      signer,
+    );
+
+    Future<Nip01Event> deletionOf(Nip01Event wrap) => signer.sign(
+      Nip01Event(
+        pubKey: signer.getPublicKey(),
+        kind: 5,
+        tags: [
+          ['e', wrap.id],
+          ['k', '1059'],
+        ],
+        content: '',
+      ),
+    );
+
+    /// Puts [event] on [to] only, leaving the cache of this device alone.
+    Future<void> publish(Nip01Event event, MockRelay to) => ndk.broadcast
+        .broadcast(
+          nostrEvent: event,
+          specificRelays: [to.url],
+          saveToCache: false,
+          retryDelivery: false,
+        )
+        .broadcastDoneFuture;
+
+    Set<String> held(MockRelay by) => {
+      for (final event in by.matchingEvents(Filter())) event.id,
+    };
+
+    Future<List<String?>> names() async => [
+      for (final item in await vault.items()) item.cipher.name,
+    ];
+
+    test('gives each relay and the cache what the others hold', () async {
+      final onFirst = await wrapItem('Boulanger');
+      final onSecond = await wrapItem('Wi-Fi');
+      final local = await wrapItem('Bank');
+      await publish(onFirst, relay);
+      await publish(onSecond, second);
+      await ndk.config.cache.saveEvent(local);
+
+      expect(await vault.reconcile(), isEmpty);
+
+      for (final to in [relay, second, third]) {
+        expect(held(to), {onFirst.id, onSecond.id, local.id});
+      }
+      expect(await names(), unorderedEquals(['Boulanger', 'Wi-Fi', 'Bank']));
+    });
+
+    test('waits for every relay before sending anything', () async {
+      final slow = MockRelay(name: 'slow relay');
+      await slow.startServer(delayResponse: const Duration(milliseconds: 300));
+      addTearDown(slow.stopServer);
+      vault = Vault(
+        ndk: ndk,
+        signer: signer,
+        relays: [relay.url, slow.url, third.url],
+        indexers: const [],
+      );
+      final wrap = await wrapItem('Old');
+      final request = await deletionOf(wrap);
+      await publish(wrap, relay);
+      await publish(request, slow);
+
+      expect(await vault.reconcile(), isEmpty);
+
+      expect(held(third), {request.id});
+      expect(third.receivedEvents.map((event) => event.id), [request.id]);
+      expect(held(relay), {request.id});
+      expect(await names(), isEmpty);
+    });
+
+    test('pages through a relay that caps its answers', () async {
+      relay.maxEventsPerRequest = 2;
+      final wraps = [
+        for (final name in ['A', 'B', 'C', 'D', 'E']) await wrapItem(name),
+      ];
+      for (final wrap in wraps) {
+        await publish(wrap, relay);
+      }
+
+      expect(await vault.reconcile(), isEmpty);
+
+      expect(held(third), {for (final wrap in wraps) wrap.id});
+    });
+
+    test('authenticates as the vault to read', () async {
+      second.requireAuthForRequests = true;
+      await publish(await wrapItem('Boulanger'), second);
+
+      expect(await vault.reconcile(), isEmpty);
+
+      expect(await names(), ['Boulanger']);
+    });
+
+    test('sends nothing to a relay that did not give all it holds', () async {
+      third.closeRequestsMessage = 'restricted: members only';
+      final wrap = await wrapItem('Boulanger');
+      await publish(wrap, relay);
+
+      final unsynced = await vault.reconcile();
+
+      expect(unsynced.keys, [third.url]);
+      expect(unsynced[third.url], contains('members only'));
+      expect(third.receivedEvents, isEmpty);
+      expect(held(second), {wrap.id});
+    });
+
+    test('reports a relay that refuses what it lacks', () async {
+      third.rejectFirstEventPublishes = 1000;
+      await publish(await wrapItem('Boulanger'), relay);
+
+      final unsynced = await vault.reconcile();
+
+      expect(unsynced.keys, [third.url]);
+      expect(unsynced[third.url], contains('rate-limited'));
+    });
+
+    test('leaves out the gift wraps that do not open', () async {
+      final attacker = const Bip340EventSignerFactory().createWithNewKeyPair();
+      await publish(
+        await attacker.sign(
+          Nip01Event(
+            pubKey: attacker.getPublicKey(),
+            kind: GiftWrap.kGiftWrapEventkind,
+            tags: [
+              ['p', signer.getPublicKey()],
+            ],
+            content: 'not encrypted',
+          ),
+        ),
+        relay,
+      );
+
+      expect(await vault.reconcile(), isEmpty);
+
+      expect(held(second), isEmpty);
+    });
+
+    test('follows the newest relay list, and sends it to its relays', () async {
+      final listed = await _startRelay('listed relay');
+      final wrap = await wrapItem('Boulanger');
+      final list = await signRelayList(
+        RelayList(
+          public: {
+            relay.url: ReadWriteMarker.readWrite,
+            listed.url: ReadWriteMarker.readWrite,
+          },
+        ),
+        signer,
+      );
+      await publish(wrap, relay);
+      await publish(list, relay);
+
+      expect(await vault.reconcile(), isEmpty);
+
+      expect(held(listed), {wrap.id, list.id});
+      expect(held(second), {list.id});
+      expect(held(third), {list.id});
+    });
+  });
+
   group('on another device', () {
     late Ndk otherNdk;
     late SyncEngine engine;

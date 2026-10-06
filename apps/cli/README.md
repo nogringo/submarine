@@ -21,7 +21,6 @@ By default, the vault lives on these relays:
 - `wss://auth.nostr1.com`
 - `wss://chat.wisp.talk`
 - `wss://relay.nostrfeed.com`
-- `wss://relay.nostr.net`
 - `wss://relay.nostr.com`
 - `wss://nostr.oxtr.dev`
 - `wss://nostr.bitcoiner.social`
@@ -56,7 +55,7 @@ list is saved locally, and `sync` sends it.
 
 ```sh
 dart run bin/submarine.dart relay add wss://relay.example.com --private
-dart run bin/submarine.dart relay remove wss://relay.nostr.net
+dart run bin/submarine.dart relay remove wss://relay.nmail.li
 dart run bin/submarine.dart relay list --pretty
 ```
 

@@ -9,7 +9,7 @@ NIP-65 relay list, signed by the vault and published as is:
   "created_at": 1790676000,
   "tags": [
     ["r", "wss://relay.primal.net"],
-    ["r", "wss://relay.nos.social"]
+    ["r", "wss://relay.nos.social", "read"]
   ],
   "content": "<nip44_encrypt(sk_vault, pk_vault, private relays)>",
   "sig": "..."
@@ -24,7 +24,7 @@ Private relays, the `content` once decrypted, in the same tag format, as NIP-51 
 ]
 ```
 
-Anyone can read the public relays in the tags. Only the vault key decrypts the private ones. No `read` or `write` marker: the vault reads and writes on every relay. The event is replaceable, so its `created_at` is the real time, not a random one as for gift wraps: relays keep the newest list.
+Anyone can read the public relays in the tags. Only the vault key decrypts the private ones. The vault reads and writes on every relay. It keeps the `read` and `write` markers for other clients, without using them. The event is replaceable, so its `created_at` is the real time, not a random one as for gift wraps: relays keep the newest list.
 
 ## Create a password
 

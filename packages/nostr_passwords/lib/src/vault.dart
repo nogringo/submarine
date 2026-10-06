@@ -216,7 +216,7 @@ class Vault {
   /// or [relays] while it has none.
   Future<List<String>> currentRelays() async {
     final list = await relayList();
-    final listed = {...?list?.public, ...?list?.private};
+    final listed = {...?list?.public.keys, ...?list?.private.keys};
     return listed.isEmpty ? relays : listed.toList();
   }
 
@@ -449,8 +449,12 @@ class Vault {
       ? _relayListTargets(await readRelayList(event, signer))
       : await currentRelays();
 
-  List<String> _relayListTargets(RelayList? list) =>
-      {...relays, ...?list?.public, ...?list?.private, ...indexers}.toList();
+  List<String> _relayListTargets(RelayList? list) => {
+    ...relays,
+    ...?list?.public.keys,
+    ...?list?.private.keys,
+    ...indexers,
+  }.toList();
 
   Account get _account => Account(
     type: AccountType.externalSigner,

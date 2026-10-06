@@ -23,8 +23,8 @@ void main() {
   );
   // Unreachable: setRelayList publishes on the relays of the list.
   const relays = RelayList(
-    public: ['ws://127.0.0.1:2'],
-    private: ['ws://127.0.0.1:3'],
+    public: {'ws://127.0.0.1:2': ReadWriteMarker.readOnly},
+    private: {'ws://127.0.0.1:3': ReadWriteMarker.writeOnly},
   );
 
   setUp(() async {
@@ -381,7 +381,9 @@ void main() {
         indexers: [indexer.url],
       );
 
-      await vault.setRelayList(RelayList(private: [private.url]));
+      await vault.setRelayList(
+        RelayList(private: {private.url: ReadWriteMarker.readWrite}),
+      );
       await vault.createItem(boulanger);
       await vault.push();
 
@@ -398,7 +400,9 @@ void main() {
 
     test('items go to the relays of the list once there is one', () async {
       final listed = await _startRelay('listed relay');
-      await vault.setRelayList(RelayList(public: [listed.url]));
+      await vault.setRelayList(
+        RelayList(public: {listed.url: ReadWriteMarker.readWrite}),
+      );
 
       await vault.createItem(boulanger);
       await vault.push();
@@ -419,7 +423,14 @@ void main() {
       await vault.deleteItem(old);
       final added = await _startRelay('added relay');
 
-      await vault.setRelayList(RelayList(public: [relay.url, added.url]));
+      await vault.setRelayList(
+        RelayList(
+          public: {
+            relay.url: ReadWriteMarker.readWrite,
+            added.url: ReadWriteMarker.readWrite,
+          },
+        ),
+      );
 
       List<int> kinds() => [
         for (final event in added.receivedEvents) event.kind,
@@ -430,10 +441,14 @@ void main() {
 
     test('a list replaces the one set the same second', () async {
       await vault.setRelayList(relays);
-      await vault.setRelayList(const RelayList(public: ['ws://127.0.0.1:4']));
+      await vault.setRelayList(
+        const RelayList(
+          public: {'ws://127.0.0.1:4': ReadWriteMarker.readWrite},
+        ),
+      );
 
       final saved = await vault.relayList();
-      expect(saved?.public, ['ws://127.0.0.1:4']);
+      expect(saved?.public, {'ws://127.0.0.1:4': ReadWriteMarker.readWrite});
       expect(saved?.private, isEmpty);
     });
   });
@@ -547,7 +562,7 @@ void main() {
       final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
       await otherNdk.config.cache.saveEvent(
         await signRelayList(
-          RelayList(private: [private.url]),
+          RelayList(private: {private.url: ReadWriteMarker.readWrite}),
           signer,
           createdAt: now - 10,
         ),
@@ -555,7 +570,7 @@ void main() {
       await ndk.broadcast
           .broadcast(
             nostrEvent: await signRelayList(
-              RelayList(public: [private.url]),
+              RelayList(public: {private.url: ReadWriteMarker.readWrite}),
               signer,
               createdAt: now,
             ),
@@ -565,13 +580,15 @@ void main() {
 
       final fetched = await otherVault.fetchRelayList();
 
-      expect(fetched?.public, [private.url]);
+      expect(fetched?.public, {private.url: ReadWriteMarker.readWrite});
       expect(fetched?.private, isEmpty);
     });
 
     test('sync follows the relay list', () async {
       final listed = await _startRelay('listed relay');
-      await vault.setRelayList(RelayList(public: [listed.url]));
+      await vault.setRelayList(
+        RelayList(public: {listed.url: ReadWriteMarker.readWrite}),
+      );
       final created = await vault.createItem(boulanger);
       await _until(
         () => relay.receivedEvents.any((event) => event.kind == 10002),
@@ -661,7 +678,9 @@ void main() {
 
       test('moves to the relays of a new relay list', () async {
         final listed = await _startRelay('listed relay');
-        await vault.setRelayList(RelayList(public: [listed.url]));
+        await vault.setRelayList(
+          RelayList(public: {listed.url: ReadWriteMarker.readWrite}),
+        );
         await _until(
           () => relay.receivedEvents.any((event) => event.kind == 10002),
         );

@@ -22,10 +22,14 @@ Future<void> main() async {
   // Its relay list (NIP-65), the private relays encrypted to the vault. It
   // goes to vault.relays, to the relays it lists and to the indexers. From now
   // on the vault lives on the relays it lists, which get a copy of the vault.
+  // It reads and writes on all of them: the markers are for other clients.
   await vault.setRelayList(
     const RelayList(
-      public: ['wss://relay.primal.net'],
-      private: ['wss://relay.alice.example'],
+      public: {
+        'wss://relay.primal.net': ReadWriteMarker.readWrite,
+        'wss://relay.nos.social': ReadWriteMarker.readOnly,
+      },
+      private: {'wss://relay.alice.example': ReadWriteMarker.readWrite},
     ),
   );
 
@@ -64,7 +68,7 @@ Future<void> main() async {
   print('Synced up to ${await vault.lastSync(engine)}');
   // Not part of the sync: fetched from where setRelayList publishes it.
   final relayList = await vault.fetchRelayList();
-  print('Private relays: ${relayList?.private.join(', ')}');
+  print('Private relays: ${relayList?.private.keys.join(', ')}');
 
   // What other devices publish from now on, the moment they do.
   final live = vault.subscribe().listen((_) async {

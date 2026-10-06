@@ -11,8 +11,12 @@ void main() {
   test('public relays go in the tags, private ones in the content', () async {
     final event = await signRelayList(
       const RelayList(
-        public: ['wss://relay.primal.net', 'wss://relay.nos.social'],
-        private: ['wss://relay.alice.example'],
+        public: {
+          'wss://relay.primal.net': ReadWriteMarker.readWrite,
+          'wss://relay.nos.social': ReadWriteMarker.readOnly,
+          'wss://relay.coinos.io': ReadWriteMarker.writeOnly,
+        },
+        private: {'wss://relay.alice.example': ReadWriteMarker.readWrite},
       ),
       vault,
     );
@@ -21,29 +25,35 @@ void main() {
     expect(event.pubKey, vault.getPublicKey());
     expect(event.tags, [
       ['r', 'wss://relay.primal.net'],
-      ['r', 'wss://relay.nos.social'],
+      ['r', 'wss://relay.nos.social', 'read'],
+      ['r', 'wss://relay.coinos.io', 'write'],
     ]);
     expect(event.content, isNot(contains('relay.alice.example')));
   });
 
-  test('the vault reads its private relays back', () async {
-    final event = await signRelayList(
-      const RelayList(
-        public: ['wss://relay.primal.net'],
-        private: ['wss://relay.alice.example'],
-      ),
-      vault,
+  test('the vault reads its relays back, markers included', () async {
+    const relays = RelayList(
+      public: {
+        'wss://relay.primal.net': ReadWriteMarker.readWrite,
+        'wss://relay.nos.social': ReadWriteMarker.readOnly,
+      },
+      private: {
+        'wss://relay.alice.example': ReadWriteMarker.writeOnly,
+        'wss://relay.bob.example': ReadWriteMarker.readWrite,
+      },
     );
 
-    final list = await readRelayList(event, vault);
+    final list = await readRelayList(await signRelayList(relays, vault), vault);
 
-    expect(list.public, ['wss://relay.primal.net']);
-    expect(list.private, ['wss://relay.alice.example']);
+    expect(list.public, relays.public);
+    expect(list.private, relays.private);
   });
 
   test('without private relays, the content is empty', () async {
     final event = await signRelayList(
-      const RelayList(public: ['wss://relay.primal.net']),
+      const RelayList(
+        public: {'wss://relay.primal.net': ReadWriteMarker.readWrite},
+      ),
       vault,
     );
 
@@ -54,7 +64,9 @@ void main() {
   test('a relay list signed by another key is rejected', () async {
     final other = signerFactory.createWithNewKeyPair();
     final event = await signRelayList(
-      const RelayList(public: ['wss://relay.primal.net']),
+      const RelayList(
+        public: {'wss://relay.primal.net': ReadWriteMarker.readWrite},
+      ),
       other,
     );
 

@@ -1,16 +1,22 @@
 import 'dart:convert';
 
 import 'package:ndk/domain_layer/entities/nip_65.dart';
+import 'package:ndk/domain_layer/entities/read_write_marker.dart';
 import 'package:ndk/ndk.dart';
+
+export 'package:ndk/domain_layer/entities/read_write_marker.dart';
 
 /// A vault's relays, in a NIP-65 relay list: the public ones in the tags, the
 /// private ones encrypted to the vault in the content, as NIP-51 does for
 /// private items.
+///
+/// The vault reads and writes on every relay: it keeps their marker for other
+/// clients only.
 class RelayList {
-  const RelayList({this.public = const [], this.private = const []});
+  const RelayList({this.public = const {}, this.private = const {}});
 
-  final List<String> public;
-  final List<String> private;
+  final Map<String, ReadWriteMarker> public;
+  final Map<String, ReadWriteMarker> private;
 }
 
 /// Relays a client gives a vault by default.
@@ -70,7 +76,7 @@ Future<RelayList> readRelayList(Nip01Event event, EventSigner vault) async {
   if (event.kind != Nip65.kKind || event.pubKey != pubkey) {
     throw FormatException('Event ${event.id} is not a relay list of the vault');
   }
-  var private = <String>[];
+  var private = <String, ReadWriteMarker>{};
   if (event.content.isNotEmpty) {
     final plaintext = await vault.decryptNip44(
       ciphertext: event.content,
@@ -84,12 +90,21 @@ Future<RelayList> readRelayList(Nip01Event event, EventSigner vault) async {
   return RelayList(public: _relays(event.tags), private: private);
 }
 
-/// No `read` or `write` marker: the vault reads and writes on every relay.
-List<List<String>> _tags(List<String> relays) => [
-  for (final relay in relays) ['r', relay],
+List<List<String>> _tags(Map<String, ReadWriteMarker> relays) => [
+  for (final MapEntry(key: relay, value: marker) in relays.entries)
+    switch (marker) {
+      ReadWriteMarker.readOnly => ['r', relay, 'read'],
+      ReadWriteMarker.writeOnly => ['r', relay, 'write'],
+      ReadWriteMarker.readWrite => ['r', relay],
+    },
 ];
 
-List<String> _relays(List<dynamic> tags) => [
+Map<String, ReadWriteMarker> _relays(List<dynamic> tags) => {
   for (final tag in tags)
-    if (tag case ['r', final String relay, ...]) relay,
-];
+    if (tag case ['r', final String relay, ...final marker])
+      relay: switch (marker) {
+        ['read', ...] => ReadWriteMarker.readOnly,
+        ['write', ...] => ReadWriteMarker.writeOnly,
+        _ => ReadWriteMarker.readWrite,
+      },
+};

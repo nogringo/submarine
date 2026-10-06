@@ -10,7 +10,8 @@ import '../widgets/select_chip.dart';
 import 'generator_settings.dart';
 
 /// Opens the generator of passwords, or of [username]s, with its last options,
-/// and returns what the user chose to use, if anything.
+/// and returns what the user chose to use, if anything. It is a dialog on a
+/// wide screen and a sheet on a phone.
 Future<String?> showGenerator(
   BuildContext context, {
   bool username = false,
@@ -18,37 +19,67 @@ Future<String?> showGenerator(
   final initial = await GeneratorSettings.read();
   if (!context.mounted) return null;
   var settings = initial;
-  final value = await showModalBottomSheet<String>(
-    context: context,
-    isScrollControlled: true,
-    showDragHandle: true,
-    builder: (context) => SafeArea(
-      child: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(
-          20,
-          0,
-          20,
-          20 + MediaQuery.viewInsetsOf(context).bottom,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              context.l10n.generator,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+  GeneratorView view(BuildContext context, {required bool inDialog}) =>
+      GeneratorView(
+        settings: initial,
+        username: username,
+        onChanged: (changed) => settings = changed,
+        onUse: (value) => Navigator.pop(context, value),
+        onCancel: inDialog ? () => Navigator.pop(context) : null,
+      );
+  final value = context.isWide
+      ? await showDialog<String>(
+          context: context,
+          builder: (context) => Dialog(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      context.l10n.generator,
+                      style: Theme.of(context).dialogTheme.titleTextStyle,
+                    ),
+                    const SizedBox(height: 20),
+                    view(context, inDialog: true),
+                  ],
+                ),
+              ),
             ),
-            const SizedBox(height: 16),
-            GeneratorView(
-              settings: initial,
-              username: username,
-              onChanged: (changed) => settings = changed,
-              onUse: (value) => Navigator.pop(context, value),
+          ),
+        )
+      : await showModalBottomSheet<String>(
+          context: context,
+          isScrollControlled: true,
+          showDragHandle: true,
+          builder: (context) => SafeArea(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(
+                20,
+                0,
+                20,
+                20 + MediaQuery.viewInsetsOf(context).bottom,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    context.l10n.generator,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  view(context, inDialog: false),
+                ],
+              ),
             ),
-          ],
-        ),
-      ),
-    ),
-  );
+          ),
+        );
   if (!identical(settings, initial)) await settings.write();
   return value;
 }
@@ -62,6 +93,7 @@ class GeneratorView extends StatefulWidget {
     required this.onChanged,
     this.username = false,
     this.onUse,
+    this.onCancel,
   });
 
   final GeneratorSettings settings;
@@ -70,6 +102,10 @@ class GeneratorView extends StatefulWidget {
   final bool username;
   final ValueChanged<GeneratorSettings> onChanged;
   final ValueChanged<String>? onUse;
+
+  /// A Cancel button next to the one that uses the value, both on the right,
+  /// as in a dialog. Without it, the button takes the whole width.
+  final VoidCallback? onCancel;
 
   @override
   State<GeneratorView> createState() => _GeneratorViewState();
@@ -162,16 +198,7 @@ class _GeneratorViewState extends State<GeneratorView> {
         ],
         if (onUse != null) ...[
           const SizedBox(height: 20),
-          FilledButton(
-            onPressed: () => onUse(_value),
-            child: Text(
-              widget.username
-                  ? l10n.useUsername
-                  : isPassword
-                  ? l10n.usePassword
-                  : l10n.usePassphrase,
-            ),
-          ),
+          _actions(l10n, onUse, isPassword),
         ],
       ],
     );
@@ -347,6 +374,33 @@ class _GeneratorViewState extends State<GeneratorView> {
         contentPadding: EdgeInsets.zero,
       ),
     ];
+  }
+
+  Widget _actions(
+    AppLocalizations l10n,
+    ValueChanged<String> onUse,
+    bool isPassword,
+  ) {
+    final use = FilledButton(
+      onPressed: () => onUse(_value),
+      child: Text(
+        widget.username
+            ? l10n.useUsername
+            : isPassword
+            ? l10n.usePassword
+            : l10n.usePassphrase,
+      ),
+    );
+    final onCancel = widget.onCancel;
+    if (onCancel == null) return use;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        TextButton(onPressed: onCancel, child: Text(l10n.cancel)),
+        const SizedBox(width: 8),
+        use,
+      ],
+    );
   }
 
   List<Widget> _usernameOptions(AppLocalizations l10n) {

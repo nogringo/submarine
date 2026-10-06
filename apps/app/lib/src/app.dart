@@ -12,6 +12,7 @@ import 'screen_capture.dart';
 import 'theme/appearance.dart';
 import 'theme/theme.dart';
 import 'vaults/vaults.dart';
+import 'widgets/signer_requests.dart';
 
 class SubmarineApp extends StatefulWidget {
   const SubmarineApp({
@@ -80,7 +81,15 @@ class _SubmarineAppState extends State<SubmarineApp> {
                 // Above the navigator, so that dialogs and menus hide too.
                 builder: (context, child) => AnnotatedRegion(
                   value: systemBarsStyle(Theme.of(context).brightness),
-                  child: LockGate(lock: widget.lock, child: child!),
+                  child: LockGate(
+                    lock: widget.lock,
+                    child: SignerRequestsFrame(
+                      onOpen: () => showSignerRequests(
+                        _router.routerDelegate.navigatorKey.currentContext!,
+                      ),
+                      child: child!,
+                    ),
+                  ),
                 ),
               ),
             ),

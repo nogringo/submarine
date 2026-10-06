@@ -9,6 +9,7 @@ import 'package:sembast/sembast.dart' show Database;
 import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
 
 import '../items/item_filter.dart';
+import 'signer_watch.dart';
 import 'vault_controller.dart';
 import 'vault_storage.dart';
 import 'version_store.dart';
@@ -41,10 +42,12 @@ class Vaults extends ChangeNotifier {
     required this.indexers,
     required this._storage,
     required this._database,
+    required this._signerPatience,
   });
 
   /// Opens the vaults saved on this device, and starts syncing them. Each one
-  /// keeps the versions it opened in [database].
+  /// keeps the versions it opened in [database]. A signer silent for
+  /// [signerPatience] seems to wait on the user.
   static Future<Vaults> load({
     required Ndk ndk,
     required SyncEngine engine,
@@ -52,6 +55,7 @@ class Vaults extends ChangeNotifier {
     required Database database,
     List<String> relays = defaultRelays,
     List<String> indexers = indexerRelays,
+    Duration signerPatience = defaultSignerPatience,
   }) async {
     final vaults = Vaults._(
       ndk: ndk,
@@ -60,6 +64,7 @@ class Vaults extends ChangeNotifier {
       indexers: indexers,
       storage: storage,
       database: database,
+      signerPatience: signerPatience,
     );
     for (final record in await storage.read()) {
       vaults._open(record);
@@ -77,6 +82,7 @@ class Vaults extends ChangeNotifier {
   final List<String> indexers;
   final VaultStorage _storage;
   final Database _database;
+  final Duration _signerPatience;
   final _vaults = <VaultController>[];
 
   List<VaultController> get all => List.unmodifiable(_vaults);
@@ -151,13 +157,18 @@ class Vaults extends ChangeNotifier {
 
   Future<void> _saving = Future.value();
 
-  EventSigner _signerOf(VaultLogin login) => switch (login) {
+  /// [onAuthUrl] gets the page where a bunker asks the user to approve.
+  EventSigner _signerOf(
+    VaultLogin login, {
+    required void Function(String url) onAuthUrl,
+  }) => switch (login) {
     KeyLogin(:final privateKey) => ndk.config.eventSignerFactory.create(
       privateKey: privateKey,
     ),
     ExtensionLogin(:final pubkey) => Nip07EventSigner(cachedPublicKey: pubkey),
     BunkerLogin(:final pubkey, :final connection) => ndk.bunkers.createSigner(
       connection,
+      authCallback: onAuthUrl,
     )..cachedPublicKey = pubkey,
     SignerAppLogin(:final pubkey, :final package) => Nip55EventSigner(
       publicKey: pubkey,
@@ -166,7 +177,11 @@ class Vaults extends ChangeNotifier {
   };
 
   VaultController _open(VaultRecord record) {
-    final signer = _signerOf(record.login);
+    late final VaultController vault;
+    final signer = _signerOf(
+      record.login,
+      onAuthUrl: (url) => vault.approvalUrl = url,
+    );
     // Vault.sync authenticates as the vault, which ndk must know.
     ndk.accounts.addAccount(
       pubkey: signer.getPublicKey(),
@@ -176,7 +191,7 @@ class Vaults extends ChangeNotifier {
       signer: signer,
     );
     final store = SembastVersionStore(_database, signer.getPublicKey());
-    final vault = VaultController(
+    vault = VaultController(
       record: record,
       vault: Vault(
         ndk: ndk,
@@ -188,6 +203,7 @@ class Vaults extends ChangeNotifier {
             : VersionCache(store, record.cacheKey),
       ),
       engine: engine,
+      signerPatience: _signerPatience,
     )..addListener(notifyListeners);
     _vaults.add(vault);
     return vault;

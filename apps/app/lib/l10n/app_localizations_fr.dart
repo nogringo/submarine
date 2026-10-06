@@ -129,7 +129,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Aucune application de signature, comme Amber, sur cet appareil.';
 
   @override
-  String get signerRefused => 'Le signeur a refusé ou a échoué.';
+  String get signerRefused => 'La demande a été refusée.';
 
   @override
   String get waitingForAnswer => 'En attente d\'une réponse';
@@ -164,6 +164,103 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get askSignerAtStartDescription =>
       'Désactivé, une clé gardée sur cet appareil lit le coffre même quand le signeur est injoignable. Activé, le coffre reste fermé tant que le signeur ne l\'a pas ouvert.';
+
+  @override
+  String get askSignerFailed => 'Le signeur a refusé ou a échoué.';
+
+  @override
+  String signerWaiting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count demandes attendent votre signeur',
+      one: '1 demande attend votre signeur',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get signerRequestsTitle => 'En attente de votre signeur';
+
+  @override
+  String get signerRequestsDescription =>
+      'Validez ces demandes dans votre signeur, ou annulez-les.';
+
+  @override
+  String get requestOpenVault => 'Ouvrir le coffre';
+
+  @override
+  String get requestLockVault => 'Verrouiller le coffre derrière le signeur';
+
+  @override
+  String requestDecryptVersions(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Déchiffrer $count versions d\'éléments',
+      one: 'Déchiffrer une version d\'un élément',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String requestSaveVersions(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Enregistrer $count versions d\'éléments',
+      one: 'Enregistrer une version d\'un élément',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String requestDeleteVersions(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Supprimer définitivement $count versions d\'éléments',
+      one: 'Supprimer définitivement une version d\'un élément',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get requestSaveRelays => 'Enregistrer la liste des relais';
+
+  @override
+  String get requestReadRelays => 'Lire les relais privés';
+
+  @override
+  String get requestEncryptRelays => 'Chiffrer les relais privés';
+
+  @override
+  String requestRelayAuth(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'S\'identifier auprès de $count relais',
+      one: 'S\'identifier auprès d\'un relais',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String requestOther(int count, String method) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count autres demandes ($method)',
+      one: 'Autre demande ($method)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cancelAll => 'Tout annuler';
+
+  @override
+  String get close => 'Fermer';
 
   @override
   String get sync => 'Synchronisation';
@@ -270,9 +367,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get syncFailed => 'Relais injoignables';
-
-  @override
-  String get waitingForSigner => 'En attente du signeur';
 
   @override
   String get signerDidNotOpen => 'Le signeur n\'a pas ouvert le coffre';

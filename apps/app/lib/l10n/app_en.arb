@@ -194,9 +194,102 @@
   "@askSignerAtStartDescription": {
     "description": "Under the switch asking the signer at each launch."
   },
-  "signerRefused": "The signer refused or failed.",
-  "@signerRefused": {
+  "askSignerFailed": "The signer refused or failed.",
+  "@askSignerFailed": {
     "description": "Error under the switch asking the signer at each launch, when the signer did not do what it was asked."
+  },
+  "signerWaiting": "{count, plural, =1{1 request waits for your signer} other{{count} requests wait for your signer}}",
+  "@signerWaiting": {
+    "description": "Bar at the bottom of a narrow screen, and tooltip of the rail button, while a signer waits on the user to approve requests.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "signerRequestsTitle": "Waiting for your signer",
+  "@signerRequestsTitle": {
+    "description": "Title of the dialog or sheet listing what the signers wait on the user for."
+  },
+  "signerRequestsDescription": "Approve these requests in your signer, or cancel them.",
+  "@signerRequestsDescription": {
+    "description": "Under the title of the dialog or sheet listing what the signers wait on the user for."
+  },
+  "requestOpenVault": "Open the vault",
+  "@requestOpenVault": {
+    "description": "Request to a signer: decrypt the key that opens a vault set to ask the signer at each launch."
+  },
+  "requestLockVault": "Lock the vault behind the signer",
+  "@requestLockVault": {
+    "description": "Request to a signer: encrypt the key of the vault on this device, once the vault asks the signer at each launch."
+  },
+  "requestDecryptVersions": "{count, plural, =1{Decrypt a version of an item} other{Decrypt {count} versions of items}}",
+  "@requestDecryptVersions": {
+    "description": "Requests to a signer: decrypt versions of items.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "requestSaveVersions": "{count, plural, =1{Save a version of an item} other{Save {count} versions of items}}",
+  "@requestSaveVersions": {
+    "description": "Requests to a signer: sign versions of items.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "requestDeleteVersions": "{count, plural, =1{Delete a version of an item for good} other{Delete {count} versions of items for good}}",
+  "@requestDeleteVersions": {
+    "description": "Requests to a signer: sign deletion requests, one per version of an item.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "requestSaveRelays": "Save the relay list",
+  "@requestSaveRelays": {
+    "description": "Request to a signer: sign the relay list of a vault."
+  },
+  "requestReadRelays": "Read the private relays",
+  "@requestReadRelays": {
+    "description": "Request to a signer: decrypt the private relays of a vault."
+  },
+  "requestEncryptRelays": "Encrypt the private relays",
+  "@requestEncryptRelays": {
+    "description": "Request to a signer: encrypt the private relays of a vault."
+  },
+  "requestRelayAuth": "{count, plural, =1{Sign in to a relay} other{Sign in to {count} relays}}",
+  "@requestRelayAuth": {
+    "description": "Requests to a signer: sign relay authentications (NIP-42).",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "requestOther": "{count, plural, =1{Other request ({method})} other{{count} other requests ({method})}}",
+  "@requestOther": {
+    "description": "Requests to a signer the app does not name, with their NIP-46 method.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelAll": "Cancel all",
+  "@cancelAll": {
+    "description": "Button cancelling every request the signers wait on the user for."
+  },
+  "close": "Close",
+  "@close": {
+    "description": "Button closing the dialog or sheet listing what the signers wait on the user for."
   },
   "sync": "Sync",
   "@sync": {
@@ -326,10 +419,6 @@
   "syncFailed": "Relays unreachable",
   "@syncFailed": {
     "description": "Sync status when no relay answers."
-  },
-  "waitingForSigner": "Waiting for the signer",
-  "@waitingForSigner": {
-    "description": "Sync status, also shown in place of an empty list, while the signer holding a vault key has a request to answer."
   },
   "signerDidNotOpen": "Signer did not open the vault",
   "@signerDidNotOpen": {

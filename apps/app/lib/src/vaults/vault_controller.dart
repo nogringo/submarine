@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
-import 'package:ndk/ndk.dart' show Nip01Event;
+import 'package:ndk/ndk.dart'
+    show Nip01Event, PendingSignerRequest, SignerMethod;
 import 'package:nostr_passwords/nostr_passwords.dart';
 import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
 
+import 'signer_watch.dart';
 import 'vault_storage.dart';
 
 /// A vault of this device, kept synced from its relays while the app runs.
@@ -16,24 +18,29 @@ class VaultController extends ChangeNotifier {
     required this._record,
     required this.vault,
     required this._engine,
-  }) {
+    Duration signerPatience = defaultSignerPatience,
+  }) : _signer = SignerWatch(
+         vault.signer.pendingRequestsStream,
+         patience: signerPatience,
+       ) {
     unawaited(_readRelays().then((_) => fetchRelays()));
     subscribe();
-    _signerRequests = vault.signer.pendingRequestsStream.listen(
-      (_) => notifyListeners(),
-    );
+    _signer.addListener(() {
+      if (_signer.idle) _approvalUrl = null;
+      notifyListeners();
+    });
     unawaited(unlock());
   }
 
   final Vault vault;
   final SyncEngine _engine;
+  final SignerWatch _signer;
 
   /// Holds the relays of the moment, replaced once they change.
   Future<SyncHandle>? _handle;
   Set<String>? _syncedRelays;
   StreamSubscription<SyncRequestStatus>? _statuses;
   StreamSubscription<Nip01Event>? _live;
-  StreamSubscription<void>? _signerRequests;
 
   /// Changed through [Vaults.edit], which saves it.
   VaultRecord get record => _record;
@@ -64,8 +71,40 @@ class VaultController extends ChangeNotifier {
   /// sealed. Nothing shows until it does, see [unlock].
   bool get locked => vault.cache?.locked ?? false;
 
-  /// Whether the signer has a request of the vault to answer.
-  bool get waitingForSigner => vault.signer.pendingRequests.isNotEmpty;
+  /// Whether [unlock] waits for the signer.
+  bool get unlocking => _unlocking;
+  var _unlocking = false;
+
+  /// What the signer seems to wait on the user for, see [SignerWatch].
+  List<PendingSignerRequest> get signerRequests => _signer.waiting;
+
+  bool get waitingForSigner => signerRequests.isNotEmpty;
+
+  /// The page where the bunker asks the user to approve, while it waits.
+  String? get approvalUrl => waitingForSigner ? _approvalUrl : null;
+  String? _approvalUrl;
+
+  set approvalUrl(String? url) {
+    _approvalUrl = url;
+    notifyListeners();
+  }
+
+  /// Whether a cancelled decryption keeps the versions from being asked to
+  /// open, until [sync].
+  var _openingHeld = false;
+
+  /// Cancels [requests], whose actions fail. Asks the signer to open no
+  /// version until [sync], as the next read would ask again.
+  void cancelSignerRequests(Iterable<PendingSignerRequest> requests) {
+    final ids = [for (final request in requests) request.id];
+    _signer.cancelled(ids);
+    if (requests.any(
+      (request) => request.method == SignerMethod.nip44Decrypt,
+    )) {
+      _openingHeld = true;
+    }
+    ids.forEach(vault.signer.cancelRequest);
+  }
 
   SyncRequestPhase get phase => _phase;
   var _phase = SyncRequestPhase.idle;
@@ -90,10 +129,11 @@ class VaultController extends ChangeNotifier {
   var _relaysFetched = false;
 
   /// Sends the unsent changes and fetches what changed on the relays now,
-  /// rather than at the next pass. Asks the signer again to open the vault if
-  /// it did not.
+  /// rather than at the next pass. Asks the signer again for what it did not
+  /// open.
   Future<void> sync() => Future.wait([
     unlock(),
+    if (_openingHeld) _resumeOpening(),
     vault.push().then((_) => _checkUnsent()),
     if (_handle case final handle?) handle.then(_engine.refresh),
     fetchRelays(),
@@ -145,7 +185,21 @@ class VaultController extends ChangeNotifier {
 
   /// Asks the signer to open the vault, unless it did.
   Future<void> unlock() async {
-    if (locked && await vault.cache!.unlock()) await _reload();
+    if (!locked || _unlocking) return;
+    _unlocking = true;
+    notifyListeners();
+    try {
+      await vault.cache!.unlock();
+    } finally {
+      _unlocking = false;
+      if (!_disposed) notifyListeners();
+    }
+    if (!locked) await _reload();
+  }
+
+  Future<void> _resumeOpening() {
+    _openingHeld = false;
+    return _reload();
   }
 
   /// Shows what other devices change the moment they publish it, until
@@ -275,7 +329,7 @@ class VaultController extends ChangeNotifier {
         _lastSync = lastSync;
         _loaded = _opened;
         notifyListeners();
-        if (!locked) unawaited(_open());
+        if (!locked && !_openingHeld) unawaited(_open());
         await _checkUnsent();
       } while (_reloadAgain);
     } catch (error, stack) {
@@ -314,7 +368,7 @@ class VaultController extends ChangeNotifier {
     _disposed = true;
     _unsentCheck?.cancel();
     unawaited(_statuses?.cancel());
-    unawaited(_signerRequests?.cancel());
+    _signer.dispose();
     unawaited(unsubscribe());
     unawaited(_handle?.then(_engine.release));
     super.dispose();

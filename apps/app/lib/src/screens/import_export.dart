@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:ndk/ndk.dart' show SignerRequestCancelledException;
 import 'package:intl/intl.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
 
@@ -337,6 +338,8 @@ class _ImportDialogState extends State<_ImportDialog> {
           if (mounted) setState(() => _saved = saved);
         },
       );
+    } on SignerRequestCancelledException {
+      // Stopped by the user, with what was saved so far.
     } catch (_) {
       _failed = true;
     }

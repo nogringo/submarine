@@ -5,12 +5,13 @@ import '../context.dart';
 import '../lock/app_lock.dart';
 import '../router.dart';
 import '../vaults/vaults.dart';
+import '../widgets/signer_requests.dart';
 import '../widgets/vault_avatar.dart';
 import 'add_vault.dart';
 import 'app_navigation.dart';
 
-/// Wide layout: the vaults in a rail, as Discord shows its servers, the
-/// generator, the settings and the lock at the bottom.
+/// Wide layout: the vaults in a rail, as Discord shows its servers, what the
+/// signers wait for, the generator, the settings and the lock at the bottom.
 class VaultRail extends StatelessWidget {
   const VaultRail({
     super.key,
@@ -29,6 +30,7 @@ class VaultRail extends StatelessWidget {
     final palette = context.palette;
     final vaults = Vaults.of(context);
     final lock = AppLock.of(context);
+    final signerRequests = signerRequestCount(vaults);
     void select(String vaultId) =>
         context.go(vaultPathKeeping(vaults, vaultId, itemId: selectedItemId));
     return SizedBox(
@@ -72,6 +74,13 @@ class VaultRail extends StatelessWidget {
               ],
             ),
           ),
+          if (signerRequests > 0)
+            _RailButton(
+              icon: Icons.pending_actions_rounded,
+              tooltip: l10n.signerWaiting(signerRequests),
+              badge: signerRequests,
+              onPressed: () => showSignerRequests(context),
+            ),
           _RailButton(
             icon: Icons.casino_outlined,
             tooltip: l10n.generator,
@@ -102,17 +111,22 @@ class _RailButton extends StatelessWidget {
     required this.icon,
     required this.tooltip,
     this.selected = false,
+    this.badge,
     required this.onPressed,
   });
 
   final IconData icon;
   final String tooltip;
   final bool selected;
+
+  /// A count to catch the eye with.
+  final int? badge;
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
+    final badge = this.badge;
     return Padding(
       padding: const EdgeInsets.only(top: 4),
       child: IconButton(
@@ -124,10 +138,21 @@ class _RailButton extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
-          foregroundColor: selected ? palette.text : palette.muted,
+          foregroundColor: badge != null
+              ? palette.signal
+              : selected
+              ? palette.text
+              : palette.muted,
           backgroundColor: selected ? palette.selected : null,
         ),
-        icon: Icon(icon),
+        icon: badge == null
+            ? Icon(icon)
+            : Badge(
+                label: Text('$badge'),
+                backgroundColor: palette.accent,
+                textColor: palette.onAccent,
+                child: Icon(icon),
+              ),
       ),
     );
   }

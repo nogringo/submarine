@@ -6,13 +6,12 @@ import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
 import '../context.dart';
 import '../vaults/vault_controller.dart';
 
-/// Where the sync of several vaults stands, as one: a signer to wait for or
-/// that did not open a vault, the changes still to send, the oldest last sync,
-/// and a failure as soon as one vault reaches no relay.
+/// Where the sync of several vaults stands, as one: a signer that did not
+/// open a vault, the changes still to send, the oldest last sync, and a
+/// failure as soon as one vault reaches no relay.
 class SyncSummary {
   SyncSummary(List<VaultController> vaults)
-    : waitingForSigner = vaults.any((vault) => vault.waitingForSigner),
-      locked = vaults.any((vault) => vault.locked),
+    : locked = vaults.any((vault) => vault.locked && !vault.unlocking),
       unsent = vaults.fold(0, (sum, vault) => sum + vault.unsent),
       failed = vaults.any((vault) => vault.phase == SyncRequestPhase.failed),
       syncing = vaults.any((vault) => vault.phase == SyncRequestPhase.syncing),
@@ -22,7 +21,7 @@ class SyncSummary {
                 .map((vault) => vault.lastSync!)
                 .reduce((a, b) => a.isBefore(b) ? a : b);
 
-  final bool waitingForSigner;
+  /// Whether a signer did not open a vault that asks it at each launch.
   final bool locked;
   final int unsent;
   final bool failed;
@@ -32,14 +31,12 @@ class SyncSummary {
   final DateTime? lastSync;
 
   /// Whether [describe] tells of the changes still to send.
-  bool get tellsUnsent => !waitingForSigner && !locked && unsent > 0;
+  bool get tellsUnsent => !locked && unsent > 0;
 
   /// Whether [describe] tells of a failure.
-  bool get tellsFailure =>
-      !waitingForSigner && (locked || (failed && unsent == 0));
+  bool get tellsFailure => locked || (failed && unsent == 0);
 
   String describe(AppLocalizations l10n) {
-    if (waitingForSigner) return l10n.waitingForSigner;
     if (locked) return l10n.signerDidNotOpen;
     if (unsent > 0) return l10n.changesNotSent(unsent);
     if (failed) return l10n.syncFailed;
@@ -151,9 +148,7 @@ class SyncCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.palette;
     final summary = SyncSummary(vaults);
-    final icon = summary.waitingForSigner
-        ? Icon(Icons.hourglass_top_rounded, size: 18, color: palette.muted)
-        : summary.locked
+    final icon = summary.locked
         ? Icon(Icons.lock_outline_rounded, size: 18, color: palette.danger)
         : summary.unsent > 0
         ? Icon(Icons.upload_rounded, size: 18, color: palette.muted)

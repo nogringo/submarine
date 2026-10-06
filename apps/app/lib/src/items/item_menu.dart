@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ndk/ndk.dart' show SignerRequestCancelledException;
 import 'package:go_router/go_router.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
 
@@ -135,32 +136,37 @@ Future<void> runItemAction(
 }) async {
   final VaultItem(:vault, :item) = entry;
   if (!action.copies && vault.isSaving(item)) return;
-  switch (action) {
-    case ItemAction.copyUsername ||
-        ItemAction.copyPassword ||
-        ItemAction.copyTotp ||
-        ItemAction.copyNumber:
-      if (action.copiedFrom(item.cipher) case final value?) {
-        await AppClipboard.of(context)
-            .copy(value, sensitive: action != ItemAction.copyUsername);
-      }
-      return;
-    case ItemAction.favorite:
-      await vault.updateItem(
-        item,
-        Cipher.fromJson(item.current.data)..favorite = !item.cipher.favorite,
-      );
-      return;
-    case ItemAction.edit:
-      context.go(editItemPath(vaultId, filter, item.id));
-      return;
-    case ItemAction.trash:
-      await vault.trashItem(item);
-    case ItemAction.restore:
-      await vault.restoreItem(item);
-    case ItemAction.delete:
-      if (!await _confirmDelete(context)) return;
-      await vault.deleteItem(item);
+  try {
+    switch (action) {
+      case ItemAction.copyUsername ||
+          ItemAction.copyPassword ||
+          ItemAction.copyTotp ||
+          ItemAction.copyNumber:
+        if (action.copiedFrom(item.cipher) case final value?) {
+          await AppClipboard.of(context)
+              .copy(value, sensitive: action != ItemAction.copyUsername);
+        }
+        return;
+      case ItemAction.favorite:
+        await vault.updateItem(
+          item,
+          Cipher.fromJson(item.current.data)..favorite = !item.cipher.favorite,
+        );
+        return;
+      case ItemAction.edit:
+        context.go(editItemPath(vaultId, filter, item.id));
+        return;
+      case ItemAction.trash:
+        await vault.trashItem(item);
+      case ItemAction.restore:
+        await vault.restoreItem(item);
+      case ItemAction.delete:
+        if (!await _confirmDelete(context)) return;
+        await vault.deleteItem(item);
+    }
+  } on SignerRequestCancelledException {
+    // Cancelled by the user, from the requests the signer waits for.
+    return;
   }
   if (close && context.mounted) context.go(vaultPath(vaultId, filter: filter));
 }

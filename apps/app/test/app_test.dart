@@ -130,6 +130,7 @@ void main() {
       database: database,
       relays: relays,
       indexers: const [],
+      signerPatience: Duration.zero,
     );
     while (vaults.all.any((vault) => !vault.loaded)) {
       await Future<void>.delayed(const Duration(milliseconds: 10));
@@ -154,9 +155,13 @@ void main() {
         database: database,
         relays: vaultRelays,
         indexers: const [],
+        signerPatience: Duration.zero,
       );
       while (vaults.all.any(
-        (vault) => !vault.loaded && !vault.locked && !vault.waitingForSigner,
+        (vault) =>
+            !vault.loaded &&
+            !vault.waitingForSigner &&
+            !(vault.locked && !vault.unlocking),
       )) {
         await Future<void>.delayed(const Duration(milliseconds: 10));
       }
@@ -1940,15 +1945,17 @@ void main() {
     await settle(tester);
 
     expect(find.text('GitHub'), findsNothing);
-    expect(find.text('Waiting for the signer'), findsWidgets);
-
-    signerApp.refuses = true;
-    await tester.runAsync(() async {
-      signerApp.hold!.complete();
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-    });
+    const waiting = '1 request waits for your signer';
+    await tester.tap(find.byTooltip(waiting));
     await settle(tester);
+    expect(inDialog('Waiting for your signer'), findsOneWidget);
+    expect(inDialog('Signed'), findsOneWidget);
+    expect(inDialog('Open the vault'), findsOneWidget);
 
+    await write(tester, inDialog('Cancel'));
+
+    expect(find.byType(Dialog), findsNothing);
+    expect(find.byTooltip(waiting), findsNothing);
     expect(find.text('GitHub'), findsNothing);
     expect(
       find.text('The signer did not open this vault. Sync to ask it again.'),
@@ -1956,9 +1963,7 @@ void main() {
     );
     expect(find.text('Signer did not open the vault'), findsWidgets);
 
-    signerApp
-      ..hold = null
-      ..refuses = false;
+    signerApp.hold = null;
     await write(tester, find.byTooltip('Sync now').first);
 
     expect(find.text('GitHub'), findsWidgets);
@@ -2004,9 +2009,10 @@ void main() {
     await tester.tap(find.byTooltip('Signed'));
     await settle(tester);
 
+    const waiting = '1 request waits for your signer';
     expect(find.text('GitHub'), findsWidgets);
     expect(find.text('Wi-Fi'), findsNothing);
-    expect(find.text('Waiting for the signer'), findsWidgets);
+    expect(find.byTooltip(waiting), findsOneWidget);
 
     await tester.runAsync(() async {
       signerApp.hold!.complete();
@@ -2015,8 +2021,57 @@ void main() {
     await settle(tester);
 
     expect(find.text('Wi-Fi'), findsWidgets);
-    expect(find.text('Waiting for the signer'), findsNothing);
+    expect(find.byTooltip(waiting), findsNothing);
     expect(signerApp.decryptions, 2);
+    await close(tester);
+  });
+
+  testWidgets('cancels from a phone what the signer waits for', (tester) async {
+    setScreen(tester, const Size(390, 844));
+    final signerApp = FakeSignerApp(tester);
+    await open(
+      tester,
+      signer: SignerAppLogin(
+        signerApp.signer.getPublicKey(),
+        package: 'com.greenart7c3.nostrsigner',
+      ),
+    );
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+      ),
+    );
+    await settle(tester);
+    await tester.tap(find.byTooltip('Vaults'));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Vault settings'));
+    await settle(tester);
+    const askSigner = 'Ask the signer at each launch';
+    const waiting = '1 request waits for your signer';
+    expect(find.text(waiting), findsNothing);
+
+    signerApp.hold = Completer();
+    await tester.ensureVisible(settingsSwitch(askSigner));
+    await settle(tester);
+    await write(tester, settingsSwitch(askSigner));
+
+    expect(find.text(waiting), findsOneWidget);
+    await tester.tap(find.text(waiting));
+    await settle(tester);
+    expect(find.text('Waiting for your signer'), findsOneWidget);
+    expect(find.text('Lock the vault behind the signer'), findsOneWidget);
+
+    await write(tester, find.text('Cancel all'));
+
+    expect(find.text('Waiting for your signer'), findsNothing);
+    expect(find.text(waiting), findsNothing);
+    expect(tester.widget<Switch>(settingsSwitch(askSigner)).value, isFalse);
+    expect(find.text('The signer refused or failed.'), findsNothing);
+    expect(vaults.all.single.record.cacheKeySealed, isFalse);
     await close(tester);
   });
 

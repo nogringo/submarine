@@ -308,10 +308,10 @@ abstract class AppLocalizations {
   /// **'No signer app, such as Amber, on this device.'**
   String get noSignerApp;
 
-  /// Error under the switch asking the signer at each launch, when the signer did not do what it was asked.
+  /// Error when the extension or the signer app refused to give the vault's public key.
   ///
   /// In en, this message translates to:
-  /// **'The signer refused or failed.'**
+  /// **'The request was refused.'**
   String get signerRefused;
 
   /// Shown while the dialog waits for a bunker, an extension or a signer app.
@@ -373,6 +373,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Off, a key kept on this device reads the vault even when the signer is out of reach. On, the vault stays closed until the signer opens it.'**
   String get askSignerAtStartDescription;
+
+  /// Error under the switch asking the signer at each launch, when the signer did not do what it was asked.
+  ///
+  /// In en, this message translates to:
+  /// **'The signer refused or failed.'**
+  String get askSignerFailed;
+
+  /// Bar at the bottom of a narrow screen, and tooltip of the rail button, while a signer waits on the user to approve requests.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 request waits for your signer} other{{count} requests wait for your signer}}'**
+  String signerWaiting(int count);
+
+  /// Title of the dialog or sheet listing what the signers wait on the user for.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for your signer'**
+  String get signerRequestsTitle;
+
+  /// Under the title of the dialog or sheet listing what the signers wait on the user for.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve these requests in your signer, or cancel them.'**
+  String get signerRequestsDescription;
+
+  /// Request to a signer: decrypt the key that opens a vault set to ask the signer at each launch.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the vault'**
+  String get requestOpenVault;
+
+  /// Request to a signer: encrypt the key of the vault on this device, once the vault asks the signer at each launch.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock the vault behind the signer'**
+  String get requestLockVault;
+
+  /// Requests to a signer: decrypt versions of items.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Decrypt a version of an item} other{Decrypt {count} versions of items}}'**
+  String requestDecryptVersions(int count);
+
+  /// Requests to a signer: sign versions of items.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Save a version of an item} other{Save {count} versions of items}}'**
+  String requestSaveVersions(int count);
+
+  /// Requests to a signer: sign deletion requests, one per version of an item.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Delete a version of an item for good} other{Delete {count} versions of items for good}}'**
+  String requestDeleteVersions(int count);
+
+  /// Request to a signer: sign the relay list of a vault.
+  ///
+  /// In en, this message translates to:
+  /// **'Save the relay list'**
+  String get requestSaveRelays;
+
+  /// Request to a signer: decrypt the private relays of a vault.
+  ///
+  /// In en, this message translates to:
+  /// **'Read the private relays'**
+  String get requestReadRelays;
+
+  /// Request to a signer: encrypt the private relays of a vault.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypt the private relays'**
+  String get requestEncryptRelays;
+
+  /// Requests to a signer: sign relay authentications (NIP-42).
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Sign in to a relay} other{Sign in to {count} relays}}'**
+  String requestRelayAuth(int count);
+
+  /// Requests to a signer the app does not name, with their NIP-46 method.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Other request ({method})} other{{count} other requests ({method})}}'**
+  String requestOther(int count, String method);
+
+  /// Button cancelling every request the signers wait on the user for.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel all'**
+  String get cancelAll;
+
+  /// Button closing the dialog or sheet listing what the signers wait on the user for.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
 
   /// Title of the vault settings section about syncing with the relays.
   ///
@@ -559,12 +655,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Relays unreachable'**
   String get syncFailed;
-
-  /// Sync status, also shown in place of an empty list, while the signer holding a vault key has a request to answer.
-  ///
-  /// In en, this message translates to:
-  /// **'Waiting for the signer'**
-  String get waitingForSigner;
 
   /// Sync status when the signer did not open a vault that asks it at each launch.
   ///

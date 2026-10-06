@@ -125,7 +125,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noSignerApp => 'No signer app, such as Amber, on this device.';
 
   @override
-  String get signerRefused => 'The signer refused or failed.';
+  String get signerRefused => 'The request was refused.';
 
   @override
   String get waitingForAnswer => 'Waiting for an answer';
@@ -160,6 +160,103 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get askSignerAtStartDescription =>
       'Off, a key kept on this device reads the vault even when the signer is out of reach. On, the vault stays closed until the signer opens it.';
+
+  @override
+  String get askSignerFailed => 'The signer refused or failed.';
+
+  @override
+  String signerWaiting(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count requests wait for your signer',
+      one: '1 request waits for your signer',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get signerRequestsTitle => 'Waiting for your signer';
+
+  @override
+  String get signerRequestsDescription =>
+      'Approve these requests in your signer, or cancel them.';
+
+  @override
+  String get requestOpenVault => 'Open the vault';
+
+  @override
+  String get requestLockVault => 'Lock the vault behind the signer';
+
+  @override
+  String requestDecryptVersions(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Decrypt $count versions of items',
+      one: 'Decrypt a version of an item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String requestSaveVersions(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Save $count versions of items',
+      one: 'Save a version of an item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String requestDeleteVersions(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Delete $count versions of items for good',
+      one: 'Delete a version of an item for good',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get requestSaveRelays => 'Save the relay list';
+
+  @override
+  String get requestReadRelays => 'Read the private relays';
+
+  @override
+  String get requestEncryptRelays => 'Encrypt the private relays';
+
+  @override
+  String requestRelayAuth(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Sign in to $count relays',
+      one: 'Sign in to a relay',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String requestOther(int count, String method) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count other requests ($method)',
+      one: 'Other request ($method)',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cancelAll => 'Cancel all';
+
+  @override
+  String get close => 'Close';
 
   @override
   String get sync => 'Sync';
@@ -265,9 +362,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get syncFailed => 'Relays unreachable';
-
-  @override
-  String get waitingForSigner => 'Waiting for the signer';
 
   @override
   String get signerDidNotOpen => 'Signer did not open the vault';

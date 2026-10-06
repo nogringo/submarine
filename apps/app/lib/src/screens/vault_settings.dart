@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ndk/entities.dart' show RelayConnectivity;
-import 'package:ndk/ndk.dart' show Nip19;
+import 'package:ndk/ndk.dart' show Nip19, SignerRequestCancelledException;
 import 'package:ndk/shared/helpers/relay_helper.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
 
@@ -290,8 +290,10 @@ class _AskSignerTileState extends State<_AskSignerTile> {
     });
     try {
       await vaults.setCacheKeySealed(widget.vault, sealed);
+    } on SignerRequestCancelledException {
+      // Cancelled by the user, from the requests the signer waits for.
     } catch (_) {
-      if (mounted) setState(() => _error = l10n.signerRefused);
+      if (mounted) setState(() => _error = l10n.askSignerFailed);
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -330,8 +332,7 @@ class _SyncTile extends StatelessWidget {
         summary.lastSync != null &&
         summary.unsent == 0 &&
         !summary.failed &&
-        !summary.locked &&
-        !summary.waitingForSigner;
+        !summary.locked;
     return SettingsTile(
       title: SyncStatusText(
         vaults: [vault],
@@ -414,6 +415,8 @@ class _RelaysState extends State<_Relays> {
           _added.clear();
         });
       }
+    } on SignerRequestCancelledException {
+      // Cancelled by the user: the draft stays, to save again.
     } catch (_) {
       if (mounted) setState(() => _saveError = l10n.relaysSaveFailed);
     } finally {

@@ -568,6 +568,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newLogin => 'New login';
 
   @override
+  String get newCard => 'New card';
+
+  @override
+  String get newSecureNote => 'New secure note';
+
+  @override
   String get editItem => 'Edit item';
 
   @override
@@ -596,6 +602,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addWebsite => 'Add a website';
+
+  @override
+  String get cardBrandOther => 'Other';
+
+  @override
+  String get cardExpYearHint => 'YYYY';
+
+  @override
+  String get notSet => 'Not set';
 
   @override
   String get favorite => 'Favorite';

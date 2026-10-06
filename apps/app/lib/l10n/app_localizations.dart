@@ -1094,6 +1094,18 @@ abstract class AppLocalizations {
   /// **'New login'**
   String get newLogin;
 
+  /// Title of the form creating a payment card.
+  ///
+  /// In en, this message translates to:
+  /// **'New card'**
+  String get newCard;
+
+  /// Title of the form creating a secure note.
+  ///
+  /// In en, this message translates to:
+  /// **'New secure note'**
+  String get newSecureNote;
+
   /// Title of the form editing an item.
   ///
   /// In en, this message translates to:
@@ -1153,6 +1165,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add a website'**
   String get addWebsite;
+
+  /// Card brand for a card of none of the listed brands.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get cardBrandOther;
+
+  /// Placeholder of the expiration year of a card in the item form.
+  ///
+  /// In en, this message translates to:
+  /// **'YYYY'**
+  String get cardExpYearHint;
+
+  /// Choice of a dropdown in the item form that leaves the value empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get notSet;
 
   /// Switch marking an item as favorite in the item form.
   ///

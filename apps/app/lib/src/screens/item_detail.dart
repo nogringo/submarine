@@ -200,8 +200,8 @@ class ItemDetail extends StatelessWidget {
   }
 }
 
-/// Marks the item as a favorite, opens the form that edits a login, and moves
-/// the item to the trash. In the trash: restores the item, or deletes it for
+/// Marks the item as a favorite, opens the form that edits it, and moves the
+/// item to the trash. In the trash: restores the item, or deletes it for
 /// good.
 class ItemActions extends StatelessWidget {
   const ItemActions({
@@ -268,7 +268,7 @@ class ItemActions extends StatelessWidget {
             icon: const Icon(Icons.restore_from_trash_rounded, size: 18),
             label: Text(l10n.restore),
           ),
-        ] else if (cipher.type == CipherType.login) ...[
+        ] else if (ItemAction.available(cipher).contains(ItemAction.edit)) ...[
           const SizedBox(width: 4),
           OutlinedButton.icon(
             onPressed: () => run(ItemAction.edit),

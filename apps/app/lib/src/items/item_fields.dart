@@ -63,7 +63,10 @@ List<FieldRow> typeFields(AppLocalizations l10n, Cipher cipher) {
     case CipherType.card:
       final card = cipher.card;
       add(l10n.cardholderName, card?.cardholderName);
-      add(l10n.cardBrand, card?.brand);
+      add(l10n.cardBrand, switch (card?.brand) {
+        final brand? => cardBrandLabel(l10n, brand),
+        null => null,
+      });
       add(l10n.cardNumber, card?.number, FieldKind.secret);
       add(l10n.cardExpiration, _expiration(card?.expMonth, card?.expYear));
       add(l10n.cardCode, card?.code, FieldKind.secret);
@@ -172,6 +175,13 @@ List<FieldRow> customFields(AppLocalizations l10n, Cipher cipher) => [
       _ => FieldRow(field.name ?? '', field.value ?? ''),
     },
 ];
+
+/// How Bitwarden's card [brand] shows.
+String cardBrandLabel(AppLocalizations l10n, String brand) => switch (brand) {
+  'Amex' => 'American Express',
+  'Other' => l10n.cardBrandOther,
+  _ => brand,
+};
 
 String? _expiration(String? month, String? year) {
   final paddedMonth = month == null || month.isEmpty

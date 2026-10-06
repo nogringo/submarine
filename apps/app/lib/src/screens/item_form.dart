@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
 
 import '../context.dart';
 import '../generator/generator_sheet.dart';
+import '../items/item_fields.dart';
 import '../items/item_filter.dart';
 import '../router.dart';
 import '../theme/theme.dart';
@@ -15,20 +17,25 @@ import '../vaults/vaults.dart';
 import '../widgets/vault_dropdown.dart';
 import 'item_detail.dart';
 
-/// Creates a login, or edits the item [itemId]. Only the name, the notes, the
-/// favorite and a login's fields are edited: the rest of the item is kept.
+/// Creates an item of [type], one of the [formTypes], or edits the item
+/// [itemId]. Only the name, the notes, the favorite and the fields of a login
+/// or a card are edited: the rest of the item is kept.
 class ItemForm extends StatelessWidget {
   const ItemForm({
     super.key,
     required this.vaultId,
     required this.filter,
     this.itemId,
+    this.type = CipherType.login,
   });
 
   /// The vaults whose items are listed, where the form goes back to.
   final String vaultId;
   final ItemFilter filter;
   final String? itemId;
+
+  /// The type of the item created, when not editing one.
+  final CipherType type;
 
   /// Whether the form on screen may be left, asking first if that loses changes.
   static FutureOr<bool> confirmExit() {
@@ -40,20 +47,33 @@ class ItemForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final itemId = this.itemId;
-    if (itemId == null) return _Form(vaultId: vaultId, filter: filter);
+    if (itemId == null) {
+      return _Form(vaultId: vaultId, filter: filter, type: type);
+    }
     return ItemOrMissing(
       vaultId: vaultId,
       itemId: itemId,
-      builder: (entry) => _Form(vaultId: vaultId, filter: filter, entry: entry),
+      builder: (entry) => _Form(
+        vaultId: vaultId,
+        filter: filter,
+        type: entry.item.cipher.type,
+        entry: entry,
+      ),
     );
   }
 }
 
 class _Form extends StatefulWidget {
-  const _Form({required this.vaultId, required this.filter, this.entry});
+  const _Form({
+    required this.vaultId,
+    required this.filter,
+    required this.type,
+    this.entry,
+  });
 
   final String vaultId;
   final ItemFilter filter;
+  final CipherType type;
   final VaultItem? entry;
 
   @override
@@ -81,9 +101,22 @@ class _FormState extends State<_Form> {
 
   /// Each website field, with the URI it edits, whose match setting is kept.
   final _uris = <(LoginUri?, TextEditingController)>[];
+  final _cardholder = TextEditingController();
+  final _cardNumber = TextEditingController();
+  final _cardExpYear = TextEditingController();
+  final _cardCode = TextEditingController();
+  String? _cardBrand;
+  String? _cardExpMonth;
+
+  /// The values the dropdowns offer, with the Bitwarden value each stands
+  /// for, null for the item's own value that stands for none.
+  late final List<(String, String?)> _cardBrands;
+  late final List<(String, String?)> _cardExpMonths;
   var _favorite = false;
   VaultController? _chosenVault;
   var _passwordHidden = true;
+  var _cardNumberHidden = true;
+  var _cardCodeHidden = true;
   var _saving = false;
 
   /// Set by Cancel or a save, which leave without asking.
@@ -92,7 +125,7 @@ class _FormState extends State<_Form> {
   String? _saveError;
   late final List<Object?> _initialValues;
 
-  bool get _isLogin => (_cipher?.type ?? CipherType.login) == CipherType.login;
+  CipherType get _type => widget.type;
 
   List<TextEditingController> get _controllers => [
     _name,
@@ -101,6 +134,10 @@ class _FormState extends State<_Form> {
     _totp,
     _notes,
     for (final (_, controller) in _uris) controller,
+    _cardholder,
+    _cardNumber,
+    _cardExpYear,
+    _cardCode,
   ];
 
   /// What [_save] would write, so an empty website field changes nothing.
@@ -113,6 +150,12 @@ class _FormState extends State<_Form> {
     _favorite,
     for (final (_, controller) in _uris)
       if (controller.text.trim() case final text when text.isNotEmpty) text,
+    _cardholder.text,
+    _cardNumber.text,
+    _cardBrand,
+    _cardExpMonth,
+    _cardExpYear.text,
+    _cardCode.text,
   ];
 
   bool get _changed => !listEquals(_values, _initialValues);
@@ -134,6 +177,23 @@ class _FormState extends State<_Form> {
         (uri, TextEditingController(text: uri.uri)),
     ]);
     if (_uris.isEmpty) _uris.add((null, TextEditingController()));
+    final card = cipher?.card;
+    _cardholder.text = card?.cardholderName ?? '';
+    _cardNumber.text = card?.number ?? '';
+    _cardBrand = _nonEmpty(card?.brand);
+    _cardExpMonth = _nonEmpty(card?.expMonth);
+    _cardExpYear.text = card?.expYear ?? '';
+    _cardCode.text = card?.code ?? '';
+    _cardBrands = _keeping(
+      _bitwardenCardBrands,
+      _cardBrand,
+      (brand, stored) => brand.toLowerCase() == stored.toLowerCase(),
+    );
+    _cardExpMonths = _keeping(
+      [for (var month = 1; month <= 12; month++) '$month'],
+      _cardExpMonth,
+      (month, stored) => int.tryParse(stored) == int.parse(month),
+    );
     _initialValues = _values;
   }
 
@@ -191,6 +251,14 @@ class _FormState extends State<_Form> {
     return discard ?? false;
   }
 
+  Widget _visibilityButton(bool hidden, VoidCallback toggle) => IconButton(
+    tooltip: hidden ? context.l10n.show : context.l10n.hide,
+    onPressed: () => setState(toggle),
+    icon: Icon(
+      hidden ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+    ),
+  );
+
   Future<void> _generatePassword() async {
     final password = await showGenerator(context);
     if (password != null && mounted) _password.text = password;
@@ -209,20 +277,31 @@ class _FormState extends State<_Form> {
     String? valueOf(TextEditingController controller) =>
         controller.text.isEmpty ? null : controller.text;
     final vault = _vaultOf(Vaults.of(context));
-    final cipher = (_cipher ?? Cipher(type: CipherType.login, name: name))
+    final cipher = (_cipher ?? Cipher(type: _type, name: name))
       ..name = name
       ..notes = valueOf(_notes)
       ..favorite = _favorite;
-    if (_isLogin) {
-      (cipher.login ??= Login())
-        ..username = valueOf(_username)
-        ..password = valueOf(_password)
-        ..totp = valueOf(_totp)
-        ..uris = [
-          for (final (uri, controller) in _uris)
-            if (controller.text.trim() case final text when text.isNotEmpty)
-              (uri ?? LoginUri(null))..uri = text,
-        ];
+    switch (_type) {
+      case CipherType.login:
+        (cipher.login ??= Login())
+          ..username = valueOf(_username)
+          ..password = valueOf(_password)
+          ..totp = valueOf(_totp)
+          ..uris = [
+            for (final (uri, controller) in _uris)
+              if (controller.text.trim() case final text when text.isNotEmpty)
+                (uri ?? LoginUri(null))..uri = text,
+          ];
+      case CipherType.card:
+        (cipher.card ??= PaymentCard())
+          ..cardholderName = valueOf(_cardholder)
+          ..number = valueOf(_cardNumber)
+          ..brand = _cardBrand
+          ..expMonth = _cardExpMonth
+          ..expYear = valueOf(_cardExpYear)
+          ..code = valueOf(_cardCode);
+      case CipherType.secureNote:
+        cipher.secureNote ??= SecureNote();
     }
 
     setState(() => _saving = true);
@@ -272,7 +351,13 @@ class _FormState extends State<_Form> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      _original == null ? l10n.newLogin : l10n.editItem,
+                      _original != null
+                          ? l10n.editItem
+                          : switch (_type) {
+                              CipherType.card => l10n.newCard,
+                              CipherType.secureNote => l10n.newSecureNote,
+                              _ => l10n.newLogin,
+                            },
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -337,7 +422,7 @@ class _FormState extends State<_Form> {
                         ),
                       ),
                       gap,
-                      if (_isLogin) ...[
+                      if (_type == CipherType.login) ...[
                         TextField(
                           controller: _username,
                           autocorrect: false,
@@ -360,18 +445,9 @@ class _FormState extends State<_Form> {
                             suffixIcon: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                IconButton(
-                                  tooltip: _passwordHidden
-                                      ? l10n.show
-                                      : l10n.hide,
-                                  onPressed: () => setState(
-                                    () => _passwordHidden = !_passwordHidden,
-                                  ),
-                                  icon: Icon(
-                                    _passwordHidden
-                                        ? Icons.visibility_outlined
-                                        : Icons.visibility_off_outlined,
-                                  ),
+                                _visibilityButton(
+                                  _passwordHidden,
+                                  () => _passwordHidden = !_passwordHidden,
                                 ),
                                 IconButton(
                                   tooltip: l10n.generatePassword,
@@ -423,10 +499,97 @@ class _FormState extends State<_Form> {
                         ),
                         const SizedBox(height: 12),
                       ],
+                      if (_type == CipherType.card) ...[
+                        TextField(
+                          controller: _cardholder,
+                          textCapitalization: TextCapitalization.words,
+                          textInputAction: TextInputAction.next,
+                          decoration: InputDecoration(
+                            labelText: l10n.cardholderName,
+                          ),
+                        ),
+                        gap,
+                        TextField(
+                          controller: _cardNumber,
+                          obscureText: _cardNumberHidden,
+                          autocorrect: false,
+                          enableSuggestions: false,
+                          keyboardType: TextInputType.number,
+                          textInputAction: TextInputAction.next,
+                          style: monoStyle,
+                          decoration: InputDecoration(
+                            labelText: l10n.cardNumber,
+                            suffixIcon: _visibilityButton(
+                              _cardNumberHidden,
+                              () => _cardNumberHidden = !_cardNumberHidden,
+                            ),
+                          ),
+                        ),
+                        gap,
+                        _Dropdown(
+                          label: l10n.cardBrand,
+                          value: _cardBrand,
+                          options: [
+                            for (final (value, brand) in _cardBrands)
+                              (
+                                value,
+                                brand == null
+                                    ? value
+                                    : cardBrandLabel(l10n, brand),
+                              ),
+                          ],
+                          onChanged: (brand) =>
+                              setState(() => _cardBrand = brand),
+                        ),
+                        gap,
+                        _Dropdown(
+                          label: l10n.cardExpMonth,
+                          value: _cardExpMonth,
+                          options: [
+                            for (final (value, month) in _cardExpMonths)
+                              (
+                                value,
+                                month == null
+                                    ? value
+                                    : _monthLabel(context, int.parse(month)),
+                              ),
+                          ],
+                          onChanged: (month) =>
+                              setState(() => _cardExpMonth = month),
+                        ),
+                        gap,
+                        TextField(
+                          controller: _cardExpYear,
+                          keyboardType: TextInputType.number,
+                          textInputAction: TextInputAction.next,
+                          decoration: InputDecoration(
+                            labelText: l10n.cardExpYear,
+                            hintText: l10n.cardExpYearHint,
+                          ),
+                        ),
+                        gap,
+                        TextField(
+                          controller: _cardCode,
+                          obscureText: _cardCodeHidden,
+                          autocorrect: false,
+                          enableSuggestions: false,
+                          keyboardType: TextInputType.number,
+                          textInputAction: TextInputAction.next,
+                          style: monoStyle,
+                          decoration: InputDecoration(
+                            labelText: l10n.cardCode,
+                            suffixIcon: _visibilityButton(
+                              _cardCodeHidden,
+                              () => _cardCodeHidden = !_cardCodeHidden,
+                            ),
+                          ),
+                        ),
+                        gap,
+                      ],
                       TextField(
                         controller: _notes,
-                        minLines: 3,
-                        maxLines: 10,
+                        minLines: _type == CipherType.secureNote ? 8 : 3,
+                        maxLines: _type == CipherType.secureNote ? 20 : 10,
                         keyboardType: TextInputType.multiline,
                         textCapitalization: TextCapitalization.sentences,
                         decoration: InputDecoration(labelText: l10n.notes),
@@ -453,4 +616,77 @@ class _FormState extends State<_Form> {
       ],
     );
   }
+}
+
+/// Bitwarden's card brands, in the order of its form.
+const _bitwardenCardBrands = [
+  'Visa',
+  'Mastercard',
+  'Amex',
+  'Discover',
+  'Diners Club',
+  'JCB',
+  'Maestro',
+  'UnionPay',
+  'RuPay',
+  'Other',
+];
+
+String _monthLabel(BuildContext context, int month) {
+  final name = DateFormat.MMMM(Localizations.localeOf(context).toLanguageTag())
+      .format(DateTime(2000, month));
+  return '${'$month'.padLeft(2, '0')} ($name)';
+}
+
+String? _nonEmpty(String? text) => text == null || text.isEmpty ? null : text;
+
+/// Pairs each of [values] with itself, but puts [stored] in place of the one
+/// it [matches], or adds it alone if it matches none: a dropdown left
+/// untouched then saves what the item had, "04" rather than "4" for instance.
+List<(String, String?)> _keeping(
+  List<String> values,
+  String? stored,
+  bool Function(String value, String stored) matches,
+) => [
+  for (final value in values)
+    (stored != null && matches(value, stored) ? stored : value, value),
+  if (stored != null && !values.any((value) => matches(value, stored)))
+    (stored, null),
+];
+
+/// A value to pick among [options], each with its label, or none.
+class _Dropdown extends StatelessWidget {
+  const _Dropdown({
+    required this.label,
+    required this.value,
+    required this.options,
+    required this.onChanged,
+  });
+
+  final String label;
+  final String? value;
+  final List<(String, String)> options;
+  final ValueChanged<String?> onChanged;
+
+  @override
+  Widget build(BuildContext context) => DropdownButtonFormField<String>(
+    initialValue: value,
+    isExpanded: true,
+    borderRadius: BorderRadius.circular(12),
+    decoration: InputDecoration(labelText: label),
+    items: [
+      DropdownMenuItem(
+        child: Text(
+          context.l10n.notSet,
+          style: TextStyle(color: context.palette.muted),
+        ),
+      ),
+      for (final (value, text) in options)
+        DropdownMenuItem(
+          value: value,
+          child: Text(text, maxLines: 1, overflow: TextOverflow.ellipsis),
+        ),
+    ],
+    onChanged: onChanged,
+  );
 }

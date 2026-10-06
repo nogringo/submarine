@@ -629,6 +629,8 @@ void main() {
 
     await tester.tap(find.text('New item'));
     await settle(tester);
+    await tester.tap(find.text('Login'));
+    await settle(tester);
     expect(find.text('New login'), findsOneWidget);
     expect(saveEnabled(tester), isFalse);
     await tester.enterText(find.widgetWithText(TextField, 'Username'), 'bob');
@@ -729,6 +731,185 @@ void main() {
     expect(cipher.login!.uris.single.match, UriMatchStrategy.host);
     expect(cipher.fields.single.value, '1234');
     expect(cipher.notes, 'Recovery codes are in the safe.');
+    await close(tester);
+  });
+
+  testWidgets('creates a card from the new item menu on a desktop', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(tester, items: [github]);
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+      ),
+    );
+    await settle(tester);
+
+    Future<void> pick(String dropdown, String option) async {
+      final field = find.widgetWithText(
+        DropdownButtonFormField<String>,
+        dropdown,
+      );
+      await tester.ensureVisible(field);
+      await tester.tap(field);
+      await settle(tester);
+      await tester.tap(find.text(option).last);
+      await settle(tester);
+    }
+
+    await tester.tap(find.text('New item'));
+    await settle(tester);
+    expect(find.text('Secure note'), findsOneWidget);
+    await tester.tap(find.text('Card'));
+    await settle(tester);
+    expect(find.text('New card'), findsOneWidget);
+    expect(find.widgetWithText(TextField, 'Username'), findsNothing);
+    await tester.enterText(find.widgetWithText(TextField, 'Name'), 'Bank card');
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Cardholder name'),
+      'Alice Martin',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Number'),
+      '4242424242424242',
+    );
+    await pick('Brand', 'American Express');
+    await pick('Expiration month', '04 (April)');
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Expiration year'),
+      '2030',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Security code'),
+      '1234',
+    );
+    await write(tester, find.text('Save'));
+
+    expect(find.text('Bank card'), findsNWidgets(2));
+    expect(find.text('04 / 2030'), findsOneWidget);
+    final items = (await tester.runAsync(vaults.all.single.vault.items))!;
+    final saved = items.singleWhere((item) => item.cipher.name == 'Bank card');
+    expect(saved.cipher.type, CipherType.card);
+    expect(saved.cipher.card!.toJson(), {
+      'cardholderName': 'Alice Martin',
+      'brand': 'Amex',
+      'number': '4242424242424242',
+      'expMonth': '4',
+      'expYear': '2030',
+      'code': '1234',
+    });
+    await close(tester);
+  });
+
+  testWidgets('edits a card, and keeps the brand and month as they were', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(
+      tester,
+      items: [
+        Cipher(
+          type: CipherType.card,
+          name: 'Bank card',
+          card: PaymentCard(
+            brand: 'visa',
+            number: '4242424242424242',
+            expMonth: '04',
+            expYear: '2030',
+            code: '123',
+          ),
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+      ),
+    );
+    await settle(tester);
+
+    await tester.tap(find.text('Bank card'));
+    await settle(tester);
+    await tester.tap(find.text('Edit'));
+    await settle(tester);
+    expect(find.text('Edit item'), findsOneWidget);
+    expect(saveEnabled(tester), isFalse);
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Security code'),
+      '456',
+    );
+    await write(tester, find.text('Save'));
+
+    final [item] = (await tester.runAsync(vaults.all.single.vault.items))!;
+    final card = item.cipher.card!;
+    expect(card.code, '456');
+    expect(card.brand, 'visa');
+    expect(card.expMonth, '04');
+    await close(tester);
+  });
+
+  testWidgets('creates a secure note from its list on a phone, in French', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(390, 844), locale: const Locale('fr'));
+    await open(
+      tester,
+      items: [
+        github,
+        Cipher(
+          type: CipherType.secureNote,
+          name: 'Alarm code',
+          secureNote: SecureNote(),
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+      ),
+    );
+    await settle(tester);
+
+    await tester.scrollUntilVisible(
+      find.text('Notes sécurisées'),
+      100,
+      scrollable: find
+          .ancestor(of: find.text('Tous'), matching: find.byType(Scrollable))
+          .first,
+    );
+    await settle(tester);
+    await tester.tap(find.text('Notes sécurisées'));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Nouvel élément'));
+    await settle(tester);
+    expect(find.text('Nouvelle note sécurisée'), findsOneWidget);
+    await tester.enterText(find.widgetWithText(TextField, 'Nom'), 'Wi-Fi');
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Notes'),
+      'Password on the box.',
+    );
+    await write(tester, find.text('Enregistrer'));
+
+    expect(find.text('Password on the box.'), findsOneWidget);
+    expect(find.text('Modifier'), findsOneWidget);
+    final items = (await tester.runAsync(vaults.all.single.vault.items))!;
+    final saved = items.singleWhere((item) => item.cipher.name == 'Wi-Fi');
+    expect(saved.cipher.type, CipherType.secureNote);
+    expect(saved.cipher.secureNote!.type, SecureNoteType.generic);
+    expect(saved.cipher.notes, 'Password on the box.');
     await close(tester);
   });
 
@@ -1232,6 +1413,8 @@ void main() {
 
     await tester.tap(find.byTooltip('Nouvel élément'));
     await settle(tester);
+    await tester.tap(find.text('Identifiant'));
+    await settle(tester);
     expect(find.text('Nouvel identifiant'), findsOneWidget);
     expect(find.text('Coffre'), findsNothing);
     await tester.enterText(find.widgetWithText(TextField, 'Nom'), 'Netflix');
@@ -1271,6 +1454,8 @@ void main() {
     }
 
     await tester.tap(find.byTooltip('New item'));
+    await settle(tester);
+    await tester.tap(find.text('Login'));
     await settle(tester);
     await tester.enterText(find.widgetWithText(TextField, 'Name'), 'Netflix');
     await tester.tap(find.byTooltip('Generate a password'));
@@ -2368,6 +2553,8 @@ void main() {
     await tester.tap(find.text('Vault'));
     await settle(tester);
     await tester.tap(find.byTooltip('New item'));
+    await settle(tester);
+    await tester.tap(find.text('Login'));
     await settle(tester);
     await tester.tap(find.byTooltip('Generate a password'));
     await settle(tester);

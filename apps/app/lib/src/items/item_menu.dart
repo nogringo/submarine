@@ -23,14 +23,14 @@ enum ItemAction {
   static const _copies = [copyUsername, copyPassword, copyTotp, copyNumber];
 
   /// The copies of what [cipher] holds, then the changes. In the trash:
-  /// restore the item, or delete it for good. Only a login has a form to edit
-  /// it.
+  /// restore the item, or delete it for good. Only the [formTypes] have a form
+  /// to edit them.
   static List<ItemAction> available(Cipher cipher) => [
     for (final copy in _copies)
       if (copy.copiedFrom(cipher) != null) copy,
     ...cipher.isDeleted
         ? const [restore, delete]
-        : [favorite, if (cipher.type == CipherType.login) edit, trash],
+        : [favorite, if (formTypes.containsKey(cipher.type)) edit, trash],
   ];
 
   /// What the copy button of [cipher]'s row copies: the secret a login or a

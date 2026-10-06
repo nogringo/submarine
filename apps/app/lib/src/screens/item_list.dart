@@ -77,7 +77,7 @@ class ItemListScreen extends StatelessWidget {
       tooltip: context.l10n.newItem,
       backgroundColor: context.palette.accent,
       foregroundColor: context.palette.onAccent,
-      onPressed: () => context.go(newItemPath(vaultId, filter)),
+      onPressed: () => _newItem(context, vaultId, filter, _pickTypeInSheet),
       child: const Icon(Icons.add_rounded),
     ),
     bottomNavigationBar: const AppNavigationBar(current: AppDestination.vaults),
@@ -243,7 +243,7 @@ class _NewItemButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => FilledButton.icon(
-    onPressed: () => context.go(newItemPath(vaultId, filter)),
+    onPressed: () => _newItem(context, vaultId, filter, _pickTypeInMenu),
     style: FilledButton.styleFrom(
       minimumSize: const Size(0, 40),
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -252,6 +252,86 @@ class _NewItemButton extends StatelessWidget {
     label: Text(context.l10n.newItem),
   );
 }
+
+/// Opens the form of a new item of the type [filter] lists, or else of the
+/// type [pick] asks for.
+Future<void> _newItem(
+  BuildContext context,
+  String vaultId,
+  ItemFilter filter,
+  Future<CipherType?> Function(BuildContext context) pick,
+) async {
+  final type = formTypes.containsKey(filter.type)
+      ? filter.type
+      : await pick(context);
+  if (type != null && context.mounted) {
+    context.go(newItemPath(vaultId, filter, type));
+  }
+}
+
+/// Asks for the type of a new item in a menu under [button], aligned on its
+/// right edge.
+Future<CipherType?> _pickTypeInMenu(BuildContext button) {
+  const width = 200.0;
+  final overlay =
+      Navigator.of(button).overlay!.context.findRenderObject()! as RenderBox;
+  final box = button.findRenderObject()! as RenderBox;
+  final bounds = box.localToGlobal(Offset.zero, ancestor: overlay) & box.size;
+  return showMenu<CipherType>(
+    context: button,
+    position: RelativeRect.fromRect(
+      Rect.fromLTWH(bounds.right - width, bounds.bottom + 4, width, 0),
+      Offset.zero & overlay.size,
+    ),
+    constraints: const BoxConstraints(minWidth: width, maxWidth: 280),
+    items: [
+      for (final type in formTypes.keys)
+        PopupMenuItem(
+          value: type,
+          child: Row(
+            children: [
+              Icon(itemTypeIcon(type), size: 20, color: button.palette.muted),
+              const SizedBox(width: 12),
+              Flexible(child: Text(itemTypeLabel(button.l10n, type))),
+            ],
+          ),
+        ),
+    ],
+  );
+}
+
+/// Asks for the type of a new item in a sheet, on a phone.
+Future<CipherType?> _pickTypeInSheet(BuildContext context) =>
+    showModalBottomSheet<CipherType>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+              child: Text(
+                context.l10n.newItem,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            for (final type in formTypes.keys)
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                leading: Icon(itemTypeIcon(type), color: context.palette.muted),
+                title: Text(itemTypeLabel(context.l10n, type)),
+                onTap: () => Navigator.pop(context, type),
+              ),
+            const SizedBox(height: 12),
+          ],
+        ),
+      ),
+    );
 
 class _Items extends StatefulWidget {
   const _Items({

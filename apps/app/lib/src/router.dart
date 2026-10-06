@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:nostr_passwords/nostr_passwords.dart';
 
 import 'context.dart';
 import 'items/item_filter.dart';
@@ -38,10 +39,18 @@ String vaultPathKeeping(
   );
 }
 
-/// Where a login is created, next to the items of [vaultId] that [filter]
-/// keeps.
-String newItemPath(String vaultId, ItemFilter filter) =>
-    '${vaultPath(vaultId, filter: filter)}/new';
+/// The types the item form creates and edits, by their name in the URL of a
+/// new item, in the order of the new item menu.
+const formTypes = {
+  CipherType.login: 'login',
+  CipherType.card: 'card',
+  CipherType.secureNote: 'note',
+};
+
+/// Where an item of [type] is created, next to the items of [vaultId] that
+/// [filter] keeps.
+String newItemPath(String vaultId, ItemFilter filter, CipherType type) =>
+    '${vaultPath(vaultId, filter: filter)}/new/${formTypes[type]}';
 
 String editItemPath(String vaultId, ItemFilter filter, String itemId) =>
     '${vaultPath(vaultId, filter: filter, itemId: itemId)}/edit';
@@ -54,6 +63,12 @@ const settingsPath = '/settings';
 
 ItemFilter _filterOf(GoRouterState state) =>
     ItemFilter.fromSlug(state.pathParameters['filter']!)!;
+
+/// The type of the new item in the path.
+CipherType? _typeOf(GoRouterState state) => formTypes.entries
+    .where((entry) => entry.value == state.pathParameters['type'])
+    .firstOrNull
+    ?.key;
 
 /// Every page is built explicitly: go_router 18 recognizes the MaterialApp of
 /// material_ui only, and would fall back to pages without transitions.
@@ -132,7 +147,13 @@ GoRouter buildRouter(Vaults vaults) => GoRouter(
                   routes: [
                     // Before ':itemId', which would take "new" for an id.
                     GoRoute(
-                      path: 'new',
+                      path: 'new/:type',
+                      redirect: (context, state) => _typeOf(state) == null
+                          ? vaultPath(
+                              state.pathParameters['vaultId']!,
+                              filter: _filterOf(state),
+                            )
+                          : null,
                       pageBuilder: (context, state) =>
                           _formPage(context, state),
                       onExit: (context, state) => ItemForm.confirmExit(),
@@ -203,7 +224,7 @@ GoRouter buildRouter(Vaults vaults) => GoRouter(
   ],
 );
 
-/// The form of the item in the path, or of a new login if none.
+/// The form of the item in the path, or of a new item of the type in the path.
 Page<void> _formPage(BuildContext context, GoRouterState state) =>
     _AdaptivePage(
       key: state.pageKey,
@@ -212,6 +233,7 @@ Page<void> _formPage(BuildContext context, GoRouterState state) =>
         vaultId: state.pathParameters['vaultId']!,
         filter: _filterOf(state),
         itemId: state.pathParameters['itemId'],
+        type: _typeOf(state) ?? CipherType.login,
       ),
     );
 
@@ -221,11 +243,13 @@ class _FormScreen extends StatefulWidget {
     required this.vaultId,
     required this.filter,
     required this.itemId,
+    required this.type,
   });
 
   final String vaultId;
   final ItemFilter filter;
   final String? itemId;
+  final CipherType type;
 
   @override
   State<_FormScreen> createState() => _FormScreenState();
@@ -242,6 +266,7 @@ class _FormScreenState extends State<_FormScreen> {
       vaultId: widget.vaultId,
       filter: widget.filter,
       itemId: widget.itemId,
+      type: widget.type,
     );
     return context.isWide ? form : Scaffold(body: SafeArea(child: form));
   }

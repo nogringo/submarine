@@ -726,6 +726,14 @@
   "@newLogin": {
     "description": "Title of the form creating a login."
   },
+  "newCard": "New card",
+  "@newCard": {
+    "description": "Title of the form creating a payment card."
+  },
+  "newSecureNote": "New secure note",
+  "@newSecureNote": {
+    "description": "Title of the form creating a secure note."
+  },
   "editItem": "Edit item",
   "@editItem": {
     "description": "Title of the form editing an item."
@@ -765,6 +773,18 @@
   "addWebsite": "Add a website",
   "@addWebsite": {
     "description": "Button adding a website field to a login in the item form."
+  },
+  "cardBrandOther": "Other",
+  "@cardBrandOther": {
+    "description": "Card brand for a card of none of the listed brands."
+  },
+  "cardExpYearHint": "YYYY",
+  "@cardExpYearHint": {
+    "description": "Placeholder of the expiration year of a card in the item form."
+  },
+  "notSet": "Not set",
+  "@notSet": {
+    "description": "Choice of a dropdown in the item form that leaves the value empty."
   },
   "favorite": "Favorite",
   "@favorite": {

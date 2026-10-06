@@ -141,6 +141,25 @@ void main() {
     addTearDown(tester.platformDispatcher.clearLocalesTestValue);
   }
 
+  /// Starts [relays] for the vaults to sync from, until the test ends.
+  Future<void> startRelays(
+    WidgetTester tester,
+    List<_EmptyRelay> relays,
+  ) async {
+    // flutter_test answers every HTTP request, websockets included, with 400.
+    final overrides = HttpOverrides.current;
+    HttpOverrides.global = null;
+    addTearDown(() => HttpOverrides.global = overrides);
+    await tester.runAsync(
+      () => Future.wait([for (final relay in relays) relay.start()]),
+    );
+    addTearDown(
+      () => tester.runAsync(
+        () => Future.wait([for (final relay in relays) relay.stop()]),
+      ),
+    );
+  }
+
   Future<void> settle(WidgetTester tester) async {
     for (var i = 0; i < 10; i++) {
       await tester.pump(const Duration(milliseconds: 100));
@@ -829,6 +848,42 @@ void main() {
     await close(tester);
   });
 
+  testWidgets('keeps an edit when the window widens, then narrows', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(390, 844));
+    await open(tester, items: [github]);
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+      ),
+    );
+    await settle(tester);
+    final password = find.widgetWithText(TextField, 'Password');
+    String typed() => tester.widget<TextField>(password).controller!.text;
+
+    await tester.tap(find.text('GitHub'));
+    await settle(tester);
+    await tester.tap(find.text('Edit'));
+    await settle(tester);
+    await tester.enterText(password, 'correct horse');
+
+    tester.view.physicalSize = const Size(1280, 800);
+    await settle(tester);
+    expect(find.text('Edit item'), findsOneWidget);
+    expect(typed(), 'correct horse');
+
+    tester.view.physicalSize = const Size(390, 844);
+    await settle(tester);
+    expect(find.text('Edit item'), findsOneWidget);
+    expect(typed(), 'correct horse');
+    await close(tester);
+  });
+
   testWidgets(
     'keeps a copied password out of the preview of Android, and clears it',
     (tester) async {
@@ -1380,16 +1435,9 @@ void main() {
     tester,
   ) async {
     setScreen(tester, const Size(1280, 800));
-    // flutter_test answers every HTTP request, websockets included, with 400.
-    final overrides = HttpOverrides.current;
-    HttpOverrides.global = null;
-    addTearDown(() => HttpOverrides.global = overrides);
     final first = _EmptyRelay();
     final second = _EmptyRelay();
-    await tester.runAsync(() => Future.wait([first.start(), second.start()]));
-    addTearDown(
-      () => tester.runAsync(() => Future.wait([first.stop(), second.stop()])),
-    );
+    await startRelays(tester, [first, second]);
     await open(tester, withFamily: true, relays: [first.url]);
     final family = vaults.all.single;
     await tester.runAsync(() async {
@@ -1477,6 +1525,57 @@ void main() {
     expect(relayLists(second), 1);
     await close(tester);
   }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+
+  testWidgets('keeps the relay draft when the window widens, then narrows', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(390, 844));
+    final relay = _EmptyRelay();
+    await startRelays(tester, [relay]);
+    await open(tester, withFamily: true, relays: [relay.url]);
+    final family = vaults.all.single;
+    await tester.runAsync(() async {
+      while (!family.relaysEditable) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+    });
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+      ),
+    );
+    await settle(tester);
+
+    await tester.tap(find.byTooltip('Vaults'));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Vault settings'));
+    await settle(tester);
+    await tester.ensureVisible(find.text('Add a relay'));
+    await settle(tester);
+    await tester.tap(
+      find.descendant(
+        of: find.widgetWithText(SettingsTile, relay.url),
+        matching: find.byTooltip('Remove this relay'),
+      ),
+    );
+    await settle(tester);
+    expect(find.byTooltip('Removed'), findsOneWidget);
+
+    tester.view.physicalSize = const Size(1280, 800);
+    await settle(tester);
+    expect(find.text('Removed'), findsOneWidget);
+    expect(find.text('Save'), findsOneWidget);
+
+    tester.view.physicalSize = const Size(390, 844);
+    await settle(tester);
+    expect(find.byTooltip('Removed'), findsOneWidget);
+    expect(find.text('Save'), findsOneWidget);
+    await close(tester);
+  });
 
   testWidgets('lists the vaults in the settings on a phone, in French', (
     tester,

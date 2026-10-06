@@ -82,14 +82,10 @@ GoRouter buildRouter(Vaults vaults) => GoRouter(
           vaults.byPubkey(state.pathParameters['vaultId']!) == null
           ? vaultPath(allVaultsId)
           : null,
-      pageBuilder: (context, state) {
-        final screen = VaultSettingsScreen(
-          vaultId: state.pathParameters['vaultId']!,
-        );
-        return context.isWide
-            ? NoTransitionPage(key: state.pageKey, child: screen)
-            : MaterialPage(key: state.pageKey, child: screen);
-      },
+      pageBuilder: (context, state) => _AdaptivePage(
+        key: state.pageKey,
+        child: VaultSettingsScreen(vaultId: state.pathParameters['vaultId']!),
+      ),
     ),
     // Each branch keeps its screens as they were left, in the order of
     // AppDestination.
@@ -208,17 +204,99 @@ GoRouter buildRouter(Vaults vaults) => GoRouter(
 );
 
 /// The form of the item in the path, or of a new login if none.
-Page<void> _formPage(BuildContext context, GoRouterState state) {
-  final form = ItemForm(
-    vaultId: state.pathParameters['vaultId']!,
-    filter: _filterOf(state),
-    itemId: state.pathParameters['itemId'],
-  );
-  return context.isWide
-      ? NoTransitionPage(key: state.pageKey, child: form)
-      : MaterialPage(
-          key: state.pageKey,
-          fullscreenDialog: true,
-          child: Scaffold(body: SafeArea(child: form)),
-        );
+Page<void> _formPage(BuildContext context, GoRouterState state) =>
+    _AdaptivePage(
+      key: state.pageKey,
+      fullscreenDialog: !context.isWide,
+      child: _FormScreen(
+        vaultId: state.pathParameters['vaultId']!,
+        filter: _filterOf(state),
+        itemId: state.pathParameters['itemId'],
+      ),
+    );
+
+/// A screen of its own on a phone, the item pane on a desktop.
+class _FormScreen extends StatefulWidget {
+  const _FormScreen({
+    required this.vaultId,
+    required this.filter,
+    required this.itemId,
+  });
+
+  final String vaultId;
+  final ItemFilter filter;
+  final String? itemId;
+
+  @override
+  State<_FormScreen> createState() => _FormScreenState();
+}
+
+class _FormScreenState extends State<_FormScreen> {
+  /// Keeps what is typed when the layout changes.
+  final _formKey = GlobalKey();
+
+  @override
+  Widget build(BuildContext context) {
+    final form = ItemForm(
+      key: _formKey,
+      vaultId: widget.vaultId,
+      filter: widget.filter,
+      itemId: widget.itemId,
+    );
+    return context.isWide ? form : Scaffold(body: SafeArea(child: form));
+  }
+}
+
+/// Slides in on a phone, as a [MaterialPage] does, and shows at once on a
+/// desktop, as a [NoTransitionPage] does. One page type for both: the
+/// navigator replaces the route of a page whose type changes, and with it the
+/// state of its screen.
+class _AdaptivePage extends Page<void> {
+  const _AdaptivePage({
+    super.key,
+    required this.child,
+    this.fullscreenDialog = false,
+  });
+
+  final Widget child;
+  final bool fullscreenDialog;
+
+  @override
+  Route<void> createRoute(BuildContext context) => _AdaptivePageRoute(this);
+}
+
+class _AdaptivePageRoute extends PageRoute<void>
+    with MaterialRouteTransitionMixin<void> {
+  _AdaptivePageRoute(_AdaptivePage page) : super(settings: page);
+
+  _AdaptivePage get _page => settings as _AdaptivePage;
+
+  bool get _wide => navigator!.context.isWide;
+
+  @override
+  Widget buildContent(BuildContext context) => _page.child;
+
+  @override
+  bool get maintainState => true;
+
+  @override
+  bool get fullscreenDialog => _page.fullscreenDialog;
+
+  @override
+  Duration get transitionDuration =>
+      _wide ? Duration.zero : super.transitionDuration;
+
+  @override
+  Duration get reverseTransitionDuration =>
+      _wide ? Duration.zero : super.reverseTransitionDuration;
+
+  @override
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) => context.isWide
+      ? child
+      : super.buildTransitions(context, animation, secondaryAnimation, child);
 }

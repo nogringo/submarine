@@ -31,7 +31,8 @@ class VaultSettingsScreen extends StatelessWidget {
     final vault = Vaults.of(context).byPubkey(vaultId);
     final settings = vault == null
         ? const SizedBox.shrink()
-        : _VaultSettings(key: ValueKey(vaultId), vault: vault);
+        // Keeps the draft when the layout changes, and is new for each vault.
+        : _VaultSettings(key: GlobalObjectKey(vault), vault: vault);
     if (!context.isWide) {
       return Scaffold(
         appBar: AppBar(

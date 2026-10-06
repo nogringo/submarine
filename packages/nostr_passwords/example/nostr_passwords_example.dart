@@ -105,6 +105,13 @@ Future<void> main() async {
     const PasswordGeneratorOptions(length: 20, special: true),
   );
   print('Or a passphrase: ${generatePassphrase()}');
+  print('A username: ${generateUsername()}');
+
+  // Made-up details for the sites that ask for them.
+  print(
+    'Sign up as ${generateFirstName()} ${generateLastName()}, '
+    'born ${generateBirthDate()}',
+  );
 
   // Bitwarden's JSON export, both ways, password protected or not.
   final bitwardenExport = File('bitwarden_export.json');

@@ -1,5 +1,6 @@
 import 'package:nostr_passwords/nostr_passwords.dart';
 import 'package:nostr_passwords/src/eff_long_wordlist.dart';
+import 'package:nostr_passwords/src/english_names.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -170,6 +171,94 @@ void main() {
       expect(effLongWordlist.first, 'abacus');
       expect(effLongWordlist.last, 'zoom');
       expect(effLongWordlist, isNot(contains('yo-yo')));
+    });
+  });
+
+  group('username', () {
+    test('defaults to a word of the EFF list', () {
+      expect(generateUsername(), isIn(effLongWordlist));
+    });
+
+    test('capitalizes it and adds 4 digits when asked', () {
+      const options = UsernameGeneratorOptions(
+        capitalize: true,
+        includeNumber: true,
+      );
+      for (var i = 0; i < 100; i++) {
+        expect(
+          generateUsername(options),
+          matches(RegExp(r'^[A-Z][a-z]+[0-9]{4}$')),
+        );
+      }
+    });
+
+    test('reads back its JSON, and defaults what is missing', () {
+      const options = UsernameGeneratorOptions(includeNumber: true);
+      final json = options.toJson();
+      expect(UsernameGeneratorOptions.fromJson(json).toJson(), json);
+      expect(
+        UsernameGeneratorOptions.fromJson({}).toJson(),
+        const UsernameGeneratorOptions().toJson(),
+      );
+    });
+  });
+
+  group('names', () {
+    test('picks a first name and a surname from the English lists', () {
+      expect(generateFirstName(), isIn(englishFirstNames));
+      expect(generateLastName(), isIn(englishLastNames));
+    });
+
+    test('has the 500 top names of each sex, and 1000 surnames', () {
+      expect(englishFirstNames, hasLength(977));
+      expect(englishFirstNames.toSet(), hasLength(977));
+      expect(englishFirstNames, containsAll(['Jessica', 'Michael', 'Taylor']));
+      expect(englishLastNames, hasLength(1000));
+      expect(englishLastNames.toSet(), hasLength(1000));
+      expect(
+        englishLastNames,
+        containsAll(['Smith', "O'Brien", 'McDonald', 'De La Cruz', 'LeBlanc']),
+      );
+    });
+  });
+
+  group('birth date', () {
+    Matcher between(String first, String last) => predicate<String>(
+      (date) => date.compareTo(first) >= 0 && date.compareTo(last) <= 0,
+      'between $first and $last',
+    );
+
+    test('is an ISO date of someone from 18 to 60 years old', () {
+      final today = DateTime(2026, 10, 6);
+      for (var i = 0; i < 1000; i++) {
+        final date = generateBirthDate(today: today);
+        expect(date, matches(RegExp(r'^\d{4}-\d{2}-\d{2}$')));
+        expect(date, between('1965-10-07', '2008-10-06'));
+      }
+    });
+
+    test('reaches both ends of the range', () {
+      final today = DateTime(2026, 10, 6);
+      final dates = {
+        for (var i = 0; i < 300000; i++) generateBirthDate(today: today),
+      };
+      expect(dates, containsAll(['1965-10-07', '2008-10-06']));
+    });
+
+    test('turns February 29 into February 28 in a year without it', () {
+      final today = DateTime(2028, 2, 29);
+      for (var i = 0; i < 1000; i++) {
+        expect(
+          generateBirthDate(today: today),
+          between('1967-03-01', '2010-02-28'),
+        );
+      }
+    });
+
+    test('defaults to today', () {
+      final year = int.parse(generateBirthDate().substring(0, 4));
+      final now = DateTime.now().year;
+      expect(year, inInclusiveRange(now - 61, now - 18));
     });
   });
 }

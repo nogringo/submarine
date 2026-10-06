@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'eff_long_wordlist.dart';
+import 'english_names.dart';
 
 /// What [generatePassword] builds a password from, with the defaults of
 /// Bitwarden's apps and `bw generate`. The JSON keys are those of Bitwarden's
@@ -168,6 +169,39 @@ class PassphraseGeneratorOptions {
   };
 }
 
+/// What [generateUsername] builds a username from, with the defaults of
+/// Bitwarden's apps. The JSON keys are those of [PassphraseGeneratorOptions].
+class UsernameGeneratorOptions {
+  const UsernameGeneratorOptions({
+    this.capitalize = false,
+    this.includeNumber = false,
+  });
+
+  factory UsernameGeneratorOptions.fromJson(Map<String, dynamic> json) {
+    const defaults = UsernameGeneratorOptions();
+    return UsernameGeneratorOptions(
+      capitalize: json['capitalize'] as bool? ?? defaults.capitalize,
+      includeNumber: json['includeNumber'] as bool? ?? defaults.includeNumber,
+    );
+  }
+
+  final bool capitalize;
+
+  /// Adds 4 digits at the end.
+  final bool includeNumber;
+
+  UsernameGeneratorOptions copyWith({bool? capitalize, bool? includeNumber}) =>
+      UsernameGeneratorOptions(
+        capitalize: capitalize ?? this.capitalize,
+        includeNumber: includeNumber ?? this.includeNumber,
+      );
+
+  Map<String, dynamic> toJson() => {
+    'capitalize': capitalize,
+    'includeNumber': includeNumber,
+  };
+}
+
 final _random = Random.secure();
 
 /// A random password, as Bitwarden generates it: the fewest characters of each
@@ -200,18 +234,55 @@ String generatePassphrase([
     PassphraseGeneratorOptions.minWords,
     PassphraseGeneratorOptions.maxWords,
   );
-  final words = [
-    for (var i = 0; i < count; i++)
-      effLongWordlist[_random.nextInt(effLongWordlist.length)],
-  ];
+  final words = [for (var i = 0; i < count; i++) _pickFrom(effLongWordlist)];
   if (options.includeNumber) {
     words[_random.nextInt(count)] += '${_random.nextInt(10)}';
   }
   return [
-    for (final word in words)
-      options.capitalize ? word[0].toUpperCase() + word.substring(1) : word,
+    for (final word in words) options.capitalize ? _capitalize(word) : word,
   ].join(options.wordSeparator);
+}
+
+/// A random word of EFF's long wordlist, as Bitwarden generates a username.
+String generateUsername([
+  UsernameGeneratorOptions options = const UsernameGeneratorOptions(),
+]) {
+  final word = _pickFrom(effLongWordlist);
+  return [
+    options.capitalize ? _capitalize(word) : word,
+    if (options.includeNumber) '${_random.nextInt(10000)}'.padLeft(4, '0'),
+  ].join();
+}
+
+/// A common English first name, to give a site instead of a real one.
+String generateFirstName() => _pickFrom(englishFirstNames);
+
+/// A common English surname, to give a site instead of a real one.
+String generateLastName() => _pickFrom(englishLastNames);
+
+/// The birth date of someone from 18 to 60 years old on [today] (by default,
+/// now), as an ISO 8601 date like `1987-04-12`.
+String generateBirthDate({DateTime? today}) {
+  today ??= DateTime.now();
+  final latest = _yearsBefore(today, 18);
+  final earliest = _yearsBefore(today, 61).add(const Duration(days: 1));
+  final days = latest.difference(earliest).inDays + 1;
+  final date = earliest.add(Duration(days: _random.nextInt(days)));
+  return date.toIso8601String().substring(0, 10);
+}
+
+/// The same day [years] earlier, in UTC so that every day lasts 24 hours.
+/// February 29 becomes February 28 in a year without it.
+DateTime _yearsBefore(DateTime day, int years) {
+  final date = DateTime.utc(day.year - years, day.month, day.day);
+  return date.month == day.month
+      ? date
+      : DateTime.utc(date.year, date.month, 0);
 }
 
 String _pick(String characters) =>
     characters[_random.nextInt(characters.length)];
+
+String _pickFrom(List<String> list) => list[_random.nextInt(list.length)];
+
+String _capitalize(String word) => word[0].toUpperCase() + word.substring(1);

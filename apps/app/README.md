@@ -6,7 +6,7 @@ Flutter app for Submarine, a password manager built on [Nostr](https://nostr.how
 
 ## Features
 
-- **Vaults.** A vault is a Nostr key. Create one, or open one with its key (an nsec) on as many devices as you like. Each device gives its vaults its own names and colors.
+- **Vaults.** A vault is a Nostr account. Create one, or open one on as many devices as you like, with its key (an nsec, in hex, or an ncryptsec and its password) or through a signer that keeps the key out of the app: a browser extension (NIP-07) on the web, a bunker (NIP-46) everywhere, a signer app such as Amber (NIP-55) on Android. Each device gives its vaults its own names and colors.
 - **Items.** Logins, cards and secure notes can be created and edited. The other Bitwarden item types (identities, SSH keys, bank accounts, driver's licenses and passports) are shown but not editable yet.
 - **Search and filters.** Search works as in Bitwarden, ignoring case and accents. Filters narrow the list to a type, the favorites or the trash.
 - **Trash.** Items move to the trash, come back out of it, or are deleted for good.
@@ -27,6 +27,8 @@ Flutter app for Submarine, a password manager built on [Nostr](https://nostr.how
 | Windows | Files encrypted for the user account (DPAPI) | Windows Hello |
 | Linux | Keyring, through libsecret | None |
 | Web | localStorage, next to the key that encrypts them | None |
+
+A vault opened through a signer leaves its key there: the device stores how to reach the signer, and for a bunker the key it signs its requests with. Each version of an item is decrypted by the signer when the app starts, which a bunker does over the network, one round trip each.
 
 On Android, the vault keys stay out of backups and device transfers, as another device could not decrypt them. Keep your vault keys: on a new phone, they are the only way to open your vaults again.
 

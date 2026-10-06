@@ -49,12 +49,14 @@ void main() {
 
   /// Vaults on [relays], none by default, whose cache already holds [items] in
   /// a vault named Personal when there are any, next to an empty Family vault
-  /// if [withFamily]. The app locks as [lockSettings] say, behind a device
-  /// that lets the user in until told otherwise.
+  /// if [withFamily] and a Signed vault held by [signer]. The app locks as
+  /// [lockSettings] say, behind a device that lets the user in until told
+  /// otherwise.
   Future<void> open(
     WidgetTester tester, {
     List<Cipher> items = const [],
     bool withFamily = false,
+    SignerLogin? signer,
     LockSettings? lockSettings,
     List<String> relays = const [],
   }) => tester.runAsync(() async {
@@ -78,7 +80,7 @@ void main() {
       }
       records = [
         VaultRecord(
-          privateKey: privateKey,
+          login: KeyLogin(privateKey),
           name: 'Personal',
           color: vaultColors.first,
         ),
@@ -87,10 +89,17 @@ void main() {
     if (withFamily) {
       records.add(
         VaultRecord(
-          privateKey: const Bip340EventSignerFactory().generateKeyPair().$1,
+          login: KeyLogin(
+            const Bip340EventSignerFactory().generateKeyPair().$1,
+          ),
           name: 'Family',
           color: vaultColors[1],
         ),
+      );
+    }
+    if (signer != null) {
+      records.add(
+        VaultRecord(login: signer, name: 'Signed', color: vaultColors[2]),
       );
     }
     FlutterSecureStorage.setMockInitialValues({
@@ -286,7 +295,10 @@ void main() {
       ),
     );
     final privateKey = parseVaultKey(nsec.data!);
-    expect(privateKey, vaults.all.single.record.privateKey);
+    expect(
+      vaults.all.single.record.login,
+      isA<KeyLogin>().having((login) => login.privateKey, 'key', privateKey),
+    );
     expect(
       jsonDecode((await const FlutterSecureStorage().read(key: 'vaults'))!),
       [vaults.all.single.record.toJson()],
@@ -1773,12 +1785,137 @@ void main() {
     await tester.tap(find.text('Afficher'));
     await settle(tester);
     final nsec = tester.widget<SelectableText>(nsecText());
-    expect(parseVaultKey(nsec.data!), vaults.all.single.record.privateKey);
+    expect(
+      vaults.all.single.record.login,
+      isA<KeyLogin>().having(
+        (login) => login.privateKey,
+        'key',
+        parseVaultKey(nsec.data!),
+      ),
+    );
 
     await tester.tap(find.byType(BackButton));
     await settle(tester);
     expect(find.text('Réglages du coffre'), findsNothing);
     expect(find.text('Tous les coffres'), findsOneWidget);
+    await close(tester);
+  });
+
+  testWidgets('names the signer holding the key of a vault in its settings', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    final pubkey = const Bip340EventSignerFactory().generateKeyPair().$2;
+    await open(
+      tester,
+      signer: SignerAppLogin(pubkey, package: 'com.greenart7c3.nostrsigner'),
+    );
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+      ),
+    );
+    await settle(tester);
+
+    await tester.tap(find.byTooltip('Signed'));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Vault settings'));
+    await settle(tester);
+
+    expect(vaults.all.single.pubkey, pubkey);
+    expect(
+      vaults.all.single.record.login,
+      isA<SignerAppLogin>().having(
+        (login) => login.package,
+        'package',
+        'com.greenart7c3.nostrsigner',
+      ),
+    );
+    expect(find.text('Signer app'), findsOneWidget);
+    expect(
+      find.text(
+        'Holds the vault key, which never enters Submarine. On another '
+        'device, open the vault the same way.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Show'), findsNothing);
+    await close(tester);
+  });
+
+  testWidgets('opens a vault with a key encrypted with a password', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(tester);
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+      ),
+    );
+    await settle(tester);
+    // The test vector of NIP-49.
+    const ncryptsec =
+        'ncryptsec1qgg9947rlpvqu76pj5ecreduf9jxhselq2nae2kghhvd5g7dgjtcxfqtd67p9m0w57lspw8gsq6yphnm8623nsl8xn9j4jdzz84zm3frztj3z7s35vpzmqf6ksu8r89qk5z2zxfmu5gv8th8wclt0h4p';
+    final keyField = find.widgetWithText(TextField, 'Vault key');
+    final passwordField = find.widgetWithText(TextField, 'Key password');
+    final openButton = find.widgetWithText(FilledButton, 'Open');
+    const notAKey = 'This is neither a vault key nor a bunker address.';
+    const badBunker = 'This bunker address lacks a relay or a secret.';
+    const wrongPassword = 'This password does not open the key.';
+
+    await tester.tap(find.text('Open a vault'));
+    await settle(tester);
+    expect(passwordField, findsNothing);
+    await tester.enterText(find.widgetWithText(TextField, 'Name'), 'Work');
+    await tester.enterText(keyField, Nip19.encodePubKey('ab' * 32));
+    await tester.tap(openButton);
+    await settle(tester);
+    expect(find.text(notAKey), findsOneWidget);
+
+    await tester.enterText(
+      keyField,
+      'bunker://${'ab' * 32}?relay=wss://relay.example.com',
+    );
+    await tapUntil(
+      tester,
+      openButton,
+      () => find.text(badBunker).evaluate().isNotEmpty,
+    );
+    expect(find.text(badBunker), findsOneWidget);
+
+    await tester.enterText(keyField, ncryptsec);
+    await tester.pump();
+    await tester.enterText(passwordField, 'nostr ');
+    await tapUntil(
+      tester,
+      openButton,
+      () => find.text(wrongPassword).evaluate().isNotEmpty,
+    );
+    expect(find.text(wrongPassword), findsOneWidget);
+    expect(vaults.isEmpty, isTrue);
+
+    await tester.enterText(passwordField, 'nostr');
+    await tapUntil(tester, openButton, () => !vaults.isEmpty);
+
+    expect(vaults.all.single.name, 'Work');
+    expect(
+      vaults.all.single.record.login,
+      isA<KeyLogin>().having(
+        (login) => login.privateKey,
+        'key',
+        '3501454135014541350145413501453fefb02227e449e57cf4d3a3ce05378683',
+      ),
+    );
+    expect(find.text('Save the vault key'), findsNothing);
     await close(tester);
   });
 

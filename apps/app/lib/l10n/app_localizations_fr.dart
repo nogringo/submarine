@@ -26,7 +26,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Un nouveau coffre vide, avec sa propre clé.';
 
   @override
-  String get openVault => 'Ouvrir un coffre avec sa clé';
+  String get openVault => 'Ouvrir un coffre';
 
   @override
   String get openVaultDescription =>
@@ -58,7 +58,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get vaultKeyInvalid =>
-      'Ce n\'est pas une clé de coffre. Elle commence par nsec1.';
+      'Ce n\'est ni une clé de coffre, ni une adresse de bunker.';
 
   @override
   String vaultAlreadyOpen(String name) {
@@ -88,6 +88,75 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get vaultKeyDescription =>
       'Toute personne qui la détient peut ouvrir ce coffre. Saisissez-la sur un autre appareil pour y ouvrir le coffre, ou donnez-la à quelqu\'un pour partager le coffre.';
+
+  @override
+  String get vaultKeyHelper =>
+      'Une nsec, une clé en hexadécimal, une ncryptsec ou une adresse bunker://.';
+
+  @override
+  String get vaultKeyPassword => 'Mot de passe de la clé';
+
+  @override
+  String get vaultKeyPasswordWrong => 'Ce mot de passe n\'ouvre pas la clé.';
+
+  @override
+  String get vaultKeyDecrypting => 'Déchiffrement de la clé';
+
+  @override
+  String get keepKeyOutside => 'Ou gardez la clé hors de Submarine';
+
+  @override
+  String get browserExtension => 'Extension de navigateur';
+
+  @override
+  String get signerApp => 'Application de signature';
+
+  @override
+  String get bunker => 'Bunker';
+
+  @override
+  String get nostrConnect => 'Nostr Connect';
+
+  @override
+  String get nostrConnectBody =>
+      'Scannez ce code avec votre bunker ou votre application de signature, ou collez-y l\'adresse.';
+
+  @override
+  String get noBrowserExtension => 'Aucune extension Nostr dans ce navigateur.';
+
+  @override
+  String get noSignerApp =>
+      'Aucune application de signature, comme Amber, sur cet appareil.';
+
+  @override
+  String get signerRefused => 'La demande a été refusée.';
+
+  @override
+  String get waitingForAnswer => 'En attente d\'une réponse';
+
+  @override
+  String get bunkerUrlInvalid =>
+      'Il manque un relais ou un secret à cette adresse de bunker.';
+
+  @override
+  String get bunkerNoAnswer => 'Le bunker n\'a pas répondu.';
+
+  @override
+  String get bunkerApproval =>
+      'Le bunker vous demande d\'approuver Submarine sur sa page.';
+
+  @override
+  String get openApprovalPage => 'Ouvrir la page';
+
+  @override
+  String get nothingConnected => 'Rien ne s\'est connecté à temps.';
+
+  @override
+  String get useAnotherKey => 'Utiliser une autre clé';
+
+  @override
+  String get vaultSignerDescription =>
+      'Garde la clé du coffre, qui n\'entre jamais dans Submarine. Sur un autre appareil, ouvrez le coffre de la même façon.';
 
   @override
   String get sync => 'Synchronisation';

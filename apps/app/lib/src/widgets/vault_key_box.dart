@@ -3,19 +3,19 @@ import 'package:ndk/ndk.dart' show Nip19;
 
 import '../context.dart';
 import '../theme/theme.dart';
-import '../vaults/vault_controller.dart';
 import 'copy_button.dart';
 
-/// The key of [vault], as an nsec, to copy.
+/// A vault key, as an nsec, to copy.
 class VaultKeyBox extends StatelessWidget {
-  const VaultKeyBox({super.key, required this.vault});
+  const VaultKeyBox({super.key, required this.privateKey});
 
-  final VaultController vault;
+  /// In hex.
+  final String privateKey;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    final nsec = Nip19.encodePrivateKey(vault.record.privateKey);
+    final nsec = Nip19.encodePrivateKey(privateKey);
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 8, 4, 8),
       decoration: BoxDecoration(

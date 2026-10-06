@@ -7,9 +7,20 @@ import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
 
 Future<void> main() async {
   final ndk = Ndk.defaultConfig();
-  // A vault key, as an nsec or in hex.
+  // A vault key, as an nsec or in hex, or encrypted with a password (NIP-49).
+  const vaultKey = '<vault key, nsec1... or ncryptsec1...>';
+  final privateKey = isEncryptedVaultKey(vaultKey)
+      ? await decryptVaultKey(vaultKey, '<password>')
+      : parseVaultKey(vaultKey);
+  // Any EventSigner works, a NIP-46 bunker or a NIP-07 extension too. A
+  // bunker is asked for vaultSignerPermissions when it connects.
+  const bunkerClient = Nip46ClientMetadata(
+    name: 'My app',
+    perms: vaultSignerPermissions,
+  );
+  print('A bunker would be asked for ${bunkerClient.perms!.join(', ')}');
   final signer = const Bip340EventSignerFactory().create(
-    privateKey: parseVaultKey('<vault key, nsec1...>')!,
+    privateKey: privateKey!,
   );
   // vault.sync authenticates as the vault, which ndk must know.
   ndk.accounts.addAccount(

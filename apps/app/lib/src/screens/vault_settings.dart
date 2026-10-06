@@ -10,6 +10,8 @@ import '../items/field_tile.dart';
 import '../router.dart';
 import '../theme/theme.dart';
 import '../vaults/vault_controller.dart';
+import '../vaults/vault_logins.dart';
+import '../vaults/vault_storage.dart';
 import '../vaults/vaults.dart';
 import '../widgets/copy_button.dart';
 import '../widgets/settings_tile.dart';
@@ -169,7 +171,15 @@ class _VaultSettingsState extends State<_VaultSettings> {
                       ),
                       trailing: CopyButton(value: npub),
                     ),
-                    _VaultKeyTile(vault: vault),
+                    switch (vault.record.login) {
+                      KeyLogin(:final privateKey) => _VaultKeyTile(
+                        privateKey: privateKey,
+                      ),
+                      SignerLogin login => SettingsTile(
+                        title: Text(signerName(l10n, login)),
+                        subtitle: Text(l10n.vaultSignerDescription),
+                      ),
+                    },
                   ],
                 ),
               ),
@@ -227,9 +237,9 @@ class _Header extends StatelessWidget {
 
 /// Hides the key until asked, as a password field does.
 class _VaultKeyTile extends StatefulWidget {
-  const _VaultKeyTile({required this.vault});
+  const _VaultKeyTile({required this.privateKey});
 
-  final VaultController vault;
+  final String privateKey;
 
   @override
   State<_VaultKeyTile> createState() => _VaultKeyTileState();
@@ -249,7 +259,7 @@ class _VaultKeyTileState extends State<_VaultKeyTile> {
         style: settingsButtonStyle,
         child: Text(_shown ? l10n.hide : l10n.show),
       ),
-      below: _shown ? VaultKeyBox(vault: widget.vault) : null,
+      below: _shown ? VaultKeyBox(privateKey: widget.privateKey) : null,
     );
   }
 }

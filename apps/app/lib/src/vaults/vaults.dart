@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:ndk/ndk.dart';
+import 'package:ndk_flutter/ndk_flutter.dart'
+    show Nip07EventSigner, Nip55EventSigner, Nip55Signer;
 import 'package:nostr_passwords/nostr_passwords.dart';
 import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
 
@@ -102,8 +104,11 @@ class Vaults extends ChangeNotifier {
   /// A new vault key, in hex.
   String newKey() => ndk.config.eventSignerFactory.generateKeyPair().$1;
 
-  String publicKeyOf(String privateKey) =>
-      ndk.config.eventSignerFactory.derivePublicKey(privateKey);
+  String pubkeyOf(VaultLogin login) => switch (login) {
+    KeyLogin(:final privateKey) =>
+      ndk.config.eventSignerFactory.derivePublicKey(privateKey),
+    SignerLogin(:final pubkey) => pubkey,
+  };
 
   /// Saves [record] on this device, and starts syncing it.
   Future<VaultController> add(VaultRecord record) async {
@@ -128,14 +133,28 @@ class Vaults extends ChangeNotifier {
 
   Future<void> _saving = Future.value();
 
+  EventSigner _signerOf(VaultLogin login) => switch (login) {
+    KeyLogin(:final privateKey) => ndk.config.eventSignerFactory.create(
+      privateKey: privateKey,
+    ),
+    ExtensionLogin(:final pubkey) => Nip07EventSigner(cachedPublicKey: pubkey),
+    BunkerLogin(:final pubkey, :final connection) => ndk.bunkers.createSigner(
+      connection,
+    )..cachedPublicKey = pubkey,
+    SignerAppLogin(:final pubkey, :final package) => Nip55EventSigner(
+      publicKey: pubkey,
+      nip55Signer: Nip55Signer(package: package),
+    ),
+  };
+
   VaultController _open(VaultRecord record) {
-    final signer = ndk.config.eventSignerFactory.create(
-      privateKey: record.privateKey,
-    );
+    final signer = _signerOf(record.login);
     // Vault.sync authenticates as the vault, which ndk must know.
     ndk.accounts.addAccount(
       pubkey: signer.getPublicKey(),
-      type: AccountType.privateKey,
+      type: record.login is KeyLogin
+          ? AccountType.privateKey
+          : AccountType.externalSigner,
       signer: signer,
     );
     final vault = VaultController(

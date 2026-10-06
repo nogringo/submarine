@@ -27,4 +27,33 @@ void main() {
       expect(parseVaultKey(text), isNull, reason: text);
     }
   });
+
+  group('encrypted vault key', () {
+    // The test vector of NIP-49.
+    const ncryptsec =
+        'ncryptsec1qgg9947rlpvqu76pj5ecreduf9jxhselq2nae2kghhvd5g7dgjtcxfqtd67p9m0w57lspw8gsq6yphnm8623nsl8xn9j4jdzz84zm3frztj3z7s35vpzmqf6ksu8r89qk5z2zxfmu5gv8th8wclt0h4p';
+
+    test('is told apart from other keys', () {
+      expect(isEncryptedVaultKey(' $ncryptsec\n'), isTrue);
+      expect(isEncryptedVaultKey(ncryptsec.toUpperCase()), isTrue);
+      for (final text in [
+        '',
+        'ncryptsec1invalid',
+        ncryptsec.substring(0, ncryptsec.length - 1),
+        Nip19.encodePrivateKey(hexKey),
+        hexKey,
+      ]) {
+        expect(isEncryptedVaultKey(text), isFalse, reason: text);
+      }
+      expect(parseVaultKey(ncryptsec), isNull);
+    });
+
+    test('opens with its password only', () async {
+      expect(
+        await decryptVaultKey(' $ncryptsec\n', 'nostr'),
+        '3501454135014541350145413501453fefb02227e449e57cf4d3a3ce05378683',
+      );
+      expect(await decryptVaultKey(ncryptsec, 'nostr '), isNull);
+    });
+  });
 }

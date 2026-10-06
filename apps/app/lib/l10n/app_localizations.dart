@@ -128,10 +128,10 @@ abstract class AppLocalizations {
   /// **'A new, empty vault with its own key.'**
   String get createVaultDescription;
 
-  /// Choice to open an existing vault by entering its key.
+  /// Choice to open an existing vault, with its key or a signer holding it.
   ///
   /// In en, this message translates to:
-  /// **'Open a vault with its key'**
+  /// **'Open a vault'**
   String get openVault;
 
   /// Explains the choice to open a vault with its key.
@@ -185,7 +185,7 @@ abstract class AppLocalizations {
   /// Error when the entered text is not a vault key.
   ///
   /// In en, this message translates to:
-  /// **'This is not a vault key. It starts with nsec1.'**
+  /// **'This is neither a vault key nor a bunker address.'**
   String get vaultKeyInvalid;
 
   /// Error when the entered key belongs to a vault already on this device, named name.
@@ -235,6 +235,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Anyone who has it can open this vault. Enter it on another device to open the vault there, or give it to someone to share the vault with them.'**
   String get vaultKeyDescription;
+
+  /// Under the vault key field: what it accepts.
+  ///
+  /// In en, this message translates to:
+  /// **'An nsec, a key in hex, an ncryptsec or a bunker:// address.'**
+  String get vaultKeyHelper;
+
+  /// Label of the field shown for a vault key encrypted with a password (an ncryptsec, NIP-49).
+  ///
+  /// In en, this message translates to:
+  /// **'Key password'**
+  String get vaultKeyPassword;
+
+  /// Error when the password does not decrypt the ncryptsec.
+  ///
+  /// In en, this message translates to:
+  /// **'This password does not open the key.'**
+  String get vaultKeyPasswordWrong;
+
+  /// Shown while an ncryptsec is decrypted with its password, which takes a moment.
+  ///
+  /// In en, this message translates to:
+  /// **'Decrypting the key'**
+  String get vaultKeyDecrypting;
+
+  /// Above the buttons opening a vault through a signer that holds its key.
+  ///
+  /// In en, this message translates to:
+  /// **'Or keep the key outside Submarine'**
+  String get keepKeyOutside;
+
+  /// A Nostr browser extension holding the vault key (NIP-07): button of the open vault dialog, and name of the signer in the vault settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Browser extension'**
+  String get browserExtension;
+
+  /// An Android app holding the vault key, such as Amber (NIP-55): button of the open vault dialog, and name of the signer in the vault settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Signer app'**
+  String get signerApp;
+
+  /// A remote signer reached through relays (NIP-46): name of the signer in the vault settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Bunker'**
+  String get bunker;
+
+  /// Button of the open vault dialog showing a nostrconnect:// code for a bunker or a signer app to scan, and title of that dialog. A protocol name, not translated.
+  ///
+  /// In en, this message translates to:
+  /// **'Nostr Connect'**
+  String get nostrConnect;
+
+  /// Explains the Nostr Connect dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan this code with your bunker or signer app, or paste the address into it.'**
+  String get nostrConnectBody;
+
+  /// Error when the browser has no NIP-07 extension.
+  ///
+  /// In en, this message translates to:
+  /// **'No Nostr extension in this browser.'**
+  String get noBrowserExtension;
+
+  /// Error when no NIP-55 signer app is installed.
+  ///
+  /// In en, this message translates to:
+  /// **'No signer app, such as Amber, on this device.'**
+  String get noSignerApp;
+
+  /// Error when the extension or the signer app refused to give the vault's public key.
+  ///
+  /// In en, this message translates to:
+  /// **'The request was refused.'**
+  String get signerRefused;
+
+  /// Shown while the dialog waits for a bunker, an extension or a signer app.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for an answer'**
+  String get waitingForAnswer;
+
+  /// Error when a bunker:// address cannot be used.
+  ///
+  /// In en, this message translates to:
+  /// **'This bunker address lacks a relay or a secret.'**
+  String get bunkerUrlInvalid;
+
+  /// Error when a bunker never answered the connection.
+  ///
+  /// In en, this message translates to:
+  /// **'The bunker did not answer.'**
+  String get bunkerNoAnswer;
+
+  /// Shown when a bunker sends a page where the user approves the app.
+  ///
+  /// In en, this message translates to:
+  /// **'The bunker asks you to approve Submarine on its page.'**
+  String get bunkerApproval;
+
+  /// Button opening the approval page a bunker sent.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the page'**
+  String get openApprovalPage;
+
+  /// Error when no bunker or signer app answered the Nostr Connect code.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing connected in time.'**
+  String get nothingConnected;
+
+  /// Tooltip of the button dropping the signer chosen in the open vault dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Use another key'**
+  String get useAnotherKey;
+
+  /// In the vault settings, under the name of the signer holding the vault key.
+  ///
+  /// In en, this message translates to:
+  /// **'Holds the vault key, which never enters Submarine. On another device, open the vault the same way.'**
+  String get vaultSignerDescription;
 
   /// Title of the vault settings section about syncing with the relays.
   ///

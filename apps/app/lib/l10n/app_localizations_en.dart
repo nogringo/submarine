@@ -25,7 +25,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createVaultDescription => 'A new, empty vault with its own key.';
 
   @override
-  String get openVault => 'Open a vault with its key';
+  String get openVault => 'Open a vault';
 
   @override
   String get openVaultDescription => 'From another device, or shared with you.';
@@ -56,7 +56,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vaultKeyInvalid =>
-      'This is not a vault key. It starts with nsec1.';
+      'This is neither a vault key nor a bunker address.';
 
   @override
   String vaultAlreadyOpen(String name) {
@@ -85,6 +85,74 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get vaultKeyDescription =>
       'Anyone who has it can open this vault. Enter it on another device to open the vault there, or give it to someone to share the vault with them.';
+
+  @override
+  String get vaultKeyHelper =>
+      'An nsec, a key in hex, an ncryptsec or a bunker:// address.';
+
+  @override
+  String get vaultKeyPassword => 'Key password';
+
+  @override
+  String get vaultKeyPasswordWrong => 'This password does not open the key.';
+
+  @override
+  String get vaultKeyDecrypting => 'Decrypting the key';
+
+  @override
+  String get keepKeyOutside => 'Or keep the key outside Submarine';
+
+  @override
+  String get browserExtension => 'Browser extension';
+
+  @override
+  String get signerApp => 'Signer app';
+
+  @override
+  String get bunker => 'Bunker';
+
+  @override
+  String get nostrConnect => 'Nostr Connect';
+
+  @override
+  String get nostrConnectBody =>
+      'Scan this code with your bunker or signer app, or paste the address into it.';
+
+  @override
+  String get noBrowserExtension => 'No Nostr extension in this browser.';
+
+  @override
+  String get noSignerApp => 'No signer app, such as Amber, on this device.';
+
+  @override
+  String get signerRefused => 'The request was refused.';
+
+  @override
+  String get waitingForAnswer => 'Waiting for an answer';
+
+  @override
+  String get bunkerUrlInvalid =>
+      'This bunker address lacks a relay or a secret.';
+
+  @override
+  String get bunkerNoAnswer => 'The bunker did not answer.';
+
+  @override
+  String get bunkerApproval =>
+      'The bunker asks you to approve Submarine on its page.';
+
+  @override
+  String get openApprovalPage => 'Open the page';
+
+  @override
+  String get nothingConnected => 'Nothing connected in time.';
+
+  @override
+  String get useAnotherKey => 'Use another key';
+
+  @override
+  String get vaultSignerDescription =>
+      'Holds the vault key, which never enters Submarine. On another device, open the vault the same way.';
 
   @override
   String get sync => 'Sync';

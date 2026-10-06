@@ -20,9 +20,9 @@
   "@createVaultDescription": {
     "description": "Explains the choice to create a vault."
   },
-  "openVault": "Open a vault with its key",
+  "openVault": "Open a vault",
   "@openVault": {
-    "description": "Choice to open an existing vault by entering its key."
+    "description": "Choice to open an existing vault, with its key or a signer holding it."
   },
   "openVaultDescription": "From another device, or shared with you.",
   "@openVaultDescription": {
@@ -61,7 +61,7 @@
   "@vaultKey": {
     "description": "The vault key (an nsec): label of the field where it is entered, and title of the vault settings section and row showing it."
   },
-  "vaultKeyInvalid": "This is not a vault key. It starts with nsec1.",
+  "vaultKeyInvalid": "This is neither a vault key nor a bunker address.",
   "@vaultKeyInvalid": {
     "description": "Error when the entered text is not a vault key."
   },
@@ -101,6 +101,90 @@
   "vaultKeyDescription": "Anyone who has it can open this vault. Enter it on another device to open the vault there, or give it to someone to share the vault with them.",
   "@vaultKeyDescription": {
     "description": "Explains the vault key, in the vault settings row that shows it."
+  },
+  "vaultKeyHelper": "An nsec, a key in hex, an ncryptsec or a bunker:// address.",
+  "@vaultKeyHelper": {
+    "description": "Under the vault key field: what it accepts."
+  },
+  "vaultKeyPassword": "Key password",
+  "@vaultKeyPassword": {
+    "description": "Label of the field shown for a vault key encrypted with a password (an ncryptsec, NIP-49)."
+  },
+  "vaultKeyPasswordWrong": "This password does not open the key.",
+  "@vaultKeyPasswordWrong": {
+    "description": "Error when the password does not decrypt the ncryptsec."
+  },
+  "vaultKeyDecrypting": "Decrypting the key",
+  "@vaultKeyDecrypting": {
+    "description": "Shown while an ncryptsec is decrypted with its password, which takes a moment."
+  },
+  "keepKeyOutside": "Or keep the key outside Submarine",
+  "@keepKeyOutside": {
+    "description": "Above the buttons opening a vault through a signer that holds its key."
+  },
+  "browserExtension": "Browser extension",
+  "@browserExtension": {
+    "description": "A Nostr browser extension holding the vault key (NIP-07): button of the open vault dialog, and name of the signer in the vault settings."
+  },
+  "signerApp": "Signer app",
+  "@signerApp": {
+    "description": "An Android app holding the vault key, such as Amber (NIP-55): button of the open vault dialog, and name of the signer in the vault settings."
+  },
+  "bunker": "Bunker",
+  "@bunker": {
+    "description": "A remote signer reached through relays (NIP-46): name of the signer in the vault settings."
+  },
+  "nostrConnect": "Nostr Connect",
+  "@nostrConnect": {
+    "description": "Button of the open vault dialog showing a nostrconnect:// code for a bunker or a signer app to scan, and title of that dialog. A protocol name, not translated."
+  },
+  "nostrConnectBody": "Scan this code with your bunker or signer app, or paste the address into it.",
+  "@nostrConnectBody": {
+    "description": "Explains the Nostr Connect dialog."
+  },
+  "noBrowserExtension": "No Nostr extension in this browser.",
+  "@noBrowserExtension": {
+    "description": "Error when the browser has no NIP-07 extension."
+  },
+  "noSignerApp": "No signer app, such as Amber, on this device.",
+  "@noSignerApp": {
+    "description": "Error when no NIP-55 signer app is installed."
+  },
+  "signerRefused": "The request was refused.",
+  "@signerRefused": {
+    "description": "Error when the extension or the signer app refused to give the vault's public key."
+  },
+  "waitingForAnswer": "Waiting for an answer",
+  "@waitingForAnswer": {
+    "description": "Shown while the dialog waits for a bunker, an extension or a signer app."
+  },
+  "bunkerUrlInvalid": "This bunker address lacks a relay or a secret.",
+  "@bunkerUrlInvalid": {
+    "description": "Error when a bunker:// address cannot be used."
+  },
+  "bunkerNoAnswer": "The bunker did not answer.",
+  "@bunkerNoAnswer": {
+    "description": "Error when a bunker never answered the connection."
+  },
+  "bunkerApproval": "The bunker asks you to approve Submarine on its page.",
+  "@bunkerApproval": {
+    "description": "Shown when a bunker sends a page where the user approves the app."
+  },
+  "openApprovalPage": "Open the page",
+  "@openApprovalPage": {
+    "description": "Button opening the approval page a bunker sent."
+  },
+  "nothingConnected": "Nothing connected in time.",
+  "@nothingConnected": {
+    "description": "Error when no bunker or signer app answered the Nostr Connect code."
+  },
+  "useAnotherKey": "Use another key",
+  "@useAnotherKey": {
+    "description": "Tooltip of the button dropping the signer chosen in the open vault dialog."
+  },
+  "vaultSignerDescription": "Holds the vault key, which never enters Submarine. On another device, open the vault the same way.",
+  "@vaultSignerDescription": {
+    "description": "In the vault settings, under the name of the signer holding the vault key."
   },
   "sync": "Sync",
   "@sync": {

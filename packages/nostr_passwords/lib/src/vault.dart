@@ -149,17 +149,17 @@ class Vault {
     final deleted = {
       for (final request in await _loadDeletions()) ...request.getTags('e'),
     };
-    final versions = <Envelope>[];
-    final dropped = <String>[];
-    for (final wrap in await _loadWraps()) {
-      if (deleted.contains(wrap.id)) {
-        dropped.add(wrap.id);
-      } else if (await _open(wrap) case final version?) {
-        versions.add(version);
-      }
-    }
-    await _drop(dropped);
-    return resolveItems(versions);
+    final wraps = await _loadWraps();
+    // All at once: a remote signer answers each decryption over the network.
+    final versions = await Future.wait([
+      for (final wrap in wraps)
+        if (!deleted.contains(wrap.id)) _open(wrap),
+    ]);
+    await _drop([
+      for (final wrap in wraps)
+        if (deleted.contains(wrap.id)) wrap.id,
+    ]);
+    return resolveItems(versions.nonNulls);
   }
 
   Future<Envelope> createItem(Cipher cipher) async {

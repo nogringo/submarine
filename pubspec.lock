@@ -686,6 +686,14 @@ packages:
       url: "https://github.com/relaystr/ndk.git"
     source: git
     version: "0.1.0"
+  nip49:
+    dependency: transitive
+    description:
+      name: nip49
+      sha256: b5352611b6171b4fc64632f5e9148d2ff8c995baaf967ecb8d676def6cb0caad
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.2"
   node_preamble:
     dependency: transitive
     description:

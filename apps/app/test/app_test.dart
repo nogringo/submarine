@@ -734,6 +734,121 @@ void main() {
     await close(tester);
   });
 
+  testWidgets('adds, edits, renames, deletes and moves custom fields', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 1600));
+    await open(
+      tester,
+      items: [
+        Cipher(
+          type: CipherType.login,
+          name: 'GitHub',
+          login: Login(username: 'alice-dev'),
+          fields: [
+            Field.fromJson({
+              'name': 'PIN',
+              'value': '1234',
+              'type': 0,
+              'futureKey': 'kept',
+            }),
+            Field(name: 'Remember me', value: 'false', type: FieldType.boolean),
+            Field(name: 'Old question', value: 'Rex'),
+          ],
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+      ),
+    );
+    await settle(tester);
+
+    await tester.tap(find.text('GitHub'));
+    await settle(tester);
+    await tester.tap(find.text('Edit'));
+    await settle(tester);
+    expect(find.text('Custom fields'), findsOneWidget);
+    await tester.enterText(find.widgetWithText(TextField, 'PIN'), '4321');
+    await tester.tap(find.text('Remember me'));
+    await settle(tester);
+
+    await tester.tap(find.byTooltip('Edit PIN'));
+    await settle(tester);
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Field label'),
+      'Door code',
+    );
+    await tester.tap(inDialog('Save'));
+    await settle(tester);
+    expect(find.widgetWithText(TextField, 'Door code'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Edit Old question'));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Delete Old question'));
+    await settle(tester);
+    expect(find.text('Old question'), findsNothing);
+
+    await tester.tap(find.text('Add a field'));
+    await settle(tester);
+    expect(
+      find.text('Use text fields for data like security questions.'),
+      findsOneWidget,
+    );
+    await tester.tap(inDialog('Text'));
+    await settle(tester);
+    await tester.tap(find.text('Hidden').last);
+    await settle(tester);
+    expect(
+      find.text('Use hidden fields for sensitive data like a password.'),
+      findsOneWidget,
+    );
+    final add = tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, 'Add'),
+    );
+    expect(add.enabled, isFalse);
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Field label'),
+      'Recovery key',
+    );
+    await tester.pump();
+    await tester.tap(inDialog('Add'));
+    await settle(tester);
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Recovery key'),
+      'abcd-efgh',
+    );
+
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byTooltip('Move Recovery key')),
+    );
+    for (var i = 0; i < 10; i++) {
+      await gesture.moveBy(const Offset(0, -20));
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+    await gesture.up();
+    await settle(tester);
+    await write(tester, find.text('Save'));
+
+    final [item] = (await tester.runAsync(vaults.all.single.vault.items))!;
+    final fields = item.cipher.fields;
+    expect(
+      [for (final field in fields) field.name],
+      ['Recovery key', 'Door code', 'Remember me'],
+    );
+    expect(fields[0].type, FieldType.hidden);
+    expect(fields[0].value, 'abcd-efgh');
+    expect(fields[1].value, '4321');
+    expect(fields[1].toJson()['futureKey'], 'kept');
+    expect(fields[2].value, 'true');
+    await close(tester);
+  });
+
   testWidgets('creates a card from the new item menu on a desktop', (
     tester,
   ) async {

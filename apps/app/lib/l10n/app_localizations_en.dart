@@ -604,6 +604,65 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addWebsite => 'Add a website';
 
   @override
+  String get addField => 'Add a field';
+
+  @override
+  String get editField => 'Edit the field';
+
+  @override
+  String get fieldType => 'Field type';
+
+  @override
+  String get fieldTypeText => 'Text';
+
+  @override
+  String get fieldTypeHidden => 'Hidden';
+
+  @override
+  String get fieldTypeCheckbox => 'Checkbox';
+
+  @override
+  String get fieldTypeLinked => 'Linked';
+
+  @override
+  String get textFieldHelp =>
+      'Use text fields for data like security questions.';
+
+  @override
+  String get hiddenFieldHelp =>
+      'Use hidden fields for sensitive data like a password.';
+
+  @override
+  String get checkboxFieldHelp =>
+      'Use checkboxes to fill a checkbox of a form, like remember my email.';
+
+  @override
+  String get linkedFieldHelp =>
+      'Use a linked field when autofill has trouble with a specific website.';
+
+  @override
+  String get fieldLabel => 'Field label';
+
+  @override
+  String get linkedFieldLabelHelp =>
+      'Enter the HTML id, name, aria-label or placeholder of the field.';
+
+  @override
+  String editFieldNamed(String field) {
+    return 'Edit $field';
+  }
+
+  @override
+  String deleteFieldNamed(String field) {
+    return 'Delete $field';
+  }
+
+  @override
+  String reorderField(String field) {
+    return 'Move $field';
+  }
+
+  @override
   String get cardBrandOther => 'Other';
 
   @override

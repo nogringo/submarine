@@ -609,6 +609,65 @@ class AppLocalizationsFr extends AppLocalizations {
   String get addWebsite => 'Ajouter un site web';
 
   @override
+  String get addField => 'Ajouter un champ';
+
+  @override
+  String get editField => 'Modifier le champ';
+
+  @override
+  String get fieldType => 'Type de champ';
+
+  @override
+  String get fieldTypeText => 'Texte';
+
+  @override
+  String get fieldTypeHidden => 'Masqué';
+
+  @override
+  String get fieldTypeCheckbox => 'Case à cocher';
+
+  @override
+  String get fieldTypeLinked => 'Lié';
+
+  @override
+  String get textFieldHelp =>
+      'Utilisez les champs texte pour des données comme les questions de sécurité.';
+
+  @override
+  String get hiddenFieldHelp =>
+      'Utilisez les champs masqués pour des données sensibles comme un mot de passe.';
+
+  @override
+  String get checkboxFieldHelp =>
+      'Utilisez les cases à cocher pour remplir la case d\'un formulaire, comme se souvenir de mon e-mail.';
+
+  @override
+  String get linkedFieldHelp =>
+      'Utilisez un champ lié quand le remplissage automatique a du mal avec un site précis.';
+
+  @override
+  String get fieldLabel => 'Étiquette du champ';
+
+  @override
+  String get linkedFieldLabelHelp =>
+      'Saisissez l\'id HTML, le name, l\'aria-label ou le placeholder du champ.';
+
+  @override
+  String editFieldNamed(String field) {
+    return 'Modifier $field';
+  }
+
+  @override
+  String deleteFieldNamed(String field) {
+    return 'Supprimer $field';
+  }
+
+  @override
+  String reorderField(String field) {
+    return 'Déplacer $field';
+  }
+
+  @override
   String get cardBrandOther => 'Autre';
 
   @override

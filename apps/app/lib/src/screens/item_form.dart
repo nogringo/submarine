@@ -8,6 +8,7 @@ import 'package:nostr_passwords/nostr_passwords.dart';
 
 import '../context.dart';
 import '../generator/generator_sheet.dart';
+import '../items/custom_fields_editor.dart';
 import '../items/item_fields.dart';
 import '../items/item_filter.dart';
 import '../router.dart';
@@ -18,8 +19,8 @@ import '../widgets/vault_dropdown.dart';
 import 'item_detail.dart';
 
 /// Creates an item of [type], one of the [formTypes], or edits the item
-/// [itemId]. Only the name, the notes, the favorite and the fields of a login
-/// or a card are edited: the rest of the item is kept.
+/// [itemId]. Only the name, the notes, the favorite, the custom fields and the
+/// fields of a login or a card are edited: the rest of the item is kept.
 class ItemForm extends StatelessWidget {
   const ItemForm({
     super.key,
@@ -112,6 +113,7 @@ class _FormState extends State<_Form> {
   /// for, null for the item's own value that stands for none.
   late final List<(String, String?)> _cardBrands;
   late final List<(String, String?)> _cardExpMonths;
+  final _fields = <EditedField>[];
   var _favorite = false;
   VaultController? _chosenVault;
   var _passwordHidden = true;
@@ -138,6 +140,7 @@ class _FormState extends State<_Form> {
     _cardNumber,
     _cardExpYear,
     _cardCode,
+    for (final field in _fields) field.value,
   ];
 
   /// What [_save] would write, so an empty website field changes nothing.
@@ -156,6 +159,7 @@ class _FormState extends State<_Form> {
     _cardExpMonth,
     _cardExpYear.text,
     _cardCode.text,
+    for (final field in _fields) field.state,
   ];
 
   bool get _changed => !listEquals(_values, _initialValues);
@@ -194,6 +198,9 @@ class _FormState extends State<_Form> {
       _cardExpMonth,
       (month, stored) => int.tryParse(stored) == int.parse(month),
     );
+    _fields.addAll([
+      for (final field in cipher?.fields ?? const <Field>[]) EditedField(field),
+    ]);
     _initialValues = _values;
   }
 
@@ -280,7 +287,8 @@ class _FormState extends State<_Form> {
     final cipher = (_cipher ?? Cipher(type: _type, name: name))
       ..name = name
       ..notes = valueOf(_notes)
-      ..favorite = _favorite;
+      ..favorite = _favorite
+      ..fields = [for (final field in _fields) field.toField()];
     switch (_type) {
       case CipherType.login:
         (cipher.login ??= Login())
@@ -605,6 +613,12 @@ class _FormState extends State<_Form> {
                           borderRadius: BorderRadius.circular(12),
                           side: BorderSide(color: palette.line),
                         ),
+                      ),
+                      gap,
+                      CustomFieldsEditor(
+                        type: _type,
+                        fields: _fields,
+                        onChanged: () => setState(() {}),
                       ),
                     ],
                   ),

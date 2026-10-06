@@ -356,7 +356,7 @@ abstract class AppLocalizations {
   /// **'The vault needs at least one relay.'**
   String get relaysNeedOne;
 
-  /// Button confirming the addition of a relay.
+  /// Button confirming the addition of a relay or a custom field.
   ///
   /// In en, this message translates to:
   /// **'Add'**
@@ -1165,6 +1165,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add a website'**
   String get addWebsite;
+
+  /// Button opening the dialog that adds a custom field to an item, and title of that dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a field'**
+  String get addField;
+
+  /// Title of the dialog renaming or deleting a custom field.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit the field'**
+  String get editField;
+
+  /// Label of the type of the custom field being added.
+  ///
+  /// In en, this message translates to:
+  /// **'Field type'**
+  String get fieldType;
+
+  /// Type of custom field: plain text.
+  ///
+  /// In en, this message translates to:
+  /// **'Text'**
+  String get fieldTypeText;
+
+  /// Type of custom field: text hidden until shown.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden'**
+  String get fieldTypeHidden;
+
+  /// Type of custom field: checked or not.
+  ///
+  /// In en, this message translates to:
+  /// **'Checkbox'**
+  String get fieldTypeCheckbox;
+
+  /// Type of custom field: stands for another field of the item.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked'**
+  String get fieldTypeLinked;
+
+  /// Under the type of custom field when it is text.
+  ///
+  /// In en, this message translates to:
+  /// **'Use text fields for data like security questions.'**
+  String get textFieldHelp;
+
+  /// Under the type of custom field when it is hidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Use hidden fields for sensitive data like a password.'**
+  String get hiddenFieldHelp;
+
+  /// Under the type of custom field when it is a checkbox.
+  ///
+  /// In en, this message translates to:
+  /// **'Use checkboxes to fill a checkbox of a form, like remember my email.'**
+  String get checkboxFieldHelp;
+
+  /// Under the type of custom field when it is linked.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a linked field when autofill has trouble with a specific website.'**
+  String get linkedFieldHelp;
+
+  /// Label of the name of a custom field in the dialog adding or renaming it.
+  ///
+  /// In en, this message translates to:
+  /// **'Field label'**
+  String get fieldLabel;
+
+  /// Under the label of a linked custom field being added: what the label must match on the website.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the HTML id, name, aria-label or placeholder of the field.'**
+  String get linkedFieldLabelHelp;
+
+  /// Tooltip of the button renaming or deleting the custom field named field.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit {field}'**
+  String editFieldNamed(String field);
+
+  /// Tooltip of the button deleting the custom field named field.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {field}'**
+  String deleteFieldNamed(String field);
+
+  /// Tooltip of the handle dragging the custom field named field up or down.
+  ///
+  /// In en, this message translates to:
+  /// **'Move {field}'**
+  String reorderField(String field);
 
   /// Card brand for a card of none of the listed brands.
   ///

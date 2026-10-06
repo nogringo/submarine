@@ -169,7 +169,7 @@ List<FieldRow> customFields(AppLocalizations l10n, Cipher cipher) => [
       ),
       FieldType.linked => FieldRow(
         field.name ?? '',
-        l10n.linkedTo(_linkedLabel(l10n, field.linkedId) ?? '?'),
+        l10n.linkedTo(linkedFieldLabel(l10n, field.linkedId) ?? '?'),
         FieldKind.info,
       ),
       _ => FieldRow(field.name ?? '', field.value ?? ''),
@@ -203,36 +203,37 @@ String _accountType(
   _ => l10n.accountTypeOther,
 };
 
-String? _linkedLabel(AppLocalizations l10n, LinkedIdType? id) => switch (id) {
-  LinkedIdType.loginUsername => l10n.username,
-  LinkedIdType.loginPassword => l10n.password,
-  LinkedIdType.cardCardholderName => l10n.cardholderName,
-  LinkedIdType.cardExpMonth => l10n.cardExpMonth,
-  LinkedIdType.cardExpYear => l10n.cardExpYear,
-  LinkedIdType.cardCode => l10n.cardCode,
-  LinkedIdType.cardBrand => l10n.cardBrand,
-  LinkedIdType.cardNumber => l10n.cardNumber,
-  LinkedIdType.identityTitle => l10n.identityTitle,
-  LinkedIdType.identityMiddleName => l10n.middleName,
-  LinkedIdType.identityAddress1 ||
-  LinkedIdType.identityAddress2 ||
-  LinkedIdType.identityAddress3 => l10n.address,
-  LinkedIdType.identityCity => l10n.city,
-  LinkedIdType.identityState => l10n.state,
-  LinkedIdType.identityPostalCode => l10n.postalCode,
-  LinkedIdType.identityCountry => l10n.country,
-  LinkedIdType.identityCompany => l10n.company,
-  LinkedIdType.identityEmail => l10n.email,
-  LinkedIdType.identityPhone => l10n.phone,
-  LinkedIdType.identitySsn => l10n.ssn,
-  LinkedIdType.identityUsername => l10n.username,
-  LinkedIdType.identityPassportNumber => l10n.passportNumber,
-  LinkedIdType.identityLicenseNumber => l10n.licenseNumber,
-  LinkedIdType.identityFirstName => l10n.firstName,
-  LinkedIdType.identityLastName => l10n.lastName,
-  LinkedIdType.identityFullName => l10n.fullName,
-  _ => null,
-};
+String? linkedFieldLabel(AppLocalizations l10n, LinkedIdType? id) =>
+    switch (id) {
+      LinkedIdType.loginUsername => l10n.username,
+      LinkedIdType.loginPassword => l10n.password,
+      LinkedIdType.cardCardholderName => l10n.cardholderName,
+      LinkedIdType.cardExpMonth => l10n.cardExpMonth,
+      LinkedIdType.cardExpYear => l10n.cardExpYear,
+      LinkedIdType.cardCode => l10n.cardCode,
+      LinkedIdType.cardBrand => l10n.cardBrand,
+      LinkedIdType.cardNumber => l10n.cardNumber,
+      LinkedIdType.identityTitle => l10n.identityTitle,
+      LinkedIdType.identityMiddleName => l10n.middleName,
+      LinkedIdType.identityAddress1 ||
+      LinkedIdType.identityAddress2 ||
+      LinkedIdType.identityAddress3 => l10n.address,
+      LinkedIdType.identityCity => l10n.city,
+      LinkedIdType.identityState => l10n.state,
+      LinkedIdType.identityPostalCode => l10n.postalCode,
+      LinkedIdType.identityCountry => l10n.country,
+      LinkedIdType.identityCompany => l10n.company,
+      LinkedIdType.identityEmail => l10n.email,
+      LinkedIdType.identityPhone => l10n.phone,
+      LinkedIdType.identitySsn => l10n.ssn,
+      LinkedIdType.identityUsername => l10n.username,
+      LinkedIdType.identityPassportNumber => l10n.passportNumber,
+      LinkedIdType.identityLicenseNumber => l10n.licenseNumber,
+      LinkedIdType.identityFirstName => l10n.firstName,
+      LinkedIdType.identityLastName => l10n.lastName,
+      LinkedIdType.identityFullName => l10n.fullName,
+      _ => null,
+    };
 
 String? _join(Iterable<String?> parts, String separator) {
   final present = [

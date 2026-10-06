@@ -184,7 +184,7 @@
   },
   "add": "Add",
   "@add": {
-    "description": "Button confirming the addition of a relay."
+    "description": "Button confirming the addition of a relay or a custom field."
   },
   "cancel": "Cancel",
   "@cancel": {
@@ -773,6 +773,85 @@
   "addWebsite": "Add a website",
   "@addWebsite": {
     "description": "Button adding a website field to a login in the item form."
+  },
+  "addField": "Add a field",
+  "@addField": {
+    "description": "Button opening the dialog that adds a custom field to an item, and title of that dialog."
+  },
+  "editField": "Edit the field",
+  "@editField": {
+    "description": "Title of the dialog renaming or deleting a custom field."
+  },
+  "fieldType": "Field type",
+  "@fieldType": {
+    "description": "Label of the type of the custom field being added."
+  },
+  "fieldTypeText": "Text",
+  "@fieldTypeText": {
+    "description": "Type of custom field: plain text."
+  },
+  "fieldTypeHidden": "Hidden",
+  "@fieldTypeHidden": {
+    "description": "Type of custom field: text hidden until shown."
+  },
+  "fieldTypeCheckbox": "Checkbox",
+  "@fieldTypeCheckbox": {
+    "description": "Type of custom field: checked or not."
+  },
+  "fieldTypeLinked": "Linked",
+  "@fieldTypeLinked": {
+    "description": "Type of custom field: stands for another field of the item."
+  },
+  "textFieldHelp": "Use text fields for data like security questions.",
+  "@textFieldHelp": {
+    "description": "Under the type of custom field when it is text."
+  },
+  "hiddenFieldHelp": "Use hidden fields for sensitive data like a password.",
+  "@hiddenFieldHelp": {
+    "description": "Under the type of custom field when it is hidden."
+  },
+  "checkboxFieldHelp": "Use checkboxes to fill a checkbox of a form, like remember my email.",
+  "@checkboxFieldHelp": {
+    "description": "Under the type of custom field when it is a checkbox."
+  },
+  "linkedFieldHelp": "Use a linked field when autofill has trouble with a specific website.",
+  "@linkedFieldHelp": {
+    "description": "Under the type of custom field when it is linked."
+  },
+  "fieldLabel": "Field label",
+  "@fieldLabel": {
+    "description": "Label of the name of a custom field in the dialog adding or renaming it."
+  },
+  "linkedFieldLabelHelp": "Enter the HTML id, name, aria-label or placeholder of the field.",
+  "@linkedFieldLabelHelp": {
+    "description": "Under the label of a linked custom field being added: what the label must match on the website."
+  },
+  "editFieldNamed": "Edit {field}",
+  "@editFieldNamed": {
+    "description": "Tooltip of the button renaming or deleting the custom field named field.",
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteFieldNamed": "Delete {field}",
+  "@deleteFieldNamed": {
+    "description": "Tooltip of the button deleting the custom field named field.",
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "reorderField": "Move {field}",
+  "@reorderField": {
+    "description": "Tooltip of the handle dragging the custom field named field up or down.",
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
   },
   "cardBrandOther": "Other",
   "@cardBrandOther": {

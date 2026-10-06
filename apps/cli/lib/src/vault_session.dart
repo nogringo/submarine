@@ -52,6 +52,14 @@ class VaultSession {
     if (unsent.isNotEmpty) throw CliException(_unsentMessage(unsent));
   }
 
+  /// Gives the cache and each of the vault's relays what it lacks, then
+  /// fetches as [sync] does, which is what [lastSync] tells.
+  Future<void> reconcile() async {
+    final leftOut = await vault.reconcile();
+    await _fetch();
+    if (leftOut.isNotEmpty) throw CliException(_leftOutMessage(leftOut));
+  }
+
   Future<void> _fetch() async {
     final handle = await vault.sync(_engine);
     _engine.start();
@@ -129,6 +137,14 @@ String _unsentMessage(List<EventDeliverySnapshot> unsent) {
     'Syncing failed: no relay accepted $events, still saved locally:',
     for (final MapEntry(:key, :value) in answers.entries)
       '  $key: ${value.isEmpty ? 'no answer' : value}',
+  ].join('\n');
+}
+
+String _leftOutMessage(Map<String, String> leftOut) {
+  final relays = leftOut.length == 1 ? '1 relay' : '${leftOut.length} relays';
+  return [
+    'Syncing incomplete, $relays left out:',
+    for (final MapEntry(:key, :value) in leftOut.entries) '  $key: $value',
   ].join('\n');
 }
 

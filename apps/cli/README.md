@@ -19,15 +19,11 @@ By default, the vault lives on these relays:
 - `wss://relay.coinos.io`
 - `wss://relay.ditto.pub`
 - `wss://auth.nostr1.com`
-- `wss://chat.wisp.talk`
-- `wss://relay.nostrfeed.com`
 - `wss://relay.nostr.com`
 - `wss://nostr.oxtr.dev`
-- `wss://nostr.bitcoiner.social`
 - `wss://nostr.data.haus`
 - `wss://purplerelay.com`
 - `wss://relay.nostr.wirednet.jp`
-- `wss://nip17.com`
 
 Some relays, like `relay.nmail.li` and `relay.ditto.pub`, serve gift wraps to
 their recipient only: the CLI authenticates to them as the vault key (NIP-42).
@@ -110,7 +106,7 @@ Bitwarden, the trash is never emptied on its own.
 These commands behave like their `bw` counterparts, so a script written for
 the Bitwarden CLI runs on Submarine as long as it sticks to them:
 
-- `sync`, `sync --last`
+- `sync`, `sync --force` and `sync --last`
 - `status`: `unlocked` when `SUBMARINE_NSEC` is set, `unauthenticated`
   otherwise. `userId` is the vault's public key, in hex. `unsentEvents` counts
   the changes no relay accepted yet.
@@ -138,6 +134,11 @@ Submarine is local first: its cache is a local relay. `add`, `create`, `edit`,
 `sync` fetches the vault's relay list, sends to its relays the changes none
 accepted yet, then fetches what changed since the last sync. `list` and `get` read the cache only. Until the
 first sync, they refuse to run, except `get template`.
+
+`sync --force` reads the whole vault from each of its relays, then gives the
+cache and each relay what it lacks, such as what a relay dropped over time.
+Nothing is sent before every relay answered, and a relay that did not give all
+it holds gets nothing. The command fails with the relays left out, if any.
 
 The vault's gift wraps, still encrypted, are cached in `~/.cache/submarine`
 (under `$XDG_CACHE_HOME` or `%LOCALAPPDATA%` when set). Passwords are decrypted

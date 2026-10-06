@@ -2,11 +2,20 @@ import 'vault_command.dart';
 
 class SyncCommand extends VaultCommand {
   SyncCommand() {
-    argParser.addFlag(
-      'last',
-      negatable: false,
-      help: 'Print the date of the last sync instead of syncing.',
-    );
+    argParser
+      ..addFlag(
+        'force',
+        abbr: 'f',
+        negatable: false,
+        help:
+            'Read the whole vault from every relay, then give each relay '
+            'what it lacks.',
+      )
+      ..addFlag(
+        'last',
+        negatable: false,
+        help: 'Print the date of the last sync instead of syncing.',
+      );
   }
 
   @override
@@ -23,7 +32,10 @@ class SyncCommand extends VaultCommand {
       output.string(lastSync?.toIso8601String());
       return;
     }
-    await withVault((session) => session.sync());
+    await withVault(
+      (session) =>
+          argResults!.flag('force') ? session.reconcile() : session.sync(),
+    );
     output.message('Syncing complete.');
   }
 }

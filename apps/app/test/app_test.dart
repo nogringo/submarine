@@ -1643,7 +1643,7 @@ void main() {
     await tester.enterText(find.widgetWithText(TextField, 'Name'), 'Forum');
     await tester.tap(find.byTooltip('Generate a username'));
     await settle(tester);
-    expect(find.byType(Dialog), findsOneWidget);
+    expect(inDialog('Generate a username'), findsOneWidget);
     expect(generated(), matches(RegExp(r'^[a-z]+$')));
     await tester.tap(find.text('Capitalize'));
     await settle(tester);

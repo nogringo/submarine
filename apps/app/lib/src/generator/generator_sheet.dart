@@ -19,6 +19,9 @@ Future<String?> showGenerator(
   final initial = await GeneratorSettings.read();
   if (!context.mounted) return null;
   var settings = initial;
+  final title = username
+      ? context.l10n.generateUsername
+      : context.l10n.generator;
   GeneratorView view(BuildContext context, {required bool inDialog}) =>
       GeneratorView(
         settings: initial,
@@ -40,7 +43,7 @@ Future<String?> showGenerator(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      context.l10n.generator,
+                      title,
                       style: Theme.of(context).dialogTheme.titleTextStyle,
                     ),
                     const SizedBox(height: 20),
@@ -67,7 +70,7 @@ Future<String?> showGenerator(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    context.l10n.generator,
+                    title,
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
@@ -307,12 +310,11 @@ class _GeneratorViewState extends State<GeneratorView> {
             ? (count) => _changePassword(options.copyWith(minSpecial: count))
             : null,
       ),
-      SwitchListTile(
+      _SwitchRow(
+        label: l10n.avoidAmbiguous,
         value: options.avoidAmbiguous,
         onChanged: (avoid) =>
             _changePassword(options.copyWith(avoidAmbiguous: avoid)),
-        title: Text(l10n.avoidAmbiguous),
-        contentPadding: EdgeInsets.zero,
       ),
     ];
   }
@@ -359,19 +361,17 @@ class _GeneratorViewState extends State<GeneratorView> {
           ],
         ),
       ),
-      SwitchListTile(
+      _SwitchRow(
+        label: l10n.capitalize,
         value: options.capitalize,
         onChanged: (capitalize) =>
             _changePassphrase(options.copyWith(capitalize: capitalize)),
-        title: Text(l10n.capitalize),
-        contentPadding: EdgeInsets.zero,
       ),
-      SwitchListTile(
+      _SwitchRow(
+        label: l10n.includeNumber,
         value: options.includeNumber,
         onChanged: (include) =>
             _changePassphrase(options.copyWith(includeNumber: include)),
-        title: Text(l10n.includeNumber),
-        contentPadding: EdgeInsets.zero,
       ),
     ];
   }
@@ -406,19 +406,17 @@ class _GeneratorViewState extends State<GeneratorView> {
   List<Widget> _usernameOptions(AppLocalizations l10n) {
     final options = _settings.username;
     return [
-      SwitchListTile(
+      _SwitchRow(
+        label: l10n.usernameCapitalize,
         value: options.capitalize,
         onChanged: (capitalize) =>
             _changeUsername(options.copyWith(capitalize: capitalize)),
-        title: Text(l10n.usernameCapitalize),
-        contentPadding: EdgeInsets.zero,
       ),
-      SwitchListTile(
+      _SwitchRow(
+        label: l10n.usernameIncludeNumber,
         value: options.includeNumber,
         onChanged: (include) =>
             _changeUsername(options.copyWith(includeNumber: include)),
-        title: Text(l10n.usernameIncludeNumber),
-        contentPadding: EdgeInsets.zero,
       ),
     ];
   }
@@ -461,6 +459,41 @@ class _Preview extends StatelessWidget {
       ),
     );
   }
+}
+
+/// A switch with its label, which toggles it too. No hover band, which would
+/// run into the label, lined up with the other rows.
+class _SwitchRow extends StatelessWidget {
+  const _SwitchRow({
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final String label;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) => MergeSemantics(
+    child: MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => onChanged(!value),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Row(
+            children: [
+              Expanded(child: Text(label, style: _rowLabelStyle)),
+              const SizedBox(width: 12),
+              Switch(value: value, onChanged: onChanged),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 class _Label extends StatelessWidget {

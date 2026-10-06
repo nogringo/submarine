@@ -796,6 +796,8 @@ void main() {
 
     await tester.tap(find.text('Add a field'));
     await settle(tester);
+    await tester.tap(find.text('Custom field'));
+    await settle(tester);
     expect(
       find.text('Use text fields for data like security questions.'),
       findsOneWidget,
@@ -1607,6 +1609,101 @@ void main() {
     expect(generated().split('-'), hasLength(6));
     await tapInSheet(find.text('Use this passphrase'));
     expect(saveEnabled(tester), isTrue);
+    await close(tester);
+  });
+
+  testWidgets('generates a username and made-up details for a login', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 1600));
+    await open(tester, items: [github]);
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+      ),
+    );
+    await settle(tester);
+
+    String generated() =>
+        tester.widget<PasswordText>(find.byType(PasswordText)).value;
+    String textOf(String label) => tester
+        .widget<TextField>(find.widgetWithText(TextField, label))
+        .controller!
+        .text;
+    final isoDate = matches(RegExp(r'^\d{4}-\d{2}-\d{2}$'));
+
+    await tester.tap(find.text('New item'));
+    await settle(tester);
+    await tester.tap(find.text('Login'));
+    await settle(tester);
+    await tester.enterText(find.widgetWithText(TextField, 'Name'), 'Forum');
+    await tester.tap(find.byTooltip('Generate a username'));
+    await settle(tester);
+    expect(generated(), matches(RegExp(r'^[a-z]+$')));
+    await tester.tap(find.text('Capitalize'));
+    await settle(tester);
+    await tester.tap(find.text('Include a number'));
+    await settle(tester);
+    expect(generated(), matches(RegExp(r'^[A-Z][a-z]+[0-9]{4}$')));
+    await tester.tap(find.text('Use this username'));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Generate a username'));
+    await settle(tester);
+    final username = generated();
+    expect(username, matches(RegExp(r'^[A-Z][a-z]+[0-9]{4}$')));
+    await tester.tap(find.text('Use this username'));
+    await settle(tester);
+    expect(textOf('Username'), username);
+
+    await tester.tap(find.text('Add a field'));
+    await settle(tester);
+    expect(find.text('Custom field'), findsOneWidget);
+    await tester.tap(find.text('First name'));
+    await settle(tester);
+    final firstName = textOf('First name');
+    expect(firstName, isNotEmpty);
+    await tester.tap(find.text('Add a field'));
+    await settle(tester);
+    await tester.tap(find.text('Date of birth'));
+    await settle(tester);
+    expect(textOf('Date of birth'), isoDate);
+    await tester.tap(
+      find.descendant(
+        of: find.widgetWithText(TextField, 'Date of birth'),
+        matching: find.byTooltip('Regenerate'),
+      ),
+    );
+    await tester.pump();
+    final birthDate = textOf('Date of birth');
+    expect(birthDate, isoDate);
+    await tester.tap(find.text('Add a field'));
+    await settle(tester);
+    await tester.tap(find.text('Custom field'));
+    await settle(tester);
+    expect(find.text('Field type'), findsOneWidget);
+    await tester.tap(inDialog('Cancel'));
+    await settle(tester);
+    await write(tester, find.text('Save'));
+
+    final items = (await tester.runAsync(vaults.all.single.vault.items))!;
+    final forum = items.singleWhere((item) => item.cipher.name == 'Forum');
+    expect(forum.cipher.login!.username, username);
+    expect(
+      [for (final field in forum.cipher.fields) (field.name, field.value)],
+      [('First name', firstName), ('Date of birth', birthDate)],
+    );
+
+    await tester.tap(find.text('New item'));
+    await settle(tester);
+    await tester.tap(find.text('Card'));
+    await settle(tester);
+    await tester.tap(find.text('Add a field'));
+    await settle(tester);
+    expect(find.text('Field type'), findsOneWidget);
     await close(tester);
   });
 

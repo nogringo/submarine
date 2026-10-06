@@ -1172,6 +1172,12 @@ abstract class AppLocalizations {
   /// **'Add a field'**
   String get addField;
 
+  /// Choice of the menu adding a field to a login: a custom field of a type and a label of choice.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom field'**
+  String get customField;
+
   /// Title of the dialog renaming or deleting a custom field.
   ///
   /// In en, this message translates to:
@@ -1388,6 +1394,12 @@ abstract class AppLocalizations {
   /// **'Generate a password'**
   String get generatePassword;
 
+  /// Tooltip of the button next to the username field that opens the generator.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate a username'**
+  String get generateUsername;
+
   /// Title of the sheet generating a password or a passphrase.
   ///
   /// In en, this message translates to:
@@ -1495,6 +1507,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Use this passphrase'**
   String get usePassphrase;
+
+  /// Button of the generator that puts the username in the username field.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this username'**
+  String get useUsername;
+
+  /// Switch capitalizing the first letter of a generated username.
+  ///
+  /// In en, this message translates to:
+  /// **'Capitalize'**
+  String get usernameCapitalize;
+
+  /// Switch adding 4 digits at the end of a generated username.
+  ///
+  /// In en, this message translates to:
+  /// **'Include a number'**
+  String get usernameIncludeNumber;
 
   /// Tooltip of the button lowering a number by one.
   ///

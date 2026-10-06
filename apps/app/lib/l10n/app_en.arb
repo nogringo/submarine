@@ -778,6 +778,10 @@
   "@addField": {
     "description": "Button opening the dialog that adds a custom field to an item, and title of that dialog."
   },
+  "customField": "Custom field",
+  "@customField": {
+    "description": "Choice of the menu adding a field to a login: a custom field of a type and a label of choice."
+  },
   "editField": "Edit the field",
   "@editField": {
     "description": "Title of the dialog renaming or deleting a custom field."
@@ -937,6 +941,10 @@
   "@generatePassword": {
     "description": "Tooltip of the button next to the password field that opens the generator."
   },
+  "generateUsername": "Generate a username",
+  "@generateUsername": {
+    "description": "Tooltip of the button next to the username field that opens the generator."
+  },
   "generator": "Generator",
   "@generator": {
     "description": "Title of the sheet generating a password or a passphrase."
@@ -1008,6 +1016,18 @@
   "usePassphrase": "Use this passphrase",
   "@usePassphrase": {
     "description": "Button of the generator that puts the passphrase in the password field."
+  },
+  "useUsername": "Use this username",
+  "@useUsername": {
+    "description": "Button of the generator that puts the username in the username field."
+  },
+  "usernameCapitalize": "Capitalize",
+  "@usernameCapitalize": {
+    "description": "Switch capitalizing the first letter of a generated username."
+  },
+  "usernameIncludeNumber": "Include a number",
+  "@usernameIncludeNumber": {
+    "description": "Switch adding 4 digits at the end of a generated username."
   },
   "decrease": "Decrease",
   "@decrease": {

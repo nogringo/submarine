@@ -607,6 +607,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addField => 'Add a field';
 
   @override
+  String get customField => 'Custom field';
+
+  @override
   String get editField => 'Edit the field';
 
   @override
@@ -727,6 +730,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generatePassword => 'Generate a password';
 
   @override
+  String get generateUsername => 'Generate a username';
+
+  @override
   String get generator => 'Generator';
 
   @override
@@ -779,6 +785,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get usePassphrase => 'Use this passphrase';
+
+  @override
+  String get useUsername => 'Use this username';
+
+  @override
+  String get usernameCapitalize => 'Capitalize';
+
+  @override
+  String get usernameIncludeNumber => 'Include a number';
 
   @override
   String get decrease => 'Decrease';

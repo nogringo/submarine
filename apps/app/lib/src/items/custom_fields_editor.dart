@@ -8,7 +8,7 @@ import 'item_fields.dart';
 /// A custom field in the item form, with the [field] it edits, whose other
 /// keys are kept.
 class EditedField {
-  EditedField(this.field, {this.isNew = false})
+  EditedField(this.field, {this.isNew = false, this.generate})
     : name = field.name ?? '',
       value = TextEditingController(
         text: field.type == FieldType.boolean || field.type == FieldType.linked
@@ -20,6 +20,9 @@ class EditedField {
 
   final Field field;
   final bool isNew;
+
+  /// Makes up a new value, for a field added with a made-up one.
+  final String Function()? generate;
   String name;
 
   /// The value of a field that is neither a checkbox nor linked.
@@ -47,7 +50,8 @@ class EditedField {
 }
 
 /// The custom fields of an item of [type], as Bitwarden's form edits them:
-/// added with a type and a label, renamed, deleted and reordered.
+/// added with a type and a label, renamed, deleted and reordered. A login can
+/// also get a made-up first name, last name or birth date.
 class CustomFieldsEditor extends StatelessWidget {
   const CustomFieldsEditor({
     super.key,
@@ -62,7 +66,59 @@ class CustomFieldsEditor extends StatelessWidget {
   final List<EditedField> fields;
   final VoidCallback onChanged;
 
-  Future<void> _add(BuildContext context) async {
+  /// Adds a field with a made-up value to a login, or a field of a type and a
+  /// label of choice, as a menu under [button] picks.
+  Future<void> _add(BuildContext button) async {
+    if (type != CipherType.login) return _addCustom(button);
+    final l10n = button.l10n;
+    final muted = button.palette.muted;
+    final madeUp = [
+      (l10n.firstName, generateFirstName),
+      (l10n.lastName, generateLastName),
+      (l10n.dateOfBirth, generateBirthDate),
+    ];
+    final overlay =
+        Navigator.of(button).overlay!.context.findRenderObject()! as RenderBox;
+    final box = button.findRenderObject()! as RenderBox;
+    final bounds = box.localToGlobal(Offset.zero, ancestor: overlay) & box.size;
+    PopupMenuItem<int> item(int value, IconData icon, String label) =>
+        PopupMenuItem(
+          value: value,
+          child: Row(
+            children: [
+              Icon(icon, size: 20, color: muted),
+              const SizedBox(width: 12),
+              Flexible(child: Text(label)),
+            ],
+          ),
+        );
+    final choice = await showMenu<int>(
+      context: button,
+      position: RelativeRect.fromRect(
+        Rect.fromLTWH(bounds.left, bounds.bottom + 4, 0, 0),
+        Offset.zero & overlay.size,
+      ),
+      constraints: const BoxConstraints(minWidth: 200, maxWidth: 280),
+      items: [
+        item(-1, Icons.text_fields_rounded, l10n.customField),
+        const PopupMenuDivider(),
+        for (final (index, (label, _)) in madeUp.indexed)
+          item(index, Icons.casino_outlined, label),
+      ],
+    );
+    if (choice == null || !button.mounted) return;
+    if (choice < 0) return _addCustom(button);
+    final (name, generate) = madeUp[choice];
+    fields.add(
+      EditedField(
+        Field(name: name, value: generate()),
+        generate: generate,
+      ),
+    );
+    onChanged();
+  }
+
+  Future<void> _addCustom(BuildContext context) async {
     final linkedIds = _linkedIds(type);
     final added = await showDialog<(FieldType, String)>(
       context: context,
@@ -154,10 +210,12 @@ class CustomFieldsEditor extends StatelessWidget {
         ),
         Align(
           alignment: Alignment.centerLeft,
-          child: TextButton.icon(
-            onPressed: () => _add(context),
-            icon: const Icon(Icons.add_rounded),
-            label: Text(l10n.addField),
+          child: Builder(
+            builder: (button) => TextButton.icon(
+              onPressed: () => _add(button),
+              icon: const Icon(Icons.add_rounded),
+              label: Text(l10n.addField),
+            ),
           ),
         ),
       ],
@@ -269,7 +327,17 @@ class _FieldRow extends StatelessWidget {
       _ => TextField(
         controller: field.value,
         autofocus: field.isNew,
-        decoration: InputDecoration(labelText: name),
+        decoration: InputDecoration(
+          labelText: name,
+          suffixIcon: switch (field.generate) {
+            final generate? => IconButton(
+              tooltip: l10n.regenerate,
+              onPressed: () => field.value.text = generate(),
+              icon: const Icon(Icons.refresh_rounded),
+            ),
+            null => null,
+          },
+        ),
       ),
     };
     return Row(

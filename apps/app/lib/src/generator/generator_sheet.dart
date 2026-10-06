@@ -9,9 +9,12 @@ import '../widgets/copy_button.dart';
 import '../widgets/select_chip.dart';
 import 'generator_settings.dart';
 
-/// Opens the generator with its last options, and returns what the user chose
-/// to use, if anything.
-Future<String?> showGenerator(BuildContext context) async {
+/// Opens the generator of passwords, or of [username]s, with its last options,
+/// and returns what the user chose to use, if anything.
+Future<String?> showGenerator(
+  BuildContext context, {
+  bool username = false,
+}) async {
   final initial = await GeneratorSettings.read();
   if (!context.mounted) return null;
   var settings = initial;
@@ -37,6 +40,7 @@ Future<String?> showGenerator(BuildContext context) async {
             const SizedBox(height: 16),
             GeneratorView(
               settings: initial,
+              username: username,
               onChanged: (changed) => settings = changed,
               onUse: (value) => Navigator.pop(context, value),
             ),
@@ -56,10 +60,14 @@ class GeneratorView extends StatefulWidget {
     super.key,
     required this.settings,
     required this.onChanged,
+    this.username = false,
     this.onUse,
   });
 
   final GeneratorSettings settings;
+
+  /// Generates a username rather than a password or a passphrase.
+  final bool username;
   final ValueChanged<GeneratorSettings> onChanged;
   final ValueChanged<String>? onUse;
 
@@ -69,7 +77,7 @@ class GeneratorView extends StatefulWidget {
 
 class _GeneratorViewState extends State<GeneratorView> {
   late var _settings = widget.settings;
-  late var _value = _settings.generate();
+  late var _value = _generate();
   late final _separator = TextEditingController(
     text: _settings.passphrase.wordSeparator,
   );
@@ -80,10 +88,14 @@ class _GeneratorViewState extends State<GeneratorView> {
     super.dispose();
   }
 
+  String _generate() => widget.username
+      ? generateUsername(_settings.username)
+      : _settings.generate();
+
   void _change(GeneratorSettings settings) {
     setState(() {
       _settings = settings;
-      _value = settings.generate();
+      _value = _generate();
     });
     widget.onChanged(settings);
   }
@@ -99,6 +111,9 @@ class _GeneratorViewState extends State<GeneratorView> {
   void _changePassphrase(PassphraseGeneratorOptions options) =>
       _change(_settings.copyWith(passphrase: options));
 
+  void _changeUsername(UsernameGeneratorOptions options) =>
+      _change(_settings.copyWith(username: options));
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -109,42 +124,53 @@ class _GeneratorViewState extends State<GeneratorView> {
       children: [
         _Preview(
           value: _value,
-          onRegenerate: () => setState(() => _value = _settings.generate()),
+          sensitive: !widget.username,
+          onRegenerate: () => setState(() => _value = _generate()),
         ),
         const SizedBox(height: 16),
-        Row(
-          children: [
-            SelectChip(
-              label: l10n.password,
-              selected: isPassword,
-              onTap: isPassword
-                  ? null
-                  : () => _change(
-                      _settings.copyWith(type: GeneratorType.password),
-                    ),
-            ),
-            const SizedBox(width: 8),
-            SelectChip(
-              label: l10n.passphrase,
-              selected: !isPassword,
-              onTap: isPassword
-                  ? () => _change(
-                      _settings.copyWith(type: GeneratorType.passphrase),
-                    )
-                  : null,
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        if (isPassword)
-          ..._passwordOptions(l10n)
-        else
-          ..._passphraseOptions(l10n),
+        if (widget.username)
+          ..._usernameOptions(l10n)
+        else ...[
+          Row(
+            children: [
+              SelectChip(
+                label: l10n.password,
+                selected: isPassword,
+                onTap: isPassword
+                    ? null
+                    : () => _change(
+                        _settings.copyWith(type: GeneratorType.password),
+                      ),
+              ),
+              const SizedBox(width: 8),
+              SelectChip(
+                label: l10n.passphrase,
+                selected: !isPassword,
+                onTap: isPassword
+                    ? () => _change(
+                        _settings.copyWith(type: GeneratorType.passphrase),
+                      )
+                    : null,
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (isPassword)
+            ..._passwordOptions(l10n)
+          else
+            ..._passphraseOptions(l10n),
+        ],
         if (onUse != null) ...[
           const SizedBox(height: 20),
           FilledButton(
             onPressed: () => onUse(_value),
-            child: Text(isPassword ? l10n.usePassword : l10n.usePassphrase),
+            child: Text(
+              widget.username
+                  ? l10n.useUsername
+                  : isPassword
+                  ? l10n.usePassword
+                  : l10n.usePassphrase,
+            ),
           ),
         ],
       ],
@@ -322,14 +348,39 @@ class _GeneratorViewState extends State<GeneratorView> {
       ),
     ];
   }
+
+  List<Widget> _usernameOptions(AppLocalizations l10n) {
+    final options = _settings.username;
+    return [
+      SwitchListTile(
+        value: options.capitalize,
+        onChanged: (capitalize) =>
+            _changeUsername(options.copyWith(capitalize: capitalize)),
+        title: Text(l10n.usernameCapitalize),
+        contentPadding: EdgeInsets.zero,
+      ),
+      SwitchListTile(
+        value: options.includeNumber,
+        onChanged: (include) =>
+            _changeUsername(options.copyWith(includeNumber: include)),
+        title: Text(l10n.usernameIncludeNumber),
+        contentPadding: EdgeInsets.zero,
+      ),
+    ];
+  }
 }
 
 const _rowLabelStyle = TextStyle(fontSize: 16);
 
 class _Preview extends StatelessWidget {
-  const _Preview({required this.value, required this.onRegenerate});
+  const _Preview({
+    required this.value,
+    required this.sensitive,
+    required this.onRegenerate,
+  });
 
   final String value;
+  final bool sensitive;
   final VoidCallback onRegenerate;
 
   @override
@@ -351,7 +402,7 @@ class _Preview extends StatelessWidget {
             onPressed: onRegenerate,
             icon: const Icon(Icons.refresh_rounded),
           ),
-          CopyButton(value: value, sensitive: true),
+          CopyButton(value: value, sensitive: sensitive),
         ],
       ),
     );

@@ -13,6 +13,7 @@ class GeneratorSettings {
     this.type = GeneratorType.password,
     this.password = const PasswordGeneratorOptions(),
     this.passphrase = const PassphraseGeneratorOptions(),
+    this.username = const UsernameGeneratorOptions(),
   });
 
   factory GeneratorSettings.fromJson(Map<String, dynamic> json) =>
@@ -25,6 +26,9 @@ class GeneratorSettings {
         ),
         passphrase: PassphraseGeneratorOptions.fromJson(
           json['passphrase'] as Map<String, dynamic>? ?? const {},
+        ),
+        username: UsernameGeneratorOptions.fromJson(
+          json['username'] as Map<String, dynamic>? ?? const {},
         ),
       );
 
@@ -42,6 +46,7 @@ class GeneratorSettings {
   final GeneratorType type;
   final PasswordGeneratorOptions password;
   final PassphraseGeneratorOptions passphrase;
+  final UsernameGeneratorOptions username;
 
   String generate() => switch (type) {
     GeneratorType.password => generatePassword(password),
@@ -52,15 +57,18 @@ class GeneratorSettings {
     GeneratorType? type,
     PasswordGeneratorOptions? password,
     PassphraseGeneratorOptions? passphrase,
+    UsernameGeneratorOptions? username,
   }) => GeneratorSettings(
     type: type ?? this.type,
     password: password ?? this.password,
     passphrase: passphrase ?? this.passphrase,
+    username: username ?? this.username,
   );
 
   Map<String, dynamic> toJson() => {
     'type': type.name,
     'password': password.toJson(),
     'passphrase': passphrase.toJson(),
+    'username': username.toJson(),
   };
 }

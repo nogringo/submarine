@@ -612,6 +612,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get addField => 'Ajouter un champ';
 
   @override
+  String get customField => 'Champ personnalisé';
+
+  @override
   String get editField => 'Modifier le champ';
 
   @override
@@ -732,6 +735,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get generatePassword => 'Générer un mot de passe';
 
   @override
+  String get generateUsername => 'Générer un nom d\'utilisateur';
+
+  @override
   String get generator => 'Générateur';
 
   @override
@@ -784,6 +790,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get usePassphrase => 'Utiliser cette phrase de passe';
+
+  @override
+  String get useUsername => 'Utiliser ce nom d\'utilisateur';
+
+  @override
+  String get usernameCapitalize => 'Commencer par une majuscule';
+
+  @override
+  String get usernameIncludeNumber => 'Inclure un nombre';
 
   @override
   String get decrease => 'Diminuer';

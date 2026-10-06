@@ -266,6 +266,11 @@ class _FormState extends State<_Form> {
     ),
   );
 
+  Future<void> _generateUsername() async {
+    final username = await showGenerator(context, username: true);
+    if (username != null && mounted) _username.text = username;
+  }
+
   Future<void> _generatePassword() async {
     final password = await showGenerator(context);
     if (password != null && mounted) _password.text = password;
@@ -437,7 +442,20 @@ class _FormState extends State<_Form> {
                           enableSuggestions: false,
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
-                          decoration: InputDecoration(labelText: l10n.username),
+                          decoration: InputDecoration(
+                            labelText: l10n.username,
+                            suffixIcon: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  tooltip: l10n.generateUsername,
+                                  onPressed: _generateUsername,
+                                  icon: const Icon(Icons.casino_outlined),
+                                ),
+                                const SizedBox(width: 4),
+                              ],
+                            ),
+                          ),
                         ),
                         gap,
                         TextField(

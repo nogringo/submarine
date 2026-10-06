@@ -350,16 +350,26 @@ class Vault {
     return unsent();
   }
 
-  /// The changes saved in the cache that no relay accepted yet.
-  Future<List<EventDeliverySnapshot>> unsent() async => [
-    for (final delivery in await ndk.broadcast.loadPendingDeliveries())
-      if (delivery.event case final event?
-          when _isOwn(event) &&
-              !delivery.relayTargets.any(
-                (target) => target.state == RelayDeliveryState.acked,
-              ))
-        delivery,
-  ];
+  /// The changes saved in the cache that no relay accepted yet. Forgets the
+  /// relay lists a newer one replaced, which ndk never sends.
+  Future<List<EventDeliverySnapshot>> unsent() async {
+    final relayList = (await _loadRelayList())?.id;
+    final unsent = <EventDeliverySnapshot>[];
+    for (final delivery in await ndk.broadcast.loadPendingDeliveries()) {
+      final event = delivery.event;
+      if (event == null || !_isOwn(event)) continue;
+      if (event.kind == Nip65.kKind && event.id != relayList) {
+        // ndk's retries would drop it, but the CLI turns them off.
+        await ndk.config.cache.removeRelayDeliveryTargets(event.id);
+        await ndk.config.cache.removeEventDeliveryRecord(event.id);
+      } else if (!delivery.relayTargets.any(
+        (target) => target.state == RelayDeliveryState.acked,
+      )) {
+        unsent.add(delivery);
+      }
+    }
+    return unsent;
+  }
 
   /// Whether [event] is one of this vault's: the cache may hold other vaults.
   bool _isOwn(Nip01Event event) => switch (event.kind) {

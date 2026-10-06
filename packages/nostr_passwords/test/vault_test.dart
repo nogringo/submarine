@@ -439,6 +439,47 @@ void main() {
       expect(kinds().where((kind) => kind == 1059), hasLength(1));
     });
 
+    test('unsent forgets a list a newer one replaced', () async {
+      // As in the CLI, where ndk's retries do not drop it.
+      final quiet = Ndk(
+        NdkConfig(
+          eventVerifier: Bip340EventVerifier(),
+          cache: MemCacheManager(),
+          bootstrapRelays: [],
+          pendingDeliveryRetriesEnabled: false,
+        ),
+      );
+      addTearDown(quiet.destroy);
+      final offline = Vault(
+        ndk: quiet,
+        signer: signer,
+        relays: ['ws://127.0.0.1:1'],
+        indexers: const [],
+      );
+      await offline.setRelayList(relays);
+      final [replaced] = await offline.unsent();
+
+      await offline.setRelayList(
+        const RelayList(
+          public: {'ws://127.0.0.1:4': ReadWriteMarker.readWrite},
+        ),
+      );
+
+      final [left] = await offline.unsent();
+      expect(left.event?.id, isNot(replaced.event?.id));
+      expect(
+        await quiet.broadcast.loadEventDelivery(replaced.event!.id),
+        isNull,
+      );
+      expect(await offline.push(), [
+        isA<EventDeliverySnapshot>().having(
+          (delivery) => delivery.event?.id,
+          'event id',
+          left.event?.id,
+        ),
+      ]);
+    });
+
     test('a list replaces the one set the same second', () async {
       await vault.setRelayList(relays);
       await vault.setRelayList(

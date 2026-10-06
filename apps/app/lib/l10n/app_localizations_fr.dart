@@ -129,7 +129,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Aucune application de signature, comme Amber, sur cet appareil.';
 
   @override
-  String get signerRefused => 'La demande a été refusée.';
+  String get signerRefused => 'Le signeur a refusé ou a échoué.';
 
   @override
   String get waitingForAnswer => 'En attente d\'une réponse';
@@ -157,6 +157,13 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get vaultSignerDescription =>
       'Garde la clé du coffre, qui n\'entre jamais dans Submarine. Sur un autre appareil, ouvrez le coffre de la même façon.';
+
+  @override
+  String get askSignerAtStart => 'Demander au signeur à chaque ouverture';
+
+  @override
+  String get askSignerAtStartDescription =>
+      'Désactivé, une clé gardée sur cet appareil lit le coffre même quand le signeur est injoignable. Activé, le coffre reste fermé tant que le signeur ne l\'a pas ouvert.';
 
   @override
   String get sync => 'Synchronisation';
@@ -265,6 +272,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get syncFailed => 'Relais injoignables';
 
   @override
+  String get waitingForSigner => 'En attente du signeur';
+
+  @override
+  String get signerDidNotOpen => 'Le signeur n\'a pas ouvert le coffre';
+
+  @override
   String get syncedJustNow => 'Synchronisé à l\'instant';
 
   @override
@@ -290,6 +303,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get lookingForItems => 'Recherche des éléments sur les relais';
+
+  @override
+  String get signerDidNotOpenVault =>
+      'Le signeur n\'a pas ouvert ce coffre. Synchronisez pour le lui redemander.';
 
   @override
   String get selectItem => 'Sélectionnez un élément pour l\'afficher ici.';

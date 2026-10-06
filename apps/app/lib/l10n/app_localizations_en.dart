@@ -125,7 +125,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noSignerApp => 'No signer app, such as Amber, on this device.';
 
   @override
-  String get signerRefused => 'The request was refused.';
+  String get signerRefused => 'The signer refused or failed.';
 
   @override
   String get waitingForAnswer => 'Waiting for an answer';
@@ -153,6 +153,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get vaultSignerDescription =>
       'Holds the vault key, which never enters Submarine. On another device, open the vault the same way.';
+
+  @override
+  String get askSignerAtStart => 'Ask the signer at each launch';
+
+  @override
+  String get askSignerAtStartDescription =>
+      'Off, a key kept on this device reads the vault even when the signer is out of reach. On, the vault stays closed until the signer opens it.';
 
   @override
   String get sync => 'Sync';
@@ -260,6 +267,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get syncFailed => 'Relays unreachable';
 
   @override
+  String get waitingForSigner => 'Waiting for the signer';
+
+  @override
+  String get signerDidNotOpen => 'Signer did not open the vault';
+
+  @override
   String get syncedJustNow => 'Synced just now';
 
   @override
@@ -285,6 +298,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lookingForItems => 'Looking for items on the relays';
+
+  @override
+  String get signerDidNotOpenVault =>
+      'The signer did not open this vault. Sync to ask it again.';
 
   @override
   String get selectItem => 'Select an item to see it here.';

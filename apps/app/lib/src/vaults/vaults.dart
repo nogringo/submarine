@@ -5,11 +5,13 @@ import 'package:ndk/ndk.dart';
 import 'package:ndk_flutter/ndk_flutter.dart'
     show Nip07EventSigner, Nip55EventSigner, Nip55Signer;
 import 'package:nostr_passwords/nostr_passwords.dart';
+import 'package:sembast/sembast.dart' show Database;
 import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
 
 import '../items/item_filter.dart';
 import 'vault_controller.dart';
 import 'vault_storage.dart';
+import 'version_store.dart';
 
 const vaultColors = [
   Color(0xFF2F6FD0),
@@ -38,13 +40,16 @@ class Vaults extends ChangeNotifier {
     required this.relays,
     required this.indexers,
     required this._storage,
+    required this._database,
   });
 
-  /// Opens the vaults saved on this device, and starts syncing them.
+  /// Opens the vaults saved on this device, and starts syncing them. Each one
+  /// keeps the versions it opened in [database].
   static Future<Vaults> load({
     required Ndk ndk,
     required SyncEngine engine,
     required VaultStorage storage,
+    required Database database,
     List<String> relays = defaultRelays,
     List<String> indexers = indexerRelays,
   }) async {
@@ -54,6 +59,7 @@ class Vaults extends ChangeNotifier {
       relays: relays,
       indexers: indexers,
       storage: storage,
+      database: database,
     );
     for (final record in await storage.read()) {
       vaults._open(record);
@@ -70,6 +76,7 @@ class Vaults extends ChangeNotifier {
   final List<String> relays;
   final List<String> indexers;
   final VaultStorage _storage;
+  final Database _database;
   final _vaults = <VaultController>[];
 
   List<VaultController> get all => List.unmodifiable(_vaults);
@@ -124,6 +131,17 @@ class Vaults extends ChangeNotifier {
     return _save([for (final vault in _vaults) vault.record]);
   }
 
+  /// Whether the key of [vault]'s cache is sealed for its signer, which then
+  /// opens it at each start, rather than kept on this device. Asks the signer.
+  Future<void> setCacheKeySealed(VaultController vault, bool sealed) async {
+    final key = vault.vault.cache!.key ?? (throw const CacheLockedException());
+    vault.record = vault.record.copyWith(
+      cacheKey: sealed ? await sealCacheKey(key, vault.vault.signer) : key,
+      cacheKeySealed: sealed,
+    );
+    await _save([for (final vault in _vaults) vault.record]);
+  }
+
   /// One write after the other, so that an older list never lands last.
   Future<void> _save(List<VaultRecord> records) {
     final saved = _saving.then((_) => _storage.write(records));
@@ -157,6 +175,7 @@ class Vaults extends ChangeNotifier {
           : AccountType.externalSigner,
       signer: signer,
     );
+    final store = SembastVersionStore(_database, signer.getPublicKey());
     final vault = VaultController(
       record: record,
       vault: Vault(
@@ -164,6 +183,9 @@ class Vaults extends ChangeNotifier {
         signer: signer,
         relays: relays,
         indexers: indexers,
+        cache: record.cacheKeySealed
+            ? VersionCache.sealed(store, record.cacheKey, signer)
+            : VersionCache(store, record.cacheKey),
       ),
       engine: engine,
     )..addListener(notifyListeners);

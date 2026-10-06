@@ -28,7 +28,7 @@ Flutter app for Submarine, a password manager built on [Nostr](https://nostr.how
 | Linux | Keyring, through libsecret | None |
 | Web | localStorage, next to the key that encrypts them | None |
 
-A vault opened through a signer leaves its key there: the device stores how to reach the signer, and for a bunker the key it signs its requests with. Each version of an item is decrypted by the signer when the app starts, which a bunker does over the network, one round trip each.
+A vault opened through a signer leaves its key there: the device stores how to reach the signer, and for a bunker the key it signs its requests with. The signer decrypts each version of an item once per device, which a bunker does over the network, one round trip each. The device keeps what was decrypted, encrypted with a key stored next to the vault keys, so that a later start only asks the signer for what is new, and shows the rest even while the signer is out of reach. In the vault settings, the signer can hold that key instead: it then opens the vault at each launch, and the vault stays closed until it does.
 
 On Android, the vault keys stay out of backups and device transfers, as another device could not decrypt them. Keep your vault keys: on a new phone, they are the only way to open your vaults again.
 

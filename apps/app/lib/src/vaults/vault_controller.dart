@@ -19,6 +19,10 @@ class VaultController extends ChangeNotifier {
   }) {
     unawaited(_readRelays().then((_) => fetchRelays()));
     subscribe();
+    _signerRequests = vault.signer.pendingRequestsStream.listen(
+      (_) => notifyListeners(),
+    );
+    unawaited(unlock());
   }
 
   final Vault vault;
@@ -29,6 +33,7 @@ class VaultController extends ChangeNotifier {
   Set<String>? _syncedRelays;
   StreamSubscription<SyncRequestStatus>? _statuses;
   StreamSubscription<Nip01Event>? _live;
+  StreamSubscription<void>? _signerRequests;
 
   /// Changed through [Vaults.edit], which saves it.
   VaultRecord get record => _record;
@@ -47,9 +52,20 @@ class VaultController extends ChangeNotifier {
   List<Item> get items => _items;
   List<Item> _items = const [];
 
-  /// Whether [items] were read from the cache yet.
+  /// Whether [items] were read from the cache yet, with what the signer had to
+  /// open at the start.
   bool get loaded => _loaded;
   var _loaded = false;
+
+  /// Whether the signer answered for what it had to open at the start.
+  var _opened = false;
+
+  /// Whether the signer has yet to open the vault, whose cache key it keeps
+  /// sealed. Nothing shows until it does, see [unlock].
+  bool get locked => vault.cache?.locked ?? false;
+
+  /// Whether the signer has a request of the vault to answer.
+  bool get waitingForSigner => vault.signer.pendingRequests.isNotEmpty;
 
   SyncRequestPhase get phase => _phase;
   var _phase = SyncRequestPhase.idle;
@@ -74,8 +90,10 @@ class VaultController extends ChangeNotifier {
   var _relaysFetched = false;
 
   /// Sends the unsent changes and fetches what changed on the relays now,
-  /// rather than at the next pass.
+  /// rather than at the next pass. Asks the signer again to open the vault if
+  /// it did not.
   Future<void> sync() => Future.wait([
+    unlock(),
     vault.push().then((_) => _checkUnsent()),
     if (_handle case final handle?) handle.then(_engine.refresh),
     fetchRelays(),
@@ -123,6 +141,11 @@ class VaultController extends ChangeNotifier {
     unawaited(_statuses?.cancel());
     // Replays the current status, which triggers a read.
     _statuses = _engine.watchStatus(handle).listen(_onStatus);
+  }
+
+  /// Asks the signer to open the vault, unless it did.
+  Future<void> unlock() async {
+    if (locked && await vault.cache!.unlock()) await _reload();
   }
 
   /// Shows what other devices change the moment they publish it, until
@@ -240,7 +263,7 @@ class VaultController extends ChangeNotifier {
     try {
       do {
         _reloadAgain = false;
-        final items = await vault.items();
+        final items = await vault.openedItems();
         final lastSync = await vault.lastSync(_engine);
         if (_disposed) return;
         _items = items..sort(compareByName);
@@ -250,14 +273,29 @@ class VaultController extends ChangeNotifier {
           unawaited(fetchRelays());
         }
         _lastSync = lastSync;
-        _loaded = true;
+        _loaded = _opened;
         notifyListeners();
+        if (!locked) unawaited(_open());
         await _checkUnsent();
       } while (_reloadAgain);
     } catch (error, stack) {
       _report(error, stack, 'while reading the vault');
     } finally {
       _reloading = false;
+    }
+  }
+
+  /// Asks the signer for the versions never opened, without holding back
+  /// those it opened before.
+  Future<void> _open() async {
+    try {
+      final opened = await vault.open();
+      if (_disposed) return;
+      final first = !_opened;
+      _opened = true;
+      if (opened || first) unawaited(_reload());
+    } catch (error, stack) {
+      _report(error, stack, 'while opening the vault');
     }
   }
 
@@ -276,6 +314,7 @@ class VaultController extends ChangeNotifier {
     _disposed = true;
     _unsentCheck?.cancel();
     unawaited(_statuses?.cancel());
+    unawaited(_signerRequests?.cancel());
     unawaited(unsubscribe());
     unawaited(_handle?.then(_engine.release));
     super.dispose();

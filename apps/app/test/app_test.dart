@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io'
     show HttpOverrides, HttpServer, InternetAddress, WebSocketTransformer;
@@ -11,6 +12,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart'
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ndk/ndk.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
+import 'package:sembast/sembast.dart' show Database;
 import 'package:sembast/sembast_memory.dart' show newDatabaseFactoryMemory;
 import 'package:submarine/src/app.dart';
 import 'package:submarine/src/clipboard.dart';
@@ -29,6 +31,9 @@ import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
 
 void main() {
   late Ndk ndk;
+  late Database database;
+  late SyncEngine engine;
+  late List<String> vaultRelays;
   late Vaults vaults;
   late AppLock lock;
   late FakeDeviceAuth deviceAuth;
@@ -49,14 +54,16 @@ void main() {
 
   /// Vaults on [relays], none by default, whose cache already holds [items] in
   /// a vault named Personal when there are any, next to an empty Family vault
-  /// if [withFamily] and a Signed vault held by [signer]. The app locks as
-  /// [lockSettings] say, behind a device that lets the user in until told
-  /// otherwise.
+  /// if [withFamily] and a Signed vault held by [signer], holding
+  /// [signedItems] made with [signerKey]. The app locks as [lockSettings] say,
+  /// behind a device that lets the user in until told otherwise.
   Future<void> open(
     WidgetTester tester, {
     List<Cipher> items = const [],
     bool withFamily = false,
     SignerLogin? signer,
+    EventSigner? signerKey,
+    List<Cipher> signedItems = const [],
     LockSettings? lockSettings,
     List<String> relays = const [],
   }) => tester.runAsync(() async {
@@ -102,20 +109,25 @@ void main() {
         VaultRecord(login: signer, name: 'Signed', color: vaultColors[2]),
       );
     }
+    if (signerKey != null) {
+      final vault = Vault(ndk: ndk, signer: signerKey, relays: const []);
+      for (final cipher in signedItems) {
+        await vault.createItem(cipher);
+      }
+    }
     FlutterSecureStorage.setMockInitialValues({
       if (records.isNotEmpty)
         'vaults': jsonEncode([for (final r in records) r.toJson()]),
       if (lockSettings != null) 'lock': jsonEncode(lockSettings.toJson()),
     });
+    database = await newDatabaseFactoryMemory().openDatabase('sync');
+    engine = SyncEngine(ndk, store: SembastSyncStore(database));
+    vaultRelays = relays;
     vaults = await Vaults.load(
       ndk: ndk,
-      engine: SyncEngine(
-        ndk,
-        store: SembastSyncStore(
-          await newDatabaseFactoryMemory().openDatabase('sync'),
-        ),
-      ),
+      engine: engine,
       storage: VaultStorage(),
+      database: database,
       relays: relays,
       indexers: const [],
     );
@@ -127,6 +139,29 @@ void main() {
     clipboard = await AppClipboard.load();
     screenCapture = await ScreenCapture.load();
   });
+
+  /// Starts the app again on the same device, which keeps its storage and its
+  /// databases. Waits for each vault to load, or to wait for its signer.
+  Future<void> restart(WidgetTester tester) async {
+    await tester.pumpWidget(const SizedBox());
+    await tester.runAsync(() async {
+      await vaults.pauseSync();
+      vaults.dispose();
+      vaults = await Vaults.load(
+        ndk: ndk,
+        engine: engine,
+        storage: VaultStorage(),
+        database: database,
+        relays: vaultRelays,
+        indexers: const [],
+      );
+      while (vaults.all.any(
+        (vault) => !vault.loaded && !vault.locked && !vault.waitingForSigner,
+      )) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+    });
+  }
 
   Future<void> close(WidgetTester tester) async {
     await tester.pumpWidget(const SizedBox());
@@ -1847,6 +1882,164 @@ void main() {
     await close(tester);
   });
 
+  testWidgets('asks the signer to open a vault at each launch, if told so', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    final signerApp = FakeSignerApp(tester);
+    await open(
+      tester,
+      signer: SignerAppLogin(
+        signerApp.signer.getPublicKey(),
+        package: 'com.greenart7c3.nostrsigner',
+      ),
+      signerKey: signerApp.signer,
+      signedItems: [github],
+    );
+    Widget app() => SubmarineApp(
+      vaults: vaults,
+      lock: lock,
+      appearance: appearance,
+      clipboard: clipboard,
+      screenCapture: screenCapture,
+    );
+    await tester.pumpWidget(app());
+    await settle(tester);
+    expect(signerApp.decryptions, 1);
+
+    await tester.tap(find.byTooltip('Signed'));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Vault settings'));
+    await settle(tester);
+    const askSigner = 'Ask the signer at each launch';
+    expect(tester.widget<Switch>(settingsSwitch(askSigner)).value, isFalse);
+    expect(
+      find.text(
+        'Off, a key kept on this device reads the vault even when the signer '
+        'is out of reach. On, the vault stays closed until the signer opens '
+        'it.',
+      ),
+      findsOneWidget,
+    );
+    final plainKey = vaults.all.single.record.cacheKey;
+
+    await write(tester, settingsSwitch(askSigner));
+
+    expect(tester.widget<Switch>(settingsSwitch(askSigner)).value, isTrue);
+    final [saved] = jsonDecode(
+      (await const FlutterSecureStorage().read(key: 'vaults'))!,
+    );
+    expect(saved['cacheKeySealed'], isTrue);
+    expect(saved['cacheKey'], isNot(plainKey));
+
+    signerApp.hold = Completer();
+    await restart(tester);
+    await tester.pumpWidget(app());
+    await settle(tester);
+    await tester.tap(find.byTooltip('Signed'));
+    await settle(tester);
+
+    expect(find.text('GitHub'), findsNothing);
+    expect(find.text('Waiting for the signer'), findsWidgets);
+
+    signerApp.refuses = true;
+    await tester.runAsync(() async {
+      signerApp.hold!.complete();
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    });
+    await settle(tester);
+
+    expect(find.text('GitHub'), findsNothing);
+    expect(
+      find.text('The signer did not open this vault. Sync to ask it again.'),
+      findsOneWidget,
+    );
+    expect(find.text('Signer did not open the vault'), findsWidgets);
+
+    signerApp
+      ..hold = null
+      ..refuses = false;
+    await write(tester, find.byTooltip('Sync now').first);
+
+    expect(find.text('GitHub'), findsWidgets);
+    // The key twice, but never the item again.
+    expect(signerApp.decryptions, 3);
+    await close(tester);
+  });
+
+  testWidgets('shows what a vault opened before while its signer waits', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    final signerApp = FakeSignerApp(tester);
+    await open(
+      tester,
+      signer: SignerAppLogin(
+        signerApp.signer.getPublicKey(),
+        package: 'com.greenart7c3.nostrsigner',
+      ),
+      signerKey: signerApp.signer,
+      signedItems: [github],
+    );
+    // What another device published meanwhile, synced in.
+    await tester.runAsync(
+      () => Vault(
+        ndk: ndk,
+        signer: signerApp.signer,
+        relays: const [],
+      ).createItem(Cipher(type: CipherType.secureNote, name: 'Wi-Fi')),
+    );
+    signerApp.hold = Completer();
+    Widget app() => SubmarineApp(
+      vaults: vaults,
+      lock: lock,
+      appearance: appearance,
+      clipboard: clipboard,
+      screenCapture: screenCapture,
+    );
+
+    await restart(tester);
+    await tester.pumpWidget(app());
+    await settle(tester);
+    await tester.tap(find.byTooltip('Signed'));
+    await settle(tester);
+
+    expect(find.text('GitHub'), findsWidgets);
+    expect(find.text('Wi-Fi'), findsNothing);
+    expect(find.text('Waiting for the signer'), findsWidgets);
+
+    await tester.runAsync(() async {
+      signerApp.hold!.complete();
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+    });
+    await settle(tester);
+
+    expect(find.text('Wi-Fi'), findsWidgets);
+    expect(find.text('Waiting for the signer'), findsNothing);
+    expect(signerApp.decryptions, 2);
+    await close(tester);
+  });
+
+  testWidgets('gives a vault saved before the cache a key, and keeps it', (
+    tester,
+  ) async {
+    FlutterSecureStorage.setMockInitialValues({
+      'vaults': jsonEncode([
+        {
+          'privateKey': const Bip340EventSignerFactory().generateKeyPair().$1,
+          'name': 'Personal',
+          'color': vaultColors.first.toARGB32(),
+        },
+      ]),
+    });
+
+    final [first] = await VaultStorage().read();
+    final [again] = await VaultStorage().read();
+
+    expect(again.cacheKey, first.cacheKey);
+    expect(again.cacheKeySealed, isFalse);
+  });
+
   testWidgets('opens a vault with a key encrypted with a password', (
     tester,
   ) async {
@@ -3021,6 +3214,47 @@ final class FakeFile extends PlatformFile {
 
   @override
   Stream<Uint8List> readAsByteStream() => Stream.value(_bytes);
+}
+
+/// A signer app on Android (NIP-55) with a key of its own, reached as
+/// ndk_flutter does. It answers at once, unless [hold] keeps its answers back,
+/// and refuses when told to.
+class FakeSignerApp {
+  FakeSignerApp(WidgetTester tester) {
+    final messenger = tester.binding.defaultBinaryMessenger;
+    messenger.setMockMethodCallHandler(_channel, _answer);
+    addTearDown(() => messenger.setMockMethodCallHandler(_channel, null));
+  }
+
+  static const _channel = MethodChannel('ndk');
+
+  final signer = const Bip340EventSignerFactory().createWithNewKeyPair();
+  var decryptions = 0;
+  var refuses = false;
+  Completer<void>? hold;
+
+  Future<Map<String, String?>> _answer(MethodCall call) async {
+    final arguments = call.arguments as Map;
+    final type = arguments['type'];
+    if (type == 'nip44_decrypt') decryptions++;
+    await hold?.future;
+    if (refuses) throw PlatformException(code: 'REJECTED');
+    final text = arguments['uri_data'] as String;
+    final pubkey = arguments['pubKey'] as String;
+    return {
+      'signature': switch (type) {
+        'nip44_encrypt' => await signer.encryptNip44(
+          plaintext: text,
+          recipientPubKey: pubkey,
+        ),
+        'nip44_decrypt' => await signer.decryptNip44(
+          ciphertext: text,
+          senderPubKey: pubkey,
+        ),
+        _ => throw UnimplementedError('$type'),
+      },
+    };
+  }
 }
 
 class FakeDeviceAuth implements DeviceAuth {

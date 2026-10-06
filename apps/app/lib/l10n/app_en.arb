@@ -186,6 +186,18 @@
   "@vaultSignerDescription": {
     "description": "In the vault settings, under the name of the signer holding the vault key."
   },
+  "askSignerAtStart": "Ask the signer at each launch",
+  "@askSignerAtStart": {
+    "description": "Switch in the settings of a vault held by a signer: the signer then opens the vault each time the app starts."
+  },
+  "askSignerAtStartDescription": "Off, a key kept on this device reads the vault even when the signer is out of reach. On, the vault stays closed until the signer opens it.",
+  "@askSignerAtStartDescription": {
+    "description": "Under the switch asking the signer at each launch."
+  },
+  "signerRefused": "The signer refused or failed.",
+  "@signerRefused": {
+    "description": "Error under the switch asking the signer at each launch, when the signer did not do what it was asked."
+  },
   "sync": "Sync",
   "@sync": {
     "description": "Title of the vault settings section about syncing with the relays."
@@ -315,6 +327,14 @@
   "@syncFailed": {
     "description": "Sync status when no relay answers."
   },
+  "waitingForSigner": "Waiting for the signer",
+  "@waitingForSigner": {
+    "description": "Sync status, also shown in place of an empty list, while the signer holding a vault key has a request to answer."
+  },
+  "signerDidNotOpen": "Signer did not open the vault",
+  "@signerDidNotOpen": {
+    "description": "Sync status when the signer did not open a vault that asks it at each launch."
+  },
   "syncedJustNow": "Synced just now",
   "@syncedJustNow": {
     "description": "Sync status when the last sync was less than a minute ago."
@@ -354,6 +374,10 @@
   "lookingForItems": "Looking for items on the relays",
   "@lookingForItems": {
     "description": "Shown in place of the list while a vault was never synced."
+  },
+  "signerDidNotOpenVault": "The signer did not open this vault. Sync to ask it again.",
+  "@signerDidNotOpenVault": {
+    "description": "Shown in place of the list when the signer did not open a vault that asks it at each launch."
   },
   "selectItem": "Select an item to see it here.",
   "@selectItem": {

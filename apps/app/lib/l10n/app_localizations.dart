@@ -308,10 +308,10 @@ abstract class AppLocalizations {
   /// **'No signer app, such as Amber, on this device.'**
   String get noSignerApp;
 
-  /// Error when the extension or the signer app refused to give the vault's public key.
+  /// Error under the switch asking the signer at each launch, when the signer did not do what it was asked.
   ///
   /// In en, this message translates to:
-  /// **'The request was refused.'**
+  /// **'The signer refused or failed.'**
   String get signerRefused;
 
   /// Shown while the dialog waits for a bunker, an extension or a signer app.
@@ -361,6 +361,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Holds the vault key, which never enters Submarine. On another device, open the vault the same way.'**
   String get vaultSignerDescription;
+
+  /// Switch in the settings of a vault held by a signer: the signer then opens the vault each time the app starts.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask the signer at each launch'**
+  String get askSignerAtStart;
+
+  /// Under the switch asking the signer at each launch.
+  ///
+  /// In en, this message translates to:
+  /// **'Off, a key kept on this device reads the vault even when the signer is out of reach. On, the vault stays closed until the signer opens it.'**
+  String get askSignerAtStartDescription;
 
   /// Title of the vault settings section about syncing with the relays.
   ///
@@ -548,6 +560,18 @@ abstract class AppLocalizations {
   /// **'Relays unreachable'**
   String get syncFailed;
 
+  /// Sync status, also shown in place of an empty list, while the signer holding a vault key has a request to answer.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the signer'**
+  String get waitingForSigner;
+
+  /// Sync status when the signer did not open a vault that asks it at each launch.
+  ///
+  /// In en, this message translates to:
+  /// **'Signer did not open the vault'**
+  String get signerDidNotOpen;
+
   /// Sync status when the last sync was less than a minute ago.
   ///
   /// In en, this message translates to:
@@ -583,6 +607,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Looking for items on the relays'**
   String get lookingForItems;
+
+  /// Shown in place of the list when the signer did not open a vault that asks it at each launch.
+  ///
+  /// In en, this message translates to:
+  /// **'The signer did not open this vault. Sync to ask it again.'**
+  String get signerDidNotOpenVault;
 
   /// Shown in the item pane of the wide layout when no item is selected.
   ///

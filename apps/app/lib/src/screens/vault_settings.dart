@@ -180,6 +180,8 @@ class _VaultSettingsState extends State<_VaultSettings> {
                         subtitle: Text(l10n.vaultSignerDescription),
                       ),
                     },
+                    if (vault.record.login is SignerLogin)
+                      _AskSignerTile(vault: vault),
                   ],
                 ),
               ),
@@ -264,6 +266,56 @@ class _VaultKeyTileState extends State<_VaultKeyTile> {
   }
 }
 
+/// Whether the signer opens the cache of the vault at each start, rather than
+/// a key kept on this device.
+class _AskSignerTile extends StatefulWidget {
+  const _AskSignerTile({required this.vault});
+
+  final VaultController vault;
+
+  @override
+  State<_AskSignerTile> createState() => _AskSignerTileState();
+}
+
+class _AskSignerTileState extends State<_AskSignerTile> {
+  var _saving = false;
+  String? _error;
+
+  Future<void> _toggle(bool sealed) async {
+    final l10n = context.l10n;
+    final vaults = Vaults.of(context);
+    setState(() {
+      _saving = true;
+      _error = null;
+    });
+    try {
+      await vaults.setCacheKeySealed(widget.vault, sealed);
+    } catch (_) {
+      if (mounted) setState(() => _error = l10n.signerRefused);
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final vault = widget.vault;
+    final error = _error;
+    return SettingsTile(
+      title: Text(l10n.askSignerAtStart),
+      subtitle: error != null
+          ? Text(error, style: TextStyle(color: context.palette.danger))
+          : Text(l10n.askSignerAtStartDescription),
+      trailing: Switch(
+        value: vault.record.cacheKeySealed,
+        // Moving the key takes it at hand, which a locked vault has not.
+        onChanged: _saving || vault.locked ? null : _toggle,
+      ),
+    );
+  }
+}
+
 class _SyncTile extends StatelessWidget {
   const _SyncTile({required this.vault});
 
@@ -275,7 +327,11 @@ class _SyncTile extends StatelessWidget {
     final palette = context.palette;
     final summary = SyncSummary([vault]);
     final allSent =
-        summary.lastSync != null && summary.unsent == 0 && !summary.failed;
+        summary.lastSync != null &&
+        summary.unsent == 0 &&
+        !summary.failed &&
+        !summary.locked &&
+        !summary.waitingForSigner;
     return SettingsTile(
       title: SyncStatusText(
         vaults: [vault],

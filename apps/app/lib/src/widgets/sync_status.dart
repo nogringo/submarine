@@ -6,11 +6,14 @@ import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
 import '../context.dart';
 import '../vaults/vault_controller.dart';
 
-/// Where the sync of several vaults stands, as one: the changes still to send,
-/// the oldest last sync, and a failure as soon as one vault reaches no relay.
+/// Where the sync of several vaults stands, as one: a signer to wait for or
+/// that did not open a vault, the changes still to send, the oldest last sync,
+/// and a failure as soon as one vault reaches no relay.
 class SyncSummary {
   SyncSummary(List<VaultController> vaults)
-    : unsent = vaults.fold(0, (sum, vault) => sum + vault.unsent),
+    : waitingForSigner = vaults.any((vault) => vault.waitingForSigner),
+      locked = vaults.any((vault) => vault.locked),
+      unsent = vaults.fold(0, (sum, vault) => sum + vault.unsent),
       failed = vaults.any((vault) => vault.phase == SyncRequestPhase.failed),
       syncing = vaults.any((vault) => vault.phase == SyncRequestPhase.syncing),
       lastSync = vaults.any((vault) => vault.lastSync == null)
@@ -19,6 +22,8 @@ class SyncSummary {
                 .map((vault) => vault.lastSync!)
                 .reduce((a, b) => a.isBefore(b) ? a : b);
 
+  final bool waitingForSigner;
+  final bool locked;
   final int unsent;
   final bool failed;
   final bool syncing;
@@ -26,7 +31,16 @@ class SyncSummary {
   /// Null until every vault reached a relay once.
   final DateTime? lastSync;
 
+  /// Whether [describe] tells of the changes still to send.
+  bool get tellsUnsent => !waitingForSigner && !locked && unsent > 0;
+
+  /// Whether [describe] tells of a failure.
+  bool get tellsFailure =>
+      !waitingForSigner && (locked || (failed && unsent == 0));
+
   String describe(AppLocalizations l10n) {
+    if (waitingForSigner) return l10n.waitingForSigner;
+    if (locked) return l10n.signerDidNotOpen;
     if (unsent > 0) return l10n.changesNotSent(unsent);
     if (failed) return l10n.syncFailed;
     final lastSync = this.lastSync;
@@ -82,16 +96,15 @@ class _SyncStatusTextState extends State<SyncStatusText> {
   Widget build(BuildContext context) {
     final palette = context.palette;
     final summary = SyncSummary(widget.vaults);
-    final unsent = summary.unsent > 0;
     final text = Text(
       summary.describe(context.l10n),
       maxLines: widget.maxLines,
       overflow: TextOverflow.ellipsis,
       style: TextStyle(fontSize: 13, color: palette.muted)
           .merge(widget.style)
-          .copyWith(color: summary.failed && !unsent ? palette.danger : null),
+          .copyWith(color: summary.tellsFailure ? palette.danger : null),
     );
-    if (!unsent || !widget.showsUnsentIcon) return text;
+    if (!summary.tellsUnsent || !widget.showsUnsentIcon) return text;
     return Row(
       children: [
         Icon(Icons.upload_rounded, size: 15, color: palette.muted),
@@ -138,7 +151,11 @@ class SyncCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.palette;
     final summary = SyncSummary(vaults);
-    final icon = summary.unsent > 0
+    final icon = summary.waitingForSigner
+        ? Icon(Icons.hourglass_top_rounded, size: 18, color: palette.muted)
+        : summary.locked
+        ? Icon(Icons.lock_outline_rounded, size: 18, color: palette.danger)
+        : summary.unsent > 0
         ? Icon(Icons.upload_rounded, size: 18, color: palette.muted)
         : summary.failed
         ? Icon(Icons.cloud_off_rounded, size: 18, color: palette.danger)

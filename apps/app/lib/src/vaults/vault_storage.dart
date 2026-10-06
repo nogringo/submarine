@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/painting.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:ndk/ndk.dart' show BunkerConnection;
+import 'package:nostr_passwords/nostr_passwords.dart';
 
 import '../secure_storage.dart';
 
@@ -88,31 +89,50 @@ class SignerAppLogin extends SignerLogin {
 /// A vault opened on this device. Its name and color stay on the device:
 /// someone the vault is shared with names it their own way.
 class VaultRecord {
-  const VaultRecord({
+  VaultRecord({
     required this.login,
     required this.name,
     required this.color,
-  });
+    String? cacheKey,
+    this.cacheKeySealed = false,
+  }) : cacheKey = cacheKey ?? newCacheKey();
 
   VaultRecord.fromJson(Map<String, dynamic> json)
     : login = VaultLogin.fromJson(json),
       name = json['name'] as String,
-      color = Color(json['color'] as int);
+      color = Color(json['color'] as int),
+      // A record saved before the cache gets a key, which VaultStorage saves.
+      cacheKey = json['cacheKey'] as String? ?? newCacheKey(),
+      cacheKeySealed = json['cacheKeySealed'] as bool? ?? false;
 
   final VaultLogin login;
   final String name;
   final Color color;
 
-  VaultRecord copyWith({String? name, Color? color}) => VaultRecord(
+  /// The key of the vault's [VersionCache], sealed for its signer when
+  /// [cacheKeySealed].
+  final String cacheKey;
+  final bool cacheKeySealed;
+
+  VaultRecord copyWith({
+    String? name,
+    Color? color,
+    String? cacheKey,
+    bool? cacheKeySealed,
+  }) => VaultRecord(
     login: login,
     name: name ?? this.name,
     color: color ?? this.color,
+    cacheKey: cacheKey ?? this.cacheKey,
+    cacheKeySealed: cacheKeySealed ?? this.cacheKeySealed,
   );
 
   Map<String, dynamic> toJson() => {
     ...login.toJson(),
     'name': name,
     'color': color.toARGB32(),
+    'cacheKey': cacheKey,
+    'cacheKeySealed': cacheKeySealed,
   };
 }
 
@@ -128,10 +148,12 @@ class VaultStorage {
   Future<List<VaultRecord>> read() async {
     final json = await _storage.read(key: _key);
     if (json == null) return [];
-    return [
-      for (final record in jsonDecode(json) as List)
-        VaultRecord.fromJson(record as Map<String, dynamic>),
-    ];
+    final saved = (jsonDecode(json) as List).cast<Map<String, dynamic>>();
+    final records = [for (final record in saved) VaultRecord.fromJson(record)];
+    if (saved.any((record) => !record.containsKey('cacheKey'))) {
+      await write(records);
+    }
+    return records;
   }
 
   Future<void> write(List<VaultRecord> records) => _storage.write(

@@ -580,7 +580,12 @@ class _Empty extends StatelessWidget {
     final l10n = context.l10n;
     final palette = context.palette;
     final selection = Vaults.of(context).select(vaultId);
-    if (!searched && selection.any((vault) => !vault.loaded)) {
+    final waitingForSigner = selection.any((vault) => vault.waitingForSigner);
+    final locked = selection.any((vault) => vault.locked);
+    if (!searched &&
+        !waitingForSigner &&
+        !locked &&
+        selection.any((vault) => !vault.loaded)) {
       return const SizedBox.shrink();
     }
     final neverSynced = selection.any((vault) => vault.lastSync == null);
@@ -590,6 +595,10 @@ class _Empty extends StatelessWidget {
         child: Text(
           searched
               ? l10n.noSearchResults
+              : waitingForSigner
+              ? l10n.waitingForSigner
+              : locked
+              ? l10n.signerDidNotOpenVault
               : neverSynced
               ? l10n.lookingForItems
               : filter == ItemFilter.all

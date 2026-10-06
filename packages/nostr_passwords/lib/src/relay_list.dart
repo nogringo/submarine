@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:ndk/domain_layer/entities/nip_65.dart';
 import 'package:ndk/domain_layer/entities/read_write_marker.dart';
 import 'package:ndk/ndk.dart';
+import 'package:ndk/shared/helpers/relay_helper.dart';
 
 export 'package:ndk/domain_layer/entities/read_write_marker.dart';
 
@@ -17,6 +18,56 @@ class RelayList {
 
   final Map<String, ReadWriteMarker> public;
   final Map<String, ReadWriteMarker> private;
+
+  /// Every relay, the public ones first.
+  Set<String> get urls => {...public.keys, ...private.keys};
+
+  bool get isEmpty => public.isEmpty && private.isEmpty;
+
+  /// Whether [url] is listed, both normalized as ndk does.
+  bool contains(String url) =>
+      urls.any((relay) => _normalized(relay) == _normalized(url));
+
+  /// This list with [url], as [parseRelayUrl] reads it, in place of the same
+  /// relay with other settings.
+  RelayList withRelay(
+    String url, {
+    ReadWriteMarker marker = ReadWriteMarker.readWrite,
+    bool private = false,
+  }) {
+    final relay =
+        parseRelayUrl(url) ??
+        (throw ArgumentError.value(url, 'url', 'Not a relay URL'));
+    final rest = without(relay);
+    return RelayList(
+      public: {...rest.public, if (!private) relay: marker},
+      private: {...rest.private, if (private) relay: marker},
+    );
+  }
+
+  RelayList without(String url) {
+    bool isUrl(String relay, ReadWriteMarker _) =>
+        _normalized(relay) == _normalized(url);
+    return RelayList(
+      public: {...public}..removeWhere(isUrl),
+      private: {...private}..removeWhere(isUrl),
+    );
+  }
+
+  static String _normalized(String url) => cleanRelayUrl(url) ?? url;
+}
+
+/// A relay address as a user types it, wss:// when it has no scheme,
+/// normalized as ndk does. Returns null for anything else, a host without a
+/// dot included, localhost aside: ndk takes "wss://typo" for a relay.
+String? parseRelayUrl(String text) {
+  final trimmed = text.trim();
+  final url = cleanRelayUrl(
+    trimmed.contains('://') ? trimmed : 'wss://$trimmed',
+  );
+  if (url == null) return null;
+  final host = Uri.parse(url).host;
+  return host.contains('.') || host == 'localhost' ? url : null;
 }
 
 /// Relays a client gives a vault by default.

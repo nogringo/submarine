@@ -5,5 +5,6 @@
 - Logins created and edited. The other item types are shown.
 - Search and filters, trash, generator and TOTP codes.
 - Live sync, and the changes not sent yet.
+- The vault's relays in its settings, changed as a draft and saved as a single relay list.
 - Lock with the device's biometrics or screen lock.
 - English and French.

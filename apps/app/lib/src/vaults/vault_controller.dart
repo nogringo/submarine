@@ -15,23 +15,18 @@ class VaultController extends ChangeNotifier {
   VaultController({
     required this._record,
     required this.vault,
-    required SyncEngine engine,
-  }) : _engine = engine {
-    _handle = vault.sync(engine);
-    unawaited(
-      _handle.then((handle) {
-        // Replays the current status, which triggers the first read.
-        if (!_disposed) {
-          _statuses = engine.watchStatus(handle).listen(_onStatus);
-        }
-      }),
-    );
+    required this._engine,
+  }) {
+    unawaited(_readRelays().then((_) => fetchRelays()));
     subscribe();
   }
 
   final Vault vault;
   final SyncEngine _engine;
-  late final Future<SyncHandle> _handle;
+
+  /// Holds the relays of the moment, replaced once they change.
+  Future<SyncHandle>? _handle;
+  Set<String>? _syncedRelays;
   StreamSubscription<SyncRequestStatus>? _statuses;
   StreamSubscription<Nip01Event>? _live;
 
@@ -69,12 +64,66 @@ class VaultController extends ChangeNotifier {
   var _unsent = 0;
   Timer? _unsentCheck;
 
+  /// The relays the vault lives on, null until read from the cache.
+  RelayList? get relayList => _relayList;
+  RelayList? _relayList;
+
+  /// Whether [setRelayList] cannot replace a newer list: the newest one was
+  /// looked for, and the vault reached a relay once.
+  bool get relaysEditable => _relaysFetched && _lastSync != null;
+  var _relaysFetched = false;
+
   /// Sends the unsent changes and fetches what changed on the relays now,
   /// rather than at the next pass.
   Future<void> sync() => Future.wait([
     vault.push().then((_) => _checkUnsent()),
-    _handle.then(_engine.refresh),
+    if (_handle case final handle?) handle.then(_engine.refresh),
+    fetchRelays(),
   ]);
+
+  /// Fetches the relay list another device may have changed, and moves the
+  /// sync to its relays.
+  Future<void> fetchRelays() async {
+    try {
+      await vault.fetchRelayList();
+      _relaysFetched = true;
+    } catch (error, stack) {
+      _report(error, stack, 'while fetching the relay list of the vault');
+    }
+    await _readRelays();
+  }
+
+  /// Saved once in the ndk cache, then sent to the relays. The relays it adds
+  /// get a copy of the vault.
+  Future<void> setRelayList(RelayList list) async {
+    await vault.setRelayList(list);
+    await _readRelays();
+    unawaited(_checkUnsent());
+  }
+
+  Future<void> _readRelays() async {
+    final RelayList list;
+    try {
+      list = await vault.currentRelayList();
+    } catch (error, stack) {
+      _report(error, stack, 'while reading the relay list of the vault');
+      return;
+    }
+    if (_disposed) return;
+    _relayList = list;
+    notifyListeners();
+    if (setEquals(list.urls, _syncedRelays)) return;
+    _syncedRelays = list.urls;
+    final previous = _handle;
+    final next = _handle = vault.sync(_engine);
+    final handle = await next;
+    // After the new handle: the same relays would otherwise drop their sync.
+    if (previous != null) unawaited(previous.then(_engine.release));
+    if (_disposed || _handle != next) return;
+    unawaited(_statuses?.cancel());
+    // Replays the current status, which triggers a read.
+    _statuses = _engine.watchStatus(handle).listen(_onStatus);
+  }
 
   /// Shows what other devices change the moment they publish it, until
   /// [unsubscribe].
@@ -195,24 +244,32 @@ class VaultController extends ChangeNotifier {
         final lastSync = await vault.lastSync(_engine);
         if (_disposed) return;
         _items = items..sort(compareByName);
+        if (_lastSync == null && lastSync != null && _relaysFetched) {
+          // Fetched before the vault ever reached a relay.
+          _relaysFetched = false;
+          unawaited(fetchRelays());
+        }
         _lastSync = lastSync;
         _loaded = true;
         notifyListeners();
         await _checkUnsent();
       } while (_reloadAgain);
     } catch (error, stack) {
+      _report(error, stack, 'while reading the vault');
+    } finally {
+      _reloading = false;
+    }
+  }
+
+  void _report(Object error, StackTrace stack, String context) =>
       FlutterError.reportError(
         FlutterErrorDetails(
           exception: error,
           stack: stack,
           library: 'submarine',
-          context: ErrorDescription('while reading the vault $pubkey'),
+          context: ErrorDescription('$context $pubkey'),
         ),
       );
-    } finally {
-      _reloading = false;
-    }
-  }
 
   @override
   void dispose() {
@@ -220,7 +277,7 @@ class VaultController extends ChangeNotifier {
     _unsentCheck?.cancel();
     unawaited(_statuses?.cancel());
     unawaited(unsubscribe());
-    unawaited(_handle.then(_engine.release));
+    unawaited(_handle?.then(_engine.release));
     super.dispose();
   }
 }

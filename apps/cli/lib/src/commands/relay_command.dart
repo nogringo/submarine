@@ -79,7 +79,7 @@ class _RelayAddCommand extends VaultCommand {
     await withVault((session) async {
       final list = await session.relayList();
       await session.vault.setRelayList(
-        withRelay(list, url, marker, private: private),
+        list.withRelay(url, marker: marker, private: private),
       );
     });
   }
@@ -97,10 +97,10 @@ class _RelayRemoveCommand extends VaultCommand {
 
   @override
   Future<void> execute() async {
-    final url = relayUrl(singleArgument('url'));
+    final argument = singleArgument('url');
     await withVault((session) async {
       final list = await session.relayList();
-      await session.vault.setRelayList(withoutRelay(list, url));
+      await session.vault.setRelayList(withoutRelay(list, argument));
     });
   }
 }

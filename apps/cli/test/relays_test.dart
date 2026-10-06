@@ -18,38 +18,19 @@ void main() {
 
   test('relayUrl refuses what is not a websocket URL', () {
     expect(() => relayUrl('https://relay.example.com'), throwsCliException);
+    expect(() => relayUrl('wss://typo'), throwsCliException);
   });
 
-  test('withRelay adds a public or a private relay', () {
-    final added = withRelay(
-      list,
-      'wss://relay.example.com',
-      ReadWriteMarker.readWrite,
-      private: true,
+  test('withoutRelay removes a relay relayUrl refuses, or without wss://', () {
+    const typo = RelayList(
+      public: {
+        'wss://typo': ReadWriteMarker.readWrite,
+        'wss://relay.primal.net': ReadWriteMarker.readWrite,
+      },
     );
 
-    expect(added.public, list.public);
-    expect(added.private, {
-      ...list.private,
-      'wss://relay.example.com': ReadWriteMarker.readWrite,
-    });
-  });
-
-  test('withRelay replaces the settings of a relay already listed', () {
-    final changed = withRelay(
-      list,
-      'wss://relay.nos.social',
-      ReadWriteMarker.writeOnly,
-      private: true,
-    );
-
-    expect(changed.public, {
-      'wss://relay.primal.net': ReadWriteMarker.readWrite,
-    });
-    expect(changed.private, {
-      'wss://relay.alice.example': ReadWriteMarker.writeOnly,
-      'wss://relay.nos.social': ReadWriteMarker.writeOnly,
-    });
+    expect(withoutRelay(typo, 'wss://typo').urls, {'wss://relay.primal.net'});
+    expect(withoutRelay(typo, 'relay.primal.net').urls, {'wss://typo'});
   });
 
   test('withoutRelay removes a public or a private relay', () {

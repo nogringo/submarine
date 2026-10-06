@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:ndk/ndk.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
@@ -32,6 +34,7 @@ class Vaults extends ChangeNotifier {
     required this.ndk,
     required this.engine,
     required this.relays,
+    required this.indexers,
     required this._storage,
   });
 
@@ -41,11 +44,13 @@ class Vaults extends ChangeNotifier {
     required SyncEngine engine,
     required VaultStorage storage,
     List<String> relays = defaultRelays,
+    List<String> indexers = indexerRelays,
   }) async {
     final vaults = Vaults._(
       ndk: ndk,
       engine: engine,
       relays: relays,
+      indexers: indexers,
       storage: storage,
     );
     for (final record in await storage.read()) {
@@ -61,6 +66,7 @@ class Vaults extends ChangeNotifier {
   final Ndk ndk;
   final SyncEngine engine;
   final List<String> relays;
+  final List<String> indexers;
   final VaultStorage _storage;
   final _vaults = <VaultController>[];
 
@@ -134,7 +140,12 @@ class Vaults extends ChangeNotifier {
     );
     final vault = VaultController(
       record: record,
-      vault: Vault(ndk: ndk, signer: signer, relays: relays),
+      vault: Vault(
+        ndk: ndk,
+        signer: signer,
+        relays: relays,
+        indexers: indexers,
+      ),
       engine: engine,
     )..addListener(notifyListeners);
     _vaults.add(vault);
@@ -151,6 +162,7 @@ class Vaults extends ChangeNotifier {
     engine.start();
     for (final vault in _vaults) {
       vault.subscribe();
+      unawaited(vault.fetchRelays());
     }
   }
 

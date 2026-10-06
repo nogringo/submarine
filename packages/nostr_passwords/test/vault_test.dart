@@ -360,6 +360,21 @@ void main() {
       expect(await vault.relayList(), isNull);
     });
 
+    test(
+      'currentRelayList is the relays of the vault until it has a list',
+      () async {
+        final before = await vault.currentRelayList();
+        expect(before.public, {relay.url: ReadWriteMarker.readWrite});
+        expect(before.private, isEmpty);
+
+        await vault.setRelayList(relays);
+
+        final after = await vault.currentRelayList();
+        expect(after.public, relays.public);
+        expect(after.private, relays.private);
+      },
+    );
+
     test('setRelayList saves the list, which push sends', () async {
       await vault.setRelayList(relays);
 

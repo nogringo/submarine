@@ -248,6 +248,120 @@ abstract class AppLocalizations {
   /// **'Every change is on your relays.'**
   String get syncAllSent;
 
+  /// Title of the vault settings section listing the relays the vault lives on.
+  ///
+  /// In en, this message translates to:
+  /// **'Relays'**
+  String get relays;
+
+  /// Under the title of the relays section of the vault settings.
+  ///
+  /// In en, this message translates to:
+  /// **'This vault is copied to each of these relays. They only see encrypted data and its public key.'**
+  String get relaysDescription;
+
+  /// Status of a relay this device has a connection to.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected'**
+  String get relayConnected;
+
+  /// Status of a relay this device has no connection to right now.
+  ///
+  /// In en, this message translates to:
+  /// **'Not connected'**
+  String get relayNotConnected;
+
+  /// Under a relay of the vault settings that is encrypted in the vault's relay list.
+  ///
+  /// In en, this message translates to:
+  /// **'Private'**
+  String get relayPrivate;
+
+  /// Tooltip of the button removing a relay from the vault.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this relay'**
+  String get removeRelay;
+
+  /// Row of the vault settings opening the dialog that adds a relay, and title of that dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a relay'**
+  String get addRelay;
+
+  /// Field of the relay to add, a wss:// URL.
+  ///
+  /// In en, this message translates to:
+  /// **'Relay address'**
+  String get relayAddress;
+
+  /// Error when the relay address is not a websocket URL.
+  ///
+  /// In en, this message translates to:
+  /// **'This is not a relay address.'**
+  String get relayAddressInvalid;
+
+  /// Error when the relay to add is already one of the vault.
+  ///
+  /// In en, this message translates to:
+  /// **'This relay is already in the list.'**
+  String get relayAlreadyListed;
+
+  /// Switch of the add relay dialog: on, the relay is encrypted in the vault's relay list.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep private'**
+  String get relayKeepPrivate;
+
+  /// Under the Keep private switch of the add relay dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypted in the vault\'s relay list: only those who have the vault key know the vault is on it.'**
+  String get relayKeepPrivateDescription;
+
+  /// Error when changing the relays of a vault failed.
+  ///
+  /// In en, this message translates to:
+  /// **'The relays could not be saved.'**
+  String get relaysSaveFailed;
+
+  /// Under the relays of a vault that never synced, while they cannot be changed.
+  ///
+  /// In en, this message translates to:
+  /// **'You can change the relays once the vault has synced.'**
+  String get relaysWaitForSync;
+
+  /// Status of a relay added to the draft of the vault's relays, not saved yet.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get relayAdded;
+
+  /// Status of a relay removed from the draft of the vault's relays, not saved yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed'**
+  String get relayRemoved;
+
+  /// Tooltip of the button undoing the removal of a relay from the draft.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep this relay'**
+  String get keepRelay;
+
+  /// Under the relays when the draft has none left, which cannot be saved.
+  ///
+  /// In en, this message translates to:
+  /// **'The vault needs at least one relay.'**
+  String get relaysNeedOne;
+
+  /// Button confirming the addition of a relay.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get add;
+
   /// Button closing a dialog without doing anything.
   ///
   /// In en, this message translates to:

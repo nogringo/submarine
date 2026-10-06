@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:io'
+    show HttpOverrides, HttpServer, InternetAddress, WebSocketTransformer;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/gestures.dart';
@@ -45,15 +47,16 @@ void main() {
     ),
   );
 
-  /// Vaults with no relay, whose cache already holds [items] in a vault named
-  /// Personal when there are any, next to an empty Family vault if
-  /// [withFamily]. The app locks as [lockSettings] say, behind a device that
-  /// lets the user in until told otherwise.
+  /// Vaults on [relays], none by default, whose cache already holds [items] in
+  /// a vault named Personal when there are any, next to an empty Family vault
+  /// if [withFamily]. The app locks as [lockSettings] say, behind a device
+  /// that lets the user in until told otherwise.
   Future<void> open(
     WidgetTester tester, {
     List<Cipher> items = const [],
     bool withFamily = false,
     LockSettings? lockSettings,
+    List<String> relays = const [],
   }) => tester.runAsync(() async {
     ndk = Ndk(
       NdkConfig(
@@ -104,7 +107,8 @@ void main() {
         ),
       ),
       storage: VaultStorage(),
-      relays: const [],
+      relays: relays,
+      indexers: const [],
     );
     while (vaults.all.any((vault) => !vault.loaded)) {
       await Future<void>.delayed(const Duration(milliseconds: 10));
@@ -1372,6 +1376,108 @@ void main() {
     await close(tester);
   });
 
+  testWidgets('changes the relays of a vault in its settings on a desktop', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    // flutter_test answers every HTTP request, websockets included, with 400.
+    final overrides = HttpOverrides.current;
+    HttpOverrides.global = null;
+    addTearDown(() => HttpOverrides.global = overrides);
+    final first = _EmptyRelay();
+    final second = _EmptyRelay();
+    await tester.runAsync(() => Future.wait([first.start(), second.start()]));
+    addTearDown(
+      () => tester.runAsync(() => Future.wait([first.stop(), second.stop()])),
+    );
+    await open(tester, withFamily: true, relays: [first.url]);
+    final family = vaults.all.single;
+    await tester.runAsync(() async {
+      while (!family.relaysEditable) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+    });
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+      ),
+    );
+    await settle(tester);
+    Finder relayRow(String url) => find.widgetWithText(SettingsTile, url);
+    Finder inRow(String url, Finder finder) =>
+        find.descendant(of: relayRow(url), matching: finder);
+    int relayLists(_EmptyRelay relay) =>
+        relay.received.where((event) => event['kind'] == 10002).length;
+
+    await tester.tap(find.byTooltip('Family'));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Vault settings'));
+    await settle(tester);
+    await tester.ensureVisible(find.text('Add a relay'));
+    await settle(tester);
+    expect(inRow(first.url, find.text('Connected')), findsOneWidget);
+    expect(find.text('Save'), findsNothing);
+    final rowHeight = tester.getSize(relayRow(first.url)).height;
+
+    await tester.tap(inRow(first.url, find.byTooltip('Remove this relay')));
+    await settle(tester);
+    expect(inRow(first.url, find.text('Removed')), findsOneWidget);
+    expect(tester.getSize(relayRow(first.url)).height, rowHeight);
+    expect(find.text('The vault needs at least one relay.'), findsOneWidget);
+    expect(saveEnabled(tester), isFalse);
+    await tester.tap(inRow(first.url, find.byTooltip('Keep this relay')));
+    await settle(tester);
+    expect(find.text('Save'), findsNothing);
+
+    await tester.tap(find.text('Add a relay'));
+    await settle(tester);
+    final address = find.widgetWithText(TextField, 'Relay address');
+    for (final invalid in ['https://relay.example.com', 'dadazd']) {
+      await tester.enterText(address, invalid);
+      await tester.tap(inDialog('Add'));
+      await settle(tester);
+      expect(find.text('This is not a relay address.'), findsOneWidget);
+    }
+    await tester.enterText(address, first.url);
+    await tester.tap(inDialog('Add'));
+    await settle(tester);
+    expect(find.text('This relay is already in the list.'), findsOneWidget);
+    await tester.enterText(address, second.url);
+    await tester.tap(
+      find.descendant(of: find.byType(Dialog), matching: find.byType(Switch)),
+    );
+    await tester.tap(inDialog('Add'));
+    await settle(tester);
+    expect(find.byType(Dialog), findsNothing);
+    expect(inRow(second.url, find.text('New')), findsOneWidget);
+    expect(inRow(second.url, find.text('Private')), findsOneWidget);
+    await tester.tap(inRow(first.url, find.byTooltip('Remove this relay')));
+    await settle(tester);
+    expect(family.relayList?.urls, {first.url});
+    expect(relayLists(first), 0);
+
+    await tester.ensureVisible(find.text('Save'));
+    await settle(tester);
+    await write(tester, find.widgetWithText(FilledButton, 'Save'));
+    expect(family.relayList?.public, isEmpty);
+    expect(family.relayList?.private.keys, [second.url]);
+    expect(relayRow(first.url), findsNothing);
+    expect(inRow(second.url, find.text('Private')), findsOneWidget);
+    expect(find.text('Save'), findsNothing);
+    await tester.runAsync(() async {
+      while (relayLists(first) == 0 || relayLists(second) == 0) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+    });
+    expect(relayLists(first), 1);
+    expect(relayLists(second), 1);
+    await close(tester);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
+
   testWidgets('lists the vaults in the settings on a phone, in French', (
     tester,
   ) async {
@@ -2233,4 +2339,29 @@ class FakeDeviceAuth implements DeviceAuth {
     asked++;
     return true;
   }
+}
+
+/// Accepts every event and holds none: enough for a vault to sync from it.
+class _EmptyRelay {
+  late final HttpServer _server;
+  final received = <Map<String, dynamic>>[];
+
+  String get url => 'ws://127.0.0.1:${_server.port}';
+
+  Future<void> start() async {
+    _server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    _server.transform(WebSocketTransformer()).listen((socket) {
+      socket.listen((data) {
+        switch (jsonDecode(data as String)) {
+          case ['REQ', final String id, ...]:
+            socket.add(jsonEncode(['EOSE', id]));
+          case ['EVENT', final Map<String, dynamic> event]:
+            received.add(event);
+            socket.add(jsonEncode(['OK', event['id'], true, '']));
+        }
+      });
+    });
+  }
+
+  Future<void> stop() => _server.close(force: true);
 }

@@ -96,6 +96,66 @@ class AppLocalizationsFr extends AppLocalizations {
   String get syncAllSent => 'Toutes vos modifications sont sur vos relais.';
 
   @override
+  String get relays => 'Relais';
+
+  @override
+  String get relaysDescription =>
+      'Ce coffre est copié sur chacun de ces relais. Ils ne voient que des données chiffrées et sa clé publique.';
+
+  @override
+  String get relayConnected => 'Connecté';
+
+  @override
+  String get relayNotConnected => 'Non connecté';
+
+  @override
+  String get relayPrivate => 'Privé';
+
+  @override
+  String get removeRelay => 'Retirer ce relais';
+
+  @override
+  String get addRelay => 'Ajouter un relais';
+
+  @override
+  String get relayAddress => 'Adresse du relais';
+
+  @override
+  String get relayAddressInvalid => 'Ce n\'est pas une adresse de relais.';
+
+  @override
+  String get relayAlreadyListed => 'Ce relais est déjà dans la liste.';
+
+  @override
+  String get relayKeepPrivate => 'Garder privé';
+
+  @override
+  String get relayKeepPrivateDescription =>
+      'Chiffré dans la liste des relais du coffre : seuls ceux qui ont la clé du coffre savent qu\'il s\'y trouve.';
+
+  @override
+  String get relaysSaveFailed => 'Les relais n\'ont pas pu être enregistrés.';
+
+  @override
+  String get relaysWaitForSync =>
+      'Vous pourrez changer les relais une fois le coffre synchronisé.';
+
+  @override
+  String get relayAdded => 'Nouveau';
+
+  @override
+  String get relayRemoved => 'Retiré';
+
+  @override
+  String get keepRelay => 'Garder ce relais';
+
+  @override
+  String get relaysNeedOne => 'Le coffre a besoin d\'au moins un relais.';
+
+  @override
+  String get add => 'Ajouter';
+
+  @override
   String get cancel => 'Annuler';
 
   @override

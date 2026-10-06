@@ -110,6 +110,82 @@
   "@syncAllSent": {
     "description": "Under the sync status in the vault settings, once every change reached the relays."
   },
+  "relays": "Relays",
+  "@relays": {
+    "description": "Title of the vault settings section listing the relays the vault lives on."
+  },
+  "relaysDescription": "This vault is copied to each of these relays. They only see encrypted data and its public key.",
+  "@relaysDescription": {
+    "description": "Under the title of the relays section of the vault settings."
+  },
+  "relayConnected": "Connected",
+  "@relayConnected": {
+    "description": "Status of a relay this device has a connection to."
+  },
+  "relayNotConnected": "Not connected",
+  "@relayNotConnected": {
+    "description": "Status of a relay this device has no connection to right now."
+  },
+  "relayPrivate": "Private",
+  "@relayPrivate": {
+    "description": "Under a relay of the vault settings that is encrypted in the vault's relay list."
+  },
+  "removeRelay": "Remove this relay",
+  "@removeRelay": {
+    "description": "Tooltip of the button removing a relay from the vault."
+  },
+  "addRelay": "Add a relay",
+  "@addRelay": {
+    "description": "Row of the vault settings opening the dialog that adds a relay, and title of that dialog."
+  },
+  "relayAddress": "Relay address",
+  "@relayAddress": {
+    "description": "Field of the relay to add, a wss:// URL."
+  },
+  "relayAddressInvalid": "This is not a relay address.",
+  "@relayAddressInvalid": {
+    "description": "Error when the relay address is not a websocket URL."
+  },
+  "relayAlreadyListed": "This relay is already in the list.",
+  "@relayAlreadyListed": {
+    "description": "Error when the relay to add is already one of the vault."
+  },
+  "relayKeepPrivate": "Keep private",
+  "@relayKeepPrivate": {
+    "description": "Switch of the add relay dialog: on, the relay is encrypted in the vault's relay list."
+  },
+  "relayKeepPrivateDescription": "Encrypted in the vault's relay list: only those who have the vault key know the vault is on it.",
+  "@relayKeepPrivateDescription": {
+    "description": "Under the Keep private switch of the add relay dialog."
+  },
+  "relaysSaveFailed": "The relays could not be saved.",
+  "@relaysSaveFailed": {
+    "description": "Error when changing the relays of a vault failed."
+  },
+  "relaysWaitForSync": "You can change the relays once the vault has synced.",
+  "@relaysWaitForSync": {
+    "description": "Under the relays of a vault that never synced, while they cannot be changed."
+  },
+  "relayAdded": "New",
+  "@relayAdded": {
+    "description": "Status of a relay added to the draft of the vault's relays, not saved yet."
+  },
+  "relayRemoved": "Removed",
+  "@relayRemoved": {
+    "description": "Status of a relay removed from the draft of the vault's relays, not saved yet."
+  },
+  "keepRelay": "Keep this relay",
+  "@keepRelay": {
+    "description": "Tooltip of the button undoing the removal of a relay from the draft."
+  },
+  "relaysNeedOne": "The vault needs at least one relay.",
+  "@relaysNeedOne": {
+    "description": "Under the relays when the draft has none left, which cannot be saved."
+  },
+  "add": "Add",
+  "@add": {
+    "description": "Button confirming the addition of a relay."
+  },
   "cancel": "Cancel",
   "@cancel": {
     "description": "Button closing a dialog without doing anything."

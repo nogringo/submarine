@@ -93,6 +93,66 @@ class AppLocalizationsEn extends AppLocalizations {
   String get syncAllSent => 'Every change is on your relays.';
 
   @override
+  String get relays => 'Relays';
+
+  @override
+  String get relaysDescription =>
+      'This vault is copied to each of these relays. They only see encrypted data and its public key.';
+
+  @override
+  String get relayConnected => 'Connected';
+
+  @override
+  String get relayNotConnected => 'Not connected';
+
+  @override
+  String get relayPrivate => 'Private';
+
+  @override
+  String get removeRelay => 'Remove this relay';
+
+  @override
+  String get addRelay => 'Add a relay';
+
+  @override
+  String get relayAddress => 'Relay address';
+
+  @override
+  String get relayAddressInvalid => 'This is not a relay address.';
+
+  @override
+  String get relayAlreadyListed => 'This relay is already in the list.';
+
+  @override
+  String get relayKeepPrivate => 'Keep private';
+
+  @override
+  String get relayKeepPrivateDescription =>
+      'Encrypted in the vault\'s relay list: only those who have the vault key know the vault is on it.';
+
+  @override
+  String get relaysSaveFailed => 'The relays could not be saved.';
+
+  @override
+  String get relaysWaitForSync =>
+      'You can change the relays once the vault has synced.';
+
+  @override
+  String get relayAdded => 'New';
+
+  @override
+  String get relayRemoved => 'Removed';
+
+  @override
+  String get keepRelay => 'Keep this relay';
+
+  @override
+  String get relaysNeedOne => 'The vault needs at least one relay.';
+
+  @override
+  String get add => 'Add';
+
+  @override
   String get cancel => 'Cancel';
 
   @override

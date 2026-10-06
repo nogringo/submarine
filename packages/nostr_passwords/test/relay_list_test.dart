@@ -72,4 +72,107 @@ void main() {
 
     expect(readRelayList(event, vault), throwsFormatException);
   });
+
+  group('changing a list', () {
+    const list = RelayList(
+      public: {
+        'wss://relay.primal.net': ReadWriteMarker.readWrite,
+        'wss://relay.nos.social/': ReadWriteMarker.readOnly,
+      },
+      private: {'wss://relay.alice.example': ReadWriteMarker.writeOnly},
+    );
+
+    test('urls lists the public relays, then the private ones', () {
+      expect(list.urls, [
+        'wss://relay.primal.net',
+        'wss://relay.nos.social/',
+        'wss://relay.alice.example',
+      ]);
+    });
+
+    test('contains compares normalized URLs', () {
+      expect(list.contains('WSS://Relay.Nos.Social'), isTrue);
+      expect(list.contains('wss://relay.example.com'), isFalse);
+    });
+
+    test('withRelay adds a public or a private relay, normalized', () {
+      final added = list
+          .withRelay(' WSS://Relay.Example.com/ ')
+          .withRelay(
+            'wss://relay.bob.example',
+            marker: ReadWriteMarker.readOnly,
+            private: true,
+          );
+
+      expect(added.public, {
+        ...list.public,
+        'wss://relay.example.com': ReadWriteMarker.readWrite,
+      });
+      expect(added.private, {
+        ...list.private,
+        'wss://relay.bob.example': ReadWriteMarker.readOnly,
+      });
+    });
+
+    test('withRelay replaces the settings of a relay already listed', () {
+      final changed = list.withRelay(
+        'wss://relay.nos.social',
+        marker: ReadWriteMarker.writeOnly,
+        private: true,
+      );
+
+      expect(changed.public, {
+        'wss://relay.primal.net': ReadWriteMarker.readWrite,
+      });
+      expect(changed.private, {
+        'wss://relay.alice.example': ReadWriteMarker.writeOnly,
+        'wss://relay.nos.social': ReadWriteMarker.writeOnly,
+      });
+    });
+
+    test('withRelay refuses what parseRelayUrl refuses', () {
+      expect(
+        () => list.withRelay('https://relay.example.com'),
+        throwsArgumentError,
+      );
+      expect(() => list.withRelay('wss://typo'), throwsArgumentError);
+    });
+
+    test('without removes a public or a private relay', () {
+      final removed = list
+          .without('wss://relay.nos.social')
+          .without('wss://relay.alice.example');
+
+      expect(removed.public, {
+        'wss://relay.primal.net': ReadWriteMarker.readWrite,
+      });
+      expect(removed.private, isEmpty);
+      expect(removed.without('wss://relay.primal.net').isEmpty, isTrue);
+    });
+  });
+
+  group('parseRelayUrl', () {
+    test('normalizes a relay URL', () {
+      expect(
+        parseRelayUrl(' WSS://Relay.Example.com/ '),
+        'wss://relay.example.com',
+      );
+      expect(parseRelayUrl('ws://127.0.0.1:7777'), 'ws://127.0.0.1:7777');
+      expect(parseRelayUrl('ws://localhost:7777'), 'ws://localhost:7777');
+    });
+
+    test('takes an address without a scheme for wss://', () {
+      expect(parseRelayUrl('relay.example.com'), 'wss://relay.example.com');
+    });
+
+    test('refuses what is not a websocket URL', () {
+      expect(parseRelayUrl('https://relay.example.com'), isNull);
+      expect(parseRelayUrl(''), isNull);
+    });
+
+    test('refuses a host without a dot', () {
+      expect(parseRelayUrl('typo'), isNull);
+      expect(parseRelayUrl('wss://typo'), isNull);
+    });
+  });
 }

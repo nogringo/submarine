@@ -70,6 +70,14 @@ Future<void> main() async {
   final relayList = await vault.fetchRelayList();
   print('Private relays: ${relayList?.private.keys.join(', ')}');
 
+  // Changes the newest list, or the vault's relays while it has none.
+  final current = await vault.currentRelayList();
+  // As a user types it: wss:// when it has no scheme, null when invalid.
+  final typed = parseRelayUrl('relay.bob.example')!;
+  await vault.setRelayList(
+    current.without('wss://relay.nos.social').withRelay(typed, private: true),
+  );
+
   // Reads the whole vault from every relay, then gives the cache and each
   // relay what it lacks, such as what a relay dropped over time.
   final unsynced = await vault.reconcile();

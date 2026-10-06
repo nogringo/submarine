@@ -95,15 +95,7 @@ class VaultSession {
   Future<RelayList> relayList() async {
     // Without the newest list, a change would replace it with an older one.
     await _ensureSynced();
-    final list = await vault.relayList();
-    if (list == null || (list.public.isEmpty && list.private.isEmpty)) {
-      return RelayList(
-        public: {
-          for (final relay in vault.relays) relay: ReadWriteMarker.readWrite,
-        },
-      );
-    }
-    return list;
+    return vault.currentRelayList();
   }
 
   Future<void> _ensureSynced() async {

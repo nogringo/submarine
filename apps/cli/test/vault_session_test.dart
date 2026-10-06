@@ -34,4 +34,17 @@ void main() {
       ),
     );
   });
+
+  test('relayList refuses to read a vault never synced', () async {
+    await expectLater(
+      session.relayList(),
+      throwsA(
+        isA<CliException>().having(
+          (error) => error.message,
+          'message',
+          contains('submarine sync'),
+        ),
+      ),
+    );
+  });
 }

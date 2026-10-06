@@ -78,12 +78,32 @@ class VaultSession {
 
   /// Items as of the last [sync], trash included. Never goes to the relays.
   Future<List<Item>> items() async {
+    await _ensureSynced();
+    return vault.items();
+  }
+
+  /// The vault's relay list as of the last [sync], or the relays it starts on
+  /// while it has none. Never goes to the relays.
+  Future<RelayList> relayList() async {
+    // Without the newest list, a change would replace it with an older one.
+    await _ensureSynced();
+    final list = await vault.relayList();
+    if (list == null || (list.public.isEmpty && list.private.isEmpty)) {
+      return RelayList(
+        public: {
+          for (final relay in vault.relays) relay: ReadWriteMarker.readWrite,
+        },
+      );
+    }
+    return list;
+  }
+
+  Future<void> _ensureSynced() async {
     if (await lastSync() == null) {
       throw CliException(
         'The vault was never synced. Run `submarine sync` first.',
       );
     }
-    return vault.items();
   }
 
   /// The item [id], trash included, as of the last [sync].

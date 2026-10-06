@@ -13,6 +13,7 @@ import 'src/commands/encode_command.dart';
 import 'src/commands/generate_command.dart';
 import 'src/commands/get_command.dart';
 import 'src/commands/list_command.dart';
+import 'src/commands/relay_command.dart';
 import 'src/commands/restore_command.dart';
 import 'src/commands/status_command.dart';
 import 'src/commands/sync_command.dart';
@@ -42,6 +43,7 @@ class SubmarineCommandRunner extends CommandRunner<void> {
     addCommand(EditCommand());
     addCommand(DeleteCommand());
     addCommand(RestoreCommand());
+    addCommand(RelayCommand());
     addCommand(StatusCommand());
     addCommand(SyncCommand());
     addCommand(GenerateCommand());

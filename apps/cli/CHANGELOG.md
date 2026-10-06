@@ -8,3 +8,5 @@
 - Local first: changes are saved in the cache, and `sync` sends them.
 - `sync` fetches the vault's relay list (NIP-65), and the vault moves to the
   relays it names.
+- `relay list`, `relay add` and `relay remove` show and change the vault's
+  relay list.

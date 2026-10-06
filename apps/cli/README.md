@@ -47,6 +47,19 @@ names instead. `sync` fetches that list from the relays above, from the relays
 of the list it already knows and from the indexers `purplepag.es`,
 `user.kindpag.es` and `indexer.coracle.social`.
 
+`relay list` shows the relays the vault lives on, and `relay add` and
+`relay remove` change its relay list. While the vault has none, they start from
+the relays above. A relay the list adds gets a copy of the vault. `--private`
+encrypts a relay in the list, for the vault only to see. `--read` and `--write`
+mark a relay for other clients: Submarine reads and writes on every relay. The
+list is saved locally, and `sync` sends it.
+
+```sh
+dart run bin/submarine.dart relay add wss://relay.example.com --private
+dart run bin/submarine.dart relay remove wss://relay.nostr.net
+dart run bin/submarine.dart relay list --pretty
+```
+
 ## Usage
 
 From `apps/cli`:

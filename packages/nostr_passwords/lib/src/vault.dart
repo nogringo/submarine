@@ -284,6 +284,8 @@ class Vault {
   /// Sends again the changes no relay accepted yet, and returns those still
   /// left.
   Future<List<EventDeliverySnapshot>> push() async {
+    // TODO: also resend to the relays not acked yet (but not permanentFailure):
+    // without ndk retries (CLI), a partial delivery or _copyTo never completes.
     await Future.wait([
       for (final delivery in await unsent()) _send(delivery.event!),
     ]);

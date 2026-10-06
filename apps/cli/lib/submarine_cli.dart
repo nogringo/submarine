@@ -10,8 +10,10 @@ import 'src/commands/create_command.dart';
 import 'src/commands/delete_command.dart';
 import 'src/commands/edit_command.dart';
 import 'src/commands/encode_command.dart';
+import 'src/commands/export_command.dart';
 import 'src/commands/generate_command.dart';
 import 'src/commands/get_command.dart';
+import 'src/commands/import_command.dart';
 import 'src/commands/list_command.dart';
 import 'src/commands/relay_command.dart';
 import 'src/commands/restore_command.dart';
@@ -43,12 +45,18 @@ class SubmarineCommandRunner extends CommandRunner<void> {
     addCommand(EditCommand());
     addCommand(DeleteCommand());
     addCommand(RestoreCommand());
+    addCommand(ImportCommand());
+    addCommand(ExportCommand());
     addCommand(RelayCommand());
     addCommand(StatusCommand());
     addCommand(SyncCommand());
     addCommand(GenerateCommand());
     addCommand(EncodeCommand());
   }
+
+  @override
+  ArgResults parse(Iterable<String> args) =>
+      super.parse(withBarePassword(args.toList()));
 
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
@@ -59,3 +67,14 @@ class SubmarineCommandRunner extends CommandRunner<void> {
     await super.runCommand(topLevelResults);
   }
 }
+
+/// bw's `export --password [password]`: args has no option with an optional
+/// value, so a bare `--password` becomes an empty one, which asks for it.
+List<String> withBarePassword(List<String> args) => [
+  for (final (index, arg) in args.indexed)
+    if (arg == '--password' &&
+        (index == args.length - 1 || args[index + 1].startsWith('-')))
+      '--password='
+    else
+      arg,
+];

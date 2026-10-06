@@ -101,6 +101,22 @@ read.
 version of the item, and other devices drop them at their next sync. Unlike
 Bitwarden, the trash is never emptied on its own.
 
+`import` adds the items of a Bitwarden JSON export to the vault, and `export`
+writes the vault as one, which Bitwarden imports. The trash is left out, and
+an export restricted to a Bitwarden account cannot be imported. A password
+protected export asks for its password, unless `--passwordfile` or
+`--passwordenv` gives it:
+
+```sh
+dart run bin/submarine.dart import bitwardenjson bitwarden_export.json
+dart run bin/submarine.dart export --output ~/Downloads/
+dart run bin/submarine.dart export --password --output vault.json
+dart run bin/submarine.dart --raw export --password hunter2 > vault.json
+```
+
+`export` names the file as Bitwarden does, readable by its owner only.
+`--password` protects it, and asks for the password when given no value.
+
 ### Bitwarden CLI compatibility
 
 These commands behave like their `bw` counterparts, so a script written for
@@ -122,6 +138,11 @@ the Bitwarden CLI runs on Submarine as long as it sticks to them:
 - `generate`, with all of its options and defaults, without a vault key
 - `delete item <id>`, with `--permanent`, and `restore item <id>`, where
   `<id>` is an item id
+- `import bitwardenjson <input>`, with `--formats`, `--passwordenv` and
+  `--passwordfile`. It is the only format.
+- `export`, with `--output`, `--password` and `--format json|encrypted_json`.
+  The default format is `json`, where bw writes CSV, and `encrypted_json`
+  needs `--password`, as a vault has no account key to encrypt with.
 - the global flags `--pretty`, `--raw`, `--quiet` and `--version`
 
 Output is the same: JSON items, bare values for `get password` and the like,
@@ -130,10 +151,11 @@ piped. Searching ignores case and accents and looks in the name, username,
 hostnames and notes. Other `bw` commands and objects fail with an error.
 
 Submarine is local first: its cache is a local relay. `add`, `create`, `edit`,
-`delete` and `restore` save their change in it and never wait for the network.
+`delete`, `restore` and `import` save their change in it and never wait for the
+network.
 `sync` fetches the vault's relay list, sends to its relays the changes none
-accepted yet, then fetches what changed since the last sync. `list` and `get` read the cache only. Until the
-first sync, they refuse to run, except `get template`.
+accepted yet, then fetches what changed since the last sync. `list`, `get` and `export` read the cache only.
+Until the first sync, they refuse to run, except `get template`.
 
 `sync --force` reads the whole vault from each of its relays, then gives the
 cache and each relay what it lacks, such as what a relay dropped over time.

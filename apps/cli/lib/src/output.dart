@@ -21,10 +21,14 @@ class Output {
     if (value != null) _write(stdout, value);
   }
 
-  /// Under `--raw`, bw prints a message's raw value, which none of
-  /// Submarine's messages has.
-  void message(String text) {
-    if (!raw) _write(stdout, text);
+  /// Under `--raw`, bw prints the message's [rawValue] instead, nothing when
+  /// it has none.
+  void message(String text, {String? rawValue}) {
+    if (!raw) {
+      _write(stdout, text);
+    } else if (rawValue != null) {
+      _write(stdout, rawValue);
+    }
   }
 
   void error(String message) => _write(stderr, message);

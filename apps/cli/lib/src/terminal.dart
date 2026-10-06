@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
-/// Reads a line from stdin, showing [label] only when a person is typing.
+/// Reads a line from stdin, showing [label] only when a person is typing. As
+/// in bw, the label goes to stderr, out of what stdout pipes.
 String prompt(String label) {
-  if (stdin.hasTerminal) stdout.write(label);
+  if (stdin.hasTerminal) stderr.write(label);
   return stdin.readLineSync(encoding: utf8)?.trim() ?? '';
 }
 
@@ -15,7 +16,7 @@ String promptSecret(String label) {
     return prompt(label);
   } finally {
     stdin.echoMode = true;
-    stdout.writeln();
+    stderr.writeln();
   }
 }
 

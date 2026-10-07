@@ -14,7 +14,8 @@ class StorageErrorApp extends StatelessWidget {
     required this.onRetry,
   });
 
-  final PlatformException error;
+  /// A [PlatformException], or a [VaultsUnreadableException].
+  final Exception error;
 
   /// Starts the app over, which shows this screen again if it fails again.
   final Future<void> Function() onRetry;
@@ -38,7 +39,7 @@ class StorageErrorScreen extends StatefulWidget {
     required this.onRetry,
   });
 
-  final PlatformException error;
+  final Exception error;
   final Future<void> Function() onRetry;
 
   @override
@@ -104,7 +105,11 @@ class _StorageErrorScreenState extends State<StorageErrorScreen> {
                   ),
                   const SizedBox(height: 24),
                   SelectableText(
-                    widget.error.message ?? widget.error.code,
+                    switch (widget.error) {
+                      PlatformException(:final message, :final code) =>
+                        message ?? code,
+                      final error => '$error',
+                    },
                     textAlign: TextAlign.center,
                     style: monoStyle.copyWith(
                       fontSize: 12,

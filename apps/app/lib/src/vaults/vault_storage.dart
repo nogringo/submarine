@@ -136,7 +136,8 @@ class VaultRecord {
   };
 }
 
-/// Keeps the vaults of this device, keys included, in its secure storage.
+/// Keeps the vaults of this device, keys included, in its secure storage,
+/// encrypted with the key of the device.
 class VaultStorage {
   VaultStorage([FlutterSecureStorage? storage])
     : _storage = storage ?? secureStorage;
@@ -145,19 +146,39 @@ class VaultStorage {
 
   final FlutterSecureStorage _storage;
 
-  Future<List<VaultRecord>> read() async {
-    final json = await _storage.read(key: _key);
-    if (json == null) return [];
+  /// Throws a [VaultsUnreadableException] when [key] does not open them.
+  Future<List<VaultRecord>> read(SymmetricCryptoKey key) async {
+    final value = await _storage.read(key: _key);
+    if (value == null) return [];
+    // Saved in clear before the device had a key.
+    final clear = value.startsWith('[');
+    final json = clear
+        ? value
+        : await key.decryptString(value) ??
+              (throw const VaultsUnreadableException());
     final saved = (jsonDecode(json) as List).cast<Map<String, dynamic>>();
     final records = [for (final record in saved) VaultRecord.fromJson(record)];
-    if (saved.any((record) => !record.containsKey('cacheKey'))) {
-      await write(records);
+    if (clear || saved.any((record) => !record.containsKey('cacheKey'))) {
+      await write(records, key);
     }
     return records;
   }
 
-  Future<void> write(List<VaultRecord> records) => _storage.write(
-    key: _key,
-    value: jsonEncode([for (final record in records) record.toJson()]),
-  );
+  Future<void> write(List<VaultRecord> records, SymmetricCryptoKey key) async =>
+      _storage.write(
+        key: _key,
+        value: await key.encryptString(
+          jsonEncode([for (final record in records) record.toJson()]),
+        ),
+      );
+}
+
+/// The vaults saved on this device do not open with its key.
+class VaultsUnreadableException implements Exception {
+  const VaultsUnreadableException();
+
+  @override
+  String toString() =>
+      'VaultsUnreadableException: the key of this device does not open its '
+      'vaults.';
 }

@@ -9,6 +9,7 @@ import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
 import 'src/app.dart';
 import 'src/clipboard.dart';
 import 'src/lock/app_lock.dart';
+import 'src/lock/device_key.dart';
 import 'src/screen_capture.dart';
 import 'src/storage_error_app.dart';
 import 'src/theme/appearance.dart';
@@ -38,6 +39,9 @@ Future<void> main() async {
 /// Reads the secure storage before anything starts, so that a failed read
 /// can be tried again from scratch.
 Future<void> _start(Ndk ndk, SyncEngine engine, Database database) async {
+  void showError(Exception error) => runApp(
+    StorageErrorApp(error: error, onRetry: () => _start(ndk, engine, database)),
+  );
   try {
     final lock = await AppLock.load();
     final appearance = await Appearance.load();
@@ -47,6 +51,7 @@ Future<void> _start(Ndk ndk, SyncEngine engine, Database database) async {
       ndk: ndk,
       engine: engine,
       storage: VaultStorage(),
+      key: await DeviceKeyStorage().read(),
       database: database,
     );
     runApp(
@@ -59,11 +64,8 @@ Future<void> _start(Ndk ndk, SyncEngine engine, Database database) async {
       ),
     );
   } on PlatformException catch (error) {
-    runApp(
-      StorageErrorApp(
-        error: error,
-        onRetry: () => _start(ndk, engine, database),
-      ),
-    );
+    showError(error);
+  } on VaultsUnreadableException catch (error) {
+    showError(error);
   }
 }

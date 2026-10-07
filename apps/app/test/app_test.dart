@@ -19,6 +19,7 @@ import 'package:submarine/src/clipboard.dart';
 import 'package:submarine/src/generator/generator_settings.dart';
 import 'package:submarine/src/items/field_tile.dart';
 import 'package:submarine/src/lock/app_lock.dart';
+import 'package:submarine/src/lock/device_key.dart';
 import 'package:submarine/src/screen_capture.dart';
 import 'package:submarine/src/screens/filter_column.dart';
 import 'package:submarine/src/storage_error_app.dart';
@@ -35,6 +36,7 @@ void main() {
   late SyncEngine engine;
   late List<String> vaultRelays;
   late Vaults vaults;
+  late SymmetricCryptoKey deviceKey;
   late AppLock lock;
   late FakeDeviceAuth deviceAuth;
   late Appearance appearance;
@@ -115,9 +117,13 @@ void main() {
         await vault.createItem(cipher);
       }
     }
+    deviceKey = SymmetricCryptoKey.generate();
     FlutterSecureStorage.setMockInitialValues({
+      'vaultsKey': base64.encode(deviceKey.bytes),
       if (records.isNotEmpty)
-        'vaults': jsonEncode([for (final r in records) r.toJson()]),
+        'vaults': await deviceKey.encryptString(
+          jsonEncode([for (final r in records) r.toJson()]),
+        ),
       if (lockSettings != null) 'lock': jsonEncode(lockSettings.toJson()),
     });
     database = await newDatabaseFactoryMemory().openDatabase('sync');
@@ -127,6 +133,7 @@ void main() {
       ndk: ndk,
       engine: engine,
       storage: VaultStorage(),
+      key: deviceKey,
       database: database,
       relays: relays,
       indexers: const [],
@@ -152,6 +159,7 @@ void main() {
         ndk: ndk,
         engine: engine,
         storage: VaultStorage(),
+        key: await DeviceKeyStorage().read(),
         database: database,
         relays: vaultRelays,
         indexers: const [],
@@ -167,6 +175,13 @@ void main() {
       }
     });
   }
+
+  /// The vaults saved on the device, decrypted.
+  Future<List<dynamic>> savedVaults() async => jsonDecode(
+    (await deviceKey.decryptString(
+      (await const FlutterSecureStorage().read(key: 'vaults'))!,
+    ))!,
+  ) as List;
 
   Future<void> close(WidgetTester tester) async {
     await tester.pumpWidget(const SizedBox());
@@ -339,10 +354,7 @@ void main() {
       vaults.all.single.record.login,
       isA<KeyLogin>().having((login) => login.privateKey, 'key', privateKey),
     );
-    expect(
-      jsonDecode((await const FlutterSecureStorage().read(key: 'vaults'))!),
-      [vaults.all.single.record.toJson()],
-    );
+    expect(await savedVaults(), [vaults.all.single.record.toJson()]);
 
     await tester.tap(find.text('Done'));
     await settle(tester);
@@ -1931,9 +1943,7 @@ void main() {
     await write(tester, settingsSwitch(askSigner));
 
     expect(tester.widget<Switch>(settingsSwitch(askSigner)).value, isTrue);
-    final [saved] = jsonDecode(
-      (await const FlutterSecureStorage().read(key: 'vaults'))!,
-    );
+    final [saved] = await savedVaults();
     expect(saved['cacheKeySealed'], isTrue);
     expect(saved['cacheKey'], isNot(plainKey));
 
@@ -2088,11 +2098,47 @@ void main() {
       ]),
     });
 
-    final [first] = await VaultStorage().read();
-    final [again] = await VaultStorage().read();
+    final key = await DeviceKeyStorage().read();
+    final [first] = await VaultStorage().read(key);
+    final [again] = await VaultStorage().read(key);
 
     expect(again.cacheKey, first.cacheKey);
     expect(again.cacheKeySealed, isFalse);
+  });
+
+  testWidgets('encrypts the vaults saved in clear before, with a new key', (
+    tester,
+  ) async {
+    final record = VaultRecord(
+      login: KeyLogin(const Bip340EventSignerFactory().generateKeyPair().$1),
+      name: 'Personal',
+      color: vaultColors.first,
+    );
+    FlutterSecureStorage.setMockInitialValues({
+      'vaults': jsonEncode([record.toJson()]),
+    });
+
+    final key = await DeviceKeyStorage().read();
+    final [read] = await VaultStorage().read(key);
+    final saved = (await const FlutterSecureStorage().read(key: 'vaults'))!;
+
+    expect(read.toJson(), record.toJson());
+    expect(saved, startsWith('2.'));
+    expect(jsonDecode((await key.decryptString(saved))!), [record.toJson()]);
+    expect((await DeviceKeyStorage().read()).bytes, key.bytes);
+  });
+
+  testWidgets('leaves the vaults alone when the key does not open them', (
+    tester,
+  ) async {
+    final encrypted = await SymmetricCryptoKey.generate().encryptString('[]');
+    FlutterSecureStorage.setMockInitialValues({'vaults': encrypted});
+
+    await expectLater(
+      VaultStorage().read(await DeviceKeyStorage().read()),
+      throwsA(isA<VaultsUnreadableException>()),
+    );
+    expect(await const FlutterSecureStorage().read(key: 'vaults'), encrypted);
   });
 
   testWidgets('opens a vault with a key encrypted with a password', (
@@ -2183,10 +2229,7 @@ void main() {
     );
     await settle(tester);
     Future<Map<String, dynamic>> saved() async =>
-        (jsonDecode(
-              (await const FlutterSecureStorage().read(key: 'vaults'))!,
-            ) as List).single
-            as Map<String, dynamic>;
+        (await savedVaults()).single as Map<String, dynamic>;
 
     await tester.tap(find.byTooltip('Family'));
     await settle(tester);

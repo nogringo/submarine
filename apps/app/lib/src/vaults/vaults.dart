@@ -41,17 +41,19 @@ class Vaults extends ChangeNotifier {
     required this.relays,
     required this.indexers,
     required this._storage,
+    required this._key,
     required this._database,
     required this._signerPatience,
   });
 
-  /// Opens the vaults saved on this device, and starts syncing them. Each one
-  /// keeps the versions it opened in [database]. A signer silent for
-  /// [signerPatience] seems to wait on the user.
+  /// Opens the vaults saved on this device, encrypted with [key], and starts
+  /// syncing them. Each one keeps the versions it opened in [database]. A
+  /// signer silent for [signerPatience] seems to wait on the user.
   static Future<Vaults> load({
     required Ndk ndk,
     required SyncEngine engine,
     required VaultStorage storage,
+    required SymmetricCryptoKey key,
     required Database database,
     List<String> relays = defaultRelays,
     List<String> indexers = indexerRelays,
@@ -63,10 +65,11 @@ class Vaults extends ChangeNotifier {
       relays: relays,
       indexers: indexers,
       storage: storage,
+      key: key,
       database: database,
       signerPatience: signerPatience,
     );
-    for (final record in await storage.read()) {
+    for (final record in await storage.read(key)) {
       vaults._open(record);
     }
     engine.start();
@@ -81,6 +84,7 @@ class Vaults extends ChangeNotifier {
   final List<String> relays;
   final List<String> indexers;
   final VaultStorage _storage;
+  final SymmetricCryptoKey _key;
   final Database _database;
   final Duration _signerPatience;
   final _vaults = <VaultController>[];
@@ -150,7 +154,7 @@ class Vaults extends ChangeNotifier {
 
   /// One write after the other, so that an older list never lands last.
   Future<void> _save(List<VaultRecord> records) {
-    final saved = _saving.then((_) => _storage.write(records));
+    final saved = _saving.then((_) => _storage.write(records, _key));
     _saving = saved.catchError((_) {});
     return saved;
   }

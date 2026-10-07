@@ -1611,5 +1611,47 @@
   "forgetVaults": "Remove the vaults",
   "@forgetVaults": {
     "description": "Button confirming that the vaults leave the device, for a forgotten lock password."
+  },
+  "removeVault": "Remove from this device",
+  "@removeVault": {
+    "description": "Last row of the vault settings, opening the dialog that removes the vault from this device."
+  },
+  "removeVaultDescription": "The vault stays on its relays, for you to open it again.",
+  "@removeVaultDescription": {
+    "description": "Under that row."
+  },
+  "removeVaultTitle": "Remove {name} from this device?",
+  "@removeVaultTitle": {
+    "description": "Title of the dialog confirming that a vault leaves this device.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "removeVaultBody": "Your items stay on its relays: open the vault again to find them.",
+  "@removeVaultBody": {
+    "description": "Body of that dialog."
+  },
+  "removeVaultKeyWarning": "Keep its key first: without it, you cannot open the vault again.",
+  "@removeVaultKeyWarning": {
+    "description": "In that dialog, for a vault whose key is on this device rather than in a signer."
+  },
+  "removeVaultUnsent": "{count, plural, =1{1 change has reached no relay yet, and will be lost.} other{{count} changes have reached no relay yet, and will be lost.}}",
+  "@removeVaultUnsent": {
+    "description": "In that dialog, while changes saved on this device have reached no relay yet.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "removeVaultConfirm": "Remove",
+  "@removeVaultConfirm": {
+    "description": "Button of that dialog that removes the vault from this device."
+  },
+  "removeVaultFailed": "The vault could not be removed.",
+  "@removeVaultFailed": {
+    "description": "Error under the row removing the vault, when this device could not save its vaults."
   }
 }

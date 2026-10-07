@@ -2257,6 +2257,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove the vaults'**
   String get forgetVaults;
+
+  /// Last row of the vault settings, opening the dialog that removes the vault from this device.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from this device'**
+  String get removeVault;
+
+  /// Under that row.
+  ///
+  /// In en, this message translates to:
+  /// **'The vault stays on its relays, for you to open it again.'**
+  String get removeVaultDescription;
+
+  /// Title of the dialog confirming that a vault leaves this device.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name} from this device?'**
+  String removeVaultTitle(String name);
+
+  /// Body of that dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Your items stay on its relays: open the vault again to find them.'**
+  String get removeVaultBody;
+
+  /// In that dialog, for a vault whose key is on this device rather than in a signer.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep its key first: without it, you cannot open the vault again.'**
+  String get removeVaultKeyWarning;
+
+  /// In that dialog, while changes saved on this device have reached no relay yet.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 change has reached no relay yet, and will be lost.} other{{count} changes have reached no relay yet, and will be lost.}}'**
+  String removeVaultUnsent(int count);
+
+  /// Button of that dialog that removes the vault from this device.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get removeVaultConfirm;
+
+  /// Error under the row removing the vault, when this device could not save its vaults.
+  ///
+  /// In en, this message translates to:
+  /// **'The vault could not be removed.'**
+  String get removeVaultFailed;
 }
 
 class _AppLocalizationsDelegate

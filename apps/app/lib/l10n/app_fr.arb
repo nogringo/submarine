@@ -359,5 +359,13 @@
   "forgotLockPassword": "Mot de passe oublié ?",
   "forgetVaultsTitle": "Retirer les coffres de cet appareil ?",
   "forgetVaultsBody": "Sans le mot de passe de verrouillage, ils ne peuvent pas être déchiffrés ici. Vos éléments restent sur les relais : rouvrez chaque coffre avec sa clé ou son signeur.",
-  "forgetVaults": "Retirer les coffres"
+  "forgetVaults": "Retirer les coffres",
+  "removeVault": "Retirer de cet appareil",
+  "removeVaultDescription": "Le coffre reste sur ses relais, pour que vous puissiez le rouvrir.",
+  "removeVaultTitle": "Retirer {name} de cet appareil ?",
+  "removeVaultBody": "Vos éléments restent sur ses relais : rouvrez le coffre pour les retrouver.",
+  "removeVaultKeyWarning": "Gardez d'abord sa clé : sans elle, vous ne pourrez pas rouvrir le coffre.",
+  "removeVaultUnsent": "{count, plural, =1{1 modification n'a encore atteint aucun relais et sera perdue.} other{{count} modifications n'ont encore atteint aucun relais et seront perdues.}}",
+  "removeVaultConfirm": "Retirer",
+  "removeVaultFailed": "Le coffre n'a pas pu être retiré."
 }

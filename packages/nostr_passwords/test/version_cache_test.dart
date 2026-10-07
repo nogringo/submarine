@@ -2,6 +2,8 @@ import 'package:ndk/ndk.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
 import 'package:test/test.dart';
 
+import 'mocks/memory_version_store.dart';
+
 void main() {
   final github = Envelope(
     id: 'item',
@@ -13,11 +15,11 @@ void main() {
   );
 
   group('VersionCache', () {
-    late _MemoryStore store;
+    late MemoryVersionStore store;
     late String key;
 
     setUp(() {
-      store = _MemoryStore();
+      store = MemoryVersionStore();
       key = newCacheKey();
     });
 
@@ -121,13 +123,13 @@ void main() {
   group('Vault with a cache', () {
     late Ndk ndk;
     late _CountingSigner signer;
-    late _MemoryStore store;
+    late MemoryVersionStore store;
     late String key;
 
     setUp(() {
       ndk = Ndk.emptyBootstrapRelaysConfig();
       signer = _CountingSigner();
-      store = _MemoryStore();
+      store = MemoryVersionStore();
       key = newCacheKey();
     });
 
@@ -248,21 +250,6 @@ void main() {
       expect(signer.decryptions, 4);
     });
   });
-}
-
-class _MemoryStore implements VersionStore {
-  final entries = <String, String>{};
-
-  @override
-  Future<Map<String, String>> read() async => {...entries};
-
-  @override
-  Future<void> write(Map<String, String> entries) async =>
-      this.entries.addAll(entries);
-
-  @override
-  Future<void> remove(Iterable<String> wrapIds) async =>
-      wrapIds.forEach(entries.remove);
 }
 
 /// A vault key that counts what it decrypts, as a remote signer would be asked.

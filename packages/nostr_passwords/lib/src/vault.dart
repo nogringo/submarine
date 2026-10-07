@@ -418,6 +418,34 @@ class Vault {
     return unsent;
   }
 
+  /// Removes the vault from this device: its events in the ndk cache, the
+  /// changes [unsent] included, what [engine] synced, and [cache]. Its relays
+  /// keep it, for [sync] to bring it back on a device that opens it again.
+  ///
+  /// Release the handle of [sync] and cancel [subscribe] first, as they would
+  /// fill the cache again.
+  Future<void> forget(SyncEngine engine) async {
+    final pubkey = signer.getPublicKey();
+    for (final filter in [_wraps, _deletions]) {
+      await engine.forgetFilter(filter, authPubkey: pubkey);
+    }
+    await ndk.config.cache.removeEvents(
+      pubKeys: [pubkey],
+      kinds: [Deletion.kKind, Nip65.kKind],
+    );
+    await ndk.config.cache.removeEvents(
+      kinds: [GiftWrap.kGiftWrapEventkind],
+      tags: {
+        'p': [pubkey],
+      },
+    );
+    if (cache case final cache?) {
+      await cache.remove((await cache.store.read()).keys);
+    }
+    _versions.clear();
+    _cacheRead = null;
+  }
+
   /// Whether [event] is one of this vault's: the cache may hold other vaults.
   bool _isOwn(Nip01Event event) => switch (event.kind) {
     GiftWrap.kGiftWrapEventkind => event.pTags.contains(signer.getPublicKey()),

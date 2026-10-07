@@ -366,6 +366,15 @@ class VaultController extends ChangeNotifier {
         ),
       );
 
+  /// Removes the vault from this device once disposed, see [Vault.forget].
+  Future<void> forget() async {
+    assert(_disposed);
+    await _released;
+    await vault.forget(_engine);
+  }
+
+  Future<void>? _released;
+
   @override
   void dispose() {
     _disposed = true;
@@ -373,7 +382,7 @@ class VaultController extends ChangeNotifier {
     unawaited(_statuses?.cancel());
     _signer.dispose();
     unawaited(unsubscribe());
-    unawaited(_handle?.then(_engine.release));
+    unawaited(_released = _handle?.then(_engine.release));
     super.dispose();
   }
 }

@@ -35,7 +35,7 @@ class VaultItem {
   final Item item;
 }
 
-/// The vaults of this device. A vault is added, never removed.
+/// The vaults of this device.
 class Vaults extends ChangeNotifier {
   Vaults._({
     required this.ndk,
@@ -188,6 +188,21 @@ class Vaults extends ChangeNotifier {
   Future<void> edit(VaultController vault, {String? name, Color? color}) {
     vault.record = vault.record.copyWith(name: name, color: color);
     return _save([for (final vault in _vaults) vault.record]);
+  }
+
+  /// Removes [vault] from this device, with what it opened and its events in
+  /// the cache. Its relays keep it, for it to come back once added again.
+  Future<void> remove(VaultController vault) async {
+    await _save([
+      for (final other in _vaults)
+        if (other != vault) other.record,
+    ]);
+    _vaults.remove(vault);
+    vault.dispose();
+    ndk.accounts.removeAccount(pubkey: vault.pubkey);
+    notifyListeners();
+    await vault.forget();
+    await vault.vault.signer.dispose();
   }
 
   /// Whether the key of [vault]'s cache is sealed for its signer, which then

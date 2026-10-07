@@ -8,6 +8,7 @@ import 'package:sembast/sembast_memory.dart' show newDatabaseFactoryMemory;
 import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
 import 'package:test/test.dart';
 
+import 'mocks/memory_version_store.dart';
 import 'mocks/mock_relay.dart';
 
 void main() {
@@ -840,6 +841,41 @@ void main() {
 
       final [item] = await syncedItems();
       expect(item.id, created.id);
+    });
+
+    test('forget removes the vault from this device, not its relays', () async {
+      final store = MemoryVersionStore();
+      otherVault = Vault(
+        ndk: otherNdk,
+        signer: signer,
+        relays: [relay.url],
+        indexers: const [],
+        cache: VersionCache(store, newCacheKey()),
+      );
+      final kept = await vault.createItem(boulanger);
+      await vault.createItem(boulanger);
+      await vault.deleteItem(
+        (await vault.items()).firstWhere((item) => item.id != kept.id),
+      );
+      await vault.push();
+      final handle = await otherVault.sync(engine);
+      engine.start();
+      await engine
+          .watchStatus(handle)
+          .firstWhere((status) => status.phase == SyncRequestPhase.synced);
+      expect((await otherVault.items()).single.id, kept.id);
+      expect(store.entries, isNotEmpty);
+
+      engine.release(handle);
+      await otherVault.forget(engine);
+
+      expect(await otherNdk.config.cache.loadEvents(), isEmpty);
+      expect(store.entries, isEmpty);
+      expect(await otherVault.lastSync(engine), isNull);
+      expect(await otherVault.openedItems(), isEmpty);
+
+      final [item] = await syncedItems();
+      expect(item.id, kept.id);
     });
 
     test('lastSync is null before the first sync', () async {

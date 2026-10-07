@@ -196,6 +196,9 @@ Future<void> main() async {
   await vault.push();
 
   await live.cancel();
+  engine.release(handle);
+  // Removes the vault from this device only: its relays keep it.
+  await vault.forget(engine);
   await engine.dispose();
   await ndk.destroy();
 }

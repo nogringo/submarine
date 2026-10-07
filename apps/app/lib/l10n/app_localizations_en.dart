@@ -1287,4 +1287,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get forgetVaults => 'Remove the vaults';
+
+  @override
+  String get removeVault => 'Remove from this device';
+
+  @override
+  String get removeVaultDescription =>
+      'The vault stays on its relays, for you to open it again.';
+
+  @override
+  String removeVaultTitle(String name) {
+    return 'Remove $name from this device?';
+  }
+
+  @override
+  String get removeVaultBody =>
+      'Your items stay on its relays: open the vault again to find them.';
+
+  @override
+  String get removeVaultKeyWarning =>
+      'Keep its key first: without it, you cannot open the vault again.';
+
+  @override
+  String removeVaultUnsent(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count changes have reached no relay yet, and will be lost.',
+      one: '1 change has reached no relay yet, and will be lost.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get removeVaultConfirm => 'Remove';
+
+  @override
+  String get removeVaultFailed => 'The vault could not be removed.';
 }

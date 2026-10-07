@@ -28,6 +28,7 @@ import 'package:submarine/src/storage_error_app.dart';
 import 'package:submarine/src/theme/appearance.dart';
 import 'package:submarine/src/vaults/vault_storage.dart';
 import 'package:submarine/src/vaults/vaults.dart';
+import 'package:submarine/src/vaults/version_store.dart';
 import 'package:submarine/src/widgets/copy_button.dart';
 import 'package:submarine/src/widgets/settings_tile.dart';
 import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
@@ -2309,6 +2310,71 @@ void main() {
     await settle(tester);
     expect(find.text('Vault settings'), findsNothing);
     expect(find.text('Home'), findsOneWidget);
+    await close(tester);
+  });
+
+  testWidgets('removes a vault from the device in its settings on a desktop', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(tester, items: [github], withFamily: true);
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+      ),
+    );
+    await settle(tester);
+    final personal = vaults.all.first.pubkey;
+    Future<List<Nip01Event>> events() => ndk.config.cache.loadEvents(
+      tags: {
+        'p': [personal],
+      },
+    );
+    Future<Map<String, String>> versions() =>
+        SembastVersionStore(database, personal).read();
+    expect(await tester.runAsync(events), isNotEmpty);
+    expect(await tester.runAsync(versions), isNotEmpty);
+
+    await tester.tap(find.byTooltip('Personal'));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Vault settings'));
+    await settle(tester);
+    final remove = find.widgetWithText(OutlinedButton, 'Remove');
+    await tester.ensureVisible(remove);
+    await settle(tester);
+    await tester.tap(remove);
+    await settle(tester);
+    expect(find.text('Remove Personal from this device?'), findsOneWidget);
+    expect(
+      inDialog(
+        'Keep its key first: without it, you cannot open the vault again.',
+      ),
+      findsOneWidget,
+    );
+    await tester.tap(inDialog('Cancel'));
+    await settle(tester);
+    expect(vaults.all, hasLength(2));
+
+    await tester.tap(remove);
+    await settle(tester);
+    await tapUntil(
+      tester,
+      find.widgetWithText(FilledButton, 'Remove'),
+      () => find.text('All vaults').evaluate().isNotEmpty,
+    );
+    expect(find.byTooltip('Personal'), findsNothing);
+    expect(find.text('GitHub'), findsNothing);
+    expect([for (final vault in vaults.all) vault.name], ['Family']);
+    expect(
+      [for (final vault in await savedVaults()) vault['name']],
+      ['Family'],
+    );
+    expect(await tester.runAsync(events), isEmpty);
+    expect(await tester.runAsync(versions), isEmpty);
     await close(tester);
   });
 

@@ -194,6 +194,10 @@ class _VaultSettingsState extends State<_VaultSettings> {
                 description: l10n.relaysDescription,
                 child: _Relays(vault: vault),
               ),
+              Padding(
+                padding: const EdgeInsets.only(top: 28),
+                child: FieldCard(children: [_RemoveTile(vault: vault)]),
+              ),
             ],
           ),
         ),
@@ -360,6 +364,103 @@ class _SyncTile extends StatelessWidget {
       ),
     );
   }
+}
+
+class _RemoveTile extends StatefulWidget {
+  const _RemoveTile({required this.vault});
+
+  final VaultController vault;
+
+  @override
+  State<_RemoveTile> createState() => _RemoveTileState();
+}
+
+class _RemoveTileState extends State<_RemoveTile> {
+  var _removing = false;
+  String? _error;
+
+  Future<void> _remove() async {
+    final l10n = context.l10n;
+    final vaults = Vaults.of(context);
+    // These settings leave the tree with the vault, before the removal ends.
+    final router = GoRouter.of(context);
+    if (!await _confirmRemove(context, widget.vault) || !mounted) return;
+    setState(() {
+      _removing = true;
+      _error = null;
+    });
+    try {
+      await vaults.remove(widget.vault);
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _removing = false;
+          _error = l10n.removeVaultFailed;
+        });
+        return;
+      }
+    }
+    router.go(vaultPath(allVaultsId));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final palette = context.palette;
+    final error = _error;
+    return SettingsTile(
+      title: Text(l10n.removeVault),
+      subtitle: error != null
+          ? Text(error, style: TextStyle(color: palette.danger))
+          : Text(l10n.removeVaultDescription),
+      trailing: OutlinedButton(
+        onPressed: _removing ? null : _remove,
+        style: OutlinedButton.styleFrom(foregroundColor: palette.danger)
+            .merge(settingsButtonStyle),
+        child: Text(l10n.removeVaultConfirm),
+      ),
+    );
+  }
+}
+
+Future<bool> _confirmRemove(BuildContext context, VaultController vault) async {
+  final l10n = context.l10n;
+  final colors = Theme.of(context).colorScheme;
+  final remove = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(l10n.removeVaultTitle(vault.name)),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 12,
+        children: [
+          Text(l10n.removeVaultBody),
+          if (vault.record.login is KeyLogin) Text(l10n.removeVaultKeyWarning),
+          if (vault.unsent > 0)
+            Text(
+              l10n.removeVaultUnsent(vault.unsent),
+              style: TextStyle(color: context.palette.danger),
+            ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: Text(l10n.cancel),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, true),
+          style: FilledButton.styleFrom(
+            backgroundColor: colors.error,
+            foregroundColor: colors.onError,
+          ),
+          child: Text(l10n.removeVaultConfirm),
+        ),
+      ],
+    ),
+  );
+  return remove ?? false;
 }
 
 /// Keeps the changes in a draft, published as a single relay list on save.

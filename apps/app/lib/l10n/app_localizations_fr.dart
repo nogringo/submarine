@@ -1296,4 +1296,42 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get forgetVaults => 'Retirer les coffres';
+
+  @override
+  String get removeVault => 'Retirer de cet appareil';
+
+  @override
+  String get removeVaultDescription =>
+      'Le coffre reste sur ses relais, pour que vous puissiez le rouvrir.';
+
+  @override
+  String removeVaultTitle(String name) {
+    return 'Retirer $name de cet appareil ?';
+  }
+
+  @override
+  String get removeVaultBody =>
+      'Vos éléments restent sur ses relais : rouvrez le coffre pour les retrouver.';
+
+  @override
+  String get removeVaultKeyWarning =>
+      'Gardez d\'abord sa clé : sans elle, vous ne pourrez pas rouvrir le coffre.';
+
+  @override
+  String removeVaultUnsent(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count modifications n\'ont encore atteint aucun relais et seront perdues.',
+      one: '1 modification n\'a encore atteint aucun relais et sera perdue.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get removeVaultConfirm => 'Retirer';
+
+  @override
+  String get removeVaultFailed => 'Le coffre n\'a pas pu être retiré.';
 }

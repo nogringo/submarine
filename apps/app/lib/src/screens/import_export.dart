@@ -11,6 +11,7 @@ import '../context.dart';
 import '../items/field_tile.dart';
 import '../vaults/vault_controller.dart';
 import '../vaults/vaults.dart';
+import '../widgets/dialog_buttons.dart';
 import '../widgets/password_field.dart';
 import '../widgets/settings_tile.dart';
 import '../widgets/vault_dropdown.dart';
@@ -193,14 +194,12 @@ class _FilePasswordDialogState extends State<_FilePasswordDialog> {
                   onSubmitted: (_) => _open(),
                 ),
                 const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                DialogButtons(
                   children: [
                     TextButton(
                       onPressed: _opening ? null : () => Navigator.pop(context),
                       child: Text(l10n.cancel),
                     ),
-                    const SizedBox(width: 8),
                     FilledButton(
                       onPressed: _opening || _password.text.isEmpty
                           ? null
@@ -344,15 +343,13 @@ class _ImportDialogState extends State<_ImportDialog> {
                 else
                   Text(l10n.importDone(total, vault.name)),
                 const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                DialogButtons(
                   children: [
                     if (saved == null) ...[
                       TextButton(
                         onPressed: () => Navigator.pop(context),
                         child: Text(l10n.cancel),
                       ),
-                      const SizedBox(width: 8),
                       FilledButton(
                         onPressed: _import,
                         child: Text(l10n.importButton),
@@ -579,8 +576,7 @@ class _ExportDialogState extends State<_ExportDialog> {
                   Text(error, style: TextStyle(color: palette.danger)),
                 ],
                 const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                DialogButtons(
                   children: [
                     TextButton(
                       onPressed: _exporting
@@ -588,7 +584,6 @@ class _ExportDialogState extends State<_ExportDialog> {
                           : () => Navigator.pop(context),
                       child: Text(l10n.cancel),
                     ),
-                    const SizedBox(width: 8),
                     FilledButton(
                       onPressed: count == 0 || _exporting
                           ? null

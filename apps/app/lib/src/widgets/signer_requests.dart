@@ -8,6 +8,7 @@ import '../context.dart';
 import '../items/field_tile.dart';
 import '../vaults/vault_controller.dart';
 import '../vaults/vaults.dart';
+import 'dialog_buttons.dart';
 import 'settings_tile.dart';
 import 'spoken_status.dart';
 import 'vault_avatar.dart';
@@ -204,8 +205,7 @@ class _SignerRequestsState extends State<_SignerRequests> {
           ),
         ],
         const SizedBox(height: 20),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
+        DialogButtons(
           children: [
             TextButton(
               onPressed: () {
@@ -215,7 +215,6 @@ class _SignerRequestsState extends State<_SignerRequests> {
               },
               child: Text(l10n.cancelAll),
             ),
-            const SizedBox(width: 8),
             FilledButton(
               onPressed: () => Navigator.pop(context),
               child: Text(l10n.close),

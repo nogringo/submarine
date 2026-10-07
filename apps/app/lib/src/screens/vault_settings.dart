@@ -14,6 +14,7 @@ import '../vaults/vault_logins.dart';
 import '../vaults/vault_storage.dart';
 import '../vaults/vaults.dart';
 import '../widgets/copy_button.dart';
+import '../widgets/dialog_buttons.dart';
 import '../widgets/settings_tile.dart';
 import '../widgets/sync_status.dart';
 import '../widgets/vault_avatar.dart';
@@ -636,14 +637,12 @@ class _RelaysState extends State<_Relays> {
             ],
             const SizedBox(height: 12),
             // Always there: the page would scroll by itself as they go.
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+            DialogButtons(
               children: [
                 TextButton(
                   onPressed: _changed && !_saving ? _discard : null,
                   child: Text(l10n.cancel),
                 ),
-                const SizedBox(width: 8),
                 FilledButton(
                   onPressed: _changed && editable && !draft.isEmpty
                       ? () => _save(draft)
@@ -814,14 +813,12 @@ class _AddRelayDialogState extends State<_AddRelayDialog> {
                 ),
               ),
               const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+              DialogButtons(
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
                     child: Text(l10n.cancel),
                   ),
-                  const SizedBox(width: 8),
                   FilledButton(onPressed: _submit, child: Text(l10n.add)),
                 ],
               ),

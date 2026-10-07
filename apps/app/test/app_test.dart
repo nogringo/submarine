@@ -3849,14 +3849,26 @@ void main() {
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   }
 
-  /// Starts the app again in [themeMode], on a screen of [size].
+  /// Each screen in both themes, then with its text twice as large, the most
+  /// Android allows: what no longer fits then fails the test.
+  const looks = [
+    (ThemeMode.light, 1.0),
+    (ThemeMode.dark, 1.0),
+    (ThemeMode.light, 2.0),
+  ];
+
+  /// Starts the app again in [themeMode], on a screen of [size], with its text
+  /// scaled by [textScale].
   Future<void> startIn(
     WidgetTester tester,
     ThemeMode themeMode,
-    Size size,
-  ) async {
+    Size size, {
+    double textScale = 1,
+  }) async {
     await tester.runAsync(() => appearance.setThemeMode(themeMode));
     setScreen(tester, size);
+    tester.platformDispatcher.textScaleFactorTestValue = textScale;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
     await tester.pumpWidget(const SizedBox());
     await tester.pumpWidget(
       SubmarineApp(
@@ -3870,146 +3882,175 @@ void main() {
     await settle(tester);
   }
 
-  testWidgets('keeps each screen accessible on a desktop, in both themes', (
-    tester,
-  ) async {
-    await open(tester, items: [github]);
-    FilePickerPlatform.instance = FakeFilePicker()
-      ..picked = FakeFile(
-        'bitwarden_export.json',
-        jsonEncode({
-          'encrypted': false,
-          'folders': [],
-          'items': [
-            {
-              'type': 1,
-              'name': 'Freebox',
-              'login': {'username': 'freebox', 'password': 'hunter2'},
-            },
-          ],
-        }),
+  testWidgets(
+    'keeps each screen accessible on a desktop, in both themes and large text',
+    (tester) async {
+      await open(tester, items: [github]);
+      FilePickerPlatform.instance = FakeFilePicker()
+        ..picked = FakeFile(
+          'bitwarden_export.json',
+          jsonEncode({
+            'encrypted': false,
+            'folders': [],
+            'items': [
+              {
+                'type': 1,
+                'name': 'Freebox',
+                'login': {'username': 'freebox', 'password': 'hunter2'},
+              },
+            ],
+          }),
+        );
+      Future<void> tapAndCheck(Finder finder) async {
+        await tester.tap(finder);
+        await settle(tester);
+        await checkAccessibility(tester);
+      }
+
+      Future<void> cancel() async {
+        await tester.ensureVisible(find.text('Cancel'));
+        await settle(tester);
+        await tester.tap(find.text('Cancel'));
+        await settle(tester);
+      }
+
+      for (final (themeMode, textScale) in looks) {
+        await startIn(
+          tester,
+          themeMode,
+          const Size(1280, 800),
+          textScale: textScale,
+        );
+        await tapAndCheck(find.text('GitHub'));
+        await tapAndCheck(find.text('Edit'));
+        await cancel();
+
+        await tester.tap(find.byTooltip('Personal'));
+        await settle(tester);
+        await tapAndCheck(find.byTooltip('Vault settings'));
+        await tester.ensureVisible(find.text('Add a relay'));
+        await settle(tester);
+        await tapAndCheck(find.text('Add a relay'));
+        await cancel();
+
+        await tapAndCheck(find.byTooltip('Generator'));
+        await tapAndCheck(find.byTooltip('Settings'));
+        await tester.ensureVisible(find.text('Export'));
+        await settle(tester);
+        await tapAndCheck(find.text('Export'));
+        await cancel();
+        await write(tester, find.text('Import'));
+        await checkAccessibility(tester);
+        await cancel();
+
+        await tapAndCheck(find.byTooltip('Add a vault'));
+        await tapAndCheck(find.text('Create a vault'));
+        await cancel();
+        await tester.tap(find.byTooltip('Add a vault'));
+        await settle(tester);
+        await tester.tap(find.text('Open a vault'));
+        await settle(tester);
+        await tapAndCheck(find.text('Other ways to open it'));
+        await cancel();
+      }
+      await close(tester);
+    },
+  );
+
+  testWidgets(
+    'keeps each screen accessible on a phone, in both themes and large text',
+    (tester) async {
+      await open(tester, items: [github]);
+      Future<void> tapAndCheck(Finder finder) async {
+        await tester.tap(finder);
+        await settle(tester);
+        await checkAccessibility(tester);
+      }
+
+      for (final (themeMode, textScale) in looks) {
+        await startIn(
+          tester,
+          themeMode,
+          const Size(390, 844),
+          textScale: textScale,
+        );
+        await checkAccessibility(tester);
+        await tapAndCheck(find.byTooltip('Vaults'));
+        await tester.tap(find.text('Personal'));
+        await settle(tester);
+        await tapAndCheck(find.text('GitHub'));
+        await tester.pageBack();
+        await settle(tester);
+        await tapAndCheck(find.text('Generator'));
+        await tapAndCheck(find.text('Settings'));
+      }
+      await close(tester);
+    },
+  );
+
+  testWidgets(
+    'keeps the welcome screen accessible, in both themes and large text',
+    (tester) async {
+      await open(tester);
+      for (final (themeMode, textScale) in looks) {
+        await startIn(
+          tester,
+          themeMode,
+          const Size(390, 844),
+          textScale: textScale,
+        );
+        expect(find.text('SUBMARINE'), findsOneWidget);
+        await checkAccessibility(tester);
+      }
+      await close(tester);
+    },
+  );
+
+  testWidgets(
+    'keeps the lock screen accessible, in both themes and large text',
+    (tester) async {
+      await open(
+        tester,
+        items: [github],
+        lockSettings: const LockSettings(enabled: true),
       );
-    Future<void> tapAndCheck(Finder finder) async {
-      await tester.tap(finder);
-      await settle(tester);
-      await checkAccessibility(tester);
-    }
+      for (final (themeMode, textScale) in looks) {
+        await startIn(
+          tester,
+          themeMode,
+          const Size(1280, 800),
+          textScale: textScale,
+        );
+        expect(find.text('Your vaults are locked.'), findsOneWidget);
+        await checkAccessibility(tester);
+      }
 
-    Future<void> cancel() async {
-      await tester.tap(find.text('Cancel'));
+      tester.platformDispatcher.textScaleFactorTestValue = 1;
+      await unlockWith(tester, find.text('Unlock'));
+      await tester.tap(find.byTooltip('Settings'));
       await settle(tester);
-    }
-
-    for (final themeMode in [ThemeMode.light, ThemeMode.dark]) {
-      await startIn(tester, themeMode, const Size(1280, 800));
-      await tapAndCheck(find.text('GitHub'));
-      await tapAndCheck(find.text('Edit'));
-      await cancel();
-
-      await tester.tap(find.byTooltip('Personal'));
+      await setLockPassword(tester, 'correct horse battery');
+      await tester.tap(find.byTooltip('Lock (Ctrl+L)'));
       await settle(tester);
-      await tapAndCheck(find.byTooltip('Vault settings'));
-      await tester.ensureVisible(find.text('Add a relay'));
-      await settle(tester);
-      await tapAndCheck(find.text('Add a relay'));
-      await cancel();
-
-      await tapAndCheck(find.byTooltip('Generator'));
-      await tapAndCheck(find.byTooltip('Settings'));
-      await tester.ensureVisible(find.text('Export'));
-      await settle(tester);
-      await tapAndCheck(find.text('Export'));
-      await cancel();
-      await write(tester, find.text('Import'));
-      await checkAccessibility(tester);
-      await cancel();
-
-      await tapAndCheck(find.byTooltip('Add a vault'));
-      await tapAndCheck(find.text('Create a vault'));
-      await cancel();
-      await tester.tap(find.byTooltip('Add a vault'));
-      await settle(tester);
-      await tester.tap(find.text('Open a vault'));
-      await settle(tester);
-      await tapAndCheck(find.text('Other ways to open it'));
-      await cancel();
-    }
-    await close(tester);
-  });
-
-  testWidgets('keeps each screen accessible on a phone, in both themes', (
-    tester,
-  ) async {
-    await open(tester, items: [github]);
-    Future<void> tapAndCheck(Finder finder) async {
-      await tester.tap(finder);
-      await settle(tester);
-      await checkAccessibility(tester);
-    }
-
-    for (final themeMode in [ThemeMode.light, ThemeMode.dark]) {
-      await startIn(tester, themeMode, const Size(390, 844));
-      await checkAccessibility(tester);
-      await tapAndCheck(find.byTooltip('Vaults'));
-      await tester.tap(find.text('Personal'));
-      await settle(tester);
-      await tapAndCheck(find.text('GitHub'));
-      await tester.pageBack();
-      await settle(tester);
-      await tapAndCheck(find.text('Generator'));
-      await tapAndCheck(find.text('Settings'));
-    }
-    await close(tester);
-  });
-
-  testWidgets('keeps the welcome screen accessible, in both themes', (
-    tester,
-  ) async {
-    await open(tester);
-    for (final themeMode in [ThemeMode.light, ThemeMode.dark]) {
-      await startIn(tester, themeMode, const Size(390, 844));
-      expect(find.text('SUBMARINE'), findsOneWidget);
-      await checkAccessibility(tester);
-    }
-    await close(tester);
-  });
-
-  testWidgets('keeps the lock screen accessible, in both themes', (
-    tester,
-  ) async {
-    await open(
-      tester,
-      items: [github],
-      lockSettings: const LockSettings(enabled: true),
-    );
-    for (final themeMode in [ThemeMode.light, ThemeMode.dark]) {
-      await startIn(tester, themeMode, const Size(1280, 800));
-      expect(find.text('Your vaults are locked.'), findsOneWidget);
-      await checkAccessibility(tester);
-    }
-
-    await unlockWith(tester, find.text('Unlock'));
-    await tester.tap(find.byTooltip('Settings'));
-    await settle(tester);
-    await setLockPassword(tester, 'correct horse battery');
-    await tester.tap(find.byTooltip('Lock (Ctrl+L)'));
-    await settle(tester);
-    await tester.enterText(
-      find.widgetWithText(TextField, 'Lock password'),
-      'correct horse batter',
-    );
-    await tapUntil(
-      tester,
-      find.text('Unlock'),
-      () => find.text('This is not the lock password.').evaluate().isNotEmpty,
-    );
-    for (final themeMode in [ThemeMode.dark, ThemeMode.light]) {
-      await tester.runAsync(() => appearance.setThemeMode(themeMode));
-      await settle(tester);
-      await checkAccessibility(tester);
-    }
-    await close(tester);
-  });
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Lock password'),
+        'correct horse batter',
+      );
+      await tapUntil(
+        tester,
+        find.text('Unlock'),
+        () => find.text('This is not the lock password.').evaluate().isNotEmpty,
+      );
+      expect(find.text('This is not the lock password.'), findsOneWidget);
+      for (final (themeMode, textScale) in looks) {
+        await tester.runAsync(() => appearance.setThemeMode(themeMode));
+        tester.platformDispatcher.textScaleFactorTestValue = textScale;
+        await settle(tester);
+        await checkAccessibility(tester);
+      }
+      await close(tester);
+    },
+  );
 
   testWidgets('tells screen readers what the screen shows, and what changes', (
     tester,

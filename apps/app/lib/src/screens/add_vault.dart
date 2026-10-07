@@ -16,6 +16,7 @@ import '../vaults/vault_logins.dart';
 import '../vaults/vault_storage.dart';
 import '../vaults/vaults.dart';
 import '../widgets/copy_button.dart';
+import '../widgets/dialog_buttons.dart';
 import '../widgets/vault_color_picker.dart';
 import '../widgets/vault_key_box.dart';
 
@@ -405,14 +406,12 @@ class _VaultFormDialogState extends State<_VaultFormDialog> {
                 _Waiting(status: status),
               ],
               const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+              DialogButtons(
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
                     child: Text(l10n.cancel),
                   ),
-                  const SizedBox(width: 8),
                   FilledButton(
                     onPressed: _busy ? null : _submit,
                     child: Text(_opening ? l10n.open : l10n.create),

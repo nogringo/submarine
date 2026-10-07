@@ -6,6 +6,7 @@ import '../context.dart';
 import '../items/field_tile.dart';
 import '../theme/theme.dart';
 import '../widgets/copy_button.dart';
+import '../widgets/dialog_buttons.dart';
 import '../widgets/select_chip.dart';
 import 'generator_settings.dart';
 
@@ -171,7 +172,8 @@ class _GeneratorViewState extends State<GeneratorView> {
         if (widget.username)
           ..._usernameOptions(l10n)
         else ...[
-          Row(
+          Wrap(
+            spacing: 8,
             children: [
               SelectChip(
                 label: l10n.password,
@@ -182,7 +184,6 @@ class _GeneratorViewState extends State<GeneratorView> {
                         _settings.copyWith(type: GeneratorType.password),
                       ),
               ),
-              const SizedBox(width: 8),
               SelectChip(
                 label: l10n.passphrase,
                 selected: !isPassword,
@@ -395,11 +396,9 @@ class _GeneratorViewState extends State<GeneratorView> {
     );
     final onCancel = widget.onCancel;
     if (onCancel == null) return use;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
+    return DialogButtons(
       children: [
         TextButton(onPressed: onCancel, child: Text(l10n.cancel)),
-        const SizedBox(width: 8),
         use,
       ],
     );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
 
 import '../context.dart';
+import '../widgets/dialog_buttons.dart';
 import '../widgets/password_field.dart';
 import 'app_lock.dart';
 
@@ -150,14 +151,12 @@ class _LockPasswordDialogState extends State<LockPasswordDialog> {
                   ),
                 ],
                 const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                DialogButtons(
                   children: [
                     TextButton(
                       onPressed: checking ? null : () => Navigator.pop(context),
                       child: Text(l10n.cancel),
                     ),
-                    const SizedBox(width: 8),
                     FilledButton(
                       onPressed: checking ? null : _submit,
                       style: remove

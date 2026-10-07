@@ -272,7 +272,9 @@ class _MenuTile<T> extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(label(value), style: const TextStyle(fontSize: 15)),
+              Flexible(
+                child: Text(label(value), style: const TextStyle(fontSize: 15)),
+              ),
               const SizedBox(width: 4),
               Icon(Icons.arrow_drop_down_rounded, color: context.palette.muted),
             ],

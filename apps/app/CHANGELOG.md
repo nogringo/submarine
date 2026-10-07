@@ -16,6 +16,6 @@
 - A lock password on every platform, with the device's biometrics or screen lock as a shortcut where it has them. The vaults close while the app is locked. Ctrl+L, or ⌘L on Apple devices, locks it from anywhere.
 - Copied passwords cleared from the clipboard after a delay. The app hidden from the app switcher, and screen capture blocked on Android.
 - A light, dark or system theme.
-- Every control named for screen readers, on the web too, which hear the selected row, a copy, a wrong lock password, a failed sync and a waiting signer. Control borders and the selected row at a 3:1 contrast, and every control at least 48 by 48 to tap.
+- Every control named for screen readers, on the web too, which hear the selected row, a copy, a wrong lock password, a failed sync and a waiting signer. Control borders and the selected row at a 3:1 contrast, every control at least 48 by 48 to tap, and every screen whole with text twice as large.
 - A welcome screen about the user's passwords, and a Built on Nostr link that explains the relays and the keys.
 - English, French, German, Spanish, Italian, Portuguese (Portugal and Brazil), Finnish, Russian, Japanese and Chinese, as the device's language or picked in the settings.

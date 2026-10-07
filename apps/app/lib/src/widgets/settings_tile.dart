@@ -66,36 +66,45 @@ class SettingsTile extends StatelessWidget {
     final subtitle = this.subtitle;
     final trailing = this.trailing;
     final below = this.below;
-    final row = Row(
-      children: [
-        if (leading != null) ...[leading, const SizedBox(width: 14)],
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              DefaultTextStyle.merge(
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                ),
-                child: title,
-              ),
-              if (subtitle != null) ...[
-                const SizedBox(height: 4),
+    final row = LayoutBuilder(
+      builder: (context, constraints) => Row(
+        children: [
+          if (leading != null) ...[leading, const SizedBox(width: 14)],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 DefaultTextStyle.merge(
-                  style: TextStyle(
-                    fontSize: 13,
-                    height: 1.4,
-                    color: context.palette.muted,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
                   ),
-                  child: subtitle,
+                  child: title,
                 ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 4),
+                  DefaultTextStyle.merge(
+                    style: TextStyle(
+                      fontSize: 13,
+                      height: 1.4,
+                      color: context.palette.muted,
+                    ),
+                    child: subtitle,
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
-        ),
-        if (trailing != null) ...[const SizedBox(width: 12), trailing],
-      ],
+          if (trailing != null) ...[
+            const SizedBox(width: 12),
+            // Half the row at most: the title keeps the rest with large text.
+            ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: constraints.maxWidth / 2),
+              child: trailing,
+            ),
+          ],
+        ],
+      ),
     );
     final tile = Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),

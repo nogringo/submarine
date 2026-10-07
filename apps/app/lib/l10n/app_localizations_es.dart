@@ -728,16 +728,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get noItemsHere => 'No hay elementos aquí.';
 
   @override
-  String searchItems(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Buscar en $count elementos',
-      one: 'Buscar en 1 elemento',
-      zero: 'Buscar',
-    );
-    return '$_temp0';
-  }
+  String get searchItems => 'Buscar';
 
   @override
   String get clearSearch => 'Borrar la búsqueda';

@@ -242,14 +242,16 @@ class _NewItemButton extends StatelessWidget {
   final ItemFilter filter;
 
   @override
-  Widget build(BuildContext context) => FilledButton.icon(
-    onPressed: () => _newItem(context, vaultId, filter, _pickTypeInMenu),
-    style: FilledButton.styleFrom(
-      minimumSize: const Size(0, 40),
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+  Widget build(BuildContext context) => Tooltip(
+    message: context.l10n.newItem,
+    child: FilledButton(
+      onPressed: () => _newItem(context, vaultId, filter, _pickTypeInMenu),
+      style: FilledButton.styleFrom(
+        minimumSize: const Size.square(40),
+        padding: EdgeInsets.zero,
+      ),
+      child: const Icon(Icons.add_rounded, size: 22),
     ),
-    icon: const Icon(Icons.add_rounded, size: 20),
-    label: Text(context.l10n.newItem),
   );
 }
 
@@ -383,7 +385,7 @@ class _ItemsState extends State<_Items> {
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
           child: SearchField(
-            hint: context.l10n.searchItems(items.length),
+            hint: context.l10n.searchItems,
             showsShortcut: context.isWide,
             onChanged: (query) => setState(() => _query = query),
           ),

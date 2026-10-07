@@ -204,7 +204,7 @@
   "filterPassports": "Pasaportes",
   "filterTrash": "Papelera",
   "noItemsHere": "No hay elementos aquí.",
-  "searchItems": "{count, plural, =0{Buscar} =1{Buscar en 1 elemento} other{Buscar en {count} elementos}}",
+  "searchItems": "Buscar",
   "clearSearch": "Borrar la búsqueda",
   "noSearchResults": "Ningún elemento coincide con tu búsqueda.",
   "changesNotSent": "{count, plural, =1{1 cambio aún sin enviar} other{{count} cambios aún sin enviar}}",

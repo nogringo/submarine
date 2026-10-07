@@ -204,7 +204,7 @@
   "filterPassports": "Passaportes",
   "filterTrash": "Lixo",
   "noItemsHere": "Nenhum item aqui.",
-  "searchItems": "{count, plural, =0{Procurar} =1{Procurar em 1 item} other{Procurar em {count} itens}}",
+  "searchItems": "Procurar",
   "clearSearch": "Limpar a pesquisa",
   "noSearchResults": "Nenhum item corresponde à sua pesquisa.",
   "changesNotSent": "{count, plural, =1{1 alteração por enviar} other{{count} alterações por enviar}}",

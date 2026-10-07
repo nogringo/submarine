@@ -1339,11 +1339,11 @@ abstract class AppLocalizations {
   /// **'No items here.'**
   String get noItemsHere;
 
-  /// Placeholder of the search box above the items, with the number of items listed.
+  /// Placeholder of the search box above the items.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =0{Search} =1{Search 1 item} other{Search {count} items}}'**
-  String searchItems(int count);
+  /// **'Search'**
+  String get searchItems;
 
   /// Tooltip of the button emptying the search box.
   ///

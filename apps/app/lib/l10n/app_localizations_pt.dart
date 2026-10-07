@@ -727,16 +727,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get noItemsHere => 'Nenhum item aqui.';
 
   @override
-  String searchItems(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Procurar em $count itens',
-      one: 'Procurar em 1 item',
-      zero: 'Procurar',
-    );
-    return '$_temp0';
-  }
+  String get searchItems => 'Procurar';
 
   @override
   String get clearSearch => 'Limpar a pesquisa';
@@ -2082,17 +2073,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get noItemsHere => 'Nenhum item aqui.';
 
   @override
-  String searchItems(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Buscar em $count itens',
-      many: 'Buscar em $count de itens',
-      one: 'Buscar em $count item',
-      zero: 'Buscar',
-    );
-    return '$_temp0';
-  }
+  String get searchItems => 'Buscar';
 
   @override
   String get clearSearch => 'Limpar a busca';

@@ -724,16 +724,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String get noItemsHere => 'Täällä ei ole kohteita.';
 
   @override
-  String searchItems(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Etsi $count kohteesta',
-      one: 'Etsi 1 kohteesta',
-      zero: 'Etsi',
-    );
-    return '$_temp0';
-  }
+  String get searchItems => 'Etsi';
 
   @override
   String get clearSearch => 'Tyhjennä haku';

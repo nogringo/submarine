@@ -204,7 +204,7 @@
   "filterPassports": "Паспорта",
   "filterTrash": "Корзина",
   "noItemsHere": "Здесь нет элементов.",
-  "searchItems": "{count, plural, =0{Поиск} one{Поиск по {count} элементу} few{Поиск по {count} элементам} many{Поиск по {count} элементам} other{Поиск по {count} элемента}}",
+  "searchItems": "Поиск",
   "clearSearch": "Очистить поиск",
   "noSearchResults": "По вашему запросу ничего не найдено.",
   "changesNotSent": "{count, plural, one{{count} изменение ещё не отправлено} few{{count} изменения ещё не отправлены} many{{count} изменений ещё не отправлены} other{{count} изменения ещё не отправлены}}",

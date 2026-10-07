@@ -713,16 +713,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get noItemsHere => '这里没有项目。';
 
   @override
-  String searchItems(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '搜索 $count 个项目',
-      one: '搜索 1 个项目',
-      zero: '搜索',
-    );
-    return '$_temp0';
-  }
+  String get searchItems => '搜索';
 
   @override
   String get clearSearch => '清除搜索';

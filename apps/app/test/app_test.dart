@@ -650,7 +650,7 @@ void main() {
     );
     await settle(tester);
 
-    expect(find.text('Search 2 items'), findsOneWidget);
+    expect(find.text('Search'), findsOneWidget);
     expect(find.text('Ctrl+F'), findsOneWidget);
     await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
     await tester.sendKeyEvent(LogicalKeyboardKey.keyF);
@@ -713,7 +713,7 @@ void main() {
     );
     await settle(tester);
 
-    expect(find.text('Rechercher parmi 2 éléments'), findsOneWidget);
+    expect(find.text('Rechercher'), findsOneWidget);
     expect(find.text('Ctrl+F'), findsNothing);
     await tester.enterText(find.byType(TextField), 'git');
     await settle(tester);
@@ -746,7 +746,7 @@ void main() {
     );
     await settle(tester);
 
-    await tester.tap(find.text('New item'));
+    await tester.tap(find.byTooltip('New item'));
     await settle(tester);
     await tester.tap(find.text('Login'));
     await settle(tester);
@@ -998,7 +998,7 @@ void main() {
       await settle(tester);
     }
 
-    await tester.tap(find.text('New item'));
+    await tester.tap(find.byTooltip('New item'));
     await settle(tester);
     expect(find.text('Secure note'), findsOneWidget);
     await tester.tap(find.text('Card'));
@@ -1755,7 +1755,7 @@ void main() {
         .text;
     final isoDate = matches(RegExp(r'^\d{4}-\d{2}-\d{2}$'));
 
-    await tester.tap(find.text('New item'));
+    await tester.tap(find.byTooltip('New item'));
     await settle(tester);
     await tester.tap(find.text('Login'));
     await settle(tester);
@@ -1825,7 +1825,7 @@ void main() {
       [('First name', firstName), ('Date of birth', birthDate)],
     );
 
-    await tester.tap(find.text('New item'));
+    await tester.tap(find.byTooltip('New item'));
     await settle(tester);
     await tester.tap(find.text('Card'));
     await settle(tester);

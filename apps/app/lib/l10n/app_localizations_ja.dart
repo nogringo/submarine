@@ -714,16 +714,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get noItemsHere => 'ここにはアイテムがありません。';
 
   @override
-  String searchItems(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count 件のアイテムを検索',
-      one: '1 件のアイテムを検索',
-      zero: '検索',
-    );
-    return '$_temp0';
-  }
+  String get searchItems => '検索';
 
   @override
   String get clearSearch => '検索をクリア';

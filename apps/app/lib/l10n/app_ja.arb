@@ -204,7 +204,7 @@
   "filterPassports": "パスポート",
   "filterTrash": "ごみ箱",
   "noItemsHere": "ここにはアイテムがありません。",
-  "searchItems": "{count, plural, =0{検索} =1{1 件のアイテムを検索} other{{count} 件のアイテムを検索}}",
+  "searchItems": "検索",
   "clearSearch": "検索をクリア",
   "noSearchResults": "検索に一致するアイテムはありません。",
   "changesNotSent": "{count, plural, =1{未送信の変更 1 件} other{未送信の変更 {count} 件}}",

@@ -901,14 +901,9 @@
   "@noItemsHere": {
     "description": "Shown in place of the list when a filter matches no item."
   },
-  "searchItems": "{count, plural, =0{Search} =1{Search 1 item} other{Search {count} items}}",
+  "searchItems": "Search",
   "@searchItems": {
-    "description": "Placeholder of the search box above the items, with the number of items listed.",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
+    "description": "Placeholder of the search box above the items."
   },
   "clearSearch": "Clear the search",
   "@clearSearch": {

@@ -742,18 +742,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get noItemsHere => 'Здесь нет элементов.';
 
   @override
-  String searchItems(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Поиск по $count элемента',
-      many: 'Поиск по $count элементам',
-      few: 'Поиск по $count элементам',
-      one: 'Поиск по $count элементу',
-      zero: 'Поиск',
-    );
-    return '$_temp0';
-  }
+  String get searchItems => 'Поиск';
 
   @override
   String get clearSearch => 'Очистить поиск';

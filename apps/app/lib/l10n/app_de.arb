@@ -204,7 +204,7 @@
   "filterPassports": "Reisepässe",
   "filterTrash": "Papierkorb",
   "noItemsHere": "Hier gibt es keine Einträge.",
-  "searchItems": "{count, plural, =0{Suchen} =1{1 Eintrag durchsuchen} other{{count} Einträge durchsuchen}}",
+  "searchItems": "Suchen",
   "clearSearch": "Suche löschen",
   "noSearchResults": "Keine Einträge passen zu deiner Suche.",
   "changesNotSent": "{count, plural, =1{1 Änderung noch nicht gesendet} other{{count} Änderungen noch nicht gesendet}}",

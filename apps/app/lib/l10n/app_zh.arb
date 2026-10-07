@@ -204,7 +204,7 @@
   "filterPassports": "护照",
   "filterTrash": "回收站",
   "noItemsHere": "这里没有项目。",
-  "searchItems": "{count, plural, =0{搜索} =1{搜索 1 个项目} other{搜索 {count} 个项目}}",
+  "searchItems": "搜索",
   "clearSearch": "清除搜索",
   "noSearchResults": "没有与搜索匹配的项目。",
   "changesNotSent": "{count, plural, =1{1 项更改尚未发送} other{{count} 项更改尚未发送}}",

@@ -204,7 +204,7 @@
   "filterPassports": "Passit",
   "filterTrash": "Roskakori",
   "noItemsHere": "Täällä ei ole kohteita.",
-  "searchItems": "{count, plural, =0{Etsi} =1{Etsi 1 kohteesta} other{Etsi {count} kohteesta}}",
+  "searchItems": "Etsi",
   "clearSearch": "Tyhjennä haku",
   "noSearchResults": "Mikään kohde ei vastaa hakuasi.",
   "changesNotSent": "{count, plural, =1{1 muutos lähettämättä} other{{count} muutosta lähettämättä}}",

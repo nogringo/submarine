@@ -61,7 +61,7 @@
   "@vaultKey": {
     "description": "The vault key (an nsec): label of the field where it is entered, and title of the vault settings section and row showing it."
   },
-  "vaultKeyInvalid": "This is neither a vault key nor a bunker address.",
+  "vaultKeyInvalid": "This is not a vault key.",
   "@vaultKeyInvalid": {
     "description": "Error when the entered text is not a vault key."
   },
@@ -102,7 +102,7 @@
   "@vaultKeyDescription": {
     "description": "Explains the vault key, in the vault settings row that shows it."
   },
-  "vaultKeyHelper": "An nsec, a key in hex, an ncryptsec or a bunker:// address.",
+  "vaultKeyHelper": "The key saved when the vault was created, or shared with you.",
   "@vaultKeyHelper": {
     "description": "Under the vault key field: what it accepts."
   },
@@ -118,9 +118,13 @@
   "@vaultKeyDecrypting": {
     "description": "Shown while an ncryptsec is decrypted with its password, which takes a moment."
   },
-  "keepKeyOutside": "Or keep the key outside Submarine",
-  "@keepKeyOutside": {
-    "description": "Above the buttons opening a vault through a signer that holds its key."
+  "otherWaysToOpen": "Other ways to open it",
+  "@otherWaysToOpen": {
+    "description": "In the open vault dialog, row unfolding the buttons that open a vault through a signer holding its key."
+  },
+  "signersDescription": "With a signer that keeps the key outside Submarine. A bunker:// address also goes in the key field.",
+  "@signersDescription": {
+    "description": "Above the signer buttons, once the other ways to open a vault are unfolded."
   },
   "browserExtension": "Browser extension",
   "@browserExtension": {
@@ -295,7 +299,7 @@
   "@sync": {
     "description": "Title of the vault settings section about syncing with the relays."
   },
-  "syncAllSent": "Every change is on your relays.",
+  "syncAllSent": "Every change is saved online.",
   "@syncAllSent": {
     "description": "Under the sync status in the vault settings, once every change reached the relays."
   },
@@ -391,9 +395,17 @@
   "@done": {
     "description": "Button closing the dialog that shows a new vault key."
   },
-  "welcomeTagline": "A password manager built on Nostr.",
+  "welcomeTagline": "Your passwords, encrypted and synced. No account needed.",
   "@welcomeTagline": {
     "description": "Tagline under the Submarine wordmark on the welcome screen."
+  },
+  "builtOnNostr": "Built on Nostr",
+  "@builtOnNostr": {
+    "description": "Link at the bottom of the welcome screen, and title of the dialog it opens. Nostr is a protocol name, not translated."
+  },
+  "builtOnNostrBody": "Your vaults live on Nostr relays: open servers that anyone can run, and that only see encrypted data. A vault key is a Nostr key, so a Nostr signer can hold it.",
+  "@builtOnNostrBody": {
+    "description": "Body of the dialog opened by the Built on Nostr link of the welcome screen."
   },
   "itemCount": "{count, plural, =0{No items} =1{1 item} other{{count} items}}",
   "@itemCount": {
@@ -416,7 +428,7 @@
   "@syncNever": {
     "description": "Sync status of a vault that never reached a relay."
   },
-  "syncFailed": "Relays unreachable",
+  "syncFailed": "Sync failed",
   "@syncFailed": {
     "description": "Sync status when no relay answers."
   },
@@ -460,7 +472,7 @@
   "@noItems": {
     "description": "Shown in place of the list when a synced vault has no items."
   },
-  "lookingForItems": "Looking for items on the relays",
+  "lookingForItems": "Looking for your items",
   "@lookingForItems": {
     "description": "Shown in place of the list while a vault was never synced."
   },
@@ -1126,7 +1138,7 @@
   "@deleteItemTitle": {
     "description": "Title of the dialog confirming that an item in the trash is deleted for good."
   },
-  "deleteItemBody": "It is erased from this device and from your relays. This cannot be undone.",
+  "deleteItemBody": "It is erased from the vault, on every device. This cannot be undone.",
   "@deleteItemBody": {
     "description": "Body of that dialog."
   },
@@ -1345,7 +1357,7 @@
   "@storageReadFailed": {
     "description": "Line under the wordmark when the device's secure storage failed to open at launch."
   },
-  "storageReadFailedBody": "The secure storage of this device refused to open them. Nothing was erased: try again. Your items stay on the relays, and a vault's key opens it on any device.",
+  "storageReadFailedBody": "The secure storage of this device refused to open them. Nothing was erased: try again. Your items stay online, and a vault's key opens it on any device.",
   "@storageReadFailedBody": {
     "description": "Explanation under storageReadFailed."
   },
@@ -1604,7 +1616,7 @@
   "@forgetVaultsTitle": {
     "description": "Title of the dialog confirming that a forgotten lock password removes the vaults from the device."
   },
-  "forgetVaultsBody": "Without the lock password, they cannot be decrypted here. Your items stay on the relays: open each vault again with its key or its signer.",
+  "forgetVaultsBody": "Without the lock password, they cannot be decrypted here. Your items stay online: open each vault again with its key.",
   "@forgetVaultsBody": {
     "description": "Body of the dialog confirming that a forgotten lock password removes the vaults."
   },
@@ -1616,7 +1628,7 @@
   "@removeVault": {
     "description": "Last row of the vault settings, opening the dialog that removes the vault from this device."
   },
-  "removeVaultDescription": "The vault stays on its relays, for you to open it again.",
+  "removeVaultDescription": "The vault stays online, for you to open it again.",
   "@removeVaultDescription": {
     "description": "Under that row."
   },
@@ -1629,7 +1641,7 @@
       }
     }
   },
-  "removeVaultBody": "Your items stay on its relays: open the vault again to find them.",
+  "removeVaultBody": "Your items stay online: open the vault again to find them.",
   "@removeVaultBody": {
     "description": "Body of that dialog."
   },
@@ -1637,7 +1649,7 @@
   "@removeVaultKeyWarning": {
     "description": "In that dialog, for a vault whose key is on this device rather than in a signer."
   },
-  "removeVaultUnsent": "{count, plural, =1{1 change has reached no relay yet, and will be lost.} other{{count} changes have reached no relay yet, and will be lost.}}",
+  "removeVaultUnsent": "{count, plural, =1{1 change is not sent yet, and will be lost.} other{{count} changes are not sent yet, and will be lost.}}",
   "@removeVaultUnsent": {
     "description": "In that dialog, while changes saved on this device have reached no relay yet.",
     "placeholders": {

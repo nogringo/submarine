@@ -57,8 +57,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get vaultKey => 'Clé du coffre';
 
   @override
-  String get vaultKeyInvalid =>
-      'Ce n\'est ni une clé de coffre, ni une adresse de bunker.';
+  String get vaultKeyInvalid => 'Ce n\'est pas une clé de coffre.';
 
   @override
   String vaultAlreadyOpen(String name) {
@@ -91,7 +90,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get vaultKeyHelper =>
-      'Une nsec, une clé en hexadécimal, une ncryptsec ou une adresse bunker://.';
+      'La clé gardée à la création du coffre, ou partagée avec vous.';
 
   @override
   String get vaultKeyPassword => 'Mot de passe de la clé';
@@ -103,7 +102,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get vaultKeyDecrypting => 'Déchiffrement de la clé';
 
   @override
-  String get keepKeyOutside => 'Ou gardez la clé hors de Submarine';
+  String get otherWaysToOpen => 'Autres façons de l\'ouvrir';
+
+  @override
+  String get signersDescription =>
+      'Avec un signeur qui garde la clé hors de Submarine. Une adresse bunker:// se colle aussi dans le champ de la clé.';
 
   @override
   String get browserExtension => 'Extension de navigateur';
@@ -266,7 +269,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get sync => 'Synchronisation';
 
   @override
-  String get syncAllSent => 'Toutes vos modifications sont sur vos relais.';
+  String get syncAllSent =>
+      'Toutes vos modifications sont enregistrées en ligne.';
 
   @override
   String get relays => 'Relais';
@@ -342,7 +346,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get welcomeTagline =>
-      'Un gestionnaire de mots de passe bâti sur Nostr.';
+      'Vos mots de passe, chiffrés et synchronisés. Sans compte.';
+
+  @override
+  String get builtOnNostr => 'Basé sur Nostr';
+
+  @override
+  String get builtOnNostrBody =>
+      'Vos coffres sont stockés sur des relais Nostr : des serveurs ouverts, que tout le monde peut faire tourner, et qui ne voient que des données chiffrées. La clé d\'un coffre est une clé Nostr : un signeur Nostr peut donc la garder.';
 
   @override
   String itemCount(int count) {
@@ -366,7 +377,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get syncNever => 'Jamais synchronisé';
 
   @override
-  String get syncFailed => 'Relais injoignables';
+  String get syncFailed => 'Synchronisation impossible';
 
   @override
   String get signerDidNotOpen => 'Le signeur n\'a pas ouvert le coffre';
@@ -396,7 +407,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get noItems => 'Aucun élément dans ce coffre pour l\'instant.';
 
   @override
-  String get lookingForItems => 'Recherche des éléments sur les relais';
+  String get lookingForItems => 'Recherche de vos éléments';
 
   @override
   String get signerDidNotOpenVault =>
@@ -906,7 +917,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get deleteItemBody =>
-      'Il sera effacé de cet appareil et de vos relais. Vous ne pourrez pas revenir en arrière.';
+      'Il sera effacé du coffre, sur tous les appareils. Vous ne pourrez pas revenir en arrière.';
 
   @override
   String get delete => 'Supprimer';
@@ -1087,7 +1098,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get storageReadFailedBody =>
-      'Le stockage sécurisé de cet appareil a refusé de les ouvrir. Rien n\'a été effacé : réessayez. Vos éléments restent sur les relais, et la clé d\'un coffre l\'ouvre sur n\'importe quel appareil.';
+      'Le stockage sécurisé de cet appareil a refusé de les ouvrir. Rien n\'a été effacé : réessayez. Vos éléments restent en ligne, et la clé d\'un coffre l\'ouvre sur n\'importe quel appareil.';
 
   @override
   String get tryAgain => 'Réessayer';
@@ -1292,7 +1303,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get forgetVaultsBody =>
-      'Sans le mot de passe de verrouillage, ils ne peuvent pas être déchiffrés ici. Vos éléments restent sur les relais : rouvrez chaque coffre avec sa clé ou son signeur.';
+      'Sans le mot de passe de verrouillage, ils ne peuvent pas être déchiffrés ici. Vos éléments restent en ligne : rouvrez chaque coffre avec sa clé.';
 
   @override
   String get forgetVaults => 'Retirer les coffres';
@@ -1302,7 +1313,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get removeVaultDescription =>
-      'Le coffre reste sur ses relais, pour que vous puissiez le rouvrir.';
+      'Le coffre reste en ligne, pour que vous puissiez le rouvrir.';
 
   @override
   String removeVaultTitle(String name) {
@@ -1311,7 +1322,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get removeVaultBody =>
-      'Vos éléments restent sur ses relais : rouvrez le coffre pour les retrouver.';
+      'Vos éléments restent en ligne : rouvrez le coffre pour les retrouver.';
 
   @override
   String get removeVaultKeyWarning =>
@@ -1323,8 +1334,8 @@ class AppLocalizationsFr extends AppLocalizations {
       count,
       locale: localeName,
       other:
-          '$count modifications n\'ont encore atteint aucun relais et seront perdues.',
-      one: '1 modification n\'a encore atteint aucun relais et sera perdue.',
+          '$count modifications ne sont pas encore envoyées et seront perdues.',
+      one: '1 modification n\'est pas encore envoyée et sera perdue.',
     );
     return '$_temp0';
   }

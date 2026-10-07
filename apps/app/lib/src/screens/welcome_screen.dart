@@ -54,6 +54,16 @@ class WelcomeScreen extends StatelessWidget {
                     icon: const Icon(Icons.key_rounded),
                     label: Text(l10n.openVault),
                   ),
+                  const SizedBox(height: 24),
+                  Center(
+                    child: TextButton(
+                      onPressed: () => _showNostr(context),
+                      style: TextButton.styleFrom(
+                        foregroundColor: palette.muted,
+                      ),
+                      child: Text(l10n.builtOnNostr),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -62,4 +72,21 @@ class WelcomeScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+Future<void> _showNostr(BuildContext context) {
+  final l10n = context.l10n;
+  return showDialog<void>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(l10n.builtOnNostr),
+      content: Text(l10n.builtOnNostrBody),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(l10n.close),
+        ),
+      ],
+    ),
+  );
 }

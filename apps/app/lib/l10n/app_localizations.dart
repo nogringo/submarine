@@ -185,7 +185,7 @@ abstract class AppLocalizations {
   /// Error when the entered text is not a vault key.
   ///
   /// In en, this message translates to:
-  /// **'This is neither a vault key nor a bunker address.'**
+  /// **'This is not a vault key.'**
   String get vaultKeyInvalid;
 
   /// Error when the entered key belongs to a vault already on this device, named name.
@@ -239,7 +239,7 @@ abstract class AppLocalizations {
   /// Under the vault key field: what it accepts.
   ///
   /// In en, this message translates to:
-  /// **'An nsec, a key in hex, an ncryptsec or a bunker:// address.'**
+  /// **'The key saved when the vault was created, or shared with you.'**
   String get vaultKeyHelper;
 
   /// Label of the field shown for a vault key encrypted with a password (an ncryptsec, NIP-49).
@@ -260,11 +260,17 @@ abstract class AppLocalizations {
   /// **'Decrypting the key'**
   String get vaultKeyDecrypting;
 
-  /// Above the buttons opening a vault through a signer that holds its key.
+  /// In the open vault dialog, row unfolding the buttons that open a vault through a signer holding its key.
   ///
   /// In en, this message translates to:
-  /// **'Or keep the key outside Submarine'**
-  String get keepKeyOutside;
+  /// **'Other ways to open it'**
+  String get otherWaysToOpen;
+
+  /// Above the signer buttons, once the other ways to open a vault are unfolded.
+  ///
+  /// In en, this message translates to:
+  /// **'With a signer that keeps the key outside Submarine. A bunker:// address also goes in the key field.'**
+  String get signersDescription;
 
   /// A Nostr browser extension holding the vault key (NIP-07): button of the open vault dialog, and name of the signer in the vault settings.
   ///
@@ -479,7 +485,7 @@ abstract class AppLocalizations {
   /// Under the sync status in the vault settings, once every change reached the relays.
   ///
   /// In en, this message translates to:
-  /// **'Every change is on your relays.'**
+  /// **'Every change is saved online.'**
   String get syncAllSent;
 
   /// Title of the vault settings section listing the relays the vault lives on.
@@ -623,8 +629,20 @@ abstract class AppLocalizations {
   /// Tagline under the Submarine wordmark on the welcome screen.
   ///
   /// In en, this message translates to:
-  /// **'A password manager built on Nostr.'**
+  /// **'Your passwords, encrypted and synced. No account needed.'**
   String get welcomeTagline;
+
+  /// Link at the bottom of the welcome screen, and title of the dialog it opens. Nostr is a protocol name, not translated.
+  ///
+  /// In en, this message translates to:
+  /// **'Built on Nostr'**
+  String get builtOnNostr;
+
+  /// Body of the dialog opened by the Built on Nostr link of the welcome screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Your vaults live on Nostr relays: open servers that anyone can run, and that only see encrypted data. A vault key is a Nostr key, so a Nostr signer can hold it.'**
+  String get builtOnNostrBody;
 
   /// Number of items in a vault, under its name in the drawer.
   ///
@@ -653,7 +671,7 @@ abstract class AppLocalizations {
   /// Sync status when no relay answers.
   ///
   /// In en, this message translates to:
-  /// **'Relays unreachable'**
+  /// **'Sync failed'**
   String get syncFailed;
 
   /// Sync status when the signer did not open a vault that asks it at each launch.
@@ -695,7 +713,7 @@ abstract class AppLocalizations {
   /// Shown in place of the list while a vault was never synced.
   ///
   /// In en, this message translates to:
-  /// **'Looking for items on the relays'**
+  /// **'Looking for your items'**
   String get lookingForItems;
 
   /// Shown in place of the list when the signer did not open a vault that asks it at each launch.
@@ -1625,7 +1643,7 @@ abstract class AppLocalizations {
   /// Body of that dialog.
   ///
   /// In en, this message translates to:
-  /// **'It is erased from this device and from your relays. This cannot be undone.'**
+  /// **'It is erased from the vault, on every device. This cannot be undone.'**
   String get deleteItemBody;
 
   /// Button of that dialog that deletes the item for good.
@@ -1931,7 +1949,7 @@ abstract class AppLocalizations {
   /// Explanation under storageReadFailed.
   ///
   /// In en, this message translates to:
-  /// **'The secure storage of this device refused to open them. Nothing was erased: try again. Your items stay on the relays, and a vault\'s key opens it on any device.'**
+  /// **'The secure storage of this device refused to open them. Nothing was erased: try again. Your items stay online, and a vault\'s key opens it on any device.'**
   String get storageReadFailedBody;
 
   /// Button reading the device's secure storage again after it failed.
@@ -2249,7 +2267,7 @@ abstract class AppLocalizations {
   /// Body of the dialog confirming that a forgotten lock password removes the vaults.
   ///
   /// In en, this message translates to:
-  /// **'Without the lock password, they cannot be decrypted here. Your items stay on the relays: open each vault again with its key or its signer.'**
+  /// **'Without the lock password, they cannot be decrypted here. Your items stay online: open each vault again with its key.'**
   String get forgetVaultsBody;
 
   /// Button confirming that the vaults leave the device, for a forgotten lock password.
@@ -2267,7 +2285,7 @@ abstract class AppLocalizations {
   /// Under that row.
   ///
   /// In en, this message translates to:
-  /// **'The vault stays on its relays, for you to open it again.'**
+  /// **'The vault stays online, for you to open it again.'**
   String get removeVaultDescription;
 
   /// Title of the dialog confirming that a vault leaves this device.
@@ -2279,7 +2297,7 @@ abstract class AppLocalizations {
   /// Body of that dialog.
   ///
   /// In en, this message translates to:
-  /// **'Your items stay on its relays: open the vault again to find them.'**
+  /// **'Your items stay online: open the vault again to find them.'**
   String get removeVaultBody;
 
   /// In that dialog, for a vault whose key is on this device rather than in a signer.
@@ -2291,7 +2309,7 @@ abstract class AppLocalizations {
   /// In that dialog, while changes saved on this device have reached no relay yet.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 change has reached no relay yet, and will be lost.} other{{count} changes have reached no relay yet, and will be lost.}}'**
+  /// **'{count, plural, =1{1 change is not sent yet, and will be lost.} other{{count} changes are not sent yet, and will be lost.}}'**
   String removeVaultUnsent(int count);
 
   /// Button of that dialog that removes the vault from this device.

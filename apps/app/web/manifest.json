@@ -5,7 +5,7 @@
     "display": "standalone",
     "background_color": "#0B1E2D",
     "theme_color": "#0B1E2D",
-    "description": "Submarine, a password manager built on Nostr.",
+    "description": "Submarine, a password manager. Your passwords, encrypted and synced. No account needed.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

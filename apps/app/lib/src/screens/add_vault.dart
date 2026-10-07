@@ -161,6 +161,7 @@ class _VaultFormDialogState extends State<_VaultFormDialog> {
   Color? _color;
   var _keyHidden = true;
   var _passwordHidden = true;
+  var _signersShown = false;
   var _busy = false;
 
   /// What the dialog waits for while [_busy].
@@ -424,6 +425,7 @@ class _VaultFormDialogState extends State<_VaultFormDialog> {
 
   List<Widget> _keyFields() {
     final l10n = context.l10n;
+    final palette = context.palette;
     return [
       TextField(
         controller: _key,
@@ -477,44 +479,72 @@ class _VaultFormDialogState extends State<_VaultFormDialog> {
           ),
         ),
       ],
-      const SizedBox(height: 16),
-      Text(
-        l10n.keepKeyOutside,
-        style: TextStyle(fontSize: 13, color: context.palette.muted),
-      ),
       const SizedBox(height: 8),
-      Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: [
-          // TODO: when no extension or signer app is found, hide its button or
-          // link to a neutral list of them, not to one we would vouch for.
-          if (canUseExtension)
-            OutlinedButton.icon(
-              onPressed: _busy
-                  ? null
-                  : () => _connectSigner(
-                      loginWithExtension,
-                      l10n.noBrowserExtension,
-                    ),
-              icon: const Icon(Icons.extension_outlined, size: 18),
-              label: Text(l10n.browserExtension),
-            ),
-          if (canUseSignerApp)
-            OutlinedButton.icon(
-              onPressed: _busy
-                  ? null
-                  : () => _connectSigner(loginWithSignerApp, l10n.noSignerApp),
-              icon: const Icon(Icons.phone_android_rounded, size: 18),
-              label: Text(l10n.signerApp),
-            ),
-          OutlinedButton.icon(
-            onPressed: _busy ? null : _nostrConnect,
-            icon: const Icon(Icons.qr_code_2_rounded, size: 18),
-            label: Text(l10n.nostrConnect),
+      InkWell(
+        onTap: () => setState(() => _signersShown = !_signersShown),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.otherWaysToOpen,
+                  style: TextStyle(fontSize: 13, color: palette.muted),
+                ),
+              ),
+              AnimatedRotation(
+                turns: _signersShown ? 0.5 : 0,
+                duration: const Duration(milliseconds: 180),
+                child: Icon(Icons.expand_more_rounded, color: palette.muted),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
+      if (_signersShown) ...[
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            l10n.signersDescription,
+            style: TextStyle(fontSize: 13, color: palette.muted),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            // TODO: when no extension or signer app is found, hide its button or
+            // link to a neutral list of them, not to one we would vouch for.
+            if (canUseExtension)
+              OutlinedButton.icon(
+                onPressed: _busy
+                    ? null
+                    : () => _connectSigner(
+                        loginWithExtension,
+                        l10n.noBrowserExtension,
+                      ),
+                icon: const Icon(Icons.extension_outlined, size: 18),
+                label: Text(l10n.browserExtension),
+              ),
+            if (canUseSignerApp)
+              OutlinedButton.icon(
+                onPressed: _busy
+                    ? null
+                    : () =>
+                          _connectSigner(loginWithSignerApp, l10n.noSignerApp),
+                icon: const Icon(Icons.phone_android_rounded, size: 18),
+                label: Text(l10n.signerApp),
+              ),
+            OutlinedButton.icon(
+              onPressed: _busy ? null : _nostrConnect,
+              icon: const Icon(Icons.qr_code_2_rounded, size: 18),
+              label: Text(l10n.nostrConnect),
+            ),
+          ],
+        ),
+      ],
     ];
   }
 }

@@ -380,6 +380,13 @@ void main() {
     await settle(tester);
 
     expect(find.text('SUBMARINE'), findsOneWidget);
+    expect(find.textContaining('Nostr'), findsOneWidget);
+    await tester.tap(find.text('Built on Nostr'));
+    await settle(tester);
+    expect(find.textContaining('Nostr relays'), findsOneWidget);
+    await tester.tap(find.text('Close'));
+    await settle(tester);
+
     await tester.tap(find.text('Create a vault'));
     await settle(tester);
     await tester.enterText(find.byType(TextField), 'Family');
@@ -2210,13 +2217,20 @@ void main() {
     final keyField = find.widgetWithText(TextField, 'Vault key');
     final passwordField = find.widgetWithText(TextField, 'Key password');
     final openButton = find.widgetWithText(FilledButton, 'Open');
-    const notAKey = 'This is neither a vault key nor a bunker address.';
+    const notAKey = 'This is not a vault key.';
     const badBunker = 'This bunker address lacks a relay or a secret.';
     const wrongPassword = 'This password does not open the key.';
 
     await tester.tap(find.text('Open a vault'));
     await settle(tester);
     expect(passwordField, findsNothing);
+    expect(find.text('Nostr Connect'), findsNothing);
+    await tester.tap(find.text('Other ways to open it'));
+    await settle(tester);
+    expect(find.text('Nostr Connect'), findsOneWidget);
+    await tester.tap(find.text('Other ways to open it'));
+    await settle(tester);
+    expect(find.text('Nostr Connect'), findsNothing);
     await tester.enterText(find.widgetWithText(TextField, 'Name'), 'Work');
     await tester.enterText(keyField, Nip19.encodePubKey('ab' * 32));
     await tester.tap(openButton);

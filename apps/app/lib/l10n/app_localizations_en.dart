@@ -55,8 +55,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vaultKey => 'Vault key';
 
   @override
-  String get vaultKeyInvalid =>
-      'This is neither a vault key nor a bunker address.';
+  String get vaultKeyInvalid => 'This is not a vault key.';
 
   @override
   String vaultAlreadyOpen(String name) {
@@ -88,7 +87,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vaultKeyHelper =>
-      'An nsec, a key in hex, an ncryptsec or a bunker:// address.';
+      'The key saved when the vault was created, or shared with you.';
 
   @override
   String get vaultKeyPassword => 'Key password';
@@ -100,7 +99,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vaultKeyDecrypting => 'Decrypting the key';
 
   @override
-  String get keepKeyOutside => 'Or keep the key outside Submarine';
+  String get otherWaysToOpen => 'Other ways to open it';
+
+  @override
+  String get signersDescription =>
+      'With a signer that keeps the key outside Submarine. A bunker:// address also goes in the key field.';
 
   @override
   String get browserExtension => 'Browser extension';
@@ -262,7 +265,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sync => 'Sync';
 
   @override
-  String get syncAllSent => 'Every change is on your relays.';
+  String get syncAllSent => 'Every change is saved online.';
 
   @override
   String get relays => 'Relays';
@@ -337,7 +340,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get done => 'Done';
 
   @override
-  String get welcomeTagline => 'A password manager built on Nostr.';
+  String get welcomeTagline =>
+      'Your passwords, encrypted and synced. No account needed.';
+
+  @override
+  String get builtOnNostr => 'Built on Nostr';
+
+  @override
+  String get builtOnNostrBody =>
+      'Your vaults live on Nostr relays: open servers that anyone can run, and that only see encrypted data. A vault key is a Nostr key, so a Nostr signer can hold it.';
 
   @override
   String itemCount(int count) {
@@ -361,7 +372,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get syncNever => 'Never synced';
 
   @override
-  String get syncFailed => 'Relays unreachable';
+  String get syncFailed => 'Sync failed';
 
   @override
   String get signerDidNotOpen => 'Signer did not open the vault';
@@ -391,7 +402,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noItems => 'No items in this vault yet.';
 
   @override
-  String get lookingForItems => 'Looking for items on the relays';
+  String get lookingForItems => 'Looking for your items';
 
   @override
   String get signerDidNotOpenVault =>
@@ -900,7 +911,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteItemBody =>
-      'It is erased from this device and from your relays. This cannot be undone.';
+      'It is erased from the vault, on every device. This cannot be undone.';
 
   @override
   String get delete => 'Delete';
@@ -1081,7 +1092,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get storageReadFailedBody =>
-      'The secure storage of this device refused to open them. Nothing was erased: try again. Your items stay on the relays, and a vault\'s key opens it on any device.';
+      'The secure storage of this device refused to open them. Nothing was erased: try again. Your items stay online, and a vault\'s key opens it on any device.';
 
   @override
   String get tryAgain => 'Try again';
@@ -1283,7 +1294,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get forgetVaultsBody =>
-      'Without the lock password, they cannot be decrypted here. Your items stay on the relays: open each vault again with its key or its signer.';
+      'Without the lock password, they cannot be decrypted here. Your items stay online: open each vault again with its key.';
 
   @override
   String get forgetVaults => 'Remove the vaults';
@@ -1293,7 +1304,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get removeVaultDescription =>
-      'The vault stays on its relays, for you to open it again.';
+      'The vault stays online, for you to open it again.';
 
   @override
   String removeVaultTitle(String name) {
@@ -1302,7 +1313,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get removeVaultBody =>
-      'Your items stay on its relays: open the vault again to find them.';
+      'Your items stay online: open the vault again to find them.';
 
   @override
   String get removeVaultKeyWarning =>
@@ -1313,8 +1324,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count changes have reached no relay yet, and will be lost.',
-      one: '1 change has reached no relay yet, and will be lost.',
+      other: '$count changes are not sent yet, and will be lost.',
+      one: '1 change is not sent yet, and will be lost.',
     );
     return '$_temp0';
   }

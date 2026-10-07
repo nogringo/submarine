@@ -107,7 +107,9 @@ class _Settings extends StatelessWidget {
               ),
               SettingsSection(
                 title: l10n.appearance,
-                child: const FieldCard(children: [_ThemeTile()]),
+                child: const FieldCard(
+                  children: [_LanguageTile(), _ThemeTile()],
+                ),
               ),
               const ImportExportSection(),
             ],
@@ -277,6 +279,34 @@ class _MenuTile<T> extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _LanguageTile extends StatelessWidget {
+  const _LanguageTile();
+
+  /// Stands for the system's language, as a menu item's value cannot be null.
+  static const _system = Locale('und');
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final appearance = Appearance.of(context);
+    String name(Locale locale) => locale == _system
+        ? l10n.languageSystem
+        : lookupAppLocalizations(locale).languageName;
+    return _MenuTile(
+      title: l10n.language,
+      value: appearance.locale ?? _system,
+      values: [
+        _system,
+        ...[...AppLocalizations.supportedLocales]
+          ..sort((a, b) => name(a).compareTo(name(b))),
+      ],
+      label: name,
+      onSelected: (locale) =>
+          appearance.setLocale(locale == _system ? null : locale),
     );
   }
 }

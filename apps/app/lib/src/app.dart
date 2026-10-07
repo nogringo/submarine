@@ -84,6 +84,7 @@ class _SubmarineAppState extends State<SubmarineApp> {
                 theme: buildTheme(Palette.light, Brightness.light),
                 darkTheme: buildTheme(Palette.dark, Brightness.dark),
                 themeMode: widget.appearance.themeMode,
+                locale: widget.appearance.locale,
                 localizationsDelegates: AppLocalizations.localizationsDelegates,
                 supportedLocales: AppLocalizations.supportedLocales,
                 routerConfig: _router,

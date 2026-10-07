@@ -15,7 +15,7 @@ Flutter app for Submarine, a password manager built on [Nostr](https://nostr.how
 - **Import and export.** Imports a JSON export from Bitwarden into the vault of your choice, and exports a vault in that format, which Bitwarden imports. Both ways, the file can be protected by a password as Bitwarden does it, and is by default. As in Bitwarden, the export leaves the trash out. Bitwarden exports restricted to their account cannot be imported, and folders are dropped.
 - **Sync.** A change is saved on the device first, then sent to the relays. What other devices publish shows up the moment they publish it, and the vault settings show what was not sent yet.
 - **Lock.** Optional: the device's biometrics or screen lock, after a delay you choose.
-- **Languages.** English and French.
+- **Languages.** English, French, German, Spanish, Italian, Portuguese (Portugal and Brazil), Finnish, Russian, Japanese and Chinese. The app follows the device's language, or the one picked in the settings.
 
 ## Platforms
 
@@ -51,7 +51,7 @@ Building on Linux needs the libsecret headers: `libsecret-1-dev` on Debian and U
 
 ### Translations
 
-The strings live in [`lib/l10n`](lib/l10n): `app_en.arb` is the template, with a description of each string, and `app_fr.arb` the French translation. To add a language, add an `app_<code>.arb` file next to them. After any change, regenerate the Dart files, which are committed:
+The strings live in [`lib/l10n`](lib/l10n): `app_en.arb` is the template, with a description of each string, and the other `app_<code>.arb` files its translations. To add a language, add an `app_<code>.arb` file next to them. After any change, regenerate the Dart files, which are committed:
 
 ```sh
 flutter gen-l10n

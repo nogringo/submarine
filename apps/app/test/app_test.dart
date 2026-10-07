@@ -3482,6 +3482,8 @@ void main() {
 
     await tester.tap(find.byTooltip('Settings'));
     await settle(tester);
+    await tester.ensureVisible(find.text('Theme'));
+    await settle(tester);
     expect(brightness(), Brightness.light);
 
     await tester.tap(find.text('Dark'));
@@ -3491,9 +3493,57 @@ void main() {
       expect((await Appearance.load()).themeMode, ThemeMode.dark);
     });
 
-    await tester.tap(find.text('System'));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(SegmentedButton<ThemeMode>),
+        matching: find.text('System'),
+      ),
+    );
     await settle(tester);
     expect(brightness(), Brightness.light);
+    await close(tester);
+  });
+
+  testWidgets('switches to French in the settings, and keeps it', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(tester, items: [github]);
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+      ),
+    );
+    await settle(tester);
+
+    await tester.tap(find.byTooltip('Settings'));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Language'));
+    await settle(tester);
+    await tester.tap(find.text('Français'));
+    await settle(tester);
+    expect(find.text('Réglages'), findsWidgets);
+    await tester.runAsync(() async {
+      expect((await Appearance.load()).locale, const Locale('fr'));
+    });
+
+    await tester.tap(find.byTooltip('Langue'));
+    await settle(tester);
+    await tester.tap(
+      find.descendant(
+        of: find.byType(PopupMenuItem<Locale>),
+        matching: find.text('Système'),
+      ),
+    );
+    await settle(tester);
+    expect(find.text('Settings'), findsWidgets);
+    await tester.runAsync(() async {
+      expect((await Appearance.load()).locale, isNull);
+    });
     await close(tester);
   });
 

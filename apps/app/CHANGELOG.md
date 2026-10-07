@@ -17,4 +17,4 @@
 - Copied passwords cleared from the clipboard after a delay. The app hidden from the app switcher, and screen capture blocked on Android.
 - A light, dark or system theme.
 - A welcome screen about the user's passwords, and a Built on Nostr link that explains the relays and the keys.
-- English and French.
+- English, French, German, Spanish, Italian, Portuguese (Portugal and Brazil), Finnish, Russian, Japanese and Chinese, as the device's language or picked in the settings.

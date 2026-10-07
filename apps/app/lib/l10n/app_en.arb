@@ -1369,6 +1369,18 @@
   "@appearance": {
     "description": "Section of the settings about the look of the app."
   },
+  "language": "Language",
+  "@language": {
+    "description": "Setting choosing the language of the app."
+  },
+  "languageSystem": "System",
+  "@languageSystem": {
+    "description": "Language option: the language of the device, or English when the app does not have it."
+  },
+  "languageName": "English",
+  "@languageName": {
+    "description": "Name of this language, written in it, in the language menu of the settings. Not a translation of the word English."
+  },
   "theme": "Theme",
   "@theme": {
     "description": "Setting choosing between the light and the dark theme."

@@ -8,3 +8,11 @@ setup_icon_file: windows\runner\resources\app_icon.ico
 locales:
   - en
   - fr
+  - de
+  - es
+  - fi
+  - it
+  - ja
+  - pt
+  - ru
+  - zh

@@ -2,7 +2,7 @@
 
 Flutter app for Submarine, a password manager built on [Nostr](https://nostr.how/). It runs on Android, iOS, macOS, Windows, Linux and the web.
 
-> **Status:** early development. Do not trust it with real passwords yet.
+> **Status:** young but ready to use. For your most important passwords, we still recommend a proven password manager such as [KeePassXC](https://keepassxc.org/).
 
 ## Features
 

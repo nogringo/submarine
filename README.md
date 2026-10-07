@@ -2,7 +2,7 @@
 
 Submarine is a password manager built on [Nostr](https://nostr.how/).
 
-> **Status:** early development. Do not trust it with real passwords yet.
+> **Status:** young but ready to use. For your most important passwords, we still recommend a proven password manager such as [KeePassXC](https://keepassxc.org/).
 
 ## Repository layout
 

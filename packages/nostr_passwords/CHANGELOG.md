@@ -4,10 +4,13 @@
 - Vault items are NIP-59 gift wraps carrying Bitwarden's cipher JSON. Each version names the versions it replaces, and concurrent edits are kept as heads.
 - Writes are done once saved in the ndk cache, and sent to the relays afterwards.
 - Sync with NIP-42 authentication, and a live subscription to what other devices publish.
+- `Vault.reconcile()` reads the whole vault from each relay, then sends each relay what it lacks, once every relay answered.
+- `Vault.forget()` removes a vault from the device, and its relays keep it.
 - Trash, restore and permanent deletion (NIP-09).
 - The vault's relay list (NIP-65), its private relays encrypted to the vault. The vault lives on the relays it names.
 - `Vault.currentRelayList()` gives the list to change, and `RelayList.withRelay()` and `without()` change it. `parseRelayUrl()` reads a relay address as a user types it.
-- Bitwarden's search, password history, TOTP codes and generator.
+- Bitwarden's search, password history, TOTP codes and generator, usernames included. Made-up first names, last names and birth dates for the sites that ask for them.
+- Bitwarden JSON exports, password protected or not, read by `parseBitwardenExport()` and `decryptBitwardenExport()`, and written by `writeBitwardenExport()` and `encryptBitwardenExport()`.
 - Vault keys as an nsec, in hex, or encrypted with a password (NIP-49). A vault takes any `EventSigner`, so a NIP-46 bunker or a NIP-07 extension can hold its key. `vaultSignerPermissions` lists what to ask a bunker for.
 - `VersionCache` keeps the versions a vault opened, encrypted, so that its signer opens each gift wrap once per device. Its key stays on the device, or is sealed for the signer with `sealCacheKey()`. `Vault.openedItems()` and `Vault.open()` show the items without waiting for the signer.
 - `PasswordProtectedKey` protects a `SymmetricCryptoKey` with a password, as Bitwarden protects the user key of an account, for a client to lock what it keeps on the device. `KdfConfig` derives keys with Argon2id, as native code or WebAssembly (`serverpod_argon2`), or with PBKDF2-SHA256.

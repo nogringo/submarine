@@ -71,10 +71,13 @@ CipherType? _typeOf(GoRouterState state) => formTypes.entries
     ?.key;
 
 /// Every page is built explicitly: go_router 18 recognizes the MaterialApp of
-/// material_ui only, and would fall back to pages without transitions.
+/// material_ui only, and would fall back to pages without transitions. Nothing
+/// redirects while the lock keeps the vaults closed, for the app to show the
+/// same place once unlocked.
 GoRouter buildRouter(Vaults vaults) => GoRouter(
   initialLocation: vaultPath(allVaultsId),
   redirect: (context, state) {
+    if (vaults.closed) return null;
     final welcome = state.matchedLocation == '/welcome';
     if (vaults.isEmpty) return welcome ? null : '/welcome';
     return welcome ? vaultPath(allVaultsId) : null;
@@ -94,7 +97,8 @@ GoRouter buildRouter(Vaults vaults) => GoRouter(
     GoRoute(
       path: '/vaults/:vaultId/settings',
       redirect: (context, state) =>
-          vaults.byPubkey(state.pathParameters['vaultId']!) == null
+          !vaults.closed &&
+              vaults.byPubkey(state.pathParameters['vaultId']!) == null
           ? vaultPath(allVaultsId)
           : null,
       pageBuilder: (context, state) => _AdaptivePage(
@@ -127,6 +131,7 @@ GoRouter buildRouter(Vaults vaults) => GoRouter(
                   redirect: (context, state) {
                     final vaultId = state.pathParameters['vaultId']!;
                     if (vaultId != allVaultsId &&
+                        !vaults.closed &&
                         vaults.byPubkey(vaultId) == null) {
                       return vaultPath(allVaultsId);
                     }

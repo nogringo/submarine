@@ -133,16 +133,18 @@ void main() {
       ndk: ndk,
       engine: engine,
       storage: VaultStorage(),
-      key: deviceKey,
       database: database,
       relays: relays,
       indexers: const [],
       signerPatience: Duration.zero,
     );
+    lock = await AppLock.load(
+      vaults: vaults,
+      auth: deviceAuth = FakeDeviceAuth(),
+    );
     while (vaults.all.any((vault) => !vault.loaded)) {
       await Future<void>.delayed(const Duration(milliseconds: 10));
     }
-    lock = await AppLock.load(auth: deviceAuth = FakeDeviceAuth());
     appearance = await Appearance.load();
     clipboard = await AppClipboard.load();
     screenCapture = await ScreenCapture.load();
@@ -155,16 +157,17 @@ void main() {
     await tester.runAsync(() async {
       await vaults.pauseSync();
       vaults.dispose();
+      lock.dispose();
       vaults = await Vaults.load(
         ndk: ndk,
         engine: engine,
         storage: VaultStorage(),
-        key: await DeviceKeyStorage().read(),
         database: database,
         relays: vaultRelays,
         indexers: const [],
         signerPatience: Duration.zero,
       );
+      lock = await AppLock.load(vaults: vaults, auth: deviceAuth);
       while (vaults.all.any(
         (vault) =>
             !vault.loaded &&
@@ -246,6 +249,29 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 200));
     });
     await settle(tester);
+  }
+
+  /// Lets work started on the clock of the test run in real time, frames in
+  /// between, until [done], for 2 seconds at most. Nothing created on that
+  /// clock may be awaited in [WidgetTester.runAsync]: it would wait forever.
+  Future<void> pumpUntil(WidgetTester tester, bool Function() done) async {
+    for (var i = 0; i < 100 && !done(); i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 10)),
+      );
+      await tester.pump(const Duration(milliseconds: 10));
+    }
+    await settle(tester);
+  }
+
+  /// Taps [button] on the clock of the test, which the lock counts idle time
+  /// with, until the vaults open and read their items again.
+  Future<void> unlockWith(WidgetTester tester, Finder button) async {
+    await tester.tap(button);
+    await pumpUntil(
+      tester,
+      () => !vaults.closed && vaults.all.every((vault) => vault.loaded),
+    );
   }
 
   /// Taps [button], then lets its work run in real time, frames in between,
@@ -2822,8 +2848,7 @@ void main() {
     expect(find.text('Your vaults are locked.'), findsOneWidget);
     expect(find.text('Security'), findsNothing);
 
-    await tester.tap(find.text('Unlock'));
-    await settle(tester);
+    await unlockWith(tester, find.text('Unlock'));
     expect(find.text('Your vaults are locked.'), findsNothing);
     expect(find.text('Security'), findsOneWidget);
 
@@ -2887,8 +2912,7 @@ void main() {
     expect(find.text('GitHub'), findsNothing);
     expect(deviceAuth.asked, 0);
 
-    await tester.tap(find.text('Unlock'));
-    await settle(tester);
+    await unlockWith(tester, find.text('Unlock'));
     expect(find.text('GitHub'), findsOneWidget);
 
     await tester.pump(const Duration(minutes: 4));
@@ -2928,16 +2952,14 @@ void main() {
       ),
     );
     await settle(tester);
-    await tester.tap(find.text('Déverrouiller'));
-    await settle(tester);
+    await unlockWith(tester, find.text('Déverrouiller'));
     expect(find.text('GitHub'), findsOneWidget);
 
     await tester.tap(find.byTooltip('Verrouiller'));
     await settle(tester);
     expect(find.text('Vos coffres sont verrouillés.'), findsOneWidget);
 
-    await tester.tap(find.text('Déverrouiller'));
-    await settle(tester);
+    await unlockWith(tester, find.text('Déverrouiller'));
     expect(find.text('GitHub'), findsOneWidget);
 
     void moveTo(List<AppLifecycleState> states) {
@@ -2954,6 +2976,125 @@ void main() {
     await settle(tester);
     expect(find.text('Vos coffres sont verrouillés.'), findsOneWidget);
     expect(deviceAuth.asked, asked);
+    await close(tester);
+  });
+
+  testWidgets('closes the vaults while locked, and opens them again', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(
+      tester,
+      items: [github],
+      lockSettings: const LockSettings(enabled: true),
+    );
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+      ),
+    );
+    await settle(tester);
+    expect(vaults.closed, isTrue);
+
+    await unlockWith(tester, find.text('Unlock'));
+    final pubkey = vaults.all.single.pubkey;
+    expect(ndk.accounts.accounts, contains(pubkey));
+    expect(find.text('GitHub'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Lock'));
+    await settle(tester);
+    expect(vaults.closed, isTrue);
+    expect(vaults.all, isEmpty);
+    expect(ndk.accounts.accounts, isNot(contains(pubkey)));
+
+    await unlockWith(tester, find.text('Unlock'));
+    expect(vaults.all.single.pubkey, pubkey);
+    expect(find.text('GitHub'), findsOneWidget);
+    await close(tester);
+  });
+
+  testWidgets('keeps an item edit through the lock on a desktop', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(
+      tester,
+      items: [github],
+      lockSettings: const LockSettings(enabled: true),
+    );
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+      ),
+    );
+    await settle(tester);
+    await unlockWith(tester, find.text('Unlock'));
+    await tester.tap(find.text('GitHub'));
+    await settle(tester);
+    await tester.tap(find.text('Edit'));
+    await settle(tester);
+    final passwordField = find.widgetWithText(TextField, 'Password');
+    await tester.enterText(passwordField, 'correct horse');
+    await tester.pump();
+
+    await tester.tap(find.byTooltip('Lock'));
+    await settle(tester);
+    expect(find.text('Your vaults are locked.'), findsOneWidget);
+    await unlockWith(tester, find.text('Unlock'));
+
+    expect(find.text('Edit item'), findsOneWidget);
+    expect(
+      tester.widget<TextField>(passwordField).controller!.text,
+      'correct horse',
+    );
+    await tester.tap(find.text('Save'));
+    String? saved() => vaults.all.single.items.single.cipher.login!.password;
+    await pumpUntil(tester, () => saved() == 'correct horse');
+    expect(saved(), 'correct horse');
+    expect(vaults.all.single.items.single.hasConflict, isFalse);
+    await close(tester);
+  });
+
+  testWidgets('stays locked when the key of the device does not open them', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(
+      tester,
+      items: [github],
+      lockSettings: const LockSettings(enabled: true),
+    );
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+      ),
+    );
+    await settle(tester);
+    const storage = FlutterSecureStorage();
+    final saved = await storage.read(key: 'vaults');
+    await storage.write(
+      key: 'vaultsKey',
+      value: base64.encode(SymmetricCryptoKey.generate().bytes),
+    );
+
+    await write(tester, find.text('Unlock'));
+
+    expect(find.text('Your vaults could not be read.'), findsOneWidget);
+    expect(lock.locked, isTrue);
+    expect(vaults.closed, isTrue);
+    expect(await storage.read(key: 'vaults'), saved);
     await close(tester);
   });
 

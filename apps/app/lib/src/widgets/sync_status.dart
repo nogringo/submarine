@@ -15,7 +15,7 @@ class SyncSummary {
       unsent = vaults.fold(0, (sum, vault) => sum + vault.unsent),
       failed = vaults.any((vault) => vault.phase == SyncRequestPhase.failed),
       syncing = vaults.any((vault) => vault.phase == SyncRequestPhase.syncing),
-      lastSync = vaults.any((vault) => vault.lastSync == null)
+      lastSync = vaults.isEmpty || vaults.any((vault) => vault.lastSync == null)
           ? null
           : vaults
                 .map((vault) => vault.lastSync!)

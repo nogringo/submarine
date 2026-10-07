@@ -41,19 +41,17 @@ class Vaults extends ChangeNotifier {
     required this.relays,
     required this.indexers,
     required this._storage,
-    required this._key,
     required this._database,
     required this._signerPatience,
   });
 
-  /// Opens the vaults saved on this device, encrypted with [key], and starts
-  /// syncing them. Each one keeps the versions it opened in [database]. A
-  /// signer silent for [signerPatience] seems to wait on the user.
+  /// Closed until [open]. Each vault keeps the versions it opened in
+  /// [database]. A signer silent for [signerPatience] seems to wait on the
+  /// user.
   static Future<Vaults> load({
     required Ndk ndk,
     required SyncEngine engine,
     required VaultStorage storage,
-    required SymmetricCryptoKey key,
     required Database database,
     List<String> relays = defaultRelays,
     List<String> indexers = indexerRelays,
@@ -65,13 +63,9 @@ class Vaults extends ChangeNotifier {
       relays: relays,
       indexers: indexers,
       storage: storage,
-      key: key,
       database: database,
       signerPatience: signerPatience,
     );
-    for (final record in await storage.read(key)) {
-      vaults._open(record);
-    }
     engine.start();
     return vaults;
   }
@@ -84,13 +78,52 @@ class Vaults extends ChangeNotifier {
   final List<String> relays;
   final List<String> indexers;
   final VaultStorage _storage;
-  final SymmetricCryptoKey _key;
   final Database _database;
   final Duration _signerPatience;
   final _vaults = <VaultController>[];
 
   List<VaultController> get all => List.unmodifiable(_vaults);
   bool get isEmpty => _vaults.isEmpty;
+
+  /// Whether the lock closed the vaults: none is in memory, keys and items
+  /// included, and none syncs. [all] is then empty, whatever the device holds.
+  bool get closed => _key == null;
+
+  /// The key of the device, while open.
+  SymmetricCryptoKey? _key;
+
+  /// Changes on each [open] and [close], for an opening to know it was closed
+  /// meanwhile.
+  var _generation = 0;
+
+  /// Opens the vaults saved on this device, encrypted with [key], and starts
+  /// syncing them. Throws a [VaultsUnreadableException] when [key] does not
+  /// open them.
+  Future<void> open(SymmetricCryptoKey key) async {
+    if (!closed) return;
+    final generation = ++_generation;
+    final records = await _storage.read(key);
+    if (generation != _generation) return;
+    _key = key;
+    for (final record in records) {
+      _open(record);
+    }
+    notifyListeners();
+  }
+
+  /// Drops every vault, with its signer and what it opened, until [open].
+  void close() {
+    _generation++;
+    if (closed) return;
+    _key = null;
+    for (final vault in _vaults) {
+      vault.dispose();
+      ndk.accounts.removeAccount(pubkey: vault.pubkey);
+      unawaited(vault.vault.signer.dispose());
+    }
+    _vaults.clear();
+    notifyListeners();
+  }
 
   VaultController? byPubkey(String pubkey) =>
       _vaults.where((vault) => vault.pubkey == pubkey).firstOrNull;
@@ -154,7 +187,8 @@ class Vaults extends ChangeNotifier {
 
   /// One write after the other, so that an older list never lands last.
   Future<void> _save(List<VaultRecord> records) {
-    final saved = _saving.then((_) => _storage.write(records, _key));
+    final key = _key ?? (throw StateError('The vaults are closed.'));
+    final saved = _saving.then((_) => _storage.write(records, key));
     _saving = saved.catchError((_) {});
     return saved;
   }

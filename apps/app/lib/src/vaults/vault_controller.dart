@@ -86,7 +86,7 @@ class VaultController extends ChangeNotifier {
 
   set approvalUrl(String? url) {
     _approvalUrl = url;
-    notifyListeners();
+    if (!_disposed) notifyListeners();
   }
 
   /// Whether a cancelled decryption keeps the versions from being asked to
@@ -249,6 +249,7 @@ class VaultController extends ChangeNotifier {
   /// Deletes [item] for good, from the cache and from the relays.
   Future<void> deleteItem(Item item) => _change(item, () async {
     await vault.deleteItem(item);
+    if (_disposed) return;
     _items = [
       for (final other in _items)
         if (other.id != item.id) other,
@@ -271,6 +272,8 @@ class VaultController extends ChangeNotifier {
   Future<Item> _write(Future<Envelope> saving) async {
     // The single version a write leaves is the item, as a read would find it.
     final item = Item([await saving]);
+    // Closed by the lock while it saved.
+    if (_disposed) return item;
     _items = [
       for (final other in _items)
         if (other.id != item.id) other,

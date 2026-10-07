@@ -37,10 +37,18 @@ class SubmarineApp extends StatefulWidget {
 class _SubmarineAppState extends State<SubmarineApp> {
   late final GoRouter _router = buildRouter(widget.vaults);
   late final AppLifecycleListener _lifecycle;
+  late var _locked = widget.lock.locked;
+
+  /// Redirects once unlocked, which the router left alone while locked.
+  void _onLock() {
+    if (_locked && !widget.lock.locked) _router.refresh();
+    _locked = widget.lock.locked;
+  }
 
   @override
   void initState() {
     super.initState();
+    widget.lock.addListener(_onLock);
     _lifecycle = AppLifecycleListener(
       onPause: () => unawaited(widget.vaults.pauseSync()),
       onResume: widget.vaults.resumeSync,
@@ -51,6 +59,7 @@ class _SubmarineAppState extends State<SubmarineApp> {
 
   @override
   void dispose() {
+    widget.lock.removeListener(_onLock);
     _lifecycle.dispose();
     _router.dispose();
     super.dispose();

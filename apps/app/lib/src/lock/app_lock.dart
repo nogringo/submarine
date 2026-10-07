@@ -8,6 +8,8 @@ import 'package:flutter/widgets.dart';
 import 'package:local_auth/local_auth.dart';
 
 import '../secure_storage.dart';
+import '../vaults/vaults.dart';
+import 'device_key.dart';
 
 /// When the app locks itself, as Bitwarden's vault timeout offers it.
 enum LockTimeout {
@@ -101,19 +103,37 @@ class DeviceAuth {
 }
 
 /// Keeps the app behind the check of the device once locked, by hand or after
-/// a while. Nothing gets encrypted further: the vault keys stay in the secure
-/// storage of the device, and the vaults keep syncing.
+/// a while. Locking closes the vaults, whose keys and items leave the memory
+/// and which stop syncing. Unlocking opens them again with the key of the
+/// device.
 class AppLock extends ChangeNotifier {
-  AppLock._(this._settings, this._auth) : _locked = _settings.enabled;
+  AppLock._(this._settings, this._auth, this._keys, this._vaults)
+    : _locked = _settings.enabled;
 
-  /// Locked from the start when the lock is on.
-  static Future<AppLock> load({DeviceAuth auth = const DeviceAuth()}) async =>
-      AppLock._(await LockSettings.read(), auth);
+  /// Locked from the start when the lock is on, [vaults] open otherwise.
+  /// Throws a [VaultsUnreadableException] when the key of the device does not
+  /// open them.
+  static Future<AppLock> load({
+    required Vaults vaults,
+    DeviceAuth auth = const DeviceAuth(),
+    DeviceKeyStorage? keys,
+  }) async {
+    final lock = AppLock._(
+      await LockSettings.read(),
+      auth,
+      keys ?? DeviceKeyStorage(),
+      vaults,
+    );
+    if (!lock.locked) await vaults.open(await lock._keys.read());
+    return lock;
+  }
 
   static AppLock of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<AppLockScope>()!.notifier!;
 
   final DeviceAuth _auth;
+  final DeviceKeyStorage _keys;
+  final Vaults _vaults;
   LockSettings _settings;
 
   bool get enabled => _settings.enabled;
@@ -122,7 +142,7 @@ class AppLock extends ChangeNotifier {
   bool get locked => _locked;
   bool _locked;
 
-  /// Whether the device is checking who uses it.
+  /// Whether the device is checking who uses it, or the vaults are opening.
   bool get checking => _checking;
   var _checking = false;
 
@@ -155,15 +175,20 @@ class AppLock extends ChangeNotifier {
     if (!enabled || _locked) return;
     _stopIdleTimer();
     _locked = true;
+    _vaults.close();
     notifyListeners();
   }
 
-  /// Asks the device to check the user, and unlocks if it is them. Throws a
-  /// [LocalAuthException] the user should hear about.
+  /// Asks the device to check the user, and opens the vaults if it is them.
+  /// Throws a [LocalAuthException] the user should hear about, and a
+  /// [VaultsUnreadableException] when the key of the device does not open the
+  /// vaults.
   Future<void> unlock(String reason) async {
     if (!_locked || _checking) return;
     try {
-      if (await _check(() => _auth.authenticate(reason))) _open();
+      await _check(() async {
+        if (await _auth.authenticate(reason)) await _open();
+      });
     } on LocalAuthException catch (error) {
       switch (error.code) {
         case LocalAuthExceptionCode.userCanceled ||
@@ -177,7 +202,7 @@ class AppLock extends ChangeNotifier {
             LocalAuthExceptionCode.noBiometricHardware:
           // A device that no longer checks anyone would lock its owner out
           // for good, while holding it is all a lock could check.
-          if (!await _auth.isAvailable()) return _open();
+          if (!await _auth.isAvailable()) return _check(_open);
           rethrow;
         default:
           rethrow;
@@ -221,17 +246,18 @@ class AppLock extends ChangeNotifier {
     _idleTimer = null;
   }
 
-  void _open() {
+  Future<void> _open() async {
+    await _vaults.open(await _keys.read());
     _locked = false;
     used();
     notifyListeners();
   }
 
-  Future<bool> _check(Future<bool> Function() authenticate) async {
+  Future<T> _check<T>(Future<T> Function() check) async {
     _checking = true;
     notifyListeners();
     try {
-      return await authenticate();
+      return await check();
     } finally {
       _checking = false;
       notifyListeners();

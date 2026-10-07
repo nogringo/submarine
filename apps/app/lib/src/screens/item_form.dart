@@ -22,7 +22,7 @@ import 'item_detail.dart';
 /// Creates an item of [type], one of the [formTypes], or edits the item
 /// [itemId]. Only the name, the notes, the favorite, the custom fields and the
 /// fields of a login or a card are edited: the rest of the item is kept.
-class ItemForm extends StatelessWidget {
+class ItemForm extends StatefulWidget {
   const ItemForm({
     super.key,
     required this.vaultId,
@@ -47,26 +47,54 @@ class ItemForm extends StatelessWidget {
   }
 
   @override
+  State<ItemForm> createState() => _ItemFormState();
+}
+
+class _ItemFormState extends State<ItemForm> {
+  final _formKey = GlobalKey();
+
+  /// The item last found, which the form keeps editing while the lock closes
+  /// the vaults and they read their items again.
+  VaultItem? _entry;
+
+  Widget _form(VaultItem entry) => _Form(
+    key: _formKey,
+    vaultId: widget.vaultId,
+    filter: widget.filter,
+    type: entry.item.cipher.type,
+    entry: entry,
+  );
+
+  @override
   Widget build(BuildContext context) {
-    final itemId = this.itemId;
+    final itemId = widget.itemId;
     if (itemId == null) {
-      return _Form(vaultId: vaultId, filter: filter, type: type);
+      return _Form(
+        vaultId: widget.vaultId,
+        filter: widget.filter,
+        type: widget.type,
+      );
     }
-    return ItemOrMissing(
-      vaultId: vaultId,
-      itemId: itemId,
-      builder: (entry) => _Form(
-        vaultId: vaultId,
-        filter: filter,
-        type: entry.item.cipher.type,
-        entry: entry,
+    final vaults = Vaults.of(context);
+    final reading =
+        vaults.closed ||
+        vaults.select(widget.vaultId).any((vault) => !vault.loaded);
+    _entry =
+        vaults.findItem(widget.vaultId, itemId) ?? (reading ? _entry : null);
+    return switch (_entry) {
+      final entry? => _form(entry),
+      null => ItemOrMissing(
+        vaultId: widget.vaultId,
+        itemId: itemId,
+        builder: _form,
       ),
-    );
+    };
   }
 }
 
 class _Form extends StatefulWidget {
   const _Form({
+    super.key,
     required this.vaultId,
     required this.filter,
     required this.type,
@@ -87,11 +115,14 @@ class _FormState extends State<_Form> {
 
   /// The version being edited, rather than one synced meanwhile: saving over
   /// it keeps both, as a conflict, instead of losing the other.
-  late final VaultItem? _original = widget.entry;
+  late final Item? _original = widget.entry?.item;
+
+  /// The vault of [_original], found again after the lock reopens the vaults.
+  late final String? _originalVaultId = widget.entry?.vault.pubkey;
 
   /// A copy, as the item's own cipher is the one on screen.
   late final Cipher? _cipher = switch (_original) {
-    final entry? => Cipher.fromJson(entry.item.current.data),
+    final item? => Cipher.fromJson(item.current.data),
     null => null,
   };
 
@@ -116,7 +147,7 @@ class _FormState extends State<_Form> {
   late final List<(String, String?)> _cardExpMonths;
   final _fields = <EditedField>[];
   var _favorite = false;
-  VaultController? _chosenVault;
+  String? _chosenVaultId;
   var _passwordHidden = true;
   var _cardNumberHidden = true;
   var _cardCodeHidden = true;
@@ -215,9 +246,7 @@ class _FormState extends State<_Form> {
   }
 
   VaultController _vaultOf(Vaults vaults) =>
-      _original?.vault ??
-      _chosenVault ??
-      vaults.byPubkey(widget.vaultId) ??
+      vaults.byPubkey(_originalVaultId ?? _chosenVaultId ?? widget.vaultId) ??
       vaults.all.first;
 
   void _leave(String location) {
@@ -226,11 +255,7 @@ class _FormState extends State<_Form> {
   }
 
   void _close() => _leave(
-    vaultPath(
-      widget.vaultId,
-      filter: widget.filter,
-      itemId: _original?.item.id,
-    ),
+    vaultPath(widget.vaultId, filter: widget.filter, itemId: _original?.id),
   );
 
   Future<bool> _confirmDiscard() async {
@@ -321,7 +346,7 @@ class _FormState extends State<_Form> {
     setState(() => _saving = true);
     try {
       final item = switch (_original) {
-        final entry? => await vault.updateItem(entry.item, cipher),
+        final original? => await vault.updateItem(original, cipher),
         null => await vault.createItem(cipher),
       };
       if (!mounted) return;
@@ -423,7 +448,7 @@ class _FormState extends State<_Form> {
                         VaultDropdown(
                           value: _vaultOf(vaults),
                           onChanged: (vault) =>
-                              setState(() => _chosenVault = vault),
+                              setState(() => _chosenVaultId = vault.pubkey),
                         ),
                         gap,
                       ],

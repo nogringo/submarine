@@ -317,7 +317,7 @@ class _ImportDialog extends StatefulWidget {
 }
 
 class _ImportDialogState extends State<_ImportDialog> {
-  VaultController? _chosenVault;
+  String? _chosenVaultId;
 
   /// Null until the import starts.
   int? _saved;
@@ -326,10 +326,13 @@ class _ImportDialogState extends State<_ImportDialog> {
 
   bool get _importing => _saved != null && !_finished;
 
-  VaultController _vaultOf(Vaults vaults) => _chosenVault ?? vaults.all.first;
+  /// Null while the lock keeps the vaults closed.
+  VaultController? _vaultOf(Vaults vaults) =>
+      vaults.byPubkey(_chosenVaultId ?? '') ?? vaults.all.firstOrNull;
 
   Future<void> _import() async {
     final vault = _vaultOf(Vaults.of(context));
+    if (vault == null) return;
     setState(() => _saved = 0);
     try {
       await vault.importItems(
@@ -351,6 +354,8 @@ class _ImportDialogState extends State<_ImportDialog> {
     final l10n = context.l10n;
     final palette = context.palette;
     final vaults = Vaults.of(context);
+    final vault = _vaultOf(vaults);
+    if (vault == null) return const SizedBox.shrink();
     final total = widget.ciphers.length;
     final saved = _saved;
     return PopScope(
@@ -377,9 +382,9 @@ class _ImportDialogState extends State<_ImportDialog> {
                   if (vaults.all.length > 1) ...[
                     const SizedBox(height: 20),
                     VaultDropdown(
-                      value: _vaultOf(vaults),
+                      value: vault,
                       onChanged: (vault) =>
-                          setState(() => _chosenVault = vault),
+                          setState(() => _chosenVaultId = vault.pubkey),
                     ),
                   ],
                 ] else if (!_finished) ...[
@@ -396,7 +401,7 @@ class _ImportDialogState extends State<_ImportDialog> {
                     style: TextStyle(color: palette.danger),
                   )
                 else
-                  Text(l10n.importDone(total, _vaultOf(vaults).name)),
+                  Text(l10n.importDone(total, vault.name)),
                 const SizedBox(height: 24),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -495,7 +500,7 @@ class _ExportDialog extends StatefulWidget {
 class _ExportDialogState extends State<_ExportDialog> {
   final _password = TextEditingController();
   final _confirmation = TextEditingController();
-  VaultController? _chosenVault;
+  String? _chosenVaultId;
   var _protected = true;
   var _hidden = true;
   var _exporting = false;
@@ -550,7 +555,10 @@ class _ExportDialogState extends State<_ExportDialog> {
     final l10n = context.l10n;
     final palette = context.palette;
     final vaults = Vaults.of(context);
-    final vault = _chosenVault ?? vaults.all.first;
+    final vault =
+        vaults.byPubkey(_chosenVaultId ?? '') ?? vaults.all.firstOrNull;
+    // Closed by the lock.
+    if (vault == null) return const SizedBox.shrink();
     final count = vault.items.where((item) => !item.cipher.isDeleted).length;
     return PopScope(
       canPop: !_exporting,
@@ -571,7 +579,8 @@ class _ExportDialogState extends State<_ExportDialog> {
                 if (vaults.all.length > 1) ...[
                   VaultDropdown(
                     value: vault,
-                    onChanged: (vault) => setState(() => _chosenVault = vault),
+                    onChanged: (vault) =>
+                        setState(() => _chosenVaultId = vault.pubkey),
                   ),
                   const SizedBox(height: 16),
                 ],

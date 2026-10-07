@@ -4,6 +4,7 @@ import 'package:local_auth/local_auth.dart';
 
 import '../context.dart';
 import '../theme/theme.dart';
+import '../vaults/vault_storage.dart';
 import '../widgets/sonar.dart';
 import 'app_lock.dart';
 
@@ -89,6 +90,10 @@ class _LockScreenState extends State<LockScreen> {
       await widget.lock.unlock(l10n.unlockReason);
     } on LocalAuthException catch (error) {
       if (mounted) setState(() => _error = authErrorMessage(l10n, error));
+    } on PlatformException {
+      if (mounted) setState(() => _error = l10n.storageReadFailed);
+    } on VaultsUnreadableException {
+      if (mounted) setState(() => _error = l10n.storageReadFailed);
     }
   }
 

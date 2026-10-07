@@ -1,9 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:crypto/crypto.dart';
-import 'package:cryptography/cryptography.dart' as cryptography;
-
+import 'bitwarden_crypto.dart';
 import 'cipher/cipher.dart';
 import 'item.dart';
 
@@ -95,11 +93,11 @@ Future<String> decryptBitwardenExport(String source, String password) async {
       data is! String) {
     throw const FormatException('Not a password protected export.');
   }
-  final keys = await ExportKdf._fromJson(json)._deriveKeys(password, salt);
-  if (await _decryptString(validation, keys) == null) {
+  final key = await KdfConfig.fromJson(json).deriveKey(password, salt);
+  if (await key.decryptString(validation) == null) {
     throw const WrongExportPasswordException();
   }
-  return await _decryptString(data, keys) ??
+  return await key.decryptString(data) ??
       (throw const FormatException('The export is damaged.'));
 }
 
@@ -108,173 +106,24 @@ Future<String> decryptBitwardenExport(String source, String password) async {
 Future<String> encryptBitwardenExport(
   String export,
   String password, {
-  ExportKdf kdf = const ExportKdf.argon2id(),
+  KdfConfig kdf = const KdfConfig.argon2id(),
 }) async {
-  if (!kdf._isAllowed) {
+  if (!kdf.isAllowed) {
     throw ArgumentError.value(kdf, 'kdf', 'Not allowed by Bitwarden');
   }
   final salt = base64.encode(_randomBytes(16));
-  final keys = await kdf._deriveKeys(password, salt);
+  final key = await kdf.deriveKey(password, salt);
   return _encoder.convert({
     'encrypted': true,
     'passwordProtected': true,
     'salt': salt,
-    ...kdf._toJson(),
+    ...kdf.toJson(),
     // Any value: an importer only checks that it decrypts.
-    'encKeyValidation_DO_NOT_EDIT': await _encryptString(
+    'encKeyValidation_DO_NOT_EDIT': await key.encryptString(
       base64.encode(_randomBytes(16)),
-      keys,
     ),
-    'data': await _encryptString(export, keys),
+    'data': await key.encryptString(export),
   });
-}
-
-/// How a password protected export derives its key from the password, as
-/// Bitwarden's KdfConfig.
-class ExportKdf {
-  /// PBKDF2-SHA256, Bitwarden's default for an account.
-  const ExportKdf.pbkdf2({this.iterations = 600000})
-    : type = _pbkdf2,
-      memory = null,
-      parallelism = null;
-
-  /// Argon2id, with Bitwarden's defaults. [memory] is in MiB.
-  const ExportKdf.argon2id({
-    this.iterations = 6,
-    int this.memory = 32,
-    int this.parallelism = 4,
-  }) : type = _argon2id;
-
-  factory ExportKdf._fromJson(Map<String, dynamic> json) {
-    final kdf = switch ((
-      json['kdfType'],
-      json['kdfIterations'],
-      json['kdfMemory'],
-      json['kdfParallelism'],
-    )) {
-      (_pbkdf2, final int iterations, _, _) => ExportKdf.pbkdf2(
-        iterations: iterations,
-      ),
-      (_argon2id, final int iterations, final int memory, final int threads) =>
-        ExportKdf.argon2id(
-          iterations: iterations,
-          memory: memory,
-          parallelism: threads,
-        ),
-      _ => null,
-    };
-    if (kdf == null || !kdf._isAllowed) {
-      throw const FormatException('Not a key derivation Bitwarden allows.');
-    }
-    return kdf;
-  }
-
-  static const _pbkdf2 = 0;
-  static const _argon2id = 1;
-
-  /// Bitwarden's `KdfType`.
-  final int type;
-  final int iterations;
-  final int? memory;
-  final int? parallelism;
-
-  /// Within the bounds of Bitwarden's KdfConfig, which also keep a file from
-  /// asking for more memory than a device has.
-  bool get _isAllowed => switch ((type, memory, parallelism)) {
-    (_pbkdf2, _, _) => iterations >= 5000 && iterations <= 2000000,
-    (_argon2id, final int memory, final int parallelism) =>
-      iterations >= 2 &&
-          iterations <= 10 &&
-          memory >= 16 &&
-          memory <= 1024 &&
-          parallelism >= 1 &&
-          parallelism <= 16,
-    _ => false,
-  };
-
-  Map<String, dynamic> _toJson() => {
-    'kdfType': type,
-    'kdfIterations': iterations,
-    'kdfMemory': ?memory,
-    'kdfParallelism': ?parallelism,
-  };
-
-  /// Bitwarden's deriveVaultExportKey: the key of the KDF, stretched.
-  Future<_Keys> _deriveKeys(String password, String salt) async {
-    final algorithm = type == _pbkdf2
-        ? cryptography.Pbkdf2(
-            macAlgorithm: cryptography.Hmac.sha256(),
-            iterations: iterations,
-            bits: 256,
-          )
-        : cryptography.Argon2id(
-            parallelism: parallelism!,
-            memory: memory! * 1024,
-            iterations: iterations,
-            hashLength: 32,
-          );
-    final key = await algorithm.deriveKey(
-      secretKey: cryptography.SecretKey(utf8.encode(password)),
-      // Bitwarden hashes the salt for Argon2id.
-      nonce: type == _pbkdf2
-          ? utf8.encode(salt)
-          : sha256.convert(utf8.encode(salt)).bytes,
-    );
-    final bytes = await key.extractBytes();
-    // HKDF-Expand to 32 bytes, a single HMAC.
-    List<int> expand(String info) =>
-        Hmac(sha256, bytes).convert([...utf8.encode(info), 1]).bytes;
-    return (enc: expand('enc'), mac: expand('mac'));
-  }
-
-  @override
-  String toString() => 'ExportKdf(${_toJson()})';
-}
-
-typedef _Keys = ({List<int> enc, List<int> mac});
-
-final _aes = cryptography.AesCbc.with256bits(
-  macAlgorithm: cryptography.MacAlgorithm.empty,
-);
-
-/// Bitwarden's EncString of type 2: AES-256-CBC, then HMAC-SHA256 of the IV
-/// and the cipher text.
-Future<String> _encryptString(String clear, _Keys keys) async {
-  final iv = _aes.newNonce();
-  final box = await _aes.encrypt(
-    utf8.encode(clear),
-    secretKey: cryptography.SecretKey(keys.enc),
-    nonce: iv,
-  );
-  final mac = Hmac(sha256, keys.mac).convert([...iv, ...box.cipherText]);
-  return '2.${base64.encode(iv)}|${base64.encode(box.cipherText)}'
-      '|${base64.encode(mac.bytes)}';
-}
-
-/// Null when [keys] are not those [encrypted] was encrypted with.
-Future<String?> _decryptString(String encrypted, _Keys keys) async {
-  final parts = RegExp(r'^2\.([^|]+)\|([^|]+)\|([^|]+)$').firstMatch(encrypted);
-  if (parts == null) throw const FormatException('Not an EncString.');
-  final [iv, cipherText, mac] = [
-    for (var i = 1; i <= 3; i++) base64.decode(parts[i]!),
-  ];
-  final expected = Hmac(sha256, keys.mac).convert([...iv, ...cipherText]);
-  if (!_sameBytes(expected.bytes, mac)) return null;
-  final clear = await _aes.decrypt(
-    cryptography.SecretBox(cipherText, nonce: iv, mac: cryptography.Mac.empty),
-    secretKey: cryptography.SecretKey(keys.enc),
-  );
-  return utf8.decode(clear);
-}
-
-/// In constant time, so that a forged MAC learns nothing from timing.
-bool _sameBytes(List<int> a, List<int> b) {
-  if (a.length != b.length) return false;
-  var difference = 0;
-  for (var i = 0; i < a.length; i++) {
-    difference |= a[i] ^ b[i];
-  }
-  return difference == 0;
 }
 
 final _random = Random.secure();

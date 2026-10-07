@@ -350,7 +350,7 @@ void main() {
       final protected = await encryptBitwardenExport(
         clearExport,
         'hunter2',
-        kdf: const ExportKdf.pbkdf2(iterations: 5000),
+        kdf: const KdfConfig.pbkdf2(iterations: 5000),
       );
       final export = jsonDecode(protected) as Map<String, dynamic>;
 
@@ -366,7 +366,7 @@ void main() {
         encryptBitwardenExport(
           clearExport,
           'hunter2',
-          kdf: const ExportKdf.pbkdf2(iterations: 1000),
+          kdf: const KdfConfig.pbkdf2(iterations: 1000),
         ),
         throwsArgumentError,
       );

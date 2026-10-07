@@ -690,10 +690,10 @@ packages:
     dependency: transitive
     description:
       name: nip49
-      sha256: b5352611b6171b4fc64632f5e9148d2ff8c995baaf967ecb8d676def6cb0caad
+      sha256: "096a8316bc989be8abaf18f47f6fa6ae4eaba1ad68d74716f02e9c33fa25d200"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.2"
+    version: "1.2.0"
   node_preamble:
     dependency: transitive
     description:
@@ -894,6 +894,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.4.6"
+  serverpod_argon2:
+    dependency: transitive
+    description:
+      name: serverpod_argon2
+      sha256: bc38946561c556693f8802e4f590761773e5a139346f2e9c9542c936ca706a8f
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
   shared_preferences:
     dependency: transitive
     description:

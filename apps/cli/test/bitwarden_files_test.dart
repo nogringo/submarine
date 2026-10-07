@@ -22,7 +22,7 @@ void main() {
       protectedExport = await encryptBitwardenExport(
         clearExport,
         'hunter2',
-        kdf: const ExportKdf.pbkdf2(iterations: 5000),
+        kdf: const KdfConfig.pbkdf2(iterations: 5000),
       );
     });
 

@@ -48,6 +48,20 @@ Future<void> main() async {
   );
   print('The signer opened the cache key: ${await sealed.unlock()}');
 
+  // What the app keeps on the device, locked with a password as Bitwarden
+  // protects the user key of an account with its master password.
+  final deviceKey = SymmetricCryptoKey.generate();
+  final secrets = await deviceKey.encryptString(
+    jsonEncode({'vaultKey': privateKey, 'cacheKey': cacheKey}),
+  );
+  final protectedKey = jsonEncode(
+    await PasswordProtectedKey.protect(deviceKey, '<lock password>'),
+  );
+  final unlocked = await PasswordProtectedKey.fromJson(
+    jsonDecode(protectedKey) as Map<String, dynamic>,
+  ).open('<lock password>');
+  print('Unlocked: ${await unlocked?.decryptString(secrets) != null}');
+
   // Its relay list (NIP-65), the private relays encrypted to the vault. It
   // goes to vault.relays, to the relays it lists and to the indexers. From now
   // on the vault lives on the relays it lists, which get a copy of the vault.

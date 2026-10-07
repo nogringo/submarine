@@ -20,6 +20,7 @@ The protocol is specified in [`docs`](../../docs).
 - **Bitwarden behavior.** Password history, search, TOTP codes and the generator work as in Bitwarden: the last 5 replaced passwords are kept, search ignores case and accents, TOTP keys can be base32 secrets, `otpauth://` or `steam://` URIs, and passwords, passphrases and usernames are generated with Bitwarden's options and defaults.
 - **Made-up personal details.** For the sites that ask for a name or a birth date: common English first names and surnames, from US public domain data, and the birth date of someone from 18 to 60 years old, as an ISO date.
 - **Bitwarden import and export.** Reads Bitwarden's JSON export as Bitwarden's importer does, and writes items in that format, which Bitwarden imports. Both ways, the file can be password protected as Bitwarden does it: a key derived with PBKDF2-SHA256 or Argon2id, AES-256-CBC and HMAC-SHA256. Exports restricted to a Bitwarden account are refused, and folders are dropped.
+- **Password lock.** A client can keep what it stores on the device under a `SymmetricCryptoKey` protected by a password, as Bitwarden protects the user key of an account with its master password: Argon2id with Bitwarden's defaults (or PBKDF2-SHA256), AES-256-CBC and HMAC-SHA256. Argon2id runs as native code, and as WebAssembly on the web, through [`serverpod_argon2`](https://pub.dev/packages/serverpod_argon2).
 
 ## Getting started
 
@@ -59,7 +60,7 @@ for (final item in searchItems(items, 'boulanger')) {
 }
 ```
 
-[`example/nostr_passwords_example.dart`](example/nostr_passwords_example.dart) goes through the whole flow: setup, relay list, sync, generate a password and made-up details, Bitwarden import and export, edit, trash, restore and permanent deletion.
+[`example/nostr_passwords_example.dart`](example/nostr_passwords_example.dart) goes through the whole flow: setup, password lock, relay list, sync, generate a password and made-up details, Bitwarden import and export, edit, trash, restore and permanent deletion.
 
 ## License
 

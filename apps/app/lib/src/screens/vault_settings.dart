@@ -778,33 +778,40 @@ class _AddRelayDialogState extends State<_AddRelayDialog> {
                 ),
               ),
               const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.relayKeepPrivate,
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
+              // The switch takes its name from the text.
+              MergeSemantics(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.relayKeepPrivate,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          l10n.relayKeepPrivateDescription,
-                          style: TextStyle(fontSize: 13, color: palette.muted),
-                        ),
-                      ],
+                          const SizedBox(height: 2),
+                          Text(
+                            l10n.relayKeepPrivateDescription,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: palette.muted,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Switch(
-                    value: _private,
-                    onChanged: (private) => setState(() => _private = private),
-                  ),
-                ],
+                    const SizedBox(width: 12),
+                    Switch(
+                      value: _private,
+                      onChanged: (private) =>
+                          setState(() => _private = private),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 24),
               Row(

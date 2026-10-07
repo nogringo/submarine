@@ -23,11 +23,10 @@ class SelectChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    return Semantics(
-      selected: selected,
-      button: true,
-      child: SizedBox(
-        height: 36,
+    final chip = SizedBox(
+      height: 36,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: 48),
         child: Material(
           color: selected ? palette.accent : Colors.transparent,
           shape: StadiumBorder(
@@ -55,6 +54,18 @@ class SelectChip extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+    return Semantics(
+      container: true,
+      selected: selected,
+      button: true,
+      // 48 high to tap, around the 36 that shows.
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        excludeFromSemantics: true,
+        child: SizedBox(height: 48, child: Center(widthFactor: 1, child: chip)),
       ),
     );
   }

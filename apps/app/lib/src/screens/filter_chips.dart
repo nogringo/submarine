@@ -36,7 +36,7 @@ class FilterChips extends StatelessWidget {
       ItemFilter.trash,
     ];
     return SizedBox(
-      height: 36,
+      height: 48,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),

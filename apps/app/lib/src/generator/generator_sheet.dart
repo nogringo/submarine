@@ -166,7 +166,8 @@ class _GeneratorViewState extends State<GeneratorView> {
           sensitive: !widget.username,
           onRegenerate: () => setState(() => _value = _generate()),
         ),
-        const SizedBox(height: 16),
+        // The chips take 6 more around them, to be tapped.
+        SizedBox(height: widget.username ? 16 : 10),
         if (widget.username)
           ..._usernameOptions(l10n)
         else ...[
@@ -193,7 +194,7 @@ class _GeneratorViewState extends State<GeneratorView> {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 6),
           if (isPassword)
             ..._passwordOptions(l10n)
           else
@@ -250,10 +251,9 @@ class _GeneratorViewState extends State<GeneratorView> {
       ),
       const SizedBox(height: 8),
       _Label(l10n.includeCharacters),
-      const SizedBox(height: 8),
+      const SizedBox(height: 2),
       Wrap(
         spacing: 8,
-        runSpacing: 8,
         children: [
           SelectChip(
             label: 'A-Z',
@@ -293,7 +293,7 @@ class _GeneratorViewState extends State<GeneratorView> {
           ),
         ],
       ),
-      const SizedBox(height: 8),
+      const SizedBox(height: 2),
       _CountRow(
         label: l10n.minNumbers,
         value: options.minNumber.clamp(1, maxCount),

@@ -287,7 +287,6 @@ class VaultDrawer extends StatelessWidget {
                 onTap: () => select(vault.pubkey),
                 trailing: IconButton(
                   tooltip: l10n.vaultSettings,
-                  visualDensity: VisualDensity.compact,
                   onPressed: () {
                     Navigator.pop(context);
                     context.push(vaultSettingsPath(vault.pubkey));

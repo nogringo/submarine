@@ -530,25 +530,28 @@ class _ExportDialogState extends State<_ExportDialog> {
                   style: TextStyle(color: palette.muted),
                 ),
                 const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        l10n.exportProtect,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
+                // The switch takes its name from the text.
+                MergeSemantics(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          l10n.exportProtect,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
-                    ),
-                    Switch(
-                      value: _protected,
-                      onChanged: _exporting
-                          ? null
-                          : (protected) =>
-                                setState(() => _protected = protected),
-                    ),
-                  ],
+                      Switch(
+                        value: _protected,
+                        onChanged: _exporting
+                            ? null
+                            : (protected) =>
+                                  setState(() => _protected = protected),
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 8),
                 if (_protected) ...[

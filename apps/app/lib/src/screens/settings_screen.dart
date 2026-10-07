@@ -268,7 +268,7 @@ class _MenuTile<T> extends StatelessWidget {
             PopupMenuItem(value: value, child: Text(label(value))),
         ],
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 8, 4, 8),
+          padding: const EdgeInsets.fromLTRB(12, 12, 4, 12),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [

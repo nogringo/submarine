@@ -16,8 +16,6 @@ class VaultColorPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Wrap(
-    spacing: 10,
-    runSpacing: 10,
     children: [
       for (final (index, color) in vaultColors.indexed)
         _ColorSwatch(
@@ -51,19 +49,25 @@ class _ColorSwatch extends StatelessWidget {
     child: InkResponse(
       onTap: onTap,
       radius: 24,
-      child: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
-          border: selected
-              ? Border.all(color: context.palette.text, width: 2.5)
-              : null,
+      // 48 to tap, around the 36 that shows.
+      child: SizedBox.square(
+        dimension: 48,
+        child: Center(
+          child: Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+              border: selected
+                  ? Border.all(color: context.palette.text, width: 2.5)
+                  : null,
+            ),
+            child: selected
+                ? const Icon(Icons.check_rounded, color: Colors.white, size: 20)
+                : null,
+          ),
         ),
-        child: selected
-            ? const Icon(Icons.check_rounded, color: Colors.white, size: 20)
-            : null,
       ),
     ),
   );

@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/semantics.dart' show SemanticsBinding;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:ndk/ndk.dart';
@@ -18,6 +20,8 @@ import 'src/vaults/vaults.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Flutter web builds no tree for screen readers until a hidden button asks.
+  if (kIsWeb) SemanticsBinding.instance.ensureSemantics();
   // Otherwise Android paints its window background behind the navigation bar.
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   final ndk = Ndk(

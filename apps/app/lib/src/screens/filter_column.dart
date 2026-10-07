@@ -139,7 +139,7 @@ class _FilterTile extends StatelessWidget {
         selected: selected,
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
           child: Row(
             children: [
               Icon(filter.icon, size: 22, color: palette.text),

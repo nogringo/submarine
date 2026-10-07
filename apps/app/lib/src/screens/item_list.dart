@@ -150,7 +150,7 @@ class _Header extends StatelessWidget {
     );
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        withDrawer ? 12 : 20,
+        withDrawer ? 10 : 20,
         16,
         withDrawer ? 8 : 16,
         12,
@@ -168,14 +168,20 @@ class _Header extends StatelessWidget {
                     customBorder: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    child: all || vault == null
-                        ? const AllVaultsAvatar(size: 44)
-                        : VaultAvatar(vault: vault, size: 44),
+                    // 48 to tap, around the 44 that shows.
+                    child: SizedBox.square(
+                      dimension: 48,
+                      child: Center(
+                        child: all || vault == null
+                            ? const AllVaultsAvatar(size: 44)
+                            : VaultAvatar(vault: vault, size: 44),
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
           ],
           Expanded(
             // The drawer has the settings on a phone, the filter column on a
@@ -395,7 +401,13 @@ class _ItemsState extends State<_Items> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+          // The filter chips below take 6 more around them, to be tapped.
+          padding: EdgeInsets.fromLTRB(
+            16,
+            0,
+            16,
+            context.showsFilters ? 12 : 6,
+          ),
           child: SearchField(
             hint: context.l10n.searchItems,
             showsShortcut: context.isWide,
@@ -408,7 +420,7 @@ class _ItemsState extends State<_Items> {
             filter: widget.filter,
             selectedItemId: widget.selectedItemId,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 6),
         ],
         Expanded(
           child: shown.isEmpty

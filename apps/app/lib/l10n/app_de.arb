@@ -300,6 +300,7 @@
   "allowScreenCapture": "Bildschirmaufnahmen erlauben",
   "allowScreenCaptureDescription": "Screenshots, Aufnahmen und Bildschirmfreigaben können dann deine Passwörter zeigen.",
   "lock": "Sperren",
+  "lockWithShortcut": "Sperren ({shortcut})",
   "unlock": "Entsperren",
   "vaultsLocked": "Deine Tresore sind gesperrt.",
   "unlockReason": "Deine Tresore entsperren",

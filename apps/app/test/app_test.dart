@@ -2932,7 +2932,7 @@ void main() {
       ),
     );
     await settle(tester);
-    expect(find.byTooltip('Lock'), findsNothing);
+    expect(find.byTooltip('Lock (Ctrl+L)'), findsNothing);
 
     await tester.tap(find.byTooltip('Settings'));
     await settle(tester);
@@ -2943,7 +2943,7 @@ void main() {
     expect(find.text('5 minutes'), findsOneWidget);
     expect((await LockSettings.read()).enabled, isTrue);
 
-    await tester.tap(find.byTooltip('Lock'));
+    await tester.tap(find.byTooltip('Lock (Ctrl+L)'));
     await settle(tester);
     expect(deviceAuth.asked, 1);
     expect(find.text('Your vaults are locked.'), findsOneWidget);
@@ -2955,8 +2955,38 @@ void main() {
 
     await tester.tap(settingsSwitch('Unlock with biometrics'));
     await settle(tester);
-    expect(find.byTooltip('Lock'), findsNothing);
+    expect(find.byTooltip('Lock (Ctrl+L)'), findsNothing);
     expect((await LockSettings.read()).enabled, isFalse);
+    await close(tester);
+  });
+
+  testWidgets('locks from Ctrl+L on a desktop, even while typing', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(
+      tester,
+      items: [github],
+      lockSettings: const LockSettings(enabled: true),
+    );
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+      ),
+    );
+    await settle(tester);
+    await unlockWith(tester, find.text('Unlock'));
+
+    await tester.enterText(find.byType(TextField), 'git');
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyL);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await settle(tester);
+    expect(find.text('Your vaults are locked.'), findsOneWidget);
     await close(tester);
   });
 
@@ -3106,7 +3136,7 @@ void main() {
     expect(ndk.accounts.accounts, contains(pubkey));
     expect(find.text('GitHub'), findsOneWidget);
 
-    await tester.tap(find.byTooltip('Lock'));
+    await tester.tap(find.byTooltip('Lock (Ctrl+L)'));
     await settle(tester);
     expect(vaults.closed, isTrue);
     expect(vaults.all, isEmpty);
@@ -3146,7 +3176,7 @@ void main() {
     await tester.enterText(passwordField, 'correct horse');
     await tester.pump();
 
-    await tester.tap(find.byTooltip('Lock'));
+    await tester.tap(find.byTooltip('Lock (Ctrl+L)'));
     await settle(tester);
     expect(find.text('Your vaults are locked.'), findsOneWidget);
     await unlockWith(tester, find.text('Unlock'));
@@ -3214,7 +3244,7 @@ void main() {
     expect(await storage.read(key: 'vaultsKey'), isNull);
     expect(await storage.read(key: 'vaultsKeyProtected'), isNotNull);
 
-    await tester.tap(find.byTooltip('Lock'));
+    await tester.tap(find.byTooltip('Lock (Ctrl+L)'));
     await settle(tester);
     final lockField = find.widgetWithText(TextField, 'Lock password');
     await tester.enterText(lockField, 'correct horse batter');
@@ -3281,7 +3311,7 @@ void main() {
       findsOneWidget,
     );
 
-    await tester.tap(find.byTooltip('Lock'));
+    await tester.tap(find.byTooltip('Lock (Ctrl+L)'));
     await settle(tester);
     expect(find.widgetWithText(TextField, 'Lock password'), findsOneWidget);
     await unlockWith(tester, find.text('Unlock with biometrics'));
@@ -3332,7 +3362,7 @@ void main() {
     await tester.enterText(current, 'correct horse battery');
     await tapUntil(tester, save, () => find.byType(Dialog).evaluate().isEmpty);
 
-    await tester.tap(find.byTooltip('Lock'));
+    await tester.tap(find.byTooltip('Lock (Ctrl+L)'));
     await settle(tester);
     await tester.enterText(
       find.widgetWithText(TextField, 'Lock password'),
@@ -3354,7 +3384,7 @@ void main() {
       () => !lock.hasPassword,
     );
     expect(lock.enabled, isFalse);
-    expect(find.byTooltip('Lock'), findsNothing);
+    expect(find.byTooltip('Lock (Ctrl+L)'), findsNothing);
     expect(find.text('Lock after'), findsNothing);
     const storage = FlutterSecureStorage();
     expect(await storage.read(key: 'vaultsKey'), isNotNull);
@@ -3380,7 +3410,7 @@ void main() {
     await tester.tap(find.byTooltip('Settings'));
     await settle(tester);
     await setLockPassword(tester, 'correct horse battery');
-    await tester.tap(find.byTooltip('Lock'));
+    await tester.tap(find.byTooltip('Lock (Ctrl+L)'));
     await settle(tester);
 
     await tester.tap(find.text('Forgot the password?'));

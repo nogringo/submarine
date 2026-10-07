@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../context.dart';
 import '../lock/app_lock.dart';
+import '../lock/lock_screen.dart';
 import '../router.dart';
 import '../vaults/vaults.dart';
 import '../widgets/signer_requests.dart';
@@ -96,7 +97,7 @@ class VaultRail extends StatelessWidget {
           if (lock.enabled)
             _RailButton(
               icon: Icons.lock_outline_rounded,
-              tooltip: l10n.lock,
+              tooltip: l10n.lockWithShortcut(lockShortcut.label),
               onPressed: lock.lock,
             ),
           const SizedBox(height: 12),

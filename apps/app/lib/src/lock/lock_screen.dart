@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 
+import '../command_shortcut.dart';
 import '../context.dart';
 import '../theme/theme.dart';
 import '../vaults/vault_storage.dart';
@@ -9,9 +10,12 @@ import '../widgets/password_field.dart';
 import '../widgets/sonar.dart';
 import 'app_lock.dart';
 
+const lockShortcut = CommandShortcut(LogicalKeyboardKey.keyL);
+
 /// [child] while unlocked, the lock screen otherwise. [child] keeps its state
 /// underneath, out of sight and out of focus, so that unlocking finds the app
-/// as it was left. Every pointer or key counts as a use of the app.
+/// as it was left. Every pointer or key counts as a use of the app, and
+/// [lockShortcut] locks it from anywhere.
 class LockGate extends StatefulWidget {
   const LockGate({super.key, required this.lock, required this.child});
 
@@ -36,8 +40,13 @@ class _LockGateState extends State<LockGate> {
   }
 
   bool _onKey(KeyEvent event) {
-    widget.lock.used();
-    return false;
+    final lock = widget.lock;
+    lock.used();
+    if (!lock.enabled || lock.locked || !lockShortcut.accepts(event)) {
+      return false;
+    }
+    lock.lock();
+    return true;
   }
 
   void _onPointer(PointerEvent event) => widget.lock.used();

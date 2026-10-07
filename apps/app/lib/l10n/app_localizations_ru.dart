@@ -1085,6 +1085,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get lock => 'Заблокировать';
 
   @override
+  String lockWithShortcut(String shortcut) {
+    return 'Заблокировать ($shortcut)';
+  }
+
+  @override
   String get unlock => 'Разблокировать';
 
   @override

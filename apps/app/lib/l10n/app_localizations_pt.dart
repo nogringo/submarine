@@ -1062,6 +1062,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String get lock => 'Bloquear';
 
   @override
+  String lockWithShortcut(String shortcut) {
+    return 'Bloquear ($shortcut)';
+  }
+
+  @override
   String get unlock => 'Desbloquear';
 
   @override
@@ -2410,6 +2415,11 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get lock => 'Bloquear';
+
+  @override
+  String lockWithShortcut(String shortcut) {
+    return 'Bloquear ($shortcut)';
+  }
 
   @override
   String get unlock => 'Desbloquear';

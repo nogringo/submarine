@@ -300,6 +300,7 @@
   "allowScreenCapture": "Consenti la cattura dello schermo",
   "allowScreenCaptureDescription": "Permette a screenshot, registrazioni e condivisione dello schermo di mostrare le tue password.",
   "lock": "Blocca",
+  "lockWithShortcut": "Blocca ({shortcut})",
   "unlock": "Sblocca",
   "vaultsLocked": "Le tue casseforti sono bloccate.",
   "unlockReason": "Sblocca le tue casseforti",

@@ -300,6 +300,7 @@
   "allowScreenCapture": "Permitir captura de tela",
   "allowScreenCaptureDescription": "Permite que capturas de tela, gravações e compartilhamento de tela mostrem suas senhas.",
   "lock": "Bloquear",
+  "lockWithShortcut": "Bloquear ({shortcut})",
   "unlock": "Desbloquear",
   "vaultsLocked": "Seus cofres estão bloqueados.",
   "unlockReason": "Desbloquear seus cofres",

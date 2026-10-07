@@ -13,7 +13,7 @@
 - Live sync, and the changes not sent yet.
 - The vault's relays in its settings, changed as a draft and saved as a single relay list.
 - The vaults encrypted on the device, under a key of the device.
-- A lock password on every platform, with the device's biometrics or screen lock as a shortcut where it has them. The vaults close while the app is locked.
+- A lock password on every platform, with the device's biometrics or screen lock as a shortcut where it has them. The vaults close while the app is locked. Ctrl+L, or ⌘L on Apple devices, locks it from anywhere.
 - Copied passwords cleared from the clipboard after a delay. The app hidden from the app switcher, and screen capture blocked on Android.
 - A light, dark or system theme.
 - A welcome screen about the user's passwords, and a Built on Nostr link that explains the relays and the keys.

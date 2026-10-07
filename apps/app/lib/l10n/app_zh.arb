@@ -300,6 +300,7 @@
   "allowScreenCapture": "允许截屏",
   "allowScreenCaptureDescription": "开启后，截屏、录屏和屏幕共享中会显示您的密码。",
   "lock": "锁定",
+  "lockWithShortcut": "锁定（{shortcut}）",
   "unlock": "解锁",
   "vaultsLocked": "您的密码库已锁定。",
   "unlockReason": "解锁您的密码库",

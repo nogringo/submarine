@@ -300,6 +300,7 @@
   "allowScreenCapture": "Разрешить захват экрана",
   "allowScreenCaptureDescription": "Ваши пароли будут видны на снимках, записях и при демонстрации экрана.",
   "lock": "Заблокировать",
+  "lockWithShortcut": "Заблокировать ({shortcut})",
   "unlock": "Разблокировать",
   "vaultsLocked": "Ваши хранилища заблокированы.",
   "unlockReason": "Разблокировать хранилища",

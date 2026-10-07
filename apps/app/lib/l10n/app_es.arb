@@ -300,6 +300,7 @@
   "allowScreenCapture": "Permitir capturas de pantalla",
   "allowScreenCaptureDescription": "Las capturas de pantalla, las grabaciones y la pantalla compartida podrán mostrar tus contraseñas.",
   "lock": "Bloquear",
+  "lockWithShortcut": "Bloquear ({shortcut})",
   "unlock": "Desbloquear",
   "vaultsLocked": "Tus cajas fuertes están bloqueadas.",
   "unlockReason": "Desbloquear tus cajas fuertes",

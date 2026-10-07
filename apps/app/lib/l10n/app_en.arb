@@ -1320,6 +1320,15 @@
   "@lock": {
     "description": "Tooltip of the button locking the app now."
   },
+  "lockWithShortcut": "Lock ({shortcut})",
+  "@lockWithShortcut": {
+    "description": "Tooltip of the button locking the app now, with the keyboard shortcut that does the same.",
+    "placeholders": {
+      "shortcut": {
+        "type": "String"
+      }
+    }
+  },
   "unlock": "Unlock",
   "@unlock": {
     "description": "Button of the lock screen asking the device to check the user."

@@ -300,6 +300,7 @@
   "allowScreenCapture": "Autoriser la capture d'écran",
   "allowScreenCaptureDescription": "Permet aux captures, aux enregistrements et au partage d'écran de montrer vos mots de passe.",
   "lock": "Verrouiller",
+  "lockWithShortcut": "Verrouiller ({shortcut})",
   "unlock": "Déverrouiller",
   "vaultsLocked": "Vos coffres sont verrouillés.",
   "unlockReason": "Déverrouiller vos coffres",

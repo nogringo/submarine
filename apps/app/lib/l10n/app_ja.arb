@@ -300,6 +300,7 @@
   "allowScreenCapture": "画面キャプチャを許可",
   "allowScreenCaptureDescription": "スクリーンショット、画面録画、画面共有にパスワードが映るようになります。",
   "lock": "ロック",
+  "lockWithShortcut": "ロック（{shortcut}）",
   "unlock": "ロック解除",
   "vaultsLocked": "保管庫はロックされています。",
   "unlockReason": "保管庫のロックを解除",

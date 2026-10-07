@@ -1915,6 +1915,12 @@ abstract class AppLocalizations {
   /// **'Lock'**
   String get lock;
 
+  /// Tooltip of the button locking the app now, with the keyboard shortcut that does the same.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock ({shortcut})'**
+  String lockWithShortcut(String shortcut);
+
   /// Button of the lock screen asking the device to check the user.
   ///
   /// In en, this message translates to:

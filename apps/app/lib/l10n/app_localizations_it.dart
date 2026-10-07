@@ -1065,6 +1065,11 @@ class AppLocalizationsIt extends AppLocalizations {
   String get lock => 'Blocca';
 
   @override
+  String lockWithShortcut(String shortcut) {
+    return 'Blocca ($shortcut)';
+  }
+
+  @override
   String get unlock => 'Sblocca';
 
   @override

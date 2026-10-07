@@ -1044,6 +1044,11 @@ class AppLocalizationsJa extends AppLocalizations {
   String get lock => 'ロック';
 
   @override
+  String lockWithShortcut(String shortcut) {
+    return 'ロック（$shortcut）';
+  }
+
+  @override
   String get unlock => 'ロック解除';
 
   @override

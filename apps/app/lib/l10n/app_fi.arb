@@ -300,6 +300,7 @@
   "allowScreenCapture": "Salli näytön kaappaus",
   "allowScreenCaptureDescription": "Salasanasi voivat tällöin näkyä kuvakaappauksissa, näyttötallenteissa ja näytön jakamisessa.",
   "lock": "Lukitse",
+  "lockWithShortcut": "Lukitse ({shortcut})",
   "unlock": "Avaa lukitus",
   "vaultsLocked": "Holvisi ovat lukossa.",
   "unlockReason": "Avaa holviesi lukitus",

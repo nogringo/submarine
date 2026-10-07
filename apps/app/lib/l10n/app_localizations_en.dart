@@ -1058,6 +1058,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lock => 'Lock';
 
   @override
+  String lockWithShortcut(String shortcut) {
+    return 'Lock ($shortcut)';
+  }
+
+  @override
   String get unlock => 'Unlock';
 
   @override

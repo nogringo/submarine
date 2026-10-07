@@ -1059,6 +1059,11 @@ class AppLocalizationsFi extends AppLocalizations {
   String get lock => 'Lukitse';
 
   @override
+  String lockWithShortcut(String shortcut) {
+    return 'Lukitse ($shortcut)';
+  }
+
+  @override
   String get unlock => 'Avaa lukitus';
 
   @override

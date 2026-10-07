@@ -1,7 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../command_shortcut.dart';
 import '../context.dart';
 import '../theme/theme.dart';
 
@@ -29,10 +29,7 @@ class _SearchFieldState extends State<SearchField> {
   final _controller = TextEditingController();
   final _focus = FocusNode();
 
-  static bool get _apple => switch (defaultTargetPlatform) {
-    TargetPlatform.macOS || TargetPlatform.iOS => true,
-    _ => false,
-  };
+  static const _shortcut = CommandShortcut(LogicalKeyboardKey.keyF);
 
   @override
   void initState() {
@@ -49,13 +46,8 @@ class _SearchFieldState extends State<SearchField> {
   }
 
   bool _onKey(KeyEvent event) {
-    final shortcut = SingleActivator(
-      LogicalKeyboardKey.keyF,
-      control: !_apple,
-      meta: _apple,
-    );
     // Not under a dialog, nor under a screen pushed over the list.
-    if (!shortcut.accepts(event, HardwareKeyboard.instance) ||
+    if (!_shortcut.accepts(event) ||
         !(ModalRoute.isCurrentOf(context) ?? true)) {
       return false;
     }
@@ -118,7 +110,7 @@ class _SearchFieldState extends State<SearchField> {
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          _apple ? '⌘F' : 'Ctrl+F',
+                          _shortcut.label,
                           style: monoStyle.copyWith(
                             fontSize: 12,
                             color: palette.muted,

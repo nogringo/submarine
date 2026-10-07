@@ -1040,6 +1040,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get lock => '锁定';
 
   @override
+  String lockWithShortcut(String shortcut) {
+    return '锁定（$shortcut）';
+  }
+
+  @override
   String get unlock => '解锁';
 
   @override

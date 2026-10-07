@@ -4,6 +4,8 @@ import 'dart:io'
     show HttpOverrides, HttpServer, InternetAddress, WebSocketTransformer;
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart'
+    show debugDefaultTargetPlatformOverride;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -290,6 +292,25 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
     }
     await settle(tester);
+  }
+
+  /// Sets [password] as the lock password from the settings on screen.
+  Future<void> setLockPassword(WidgetTester tester, String password) async {
+    await tester.tap(find.text('Set up'));
+    await settle(tester);
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Lock password'),
+      password,
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Confirm the password'),
+      password,
+    );
+    await tapUntil(
+      tester,
+      find.widgetWithText(FilledButton, 'Save'),
+      () => lock.hasPassword,
+    );
   }
 
   /// Opens the menu of [button] in real time, where the callback of its items
@@ -2124,7 +2145,7 @@ void main() {
       ]),
     });
 
-    final key = await DeviceKeyStorage().read();
+    final key = await DeviceKeyStorage().create();
     final [first] = await VaultStorage().read(key);
     final [again] = await VaultStorage().read(key);
 
@@ -2144,14 +2165,14 @@ void main() {
       'vaults': jsonEncode([record.toJson()]),
     });
 
-    final key = await DeviceKeyStorage().read();
+    final key = await DeviceKeyStorage().create();
     final [read] = await VaultStorage().read(key);
     final saved = (await const FlutterSecureStorage().read(key: 'vaults'))!;
 
     expect(read.toJson(), record.toJson());
     expect(saved, startsWith('2.'));
     expect(jsonDecode((await key.decryptString(saved))!), [record.toJson()]);
-    expect((await DeviceKeyStorage().read()).bytes, key.bytes);
+    expect((await DeviceKeyStorage().read())!.bytes, key.bytes);
   });
 
   testWidgets('leaves the vaults alone when the key does not open them', (
@@ -2161,7 +2182,7 @@ void main() {
     FlutterSecureStorage.setMockInitialValues({'vaults': encrypted});
 
     await expectLater(
-      VaultStorage().read(await DeviceKeyStorage().read()),
+      VaultStorage().read(await DeviceKeyStorage().create()),
       throwsA(isA<VaultsUnreadableException>()),
     );
     expect(await const FlutterSecureStorage().read(key: 'vaults'), encrypted);
@@ -3061,6 +3082,269 @@ void main() {
     expect(saved(), 'correct horse');
     expect(vaults.all.single.items.single.hasConflict, isFalse);
     await close(tester);
+  });
+
+  testWidgets('sets a lock password, then unlocks with it only', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(tester, items: [github]);
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+      ),
+    );
+    await settle(tester);
+    await tester.tap(find.byTooltip('Settings'));
+    await settle(tester);
+    expect(find.text('Lock after'), findsNothing);
+
+    await tester.tap(find.text('Set up'));
+    await settle(tester);
+    final password = find.widgetWithText(TextField, 'Lock password');
+    final confirmation = find.widgetWithText(TextField, 'Confirm the password');
+    final save = find.widgetWithText(FilledButton, 'Save');
+    await tester.enterText(password, 'too short');
+    await tester.tap(save);
+    await settle(tester);
+    expect(find.text('At least 12 characters.'), findsOneWidget);
+    await tester.enterText(password, 'correct horse battery');
+    await tester.enterText(confirmation, 'correct horse batter');
+    await tester.tap(save);
+    await settle(tester);
+    expect(find.text('The passwords do not match.'), findsOneWidget);
+
+    await tester.tap(find.text('Generate a passphrase'));
+    await tester.pump();
+    final generated = tester.widget<TextField>(password).controller!.text;
+    expect(generated.split('-'), hasLength(6));
+    expect(tester.widget<TextField>(confirmation).controller!.text, generated);
+    expect(tester.widget<TextField>(password).obscureText, isFalse);
+
+    await tester.enterText(password, 'correct horse battery');
+    await tester.enterText(confirmation, 'correct horse battery');
+    await tapUntil(tester, save, () => lock.hasPassword);
+    expect(find.byType(Dialog), findsNothing);
+    expect(find.text('Lock after'), findsOneWidget);
+    const storage = FlutterSecureStorage();
+    expect(await storage.read(key: 'vaultsKey'), isNull);
+    expect(await storage.read(key: 'vaultsKeyProtected'), isNotNull);
+
+    await tester.tap(find.byTooltip('Lock'));
+    await settle(tester);
+    final lockField = find.widgetWithText(TextField, 'Lock password');
+    await tester.enterText(lockField, 'correct horse batter');
+    await tapUntil(
+      tester,
+      find.text('Unlock'),
+      () => find.text('This is not the lock password.').evaluate().isNotEmpty,
+    );
+    expect(find.text('This is not the lock password.'), findsOneWidget);
+    expect(lock.locked, isTrue);
+
+    await tester.enterText(lockField, 'correct horse battery');
+    await tapUntil(
+      tester,
+      find.text('Unlock'),
+      () => !lock.locked && vaults.all.every((vault) => vault.loaded),
+    );
+    expect(find.text('Security'), findsOneWidget);
+
+    await restart(tester);
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+      ),
+    );
+    await settle(tester);
+    expect(find.text('Your vaults are locked.'), findsOneWidget);
+    expect(lockField, findsOneWidget);
+    expect(find.text('Unlock with biometrics'), findsNothing);
+    expect(vaults.closed, isTrue);
+    await close(tester);
+  });
+
+  testWidgets('unlocks with biometrics instead of the lock password', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(tester, items: [github]);
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+      ),
+    );
+    await settle(tester);
+    await tester.tap(find.byTooltip('Settings'));
+    await settle(tester);
+    await setLockPassword(tester, 'correct horse battery');
+    const storage = FlutterSecureStorage();
+
+    await tester.tap(settingsSwitch('Unlock with biometrics'));
+    await settle(tester);
+    expect(lock.biometrics, isTrue);
+    expect(await storage.read(key: 'vaultsKey'), isNotNull);
+    expect(
+      find.text('Instead of typing the lock password, which keeps working.'),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byTooltip('Lock'));
+    await settle(tester);
+    expect(find.widgetWithText(TextField, 'Lock password'), findsOneWidget);
+    await unlockWith(tester, find.text('Unlock with biometrics'));
+    expect(lock.locked, isFalse);
+    expect(find.text('Security'), findsOneWidget);
+
+    await tester.tap(settingsSwitch('Unlock with biometrics'));
+    await settle(tester);
+    expect(lock.biometrics, isFalse);
+    expect(lock.enabled, isTrue);
+    expect(await storage.read(key: 'vaultsKey'), isNull);
+    await close(tester);
+  });
+
+  testWidgets('changes the lock password, then removes it', (tester) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(tester, items: [github]);
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+      ),
+    );
+    await settle(tester);
+    await tester.tap(find.byTooltip('Settings'));
+    await settle(tester);
+    await setLockPassword(tester, 'correct horse battery');
+    final current = find.widgetWithText(TextField, 'Current password');
+    const wrong = 'This is not the lock password.';
+
+    await tester.tap(find.text('Change'));
+    await settle(tester);
+    await tester.enterText(current, 'correct horse batter');
+    await tester.enterText(
+      find.widgetWithText(TextField, 'New password'),
+      'staple tremor gallery',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Confirm the password'),
+      'staple tremor gallery',
+    );
+    final save = find.widgetWithText(FilledButton, 'Save');
+    await tapUntil(tester, save, () => find.text(wrong).evaluate().isNotEmpty);
+    expect(find.text(wrong), findsOneWidget);
+    await tester.enterText(current, 'correct horse battery');
+    await tapUntil(tester, save, () => find.byType(Dialog).evaluate().isEmpty);
+
+    await tester.tap(find.byTooltip('Lock'));
+    await settle(tester);
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Lock password'),
+      'staple tremor gallery',
+    );
+    await tapUntil(
+      tester,
+      find.text('Unlock'),
+      () => !lock.locked && vaults.all.every((vault) => vault.loaded),
+    );
+    expect(lock.locked, isFalse);
+
+    await tester.tap(find.text('Remove'));
+    await settle(tester);
+    await tester.enterText(current, 'staple tremor gallery');
+    await tapUntil(
+      tester,
+      find.widgetWithText(FilledButton, 'Remove'),
+      () => !lock.hasPassword,
+    );
+    expect(lock.enabled, isFalse);
+    expect(find.byTooltip('Lock'), findsNothing);
+    expect(find.text('Lock after'), findsNothing);
+    const storage = FlutterSecureStorage();
+    expect(await storage.read(key: 'vaultsKey'), isNotNull);
+    expect(await storage.read(key: 'vaultsKeyProtected'), isNull);
+    await close(tester);
+  });
+
+  testWidgets('removes the vaults from the device for a forgotten password', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(tester, items: [github]);
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+      ),
+    );
+    await settle(tester);
+    await tester.tap(find.byTooltip('Settings'));
+    await settle(tester);
+    await setLockPassword(tester, 'correct horse battery');
+    await tester.tap(find.byTooltip('Lock'));
+    await settle(tester);
+
+    await tester.tap(find.text('Forgot the password?'));
+    await settle(tester);
+    expect(find.text('Remove the vaults from this device?'), findsOneWidget);
+    await tester.tap(find.text('Cancel'));
+    await settle(tester);
+    expect(lock.locked, isTrue);
+
+    await tester.tap(find.text('Forgot the password?'));
+    await settle(tester);
+    await tapUntil(tester, find.text('Remove the vaults'), () => !lock.locked);
+    expect(find.text('Create a vault'), findsOneWidget);
+    expect(vaults.isEmpty, isTrue);
+    expect(lock.enabled, isFalse);
+    const storage = FlutterSecureStorage();
+    expect(await storage.read(key: 'vaults'), isNull);
+    expect(await storage.read(key: 'vaultsKeyProtected'), isNull);
+    expect(await storage.read(key: 'vaultsKey'), isNotNull);
+    expect(await tester.runAsync(() => ndk.config.cache.loadEvents()), isEmpty);
+    await close(tester);
+  });
+
+  testWidgets('offers the lock password only on Linux', (tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+    setScreen(tester, const Size(1280, 800));
+    await open(tester, items: [github]);
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+      ),
+    );
+    await settle(tester);
+    await tester.tap(find.byTooltip('Settings'));
+    await settle(tester);
+
+    expect(find.text('Lock password'), findsOneWidget);
+    expect(find.text('Unlock with biometrics'), findsNothing);
+    await close(tester);
+    debugDefaultTargetPlatformOverride = null;
   });
 
   testWidgets('stays locked when the key of the device does not open them', (

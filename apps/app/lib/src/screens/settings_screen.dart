@@ -7,6 +7,7 @@ import '../clipboard.dart';
 import '../context.dart';
 import '../items/field_tile.dart';
 import '../lock/app_lock.dart';
+import '../lock/lock_password_dialog.dart';
 import '../lock/lock_screen.dart';
 import '../router.dart';
 import '../screen_capture.dart';
@@ -75,7 +76,8 @@ class _Settings extends StatelessWidget {
                 title: l10n.security,
                 child: FieldCard(
                   children: [
-                    const _LockTile(),
+                    const _PasswordTile(),
+                    if (DeviceAuth.supportedPlatform) const _BiometricsTile(),
                     if (lock.enabled)
                       _MenuTile(
                         title: l10n.lockAfter,
@@ -136,14 +138,50 @@ class _VaultTile extends StatelessWidget {
   );
 }
 
-class _LockTile extends StatefulWidget {
-  const _LockTile();
+class _PasswordTile extends StatelessWidget {
+  const _PasswordTile();
 
   @override
-  State<_LockTile> createState() => _LockTileState();
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final lock = AppLock.of(context);
+    void open(LockPasswordChange change) => showDialog<void>(
+      context: context,
+      builder: (context) => LockPasswordDialog(change: change),
+    );
+    return SettingsTile(
+      title: Text(l10n.lockPassword),
+      subtitle: Text(l10n.lockPasswordDescription),
+      trailing: lock.hasPassword
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextButton(
+                  onPressed: () => open(LockPasswordChange.change),
+                  child: Text(l10n.changeLockPassword),
+                ),
+                TextButton(
+                  onPressed: () => open(LockPasswordChange.remove),
+                  child: Text(l10n.removeLockPassword),
+                ),
+              ],
+            )
+          : TextButton(
+              onPressed: () => open(LockPasswordChange.set),
+              child: Text(l10n.setLockPassword),
+            ),
+    );
+  }
 }
 
-class _LockTileState extends State<_LockTile> {
+class _BiometricsTile extends StatefulWidget {
+  const _BiometricsTile();
+
+  @override
+  State<_BiometricsTile> createState() => _BiometricsTileState();
+}
+
+class _BiometricsTileState extends State<_BiometricsTile> {
   Future<bool>? _available;
   String? _error;
 
@@ -156,9 +194,9 @@ class _LockTileState extends State<_LockTile> {
   Future<void> _toggle(AppLock lock, bool enabled) async {
     final l10n = context.l10n;
     setState(() => _error = null);
-    if (!enabled) return lock.disable();
+    if (!enabled) return lock.disableBiometrics();
     try {
-      await lock.enable(l10n.enableLockReason);
+      await lock.enableBiometrics(l10n.enableLockReason);
     } on LocalAuthException catch (error) {
       if (mounted) setState(() => _error = authErrorMessage(l10n, error));
     }
@@ -172,23 +210,23 @@ class _LockTileState extends State<_LockTile> {
     return FutureBuilder(
       future: _available,
       builder: (context, snapshot) {
-        // Turning the lock off never waits for the device.
-        final canToggle = lock.enabled || snapshot.data == true;
-        final unavailable = snapshot.data == false && !lock.enabled;
+        // Turning biometrics off never waits for the device.
+        final canToggle = lock.biometrics || snapshot.data == true;
+        final unavailable = snapshot.data == false && !lock.biometrics;
         final error = _error;
         return SettingsTile(
           title: Text(l10n.unlockWithBiometrics),
           subtitle: error != null
               ? Text(error, style: TextStyle(color: palette.danger))
               : Text(
-                  !unavailable
-                      ? l10n.unlockWithBiometricsDescription
-                      : DeviceAuth.supportedPlatform
+                  unavailable
                       ? l10n.lockNeedsScreenLock
-                      : l10n.lockUnavailable,
+                      : lock.hasPassword
+                      ? l10n.unlockWithBiometricsWithPassword
+                      : l10n.unlockWithBiometricsDescription,
                 ),
           trailing: Switch(
-            value: lock.enabled,
+            value: lock.biometrics,
             onChanged: canToggle && !lock.checking
                 ? (enabled) => _toggle(lock, enabled)
                 : null,

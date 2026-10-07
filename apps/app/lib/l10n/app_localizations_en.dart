@@ -998,9 +998,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Set up a screen lock on this device first.';
 
   @override
-  String get lockUnavailable => 'Not available on this system.';
-
-  @override
   String get lockAfter => 'Lock after';
 
   @override
@@ -1216,4 +1213,78 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get filePasswordMismatch => 'The passwords do not match.';
+
+  @override
+  String get lockPassword => 'Lock password';
+
+  @override
+  String get lockPasswordDescription =>
+      'Encrypts the vault keys on this device, and unlocks the app. It cannot be recovered.';
+
+  @override
+  String get setLockPassword => 'Set up';
+
+  @override
+  String get changeLockPassword => 'Change';
+
+  @override
+  String get removeLockPassword => 'Remove';
+
+  @override
+  String get setLockPasswordTitle => 'Set a lock password';
+
+  @override
+  String get changeLockPasswordTitle => 'Change the lock password';
+
+  @override
+  String get removeLockPasswordTitle => 'Remove the lock password';
+
+  @override
+  String get removeLockPasswordBody =>
+      'The app no longer asks for it. The vault keys on this device then rest on its secure storage only.';
+
+  @override
+  String get currentLockPassword => 'Current password';
+
+  @override
+  String get newLockPassword => 'New password';
+
+  @override
+  String get confirmLockPassword => 'Confirm the password';
+
+  @override
+  String lockPasswordHelper(int count) {
+    return 'At least $count characters. Forgetting it removes the vaults from this device.';
+  }
+
+  @override
+  String lockPasswordTooShort(int count) {
+    return 'At least $count characters.';
+  }
+
+  @override
+  String get lockPasswordMismatch => 'The passwords do not match.';
+
+  @override
+  String get wrongLockPassword => 'This is not the lock password.';
+
+  @override
+  String get generatePassphrase => 'Generate a passphrase';
+
+  @override
+  String get unlockWithBiometricsWithPassword =>
+      'Instead of typing the lock password, which keeps working.';
+
+  @override
+  String get forgotLockPassword => 'Forgot the password?';
+
+  @override
+  String get forgetVaultsTitle => 'Remove the vaults from this device?';
+
+  @override
+  String get forgetVaultsBody =>
+      'Without the lock password, they cannot be decrypted here. Your items stay on the relays: open each vault again with its key or its signer.';
+
+  @override
+  String get forgetVaults => 'Remove the vaults';
 }

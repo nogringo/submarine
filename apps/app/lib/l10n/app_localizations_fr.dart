@@ -1004,9 +1004,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'Configurez d\'abord un verrouillage de l\'écran sur cet appareil.';
 
   @override
-  String get lockUnavailable => 'Indisponible sur ce système.';
-
-  @override
   String get lockAfter => 'Verrouiller après';
 
   @override
@@ -1222,4 +1219,81 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get filePasswordMismatch => 'Les mots de passe ne correspondent pas.';
+
+  @override
+  String get lockPassword => 'Mot de passe de verrouillage';
+
+  @override
+  String get lockPasswordDescription =>
+      'Chiffre les clés des coffres sur cet appareil, et déverrouille l\'application. Il ne peut pas être récupéré.';
+
+  @override
+  String get setLockPassword => 'Définir';
+
+  @override
+  String get changeLockPassword => 'Changer';
+
+  @override
+  String get removeLockPassword => 'Retirer';
+
+  @override
+  String get setLockPasswordTitle => 'Définir un mot de passe de verrouillage';
+
+  @override
+  String get changeLockPasswordTitle =>
+      'Changer le mot de passe de verrouillage';
+
+  @override
+  String get removeLockPasswordTitle =>
+      'Retirer le mot de passe de verrouillage';
+
+  @override
+  String get removeLockPasswordBody =>
+      'L\'application ne le demande plus. Les clés des coffres de cet appareil ne reposent alors plus que sur son stockage sécurisé.';
+
+  @override
+  String get currentLockPassword => 'Mot de passe actuel';
+
+  @override
+  String get newLockPassword => 'Nouveau mot de passe';
+
+  @override
+  String get confirmLockPassword => 'Confirmez le mot de passe';
+
+  @override
+  String lockPasswordHelper(int count) {
+    return 'Au moins $count caractères. L\'oublier retire les coffres de cet appareil.';
+  }
+
+  @override
+  String lockPasswordTooShort(int count) {
+    return 'Au moins $count caractères.';
+  }
+
+  @override
+  String get lockPasswordMismatch => 'Les mots de passe ne correspondent pas.';
+
+  @override
+  String get wrongLockPassword =>
+      'Ce n\'est pas le mot de passe de verrouillage.';
+
+  @override
+  String get generatePassphrase => 'Générer une phrase de passe';
+
+  @override
+  String get unlockWithBiometricsWithPassword =>
+      'Plutôt que de taper le mot de passe de verrouillage, qui reste valable.';
+
+  @override
+  String get forgotLockPassword => 'Mot de passe oublié ?';
+
+  @override
+  String get forgetVaultsTitle => 'Retirer les coffres de cet appareil ?';
+
+  @override
+  String get forgetVaultsBody =>
+      'Sans le mot de passe de verrouillage, ils ne peuvent pas être déchiffrés ici. Vos éléments restent sur les relais : rouvrez chaque coffre avec sa clé ou son signeur.';
+
+  @override
+  String get forgetVaults => 'Retirer les coffres';
 }

@@ -6,8 +6,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:nostr_passwords/nostr_passwords.dart';
 
 import '../secure_storage.dart';
+import '../vaults/vault_storage.dart';
 import '../vaults/vaults.dart';
 import 'device_key.dart';
 
@@ -53,6 +55,7 @@ class LockSettings {
   Future<void> write() =>
       secureStorage.write(key: _key, value: jsonEncode(toJson()));
 
+  /// Whether the device unlocks the app: biometrics, or its code or password.
   final bool enabled;
   final LockTimeout timeout;
 
@@ -102,13 +105,21 @@ class DeviceAuth {
   );
 }
 
-/// Keeps the app behind the check of the device once locked, by hand or after
-/// a while. Locking closes the vaults, whose keys and items leave the memory
-/// and which stop syncing. Unlocking opens them again with the key of the
-/// device.
+/// As Bitwarden asks of a master password.
+const minLockPasswordLength = 12;
+
+/// Keeps the app behind the lock password or the check of the device once
+/// locked, by hand or after a while. Locking closes the vaults, whose keys and
+/// items leave the memory and which stop syncing. Unlocking opens them again
+/// with the key of the device, which the password protects when there is one.
 class AppLock extends ChangeNotifier {
-  AppLock._(this._settings, this._auth, this._keys, this._vaults)
-    : _locked = _settings.enabled;
+  AppLock._(
+    this._settings,
+    this._protected,
+    this._auth,
+    this._keys,
+    this._vaults,
+  ) : _locked = _settings.enabled || _protected != null;
 
   /// Locked from the start when the lock is on, [vaults] open otherwise.
   /// Throws a [VaultsUnreadableException] when the key of the device does not
@@ -118,13 +129,14 @@ class AppLock extends ChangeNotifier {
     DeviceAuth auth = const DeviceAuth(),
     DeviceKeyStorage? keys,
   }) async {
-    final lock = AppLock._(
-      await LockSettings.read(),
-      auth,
-      keys ?? DeviceKeyStorage(),
-      vaults,
-    );
-    if (!lock.locked) await vaults.open(await lock._keys.read());
+    keys ??= DeviceKeyStorage();
+    final settings = await LockSettings.read();
+    final protected = await keys.readProtected();
+    // Left by a change stopped halfway: next to a password, only biometrics
+    // keep the key in clear.
+    if (protected != null && !settings.enabled) await keys.delete();
+    final lock = AppLock._(settings, protected, auth, keys, vaults);
+    if (!lock.locked) await lock._open(await lock._clearKey());
     return lock;
   }
 
@@ -135,14 +147,27 @@ class AppLock extends ChangeNotifier {
   final DeviceKeyStorage _keys;
   final Vaults _vaults;
   LockSettings _settings;
+  PasswordProtectedKey? _protected;
 
-  bool get enabled => _settings.enabled;
+  /// The key of the device while unlocked, which a new password protects.
+  SymmetricCryptoKey? _key;
+
+  /// Whether the app locks at all.
+  bool get enabled => biometrics || hasPassword;
+
+  /// Whether the device unlocks the app: biometrics, or its code or password.
+  bool get biometrics => _settings.enabled;
+
+  /// Whether the lock password unlocks the app.
+  bool get hasPassword => _protected != null;
+
   LockTimeout get timeout => _settings.timeout;
 
   bool get locked => _locked;
   bool _locked;
 
-  /// Whether the device is checking who uses it, or the vaults are opening.
+  /// Whether the device is checking who uses it, a password is being checked
+  /// or protected, or the vaults are opening.
   bool get checking => _checking;
   var _checking = false;
 
@@ -151,19 +176,51 @@ class AppLock extends ChangeNotifier {
 
   Future<bool> isAvailable() => _auth.isAvailable();
 
-  /// Turns the lock on once the device checked the user, which proves it can
-  /// unlock the app later. Throws a [LocalAuthException] when the device could
-  /// not check.
-  Future<void> enable(String reason) async {
+  /// Lets the device unlock the app once it checked the user, which proves it
+  /// can later. Throws a [LocalAuthException] when the device could not check.
+  Future<void> enableBiometrics(String reason) async {
     if (!await _check(() => _auth.authenticate(reason))) return;
+    if (hasPassword) await _keys.write(_key!);
     await _save(_settings.copyWith(enabled: true));
     used();
   }
 
-  Future<void> disable() async {
-    _stopIdleTimer();
+  Future<void> disableBiometrics() async {
+    if (!hasPassword) _stopIdleTimer();
     await _save(_settings.copyWith(enabled: false));
+    if (hasPassword) await _keys.delete();
   }
+
+  /// Protects the key of the device with [password], which then unlocks the
+  /// app. The key stays in clear only for biometrics.
+  Future<void> setPassword(String password) => _check(() async {
+    final protected = await compute(_protect, (_key!.bytes, password));
+    await _keys.writeProtected(protected);
+    if (!biometrics) await _keys.delete();
+    _protected = protected;
+    used();
+  });
+
+  /// Whether [current] is the lock password, which [password] then replaces.
+  Future<bool> changePassword(String current, String password) =>
+      _check(() async {
+        if (await _unprotect(current) == null) return false;
+        final protected = await compute(_protect, (_key!.bytes, password));
+        await _keys.writeProtected(protected);
+        _protected = protected;
+        return true;
+      });
+
+  /// Whether [current] is the lock password, which then no longer locks the
+  /// app.
+  Future<bool> removePassword(String current) => _check(() async {
+    if (await _unprotect(current) == null) return false;
+    await _keys.write(_key!);
+    await _keys.deleteProtected();
+    _protected = null;
+    if (!enabled) _stopIdleTimer();
+    return true;
+  });
 
   Future<void> setTimeout(LockTimeout timeout) async {
     _stopIdleTimer();
@@ -175,6 +232,7 @@ class AppLock extends ChangeNotifier {
     if (!enabled || _locked) return;
     _stopIdleTimer();
     _locked = true;
+    _key = null;
     _vaults.close();
     notifyListeners();
   }
@@ -187,7 +245,7 @@ class AppLock extends ChangeNotifier {
     if (!_locked || _checking) return;
     try {
       await _check(() async {
-        if (await _auth.authenticate(reason)) await _open();
+        if (await _auth.authenticate(reason)) await _open(await _clearKey());
       });
     } on LocalAuthException catch (error) {
       switch (error.code) {
@@ -201,14 +259,41 @@ class AppLock extends ChangeNotifier {
             LocalAuthExceptionCode.noBiometricsEnrolled ||
             LocalAuthExceptionCode.noBiometricHardware:
           // A device that no longer checks anyone would lock its owner out
-          // for good, while holding it is all a lock could check.
-          if (!await _auth.isAvailable()) return _check(_open);
+          // for good, while holding it is all a lock could check. A password
+          // still lets them in.
+          if (!hasPassword && !await _auth.isAvailable()) {
+            return _check(() async => _open(await _clearKey()));
+          }
           rethrow;
         default:
           rethrow;
       }
     }
   }
+
+  /// Whether [password] is the lock password, which then opens the vaults.
+  /// Throws a [VaultsUnreadableException] when the key it opens does not open
+  /// them.
+  Future<bool> unlockWithPassword(String password) async {
+    if (!_locked || _checking) return !_locked;
+    return _check(() async {
+      final key = await _unprotect(password);
+      if (key == null) return false;
+      await _open(key);
+      return true;
+    });
+  }
+
+  /// Removes every vault from this device, for a forgotten password, and
+  /// leaves it unlocked without a lock, under a new key.
+  Future<void> forget() => _check(() async {
+    await _vaults.forget();
+    await _keys.deleteProtected();
+    await _keys.delete();
+    _protected = null;
+    await _save(_settings.copyWith(enabled: false));
+    await _open(await _keys.create());
+  });
 
   /// Counts as a use of the app, which restarts the wait before it locks.
   void used() {
@@ -246,8 +331,23 @@ class AppLock extends ChangeNotifier {
     _idleTimer = null;
   }
 
-  Future<void> _open() async {
-    await _vaults.open(await _keys.read());
+  /// The key kept in clear, which is new while there is none and no password
+  /// either.
+  Future<SymmetricCryptoKey> _clearKey() async =>
+      await _keys.read() ??
+      (hasPassword
+          ? throw const VaultsUnreadableException()
+          : await _keys.create());
+
+  /// The key of the device, if [password] is the lock password.
+  Future<SymmetricCryptoKey?> _unprotect(String password) async {
+    final bytes = await compute(_openProtected, (_protected!, password));
+    return bytes == null ? null : SymmetricCryptoKey(bytes);
+  }
+
+  Future<void> _open(SymmetricCryptoKey key) async {
+    await _vaults.open(key);
+    _key = key;
     _locked = false;
     used();
     notifyListeners();
@@ -275,6 +375,17 @@ class AppLock extends ChangeNotifier {
     _stopIdleTimer();
     super.dispose();
   }
+}
+
+/// On an isolate of its own where there is one, as Argon2id takes a moment.
+Future<PasswordProtectedKey> _protect((Uint8List, String) key) {
+  final (bytes, password) = key;
+  return PasswordProtectedKey.protect(SymmetricCryptoKey(bytes), password);
+}
+
+Future<Uint8List?> _openProtected((PasswordProtectedKey, String) key) async {
+  final (protected, password) = key;
+  return (await protected.open(password))?.bytes;
 }
 
 class AppLockScope extends InheritedNotifier<AppLock> {

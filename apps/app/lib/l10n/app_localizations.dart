@@ -1814,12 +1814,6 @@ abstract class AppLocalizations {
   /// **'Set up a screen lock on this device first.'**
   String get lockNeedsScreenLock;
 
-  /// Why the lock cannot be turned on: the platform (Linux, web) has no device check.
-  ///
-  /// In en, this message translates to:
-  /// **'Not available on this system.'**
-  String get lockUnavailable;
-
   /// Setting choosing how long the app may go unused before it locks.
   ///
   /// In en, this message translates to:
@@ -2131,6 +2125,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The passwords do not match.'**
   String get filePasswordMismatch;
+
+  /// Setting of the password that encrypts the vault keys on this device and unlocks the app.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock password'**
+  String get lockPassword;
+
+  /// Explains the lock password setting.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypts the vault keys on this device, and unlocks the app. It cannot be recovered.'**
+  String get lockPasswordDescription;
+
+  /// Button of the settings opening the dialog that sets the lock password.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up'**
+  String get setLockPassword;
+
+  /// Button of the settings opening the dialog that changes the lock password.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get changeLockPassword;
+
+  /// Button of the settings opening the dialog that removes the lock password, and button confirming it.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get removeLockPassword;
+
+  /// Title of the dialog setting the lock password.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a lock password'**
+  String get setLockPasswordTitle;
+
+  /// Title of the dialog changing the lock password.
+  ///
+  /// In en, this message translates to:
+  /// **'Change the lock password'**
+  String get changeLockPasswordTitle;
+
+  /// Title of the dialog removing the lock password.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove the lock password'**
+  String get removeLockPasswordTitle;
+
+  /// Explains what removing the lock password does.
+  ///
+  /// In en, this message translates to:
+  /// **'The app no longer asks for it. The vault keys on this device then rest on its secure storage only.'**
+  String get removeLockPasswordBody;
+
+  /// Field of the lock password in use, asked before changing or removing it.
+  ///
+  /// In en, this message translates to:
+  /// **'Current password'**
+  String get currentLockPassword;
+
+  /// Field of the lock password replacing the current one.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get newLockPassword;
+
+  /// Second field of a new lock password, to catch a typo.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm the password'**
+  String get confirmLockPassword;
+
+  /// Under the fields of a new lock password.
+  ///
+  /// In en, this message translates to:
+  /// **'At least {count} characters. Forgetting it removes the vaults from this device.'**
+  String lockPasswordHelper(int count);
+
+  /// Error when a new lock password is too short.
+  ///
+  /// In en, this message translates to:
+  /// **'At least {count} characters.'**
+  String lockPasswordTooShort(int count);
+
+  /// Error when the confirmation differs from the new lock password.
+  ///
+  /// In en, this message translates to:
+  /// **'The passwords do not match.'**
+  String get lockPasswordMismatch;
+
+  /// Error when the typed password does not open the key of the device.
+  ///
+  /// In en, this message translates to:
+  /// **'This is not the lock password.'**
+  String get wrongLockPassword;
+
+  /// Button filling the new lock password with a generated passphrase, shown in clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate a passphrase'**
+  String get generatePassphrase;
+
+  /// Explains the biometrics switch while a lock password is set.
+  ///
+  /// In en, this message translates to:
+  /// **'Instead of typing the lock password, which keeps working.'**
+  String get unlockWithBiometricsWithPassword;
+
+  /// Button of the lock screen for a forgotten lock password.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot the password?'**
+  String get forgotLockPassword;
+
+  /// Title of the dialog confirming that a forgotten lock password removes the vaults from the device.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove the vaults from this device?'**
+  String get forgetVaultsTitle;
+
+  /// Body of the dialog confirming that a forgotten lock password removes the vaults.
+  ///
+  /// In en, this message translates to:
+  /// **'Without the lock password, they cannot be decrypted here. Your items stay on the relays: open each vault again with its key or its signer.'**
+  String get forgetVaultsBody;
+
+  /// Button confirming that the vaults leave the device, for a forgotten lock password.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove the vaults'**
+  String get forgetVaults;
 }
 
 class _AppLocalizationsDelegate

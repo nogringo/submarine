@@ -5,7 +5,9 @@ import 'package:ndk/ndk.dart';
 import 'package:ndk_flutter/ndk_flutter.dart'
     show Nip07EventSigner, Nip55EventSigner, Nip55Signer;
 import 'package:nostr_passwords/nostr_passwords.dart';
-import 'package:sembast/sembast.dart' show Database;
+import 'package:sembast/sembast.dart'
+    show Database, SembastStoreRefExtension, StoreRef;
+import 'package:sembast/utils/database_utils.dart' show getNonEmptyStoreNames;
 import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
 
 import '../items/item_filter.dart';
@@ -109,6 +111,20 @@ class Vaults extends ChangeNotifier {
       _open(record);
     }
     notifyListeners();
+  }
+
+  /// Removes every vault from this device while closed, with what they opened
+  /// and the events of the cache: what a forgotten lock password leaves.
+  Future<void> forget() async {
+    assert(closed);
+    await _storage.delete();
+    await ndk.config.cache.removeAllEvents();
+    final stores = getNonEmptyStoreNames(_database).toList();
+    await _database.transaction((transaction) async {
+      for (final name in stores) {
+        await StoreRef<Object?, Object?>(name).drop(transaction);
+      }
+    });
   }
 
   /// Drops every vault, with its signer and what it opened, until [open].

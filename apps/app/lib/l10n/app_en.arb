@@ -1254,10 +1254,6 @@
   "@lockNeedsScreenLock": {
     "description": "Why the lock cannot be turned on: the device has no code, password or biometrics."
   },
-  "lockUnavailable": "Not available on this system.",
-  "@lockUnavailable": {
-    "description": "Why the lock cannot be turned on: the platform (Linux, web) has no device check."
-  },
   "lockAfter": "Lock after",
   "@lockAfter": {
     "description": "Setting choosing how long the app may go unused before it locks."
@@ -1517,5 +1513,103 @@
   "filePasswordMismatch": "The passwords do not match.",
   "@filePasswordMismatch": {
     "description": "Error when the confirmation differs from the file password."
+  },
+  "lockPassword": "Lock password",
+  "@lockPassword": {
+    "description": "Setting of the password that encrypts the vault keys on this device and unlocks the app."
+  },
+  "lockPasswordDescription": "Encrypts the vault keys on this device, and unlocks the app. It cannot be recovered.",
+  "@lockPasswordDescription": {
+    "description": "Explains the lock password setting."
+  },
+  "setLockPassword": "Set up",
+  "@setLockPassword": {
+    "description": "Button of the settings opening the dialog that sets the lock password."
+  },
+  "changeLockPassword": "Change",
+  "@changeLockPassword": {
+    "description": "Button of the settings opening the dialog that changes the lock password."
+  },
+  "removeLockPassword": "Remove",
+  "@removeLockPassword": {
+    "description": "Button of the settings opening the dialog that removes the lock password, and button confirming it."
+  },
+  "setLockPasswordTitle": "Set a lock password",
+  "@setLockPasswordTitle": {
+    "description": "Title of the dialog setting the lock password."
+  },
+  "changeLockPasswordTitle": "Change the lock password",
+  "@changeLockPasswordTitle": {
+    "description": "Title of the dialog changing the lock password."
+  },
+  "removeLockPasswordTitle": "Remove the lock password",
+  "@removeLockPasswordTitle": {
+    "description": "Title of the dialog removing the lock password."
+  },
+  "removeLockPasswordBody": "The app no longer asks for it. The vault keys on this device then rest on its secure storage only.",
+  "@removeLockPasswordBody": {
+    "description": "Explains what removing the lock password does."
+  },
+  "currentLockPassword": "Current password",
+  "@currentLockPassword": {
+    "description": "Field of the lock password in use, asked before changing or removing it."
+  },
+  "newLockPassword": "New password",
+  "@newLockPassword": {
+    "description": "Field of the lock password replacing the current one."
+  },
+  "confirmLockPassword": "Confirm the password",
+  "@confirmLockPassword": {
+    "description": "Second field of a new lock password, to catch a typo."
+  },
+  "lockPasswordHelper": "At least {count} characters. Forgetting it removes the vaults from this device.",
+  "@lockPasswordHelper": {
+    "description": "Under the fields of a new lock password.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "lockPasswordTooShort": "At least {count} characters.",
+  "@lockPasswordTooShort": {
+    "description": "Error when a new lock password is too short.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "lockPasswordMismatch": "The passwords do not match.",
+  "@lockPasswordMismatch": {
+    "description": "Error when the confirmation differs from the new lock password."
+  },
+  "wrongLockPassword": "This is not the lock password.",
+  "@wrongLockPassword": {
+    "description": "Error when the typed password does not open the key of the device."
+  },
+  "generatePassphrase": "Generate a passphrase",
+  "@generatePassphrase": {
+    "description": "Button filling the new lock password with a generated passphrase, shown in clear."
+  },
+  "unlockWithBiometricsWithPassword": "Instead of typing the lock password, which keeps working.",
+  "@unlockWithBiometricsWithPassword": {
+    "description": "Explains the biometrics switch while a lock password is set."
+  },
+  "forgotLockPassword": "Forgot the password?",
+  "@forgotLockPassword": {
+    "description": "Button of the lock screen for a forgotten lock password."
+  },
+  "forgetVaultsTitle": "Remove the vaults from this device?",
+  "@forgetVaultsTitle": {
+    "description": "Title of the dialog confirming that a forgotten lock password removes the vaults from the device."
+  },
+  "forgetVaultsBody": "Without the lock password, they cannot be decrypted here. Your items stay on the relays: open each vault again with its key or its signer.",
+  "@forgetVaultsBody": {
+    "description": "Body of the dialog confirming that a forgotten lock password removes the vaults."
+  },
+  "forgetVaults": "Remove the vaults",
+  "@forgetVaults": {
+    "description": "Button confirming that the vaults leave the device, for a forgotten lock password."
   }
 }

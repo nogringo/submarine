@@ -5,6 +5,7 @@ import 'package:local_auth/local_auth.dart';
 import '../context.dart';
 import '../theme/theme.dart';
 import '../vaults/vault_storage.dart';
+import '../widgets/password_field.dart';
 import '../widgets/sonar.dart';
 import 'app_lock.dart';
 
@@ -60,7 +61,13 @@ class _LockGateState extends State<LockGate> {
               maintainState: true,
               child: ExcludeFocus(excluding: locked, child: child!),
             ),
-            if (locked) LockScreen(lock: widget.lock),
+            // Its own navigator, for its dialog and the overlay of its field:
+            // the app's lies underneath.
+            if (locked)
+              Navigator(
+                pages: [MaterialPage(child: LockScreen(lock: widget.lock))],
+                onDidRemovePage: (_) {},
+              ),
           ],
         );
       },
@@ -81,26 +88,80 @@ class LockScreen extends StatefulWidget {
 /// Asks the device only when the user says so: a window focused back by
 /// accident must not raise the system prompt.
 class _LockScreenState extends State<LockScreen> {
+  final _password = TextEditingController();
+  var _hidden = true;
   String? _error;
 
-  Future<void> _unlock() async {
+  @override
+  void dispose() {
+    _password.dispose();
+    super.dispose();
+  }
+
+  /// Runs [unlock], which tells what the user should hear if it did not
+  /// unlock.
+  Future<void> _try(
+    Future<String?> Function(AppLocalizations l10n) unlock,
+  ) async {
     final l10n = context.l10n;
     setState(() => _error = null);
+    String? error;
     try {
-      await widget.lock.unlock(l10n.unlockReason);
-    } on LocalAuthException catch (error) {
-      if (mounted) setState(() => _error = authErrorMessage(l10n, error));
+      error = await unlock(l10n);
+    } on LocalAuthException catch (exception) {
+      error = authErrorMessage(l10n, exception);
     } on PlatformException {
-      if (mounted) setState(() => _error = l10n.storageReadFailed);
+      error = l10n.storageReadFailed;
     } on VaultsUnreadableException {
-      if (mounted) setState(() => _error = l10n.storageReadFailed);
+      error = l10n.storageReadFailed;
     }
+    if (mounted) setState(() => _error = error);
+  }
+
+  Future<void> _unlockWithDevice() => _try((l10n) async {
+    await widget.lock.unlock(l10n.unlockReason);
+    return null;
+  });
+
+  Future<void> _unlockWithPassword() => _try((l10n) async {
+    if (_password.text.isEmpty) return null;
+    return await widget.lock.unlockWithPassword(_password.text)
+        ? null
+        : l10n.wrongLockPassword;
+  });
+
+  Future<void> _forget() async {
+    final l10n = context.l10n;
+    final colors = Theme.of(context).colorScheme;
+    final forget = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.forgetVaultsTitle),
+        content: Text(l10n.forgetVaultsBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: colors.error,
+              foregroundColor: colors.onError,
+            ),
+            child: Text(l10n.forgetVaults),
+          ),
+        ],
+      ),
+    );
+    if (forget ?? false) await widget.lock.forget();
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final palette = context.palette;
+    final lock = widget.lock;
     final error = _error;
     return Scaffold(
       body: SafeArea(
@@ -109,46 +170,77 @@ class _LockScreenState extends State<LockScreen> {
             padding: const EdgeInsets.all(24),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 360),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Center(child: Sonar(size: 180)),
-                  const SizedBox(height: 32),
-                  Text(
-                    'SUBMARINE',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: wordmarkFont,
-                      fontSize: 40,
-                      letterSpacing: 3,
-                      color: palette.text,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    l10n.vaultsLocked,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 16, color: palette.muted),
-                  ),
-                  const SizedBox(height: 40),
-                  ListenableBuilder(
-                    listenable: widget.lock,
-                    builder: (context, _) => FilledButton.icon(
-                      autofocus: true,
-                      onPressed: widget.lock.checking ? null : _unlock,
-                      icon: const Icon(Icons.lock_open_rounded),
-                      label: Text(l10n.unlock),
-                    ),
-                  ),
-                  if (error != null) ...[
-                    const SizedBox(height: 16),
+              child: ListenableBuilder(
+                listenable: lock,
+                builder: (context, _) => Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Center(child: Sonar(size: 180)),
+                    const SizedBox(height: 32),
                     Text(
-                      error,
+                      'SUBMARINE',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: palette.danger),
+                      style: TextStyle(
+                        fontFamily: wordmarkFont,
+                        fontSize: 40,
+                        letterSpacing: 3,
+                        color: palette.text,
+                      ),
                     ),
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.vaultsLocked,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 16, color: palette.muted),
+                    ),
+                    const SizedBox(height: 40),
+                    if (lock.hasPassword) ...[
+                      PasswordField(
+                        controller: _password,
+                        label: l10n.lockPassword,
+                        hidden: _hidden,
+                        onToggleHidden: () =>
+                            setState(() => _hidden = !_hidden),
+                        autofocus: !lock.biometrics,
+                        onSubmitted: (_) => _unlockWithPassword(),
+                      ),
+                      const SizedBox(height: 16),
+                      FilledButton.icon(
+                        onPressed: lock.checking ? null : _unlockWithPassword,
+                        icon: const Icon(Icons.lock_open_rounded),
+                        label: Text(l10n.unlock),
+                      ),
+                      if (lock.biometrics) ...[
+                        const SizedBox(height: 8),
+                        OutlinedButton.icon(
+                          autofocus: true,
+                          onPressed: lock.checking ? null : _unlockWithDevice,
+                          icon: const Icon(Icons.fingerprint_rounded),
+                          label: Text(l10n.unlockWithBiometrics),
+                        ),
+                      ],
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: lock.checking ? null : _forget,
+                        child: Text(l10n.forgotLockPassword),
+                      ),
+                    ] else
+                      FilledButton.icon(
+                        autofocus: true,
+                        onPressed: lock.checking ? null : _unlockWithDevice,
+                        icon: const Icon(Icons.lock_open_rounded),
+                        label: Text(l10n.unlock),
+                      ),
+                    if (error != null) ...[
+                      const SizedBox(height: 16),
+                      Text(
+                        error,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: palette.danger),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),

@@ -9,9 +9,9 @@ import 'package:nostr_passwords/nostr_passwords.dart';
 
 import '../context.dart';
 import '../items/field_tile.dart';
-import '../theme/theme.dart';
 import '../vaults/vault_controller.dart';
 import '../vaults/vaults.dart';
+import '../widgets/password_field.dart';
 import '../widgets/settings_tile.dart';
 import '../widgets/vault_dropdown.dart';
 
@@ -182,7 +182,7 @@ class _FilePasswordDialogState extends State<_FilePasswordDialog> {
                   style: TextStyle(color: context.palette.muted),
                 ),
                 const SizedBox(height: 20),
-                _FilePasswordField(
+                PasswordField(
                   controller: _password,
                   label: l10n.filePassword,
                   hidden: _hidden,
@@ -230,65 +230,6 @@ Future<List<Cipher>> _openExport((String, String) file) async {
 Future<String> _protectExport((String, String) file) {
   final (export, password) = file;
   return encryptBitwardenExport(export, password);
-}
-
-class _FilePasswordField extends StatelessWidget {
-  const _FilePasswordField({
-    required this.controller,
-    required this.label,
-    required this.hidden,
-    this.onToggleHidden,
-    this.autofocus = false,
-    this.errorText,
-    this.helperText,
-    this.onChanged,
-    this.onSubmitted,
-  });
-
-  final TextEditingController controller;
-  final String label;
-  final bool hidden;
-  final VoidCallback? onToggleHidden;
-  final bool autofocus;
-  final String? errorText;
-  final String? helperText;
-  final ValueChanged<String>? onChanged;
-  final ValueChanged<String>? onSubmitted;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final onToggleHidden = this.onToggleHidden;
-    return TextField(
-      controller: controller,
-      autofocus: autofocus,
-      obscureText: hidden,
-      autocorrect: false,
-      enableSuggestions: false,
-      keyboardType: TextInputType.visiblePassword,
-      style: monoStyle,
-      onChanged: onChanged,
-      onSubmitted: onSubmitted,
-      decoration: InputDecoration(
-        labelText: label,
-        errorText: errorText,
-        errorMaxLines: 3,
-        helperText: helperText,
-        helperMaxLines: 3,
-        suffixIcon: onToggleHidden == null
-            ? null
-            : IconButton(
-                tooltip: hidden ? l10n.show : l10n.hide,
-                onPressed: onToggleHidden,
-                icon: Icon(
-                  hidden
-                      ? Icons.visibility_outlined
-                      : Icons.visibility_off_outlined,
-                ),
-              ),
-      ),
-    );
-  }
 }
 
 class _ButtonProgress extends StatelessWidget {
@@ -611,7 +552,7 @@ class _ExportDialogState extends State<_ExportDialog> {
                 ),
                 const SizedBox(height: 8),
                 if (_protected) ...[
-                  _FilePasswordField(
+                  PasswordField(
                     controller: _password,
                     label: l10n.filePassword,
                     hidden: _hidden,
@@ -620,7 +561,7 @@ class _ExportDialogState extends State<_ExportDialog> {
                     errorText: _passwordError,
                   ),
                   const SizedBox(height: 16),
-                  _FilePasswordField(
+                  PasswordField(
                     controller: _confirmation,
                     label: l10n.confirmFilePassword,
                     hidden: _hidden,

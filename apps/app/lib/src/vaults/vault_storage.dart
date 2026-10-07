@@ -171,6 +171,8 @@ class VaultStorage {
           jsonEncode([for (final record in records) record.toJson()]),
         ),
       );
+
+  Future<void> delete() => _storage.delete(key: _key);
 }
 
 /// The vaults saved on this device do not open with its key.

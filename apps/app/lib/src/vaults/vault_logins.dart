@@ -14,9 +14,10 @@ const nostrConnectRelays = [
   'wss://relay.primal.net',
 ];
 
-// TODO: add the image and the url once Submarine has a website.
 const bunkerClient = Nip46ClientMetadata(
   name: 'Submarine',
+  url: 'https://nogringo.github.io/submarine/',
+  image: 'https://nogringo.github.io/submarine/icons/Icon-192.png',
   perms: vaultSignerPermissions,
 );
 

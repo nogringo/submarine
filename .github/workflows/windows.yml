@@ -1,0 +1,42 @@
+name: Build Windows packages
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Install Fastforge
+        run: dart pub global activate fastforge
+
+      - name: Build Windows packages
+        working-directory: apps/app
+        run: >-
+          fastforge package --no-version-check
+          --platform windows
+          --targets exe,zip
+          --artifact-name '{{name}}-{{build_name}}-{{platform}}{{#is_installer}}-setup{{/is_installer}}.{{ext}}'
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: submarine-windows
+          path: apps/app/dist/*/*

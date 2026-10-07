@@ -64,6 +64,8 @@ for size in 192 512; do
   square $size "$web/icons/Icon-maskable-$size.png"
 done
 
+rounded 256 0 "$app/linux/packaging/icon.png"
+
 for size in 16 20 24 32 40 48 64 256; do
   rounded $size 0 "$tmp/windows-$size.png"
 done

@@ -1,0 +1,9 @@
+display_name: Submarine
+icon: linux/packaging/icon.png
+generic_name: Password Manager
+keywords:
+  - password
+  - vault
+  - nostr
+categories:
+  - Utility

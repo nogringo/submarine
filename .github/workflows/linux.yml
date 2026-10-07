@@ -1,0 +1,50 @@
+name: Build Linux packages
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libstdc++-12-dev libsecret-1-dev libfuse2
+          wget -O appimagetool https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x appimagetool
+          sudo mv appimagetool /usr/local/bin/
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Install Fastforge
+        run: dart pub global activate fastforge
+
+      - name: Build Linux packages
+        working-directory: apps/app
+        run: >-
+          fastforge package --no-version-check
+          --platform linux
+          --targets appimage,deb,zip
+          --artifact-name '{{name}}-{{build_name}}-{{platform}}.{{ext}}'
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: submarine-linux
+          path: apps/app/dist/*/*

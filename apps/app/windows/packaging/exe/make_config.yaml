@@ -1,0 +1,10 @@
+# Never change it: Windows recognizes an installed Submarine by this id.
+app_id: B842340A-5661-4CD2-B3E5-73142214B6D3
+publisher_name: Russell
+publisher_url: https://github.com/nogringo/submarine
+display_name: Submarine
+create_desktop_icon: true
+setup_icon_file: windows\runner\resources\app_icon.ico
+locales:
+  - en
+  - fr

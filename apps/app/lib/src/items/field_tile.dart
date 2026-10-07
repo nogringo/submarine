@@ -144,7 +144,11 @@ class _Mask extends StatelessWidget {
   final TextStyle style;
 
   @override
-  Widget build(BuildContext context) => Text('••••••••••••', style: style);
+  Widget build(BuildContext context) => Text(
+    '••••••••••••',
+    semanticsLabel: context.l10n.hiddenValue,
+    style: style,
+  );
 }
 
 /// Digits in signal, special characters in symbol, so that look-alike

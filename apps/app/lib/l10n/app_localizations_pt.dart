@@ -458,6 +458,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get hide => 'Ocultar';
 
   @override
+  String get hiddenValue => 'Valor oculto';
+
+  @override
   String get openWebsite => 'Abrir site';
 
   @override
@@ -928,6 +931,17 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get passwordLength => 'Comprimento';
+
+  @override
+  String characterCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count caracteres',
+      one: '1 caractere',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get includeCharacters => 'Incluir';
@@ -1809,6 +1823,9 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get hide => 'Ocultar';
 
   @override
+  String get hiddenValue => 'Valor oculto';
+
+  @override
   String get openWebsite => 'Abrir site';
 
   @override
@@ -2280,6 +2297,18 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get passwordLength => 'Comprimento';
+
+  @override
+  String characterCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count caracteres',
+      many: '$count de caracteres',
+      one: '$count caractere',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get includeCharacters => 'Incluir';

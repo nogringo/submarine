@@ -57,13 +57,15 @@ class ItemIcon extends StatelessWidget {
         borderRadius: BorderRadius.circular(size * 0.25),
       ),
       child: cipher.type == CipherType.login && cipher.name.trim().isNotEmpty
-          ? Text(
-              initialOf(cipher.name),
-              style: TextStyle(
-                color: foreground,
-                fontSize: size * 0.4,
-                fontWeight: FontWeight.w700,
-                height: 1,
+          ? ExcludeSemantics(
+              child: Text(
+                initialOf(cipher.name),
+                style: TextStyle(
+                  color: foreground,
+                  fontSize: size * 0.4,
+                  fontWeight: FontWeight.w700,
+                  height: 1,
+                ),
               ),
             )
           : Icon(
@@ -79,7 +81,14 @@ class ItemIcon extends StatelessWidget {
       clipBehavior: Clip.none,
       children: [
         tile,
-        Positioned(right: -4, bottom: -4, child: VaultBadge(vault: vault)),
+        Positioned(
+          right: -4,
+          bottom: -4,
+          child: Semantics(
+            label: vault.name,
+            child: VaultBadge(vault: vault),
+          ),
+        ),
       ],
     );
   }

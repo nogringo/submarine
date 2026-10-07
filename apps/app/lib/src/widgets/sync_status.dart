@@ -5,6 +5,7 @@ import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
 
 import '../context.dart';
 import '../vaults/vault_controller.dart';
+import 'spoken_status.dart';
 
 /// Where the sync of several vaults stands, as one: a signer that did not
 /// open a vault, the changes still to send, the oldest last sync, and a
@@ -93,13 +94,17 @@ class _SyncStatusTextState extends State<SyncStatusText> {
   Widget build(BuildContext context) {
     final palette = context.palette;
     final summary = SyncSummary(widget.vaults);
-    final text = Text(
-      summary.describe(context.l10n),
-      maxLines: widget.maxLines,
-      overflow: TextOverflow.ellipsis,
-      style: TextStyle(fontSize: 13, color: palette.muted)
-          .merge(widget.style)
-          .copyWith(color: summary.tellsFailure ? palette.danger : null),
+    final description = summary.describe(context.l10n);
+    final text = SpokenStatus(
+      message: summary.tellsFailure ? description : null,
+      child: Text(
+        description,
+        maxLines: widget.maxLines,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(fontSize: 13, color: palette.muted)
+            .merge(widget.style)
+            .copyWith(color: summary.tellsFailure ? palette.danger : null),
+      ),
     );
     if (!summary.tellsUnsent || !widget.showsUnsentIcon) return text;
     return Row(

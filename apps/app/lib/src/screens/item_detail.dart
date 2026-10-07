@@ -395,31 +395,38 @@ class _PasswordHistoryState extends State<_PasswordHistory> {
     ).add_Hm();
     return FieldCard(
       children: [
-        InkWell(
-          onTap: () => setState(() => _expanded = !_expanded),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-            child: Row(
-              children: [
-                Icon(Icons.history_rounded, color: palette.muted),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    context.l10n.passwordHistory,
-                    style: const TextStyle(fontSize: 16),
+        Semantics(
+          button: true,
+          expanded: _expanded,
+          child: InkWell(
+            onTap: () => setState(() => _expanded = !_expanded),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+              child: Row(
+                children: [
+                  Icon(Icons.history_rounded, color: palette.muted),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      context.l10n.passwordHistory,
+                      style: const TextStyle(fontSize: 16),
+                    ),
                   ),
-                ),
-                Text(
-                  '${widget.entries.length}',
-                  style: TextStyle(color: palette.muted),
-                ),
-                const SizedBox(width: 8),
-                AnimatedRotation(
-                  turns: _expanded ? 0.5 : 0,
-                  duration: const Duration(milliseconds: 180),
-                  child: Icon(Icons.expand_more_rounded, color: palette.muted),
-                ),
-              ],
+                  Text(
+                    '${widget.entries.length}',
+                    style: TextStyle(color: palette.muted),
+                  ),
+                  const SizedBox(width: 8),
+                  AnimatedRotation(
+                    turns: _expanded ? 0.5 : 0,
+                    duration: const Duration(milliseconds: 180),
+                    child: Icon(
+                      Icons.expand_more_rounded,
+                      color: palette.muted,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

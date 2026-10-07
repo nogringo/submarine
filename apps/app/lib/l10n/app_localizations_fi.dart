@@ -455,6 +455,9 @@ class AppLocalizationsFi extends AppLocalizations {
   String get hide => 'Piilota';
 
   @override
+  String get hiddenValue => 'Piilotettu arvo';
+
+  @override
   String get openWebsite => 'Avaa verkkosivusto';
 
   @override
@@ -925,6 +928,17 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get passwordLength => 'Pituus';
+
+  @override
+  String characterCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count merkkiä',
+      one: '1 merkki',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get includeCharacters => 'Sisällytä';

@@ -66,51 +66,56 @@ class SettingsTile extends StatelessWidget {
     final subtitle = this.subtitle;
     final trailing = this.trailing;
     final below = this.below;
+    final row = Row(
+      children: [
+        if (leading != null) ...[leading, const SizedBox(width: 14)],
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              DefaultTextStyle.merge(
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+                child: title,
+              ),
+              if (subtitle != null) ...[
+                const SizedBox(height: 4),
+                DefaultTextStyle.merge(
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.4,
+                    color: context.palette.muted,
+                  ),
+                  child: subtitle,
+                ),
+              ],
+            ],
+          ),
+        ),
+        if (trailing != null) ...[const SizedBox(width: 12), trailing],
+      ],
+    );
     final tile = Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              if (leading != null) ...[leading, const SizedBox(width: 14)],
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    DefaultTextStyle.merge(
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      child: title,
-                    ),
-                    if (subtitle != null) ...[
-                      const SizedBox(height: 4),
-                      DefaultTextStyle.merge(
-                        style: TextStyle(
-                          fontSize: 13,
-                          height: 1.4,
-                          color: context.palette.muted,
-                        ),
-                        child: subtitle,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              if (trailing != null) ...[const SizedBox(width: 12), trailing],
-            ],
-          ),
+          // A switch takes its name from the title, as in a SwitchListTile.
+          if (trailing is Switch) MergeSemantics(child: row) else row,
           if (below != null) ...[const SizedBox(height: 12), below],
         ],
       ),
     );
     if (onTap == null) return tile;
     // The card's color would hide the ink of the Material below it.
-    return Material(
-      type: MaterialType.transparency,
-      child: InkWell(onTap: onTap, child: tile),
+    return Semantics(
+      button: true,
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(onTap: onTap, child: tile),
+      ),
     );
   }
 }

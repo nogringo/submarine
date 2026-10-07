@@ -107,28 +107,31 @@ class _ChoiceTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        child: Row(
-          children: [
-            Icon(icon, color: palette.muted),
-            const SizedBox(width: 18),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: const TextStyle(fontSize: 16)),
-                  const SizedBox(height: 2),
-                  Text(
-                    description,
-                    style: TextStyle(fontSize: 13, color: palette.muted),
-                  ),
-                ],
+    return Semantics(
+      button: true,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          child: Row(
+            children: [
+              Icon(icon, color: palette.muted),
+              const SizedBox(width: 18),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: const TextStyle(fontSize: 16)),
+                    const SizedBox(height: 2),
+                    Text(
+                      description,
+                      style: TextStyle(fontSize: 13, color: palette.muted),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -480,25 +483,29 @@ class _VaultFormDialogState extends State<_VaultFormDialog> {
         ),
       ],
       const SizedBox(height: 8),
-      InkWell(
-        onTap: () => setState(() => _signersShown = !_signersShown),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  l10n.otherWaysToOpen,
-                  style: TextStyle(fontSize: 13, color: palette.muted),
+      Semantics(
+        button: true,
+        expanded: _signersShown,
+        child: InkWell(
+          onTap: () => setState(() => _signersShown = !_signersShown),
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l10n.otherWaysToOpen,
+                    style: TextStyle(fontSize: 13, color: palette.muted),
+                  ),
                 ),
-              ),
-              AnimatedRotation(
-                turns: _signersShown ? 0.5 : 0,
-                duration: const Duration(milliseconds: 180),
-                child: Icon(Icons.expand_more_rounded, color: palette.muted),
-              ),
-            ],
+                AnimatedRotation(
+                  turns: _signersShown ? 0.5 : 0,
+                  duration: const Duration(milliseconds: 180),
+                  child: Icon(Icons.expand_more_rounded, color: palette.muted),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -12,6 +12,7 @@ import '../widgets/copy_button.dart';
 import '../widgets/item_icon.dart';
 import '../widgets/no_browser_menu.dart';
 import '../widgets/search_field.dart';
+import '../widgets/selectable_row.dart';
 import '../widgets/sync_status.dart';
 import '../widgets/vault_avatar.dart';
 import 'add_vault.dart';
@@ -160,14 +161,17 @@ class _Header extends StatelessWidget {
             Builder(
               builder: (context) => Tooltip(
                 message: l10n.vaults,
-                child: InkWell(
-                  onTap: Scaffold.of(context).openDrawer,
-                  customBorder: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+                child: Semantics(
+                  button: true,
+                  child: InkWell(
+                    onTap: Scaffold.of(context).openDrawer,
+                    customBorder: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: all || vault == null
+                        ? const AllVaultsAvatar(size: 44)
+                        : VaultAvatar(vault: vault, size: 44),
                   ),
-                  child: all || vault == null
-                      ? const AllVaultsAvatar(size: 44)
-                      : VaultAvatar(vault: vault, size: 44),
                 ),
               ),
             ),
@@ -180,11 +184,14 @@ class _Header extends StatelessWidget {
                 ? title
                 : Tooltip(
                     message: l10n.vaultSettings,
-                    child: InkWell(
-                      onTap: () =>
-                          context.push(vaultSettingsPath(vault.pubkey)),
-                      borderRadius: BorderRadius.circular(10),
-                      child: title,
+                    child: Semantics(
+                      button: true,
+                      child: InkWell(
+                        onTap: () =>
+                            context.push(vaultSettingsPath(vault.pubkey)),
+                        borderRadius: BorderRadius.circular(10),
+                        child: title,
+                      ),
                     ),
                   ),
           ),
@@ -242,17 +249,22 @@ class _NewItemButton extends StatelessWidget {
   final ItemFilter filter;
 
   @override
-  Widget build(BuildContext context) => Tooltip(
-    message: context.l10n.newItem,
-    child: FilledButton(
-      onPressed: () => _newItem(context, vaultId, filter, _pickTypeInMenu),
-      style: FilledButton.styleFrom(
-        minimumSize: const Size.square(40),
-        padding: EdgeInsets.zero,
+  Widget build(BuildContext context) {
+    final newItem = context.l10n.newItem;
+    // Outside the button, the tooltip would name its parent to screen readers.
+    return Tooltip(
+      message: newItem,
+      excludeFromSemantics: true,
+      child: FilledButton(
+        onPressed: () => _newItem(context, vaultId, filter, _pickTypeInMenu),
+        style: FilledButton.styleFrom(
+          minimumSize: const Size.square(40),
+          padding: EdgeInsets.zero,
+        ),
+        child: Icon(Icons.add_rounded, size: 22, semanticLabel: newItem),
       ),
-      child: const Icon(Icons.add_rounded, size: 22),
-    ),
-  );
+    );
+  }
 }
 
 /// Opens the form of a new item of the type [filter] lists, or else of the
@@ -498,64 +510,57 @@ class _ItemRow extends StatelessWidget {
     final copy = showCopy ? ItemAction.rowCopy(cipher) : null;
     return Padding(
       padding: const EdgeInsets.only(bottom: 2),
-      child: Material(
-        color: selected ? palette.selected : Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
-        child: InkWell(
-          onTap: onTap,
-          onSecondaryTapUp: (details) =>
-              _openMenu(context, details.globalPosition),
-          onLongPress: () => _openMenu(context),
-          borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(10, 8, showCopy ? 4 : 10, 8),
-            child: ConstrainedBox(
-              // As high as a copy button, in every row.
-              constraints: BoxConstraints(minHeight: showCopy ? 48 : 0),
-              child: Row(
-                children: [
-                  ItemIcon(
-                    cipher: cipher,
-                    vault: showVault ? entry.vault : null,
-                    highlighted: selected,
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+      child: SelectableRow(
+        selected: selected,
+        onTap: onTap,
+        onSecondaryTapUp: (details) =>
+            _openMenu(context, details.globalPosition),
+        onLongPress: () => _openMenu(context),
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(10, 8, showCopy ? 4 : 10, 8),
+          child: ConstrainedBox(
+            // As high as a copy button, in every row.
+            constraints: BoxConstraints(minHeight: showCopy ? 48 : 0),
+            child: Row(
+              children: [
+                ItemIcon(
+                  cipher: cipher,
+                  vault: showVault ? entry.vault : null,
+                  highlighted: selected,
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        cipher.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      if (subtitle != null && subtitle.isNotEmpty)
                         Text(
-                          cipher.name,
+                          subtitle,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: TextStyle(fontSize: 13, color: palette.muted),
                         ),
-                        if (subtitle != null && subtitle.isNotEmpty)
-                          Text(
-                            subtitle,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: palette.muted,
-                            ),
-                          ),
-                      ],
-                    ),
+                    ],
                   ),
-                  if (copy != null)
-                    CopyButton(
-                      value: copy.copiedFrom(cipher)!,
-                      sensitive: true,
-                      tooltip: copy == ItemAction.copyNumber
-                          ? l10n.copyNumber
-                          : l10n.copyPassword,
-                    ),
-                ],
-              ),
+                ),
+                if (copy != null)
+                  CopyButton(
+                    value: copy.copiedFrom(cipher)!,
+                    sensitive: true,
+                    tooltip: copy == ItemAction.copyNumber
+                        ? l10n.copyNumber
+                        : l10n.copyPassword,
+                  ),
+              ],
             ),
           ),
         ),

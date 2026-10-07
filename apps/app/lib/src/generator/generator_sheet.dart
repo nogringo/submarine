@@ -241,6 +241,8 @@ class _GeneratorViewState extends State<GeneratorView> {
         min: minLength.toDouble(),
         max: maxLength.toDouble(),
         divisions: maxLength - minLength,
+        semanticFormatterCallback: (length) =>
+            l10n.characterCount(length.round()),
         // Lines the thumb up with the labels at both ends.
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
         onChanged: (length) =>

@@ -445,6 +445,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get hide => '非表示';
 
   @override
+  String get hiddenValue => '非表示の値';
+
+  @override
   String get openWebsite => 'ウェブサイトを開く';
 
   @override
@@ -911,6 +914,16 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get passwordLength => '長さ';
+
+  @override
+  String characterCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 文字',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get includeCharacters => '含める文字';

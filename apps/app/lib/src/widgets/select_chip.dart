@@ -31,7 +31,9 @@ class SelectChip extends StatelessWidget {
         child: Material(
           color: selected ? palette.accent : Colors.transparent,
           shape: StadiumBorder(
-            side: BorderSide(color: selected ? palette.accent : palette.line),
+            side: BorderSide(
+              color: selected ? palette.accent : palette.outline,
+            ),
           ),
           child: InkWell(
             onTap: onTap,

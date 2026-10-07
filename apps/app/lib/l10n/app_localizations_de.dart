@@ -459,6 +459,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get hide => 'Ausblenden';
 
   @override
+  String get hiddenValue => 'Verborgener Wert';
+
+  @override
   String get openWebsite => 'Website öffnen';
 
   @override
@@ -930,6 +933,17 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get passwordLength => 'Länge';
+
+  @override
+  String characterCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Zeichen',
+      one: '1 Zeichen',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get includeCharacters => 'Einschließen';

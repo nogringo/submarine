@@ -45,7 +45,7 @@ ThemeData buildTheme(Palette palette, Brightness brightness) {
     surfaceContainer: palette.surface,
     surfaceContainerHigh: palette.surface,
     surfaceContainerHighest: palette.raised,
-    outline: palette.line,
+    outline: palette.outline,
     outlineVariant: palette.line,
     shadow: Colors.black,
     scrim: Colors.black,
@@ -132,7 +132,7 @@ ThemeData buildTheme(Palette palette, Brightness brightness) {
         foregroundColor: palette.text,
         minimumSize: const Size(0, 48),
         padding: const EdgeInsets.symmetric(horizontal: 22),
-        side: BorderSide(color: palette.line),
+        side: BorderSide(color: palette.outline),
         shape: rounded,
         textStyle: buttonText,
       ),
@@ -160,7 +160,7 @@ ThemeData buildTheme(Palette palette, Brightness brightness) {
               ? palette.text
               : palette.muted,
         ),
-        side: WidgetStatePropertyAll(BorderSide(color: palette.line)),
+        side: WidgetStatePropertyAll(BorderSide(color: palette.outline)),
         textStyle: const WidgetStatePropertyAll(
           TextStyle(
             fontFamily: textFont,
@@ -177,8 +177,8 @@ ThemeData buildTheme(Palette palette, Brightness brightness) {
       floatingLabelStyle: TextStyle(color: palette.text),
       hintStyle: TextStyle(color: palette.muted),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      border: inputBorder(palette.line),
-      enabledBorder: inputBorder(palette.line),
+      border: inputBorder(palette.outline),
+      enabledBorder: inputBorder(palette.outline),
       focusedBorder: inputBorder(palette.text, 1.5),
       errorBorder: inputBorder(palette.danger),
       focusedErrorBorder: inputBorder(palette.danger, 1.5),

@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 
 import '../clipboard.dart';
 import '../context.dart';
+import 'spoken_status.dart';
 
-/// Copies [value], and shows a check for a moment rather than a toast.
+/// Copies [value], then shows a check for a moment and tells screen readers,
+/// rather than a toast.
 class CopyButton extends StatefulWidget {
   const CopyButton({
     super.key,
@@ -50,15 +52,17 @@ class _CopyButtonState extends State<CopyButton> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final copied = _reset != null;
-    return IconButton(
-      tooltip: copied
-          ? context.l10n.copied
-          : widget.tooltip ?? context.l10n.copy,
-      onPressed: _copy,
-      icon: copied
-          ? Icon(Icons.check_rounded, color: context.palette.signal)
-          : const Icon(Icons.content_copy_rounded, size: 20),
+    return SpokenStatus(
+      message: copied ? l10n.copied : null,
+      child: IconButton(
+        tooltip: copied ? l10n.copied : widget.tooltip ?? l10n.copy,
+        onPressed: _copy,
+        icon: copied
+            ? Icon(Icons.check_rounded, color: context.palette.signal)
+            : const Icon(Icons.content_copy_rounded, size: 20),
+      ),
     );
   }
 }

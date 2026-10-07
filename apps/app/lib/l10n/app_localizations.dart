@@ -829,6 +829,12 @@ abstract class AppLocalizations {
   /// **'Hide'**
   String get hide;
 
+  /// What screen readers say of a password or another secret while it is hidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden value'**
+  String get hiddenValue;
+
   /// Tooltip of the button opening a login's website in the browser.
   ///
   /// In en, this message translates to:
@@ -1704,6 +1710,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Length'**
   String get passwordLength;
+
+  /// Length of a generated password, as screen readers say the value of its slider.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 character} other{{count} characters}}'**
+  String characterCount(int count);
 
   /// Label above the character sets a generated password takes its characters from.
   ///

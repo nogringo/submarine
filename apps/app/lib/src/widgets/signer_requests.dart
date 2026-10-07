@@ -9,6 +9,7 @@ import '../items/field_tile.dart';
 import '../vaults/vault_controller.dart';
 import '../vaults/vaults.dart';
 import 'settings_tile.dart';
+import 'spoken_status.dart';
 import 'vault_avatar.dart';
 
 /// How many requests the signers seem to wait on the user for.
@@ -82,31 +83,38 @@ class _SignerRequestsBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    return Material(
-      color: palette.raised,
-      shape: Border(top: BorderSide(color: palette.line)),
-      child: InkWell(
-        onTap: onTap,
-        child: SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 14, 12, 14),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.pending_actions_rounded,
-                  size: 20,
-                  color: palette.signal,
+    final waiting = context.l10n.signerWaiting(count);
+    return SpokenStatus(
+      message: waiting,
+      child: Semantics(
+        button: true,
+        child: Material(
+          color: palette.raised,
+          shape: Border(top: BorderSide(color: palette.line)),
+          child: InkWell(
+            onTap: onTap,
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 14, 12, 14),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.pending_actions_rounded,
+                      size: 20,
+                      color: palette.signal,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        waiting,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    Icon(Icons.chevron_right_rounded, color: palette.muted),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    context.l10n.signerWaiting(count),
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                ),
-                Icon(Icons.chevron_right_rounded, color: palette.muted),
-              ],
+              ),
             ),
           ),
         ),

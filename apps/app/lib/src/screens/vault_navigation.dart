@@ -6,7 +6,9 @@ import '../lock/app_lock.dart';
 import '../lock/lock_screen.dart';
 import '../router.dart';
 import '../vaults/vaults.dart';
+import '../widgets/selectable_row.dart';
 import '../widgets/signer_requests.dart';
+import '../widgets/spoken_status.dart';
 import '../widgets/vault_avatar.dart';
 import 'add_vault.dart';
 import 'app_navigation.dart';
@@ -76,11 +78,14 @@ class VaultRail extends StatelessWidget {
             ),
           ),
           if (signerRequests > 0)
-            _RailButton(
-              icon: Icons.pending_actions_rounded,
-              tooltip: l10n.signerWaiting(signerRequests),
-              badge: signerRequests,
-              onPressed: () => showSignerRequests(context),
+            SpokenStatus(
+              message: l10n.signerWaiting(signerRequests),
+              child: _RailButton(
+                icon: Icons.pending_actions_rounded,
+                tooltip: l10n.signerWaiting(signerRequests),
+                badge: signerRequests,
+                onPressed: () => showSignerRequests(context),
+              ),
             ),
           _RailButton(
             icon: Icons.casino_outlined,
@@ -205,6 +210,7 @@ class _RailTileState extends State<_RailTile> {
             message: widget.tooltip,
             preferBelow: false,
             child: Semantics(
+              button: true,
               selected: widget.selected,
               child: InkWell(
                 onTap: widget.onTap,
@@ -329,42 +335,39 @@ class _DrawerTile extends StatelessWidget {
     final trailing = this.trailing;
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
-      child: Material(
-        color: selected ? palette.selected : Colors.transparent,
-        borderRadius: BorderRadius.circular(14),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(14),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              children: [
-                leading,
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
+      child: SelectableRow(
+        selected: selected,
+        onTap: onTap,
+        radius: 14,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              leading,
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
                       ),
-                      if (subtitle != null)
-                        Text(
-                          subtitle,
-                          style: TextStyle(fontSize: 13, color: palette.muted),
-                        ),
-                    ],
-                  ),
+                    ),
+                    if (subtitle != null)
+                      Text(
+                        subtitle,
+                        style: TextStyle(fontSize: 13, color: palette.muted),
+                      ),
+                  ],
                 ),
-                ?trailing,
-              ],
-            ),
+              ),
+              ?trailing,
+            ],
           ),
         ),
       ),

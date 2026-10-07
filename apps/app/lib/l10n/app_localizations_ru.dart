@@ -473,6 +473,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get hide => 'Скрыть';
 
   @override
+  String get hiddenValue => 'Скрытое значение';
+
+  @override
   String get openWebsite => 'Открыть сайт';
 
   @override
@@ -945,6 +948,19 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get passwordLength => 'Длина';
+
+  @override
+  String characterCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count символа',
+      many: '$count символов',
+      few: '$count символа',
+      one: '$count символ',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get includeCharacters => 'Включить';

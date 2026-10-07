@@ -6,6 +6,7 @@ import '../items/item_filter.dart';
 import '../router.dart';
 import '../theme/theme.dart';
 import '../vaults/vaults.dart';
+import '../widgets/selectable_row.dart';
 import '../widgets/sync_status.dart';
 
 /// Desktop layout: the filters of the selected vault, with their counts, and
@@ -134,35 +135,31 @@ class _FilterTile extends StatelessWidget {
     final palette = context.palette;
     return Padding(
       padding: const EdgeInsets.only(bottom: 2),
-      child: Material(
-        color: selected ? palette.selected : Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            child: Row(
-              children: [
-                Icon(filter.icon, size: 22, color: palette.text),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Text(
-                    filter.label(context.l10n),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
-                    ),
+      child: SelectableRow(
+        selected: selected,
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            children: [
+              Icon(filter.icon, size: 22, color: palette.text),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Text(
+                  filter.label(context.l10n),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
                   ),
                 ),
-                Text(
-                  '$count',
-                  style: monoStyle.copyWith(fontSize: 13, color: palette.muted),
-                ),
-              ],
-            ),
+              ),
+              Text(
+                '$count',
+                style: monoStyle.copyWith(fontSize: 13, color: palette.muted),
+              ),
+            ],
           ),
         ),
       ),

@@ -540,6 +540,10 @@
   "@hide": {
     "description": "Tooltip of the button hiding a shown value."
   },
+  "hiddenValue": "Hidden value",
+  "@hiddenValue": {
+    "description": "What screen readers say of a password or another secret while it is hidden."
+  },
   "openWebsite": "Open website",
   "@openWebsite": {
     "description": "Tooltip of the button opening a login's website in the browser."
@@ -1164,6 +1168,15 @@
   "passwordLength": "Length",
   "@passwordLength": {
     "description": "Label of the length of a generated password."
+  },
+  "characterCount": "{count, plural, =1{1 character} other{{count} characters}}",
+  "@characterCount": {
+    "description": "Length of a generated password, as screen readers say the value of its slider.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "includeCharacters": "Include",
   "@includeCharacters": {

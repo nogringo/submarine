@@ -8,6 +8,7 @@ import '../theme/theme.dart';
 import '../vaults/vault_storage.dart';
 import '../widgets/password_field.dart';
 import '../widgets/sonar.dart';
+import '../widgets/spoken_status.dart';
 import 'app_lock.dart';
 
 const lockShortcut = CommandShortcut(LogicalKeyboardKey.keyL);
@@ -242,10 +243,13 @@ class _LockScreenState extends State<LockScreen> {
                       ),
                     if (error != null) ...[
                       const SizedBox(height: 16),
-                      Text(
-                        error,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: palette.danger),
+                      SpokenStatus(
+                        message: error,
+                        child: Text(
+                          error,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: palette.danger),
+                        ),
                       ),
                     ],
                   ],

@@ -444,6 +444,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get hide => '隐藏';
 
   @override
+  String get hiddenValue => '已隐藏的值';
+
+  @override
   String get openWebsite => '打开网站';
 
   @override
@@ -908,6 +911,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get passwordLength => '长度';
+
+  @override
+  String characterCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个字符',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get includeCharacters => '包含';

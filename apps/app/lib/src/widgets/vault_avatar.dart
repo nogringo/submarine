@@ -101,7 +101,8 @@ class _AvatarTile extends StatelessWidget {
       color: color,
       borderRadius: BorderRadius.circular(size * (selected ? 0.3 : 0.5)),
     ),
-    child: child,
+    // The vault's name is beside its avatar, or in its tooltip.
+    child: ExcludeSemantics(child: child),
   );
 }
 
@@ -122,13 +123,15 @@ class VaultBadge extends StatelessWidget {
       borderRadius: BorderRadius.circular(size * 0.28),
       border: Border.all(color: context.palette.background, width: 1.5),
     ),
-    child: Text(
-      initialOf(vault.name),
-      style: TextStyle(
-        color: Colors.white,
-        fontSize: size * 0.5,
-        fontWeight: FontWeight.w700,
-        height: 1,
+    child: ExcludeSemantics(
+      child: Text(
+        initialOf(vault.name),
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: size * 0.5,
+          fontWeight: FontWeight.w700,
+          height: 1,
+        ),
       ),
     ),
   );

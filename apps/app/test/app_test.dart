@@ -3197,6 +3197,10 @@ void main() {
   testWidgets('sets a lock password, then unlocks with it only', (
     tester,
   ) async {
+    // Without announcements, as on Android 16, the error is a live region.
+    tester.platformDispatcher.accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures();
+    addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
     setScreen(tester, const Size(1280, 800));
     await open(tester, items: [github]);
     await tester.pumpWidget(
@@ -3253,7 +3257,10 @@ void main() {
       find.text('Unlock'),
       () => find.text('This is not the lock password.').evaluate().isNotEmpty,
     );
-    expect(find.text('This is not the lock password.'), findsOneWidget);
+    expect(
+      tester.getSemantics(find.text('This is not the lock password.')),
+      isSemantics(isLiveRegion: true),
+    );
     expect(lock.locked, isTrue);
 
     await tester.enterText(lockField, 'correct horse battery');
@@ -3831,6 +3838,112 @@ void main() {
     await tester.tap(find.text('Try again'));
     await settle(tester);
     expect(retries, 1);
+  });
+
+  testWidgets(
+    'labels its controls and keeps its text readable, in both themes',
+    (tester) async {
+      await open(tester, items: [github]);
+      Future<void> checkGuidelines() async {
+        await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+        await expectLater(tester, meetsGuideline(textContrastGuideline));
+      }
+
+      Future<void> start(Size size) async {
+        setScreen(tester, size);
+        await tester.pumpWidget(const SizedBox());
+        await tester.pumpWidget(
+          SubmarineApp(
+            vaults: vaults,
+            lock: lock,
+            appearance: appearance,
+            clipboard: clipboard,
+            screenCapture: screenCapture,
+          ),
+        );
+        await settle(tester);
+      }
+
+      for (final themeMode in [ThemeMode.light, ThemeMode.dark]) {
+        await tester.runAsync(() => appearance.setThemeMode(themeMode));
+        await start(const Size(1280, 800));
+        await tester.tap(find.text('GitHub'));
+        await settle(tester);
+        await checkGuidelines();
+        await tester.tap(find.byTooltip('Generator'));
+        await settle(tester);
+        await checkGuidelines();
+        await tester.tap(find.byTooltip('Settings'));
+        await settle(tester);
+        await checkGuidelines();
+
+        await start(const Size(390, 844));
+        await checkGuidelines();
+      }
+      await close(tester);
+    },
+  );
+
+  testWidgets('tells screen readers what the screen shows, and what changes', (
+    tester,
+  ) async {
+    tester.platformDispatcher.accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures(supportsAnnounce: true);
+    addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
+    setScreen(tester, const Size(1280, 800));
+    watchClipboard(tester);
+    await open(tester, items: [github]);
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+      ),
+    );
+    await settle(tester);
+    await tester.tap(find.text('GitHub'));
+    await settle(tester);
+
+    expect(
+      tester.getSemantics(
+        find.descendant(
+          of: find.byType(ListView),
+          matching: find.text('GitHub'),
+        ),
+      ),
+      isSemantics(isButton: true, isSelected: true),
+    );
+    expect(
+      tester.getSemantics(
+        find.descendant(
+          of: find.byType(FilterColumn),
+          matching: find.text('All items'),
+        ),
+      ),
+      isSemantics(isButton: true, isSelected: true),
+    );
+    expect(find.bySemanticsLabel('Hidden value'), findsOneWidget);
+
+    tester.takeAnnouncements();
+    await tester.tap(
+      find.descendant(
+        of: find.ancestor(
+          of: find.text('Password'),
+          matching: find.byType(FieldTile),
+        ),
+        matching: find.byTooltip('Copy'),
+      ),
+    );
+    await settle(tester);
+    expect(tester.takeAnnouncements(), [isAccessibilityAnnouncement('Copied')]);
+
+    await tester.tap(find.byTooltip('Generator'));
+    await settle(tester);
+    final length = tester.widget<Slider>(find.byType(Slider)).value.round();
+    expect(find.semantics.byValue('$length characters'), findsOne);
+    await close(tester);
   });
 }
 

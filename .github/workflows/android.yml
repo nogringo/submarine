@@ -1,0 +1,54 @@
+name: Build Android package
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Install Fastforge
+        run: dart pub global activate fastforge
+
+      - name: Import signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/submarine.jks"
+          cat > apps/app/android/key.properties <<EOF
+          storeFile=$RUNNER_TEMP/submarine.jks
+          storePassword=$KEYSTORE_PASSWORD
+          keyAlias=submarine
+          keyPassword=$KEYSTORE_PASSWORD
+          EOF
+
+      - name: Build Android package
+        working-directory: apps/app
+        run: >-
+          fastforge package --no-version-check
+          --platform android
+          --targets apk
+          --artifact-name '{{name}}-{{build_name}}-{{platform}}.{{ext}}'
+
+      - name: Upload package
+        uses: actions/upload-artifact@v7
+        with:
+          name: submarine-android
+          path: apps/app/dist/*/*

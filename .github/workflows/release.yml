@@ -21,11 +21,15 @@ jobs:
     uses: ./.github/workflows/macos.yml
     secrets: inherit
 
+  android:
+    uses: ./.github/workflows/android.yml
+    secrets: inherit
+
   cli:
     uses: ./.github/workflows/cli.yml
 
   release:
-    needs: [ci, linux, windows, macos, cli]
+    needs: [ci, linux, windows, macos, android, cli]
     runs-on: ubuntu-latest
     permissions:
       contents: write

@@ -64,12 +64,25 @@ git tag -a v0.1.0 -m "Submarine 0.1.0"
 git push origin v0.1.0
 ```
 
-The tag runs the [release workflow](.github/workflows/release.yml), which builds the app for Linux, Windows and macOS and the CLI, then publishes them in a GitHub release. The macOS package is signed with Developer ID and notarized, from these repository secrets:
+The tag runs the [release workflow](.github/workflows/release.yml), which builds the app for Linux, Windows, macOS and Android and the CLI, then publishes them in a GitHub release. The macOS package is signed with Developer ID and notarized, from these repository secrets:
 
 - `APPLE_DEVELOPER_ID_APPLICATION_CERTIFICATE_BASE64`: the Developer ID Application certificate with its private key, exported as `.p12`, in base64.
 - `APPLE_DEVELOPER_ID_APPLICATION_CERTIFICATE_PASSWORD`: the password of that `.p12`.
 - `APPLE_DEVELOPER_ID_PROVISIONING_PROFILE_BASE64`: a Developer ID provisioning profile for `ovh.uid.submarine`, in base64. The keychain entitlement needs it, or macOS does not launch the app.
 - `APPLE_ID` and `APPLE_APP_SPECIFIC_PASSWORD`: an Apple ID of the team and one of its app-specific passwords, for the notary service.
+
+The Android APK is signed with the key of alias `submarine`, from these repository secrets:
+
+- `ANDROID_KEYSTORE_BASE64`: the keystore, in base64.
+- `ANDROID_KEYSTORE_PASSWORD`: the password of the keystore and of its key.
+
+Create the keystore once, then keep a copy of it and of its password: Android only installs an update signed with the same key.
+
+```sh
+keytool -genkeypair -keystore submarine.jks -storetype PKCS12 -keyalg RSA -keysize 4096 -validity 10000 -alias submarine
+```
+
+To sign local release builds with it, write `apps/app/android/key.properties` (ignored by git) with `storeFile`, `storePassword`, `keyAlias` and `keyPassword`. Without that file, release builds use the debug key.
 
 ## License
 

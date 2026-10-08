@@ -1,8 +1,7 @@
 name: Build Linux packages
 
 on:
-  push:
-    tags: ['v*']
+  workflow_call:
   workflow_dispatch:
 
 permissions:

@@ -1,0 +1,16 @@
+title: Submarine
+icon: Submarine.app/Contents/Resources/AppIcon.icns
+icon-size: 100
+window:
+  size:
+    width: 540
+    height: 380
+contents:
+  - x: 140
+    y: 180
+    type: file
+    path: Submarine.app
+  - x: 400
+    y: 180
+    type: link
+    path: /Applications

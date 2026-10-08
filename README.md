@@ -64,6 +64,13 @@ git tag -a v0.1.0 -m "Submarine 0.1.0"
 git push origin v0.1.0
 ```
 
+The tag runs the [release workflow](.github/workflows/release.yml), which builds the app for Linux, Windows and macOS and the CLI, then publishes them in a GitHub release. The macOS package is signed with Developer ID and notarized, from these repository secrets:
+
+- `APPLE_DEVELOPER_ID_APPLICATION_CERTIFICATE_BASE64`: the Developer ID Application certificate with its private key, exported as `.p12`, in base64.
+- `APPLE_DEVELOPER_ID_APPLICATION_CERTIFICATE_PASSWORD`: the password of that `.p12`.
+- `APPLE_DEVELOPER_ID_PROVISIONING_PROFILE_BASE64`: a Developer ID provisioning profile for `ovh.uid.submarine`, in base64. The keychain entitlement needs it, or macOS does not launch the app.
+- `APPLE_ID` and `APPLE_APP_SPECIFIC_PASSWORD`: an Apple ID of the team and one of its app-specific passwords, for the notary service.
+
 ## License
 
 [MIT](LICENSE)

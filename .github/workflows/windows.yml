@@ -1,8 +1,7 @@
 name: Build Windows packages
 
 on:
-  push:
-    tags: ['v*']
+  workflow_call:
   workflow_dispatch:
 
 permissions:

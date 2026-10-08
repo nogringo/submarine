@@ -1,0 +1,56 @@
+name: Build CLI
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux-x64
+          - os: macos-latest
+            platform: macos-arm64
+          - os: windows-latest
+            platform: windows-x64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build CLI
+        working-directory: apps/cli
+        run: dart build cli -o build
+
+      - name: Package CLI
+        shell: bash
+        run: |
+          version=$(apps/cli/build/bundle/bin/submarine --version)
+          name=submarine-cli-$version-${{ matrix.platform }}
+          mv apps/cli/build/bundle "$name"
+          mkdir dist
+          if [ "$RUNNER_OS" = Windows ]; then
+            7z a "dist/$name.zip" "$name"
+          else
+            tar -czf "dist/$name.tar.gz" "$name"
+          fi
+
+      - name: Upload CLI
+        uses: actions/upload-artifact@v7
+        with:
+          name: submarine-cli-${{ matrix.platform }}
+          path: dist/*

@@ -23,9 +23,6 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Install Fastforge
-        run: dart pub global activate fastforge
-
       - name: Import signing key
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -41,14 +38,17 @@ jobs:
 
       - name: Build Android package
         working-directory: apps/app
-        run: >-
-          fastforge package --no-version-check
-          --platform android
-          --targets apk
-          --artifact-name '{{name}}-{{build_name}}-{{platform}}.{{ext}}'
+        run: |
+          version=$(sed -n 's/^version: \([^+]*\).*/\1/p' pubspec.yaml)
+          mkdir dist
+          flutter build apk --release
+          mv build/app/outputs/flutter-apk/app-release.apk "dist/submarine-$version-android.apk"
+          # Splitting drops the other ABIs of plugin libraries too; the flag keeps the versionCode of the universal APK.
+          flutter build apk --release --split-per-abi --target-platform android-arm64 -P force-version-code-ignoring-abi=true
+          mv build/app/outputs/flutter-apk/app-arm64-v8a-release.apk "dist/submarine-$version-android-arm64.apk"
 
       - name: Upload package
         uses: actions/upload-artifact@v7
         with:
           name: submarine-android
-          path: apps/app/dist/*/*
+          path: apps/app/dist/*

@@ -1,0 +1,43 @@
+repository: https://github.com/nogringo/submarine
+pubkey: npub1kg4sdvz3l4fr99n2jdz2vdxe2mpacva87hkdetv76ywacsfq5leqquw5te
+match: "-arm64\\.apk$"
+
+summary: Your passwords, encrypted and synced. No account needed.
+description: |
+  Submarine keeps your passwords, cards and notes safe and in sync across your devices, with no account to create.
+
+  Everything is encrypted before it is synced, so nobody but you can read it, not even us. Your vaults live on Nostr relays: open servers that anyone can run, and that only see encrypted data.
+
+  When you create a vault, Submarine gives you its key. That key opens your vault on your other devices, so keep it somewhere safe: if you lose it, nobody can recover your vault.
+
+  - Logins, cards and secure notes, with your own custom fields.
+  - Two-factor authentication codes next to your logins.
+  - A generator of strong passwords, passphrases and usernames.
+  - Import your passwords from Bitwarden, and export them at any time.
+  - A lock password, with your fingerprint, face or screen lock as a shortcut.
+  - Copied passwords cleared from the clipboard after a delay.
+  - Screenshots blocked unless you allow them, and the app hidden in recent apps.
+  - The same vaults on your computer and on the web.
+
+  Free and open source. No ads, no tracking.
+
+  Already using Nostr? A signer app such as Amber can hold your vault keys.
+
+  Submarine is still young. For your most important passwords, we still recommend a proven password manager.
+tags:
+  - password-manager
+  - nostr
+  - privacy
+
+release_notes: https://raw.githubusercontent.com/nogringo/submarine/main/apps/app/CHANGELOG.md
+
+supported_nips:
+  - "01"
+  - "09"
+  - "42"
+  - "44"
+  - "46"
+  - "49"
+  - "55"
+  - "59"
+  - "65"

@@ -9,6 +9,7 @@ import '../context.dart';
 import '../items/field_tile.dart';
 import '../theme/theme.dart';
 import '../vaults/vaults.dart';
+import '../widgets/spinning_icon.dart';
 
 /// The emails and private messages of an item's mailbox, synced while it
 /// shows, unless [Vaults.pauseSync] paused the syncing.
@@ -24,12 +25,8 @@ class Inbox extends StatefulWidget {
   State<Inbox> createState() => _InboxState();
 }
 
-class _InboxState extends State<Inbox> with SingleTickerProviderStateMixin {
+class _InboxState extends State<Inbox> {
   late final Mailbox _mailbox;
-  late final _spin = AnimationController(
-    vsync: this,
-    duration: const Duration(seconds: 1),
-  );
   bool? _paused;
   StreamSubscription<void>? _live;
   Future<void>? _syncing;
@@ -63,18 +60,12 @@ class _InboxState extends State<Inbox> with SingleTickerProviderStateMixin {
     unawaited(
       (_syncing ?? Future.value()).whenComplete(_mailbox.signer.dispose),
     );
-    _spin.dispose();
     super.dispose();
   }
 
   void _sync() {
-    if (_syncing != null) return;
-    if (!MediaQuery.disableAnimationsOf(context)) unawaited(_spin.repeat());
-    _syncing = _fetch().whenComplete(() {
-      if (!mounted) return;
-      setState(() => _syncing = null);
-      // Ends its turn rather than stop askew.
-      unawaited(_spin.forward(from: _spin.value));
+    _syncing ??= _fetch().whenComplete(() {
+      if (mounted) setState(() => _syncing = null);
     });
   }
 
@@ -154,13 +145,11 @@ class _InboxState extends State<Inbox> with SingleTickerProviderStateMixin {
             IconButton(
               tooltip: l10n.refreshInbox,
               onPressed: syncing ? null : () => setState(_sync),
-              icon: RotationTransition(
-                turns: _spin,
-                child: Icon(
-                  Icons.refresh_rounded,
-                  size: 20,
-                  color: palette.muted,
-                ),
+              icon: SpinningIcon(
+                Icons.refresh_rounded,
+                spinning: syncing,
+                size: 20,
+                color: palette.muted,
               ),
             ),
           ],

@@ -16,6 +16,7 @@ import '../vaults/vaults.dart';
 import '../widgets/copy_button.dart';
 import '../widgets/dialog_buttons.dart';
 import '../widgets/settings_tile.dart';
+import '../widgets/spinning_icon.dart';
 import '../widgets/sync_status.dart';
 import '../widgets/vault_avatar.dart';
 import '../widgets/vault_color_picker.dart';
@@ -352,15 +353,13 @@ class _SyncTile extends StatelessWidget {
       trailing: OutlinedButton.icon(
         onPressed: summary.syncing ? null : vault.sync,
         style: settingsButtonStyle,
-        icon: summary.syncing
-            ? SizedBox.square(
-                dimension: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: palette.muted,
-                ),
-              )
-            : const Icon(Icons.sync_rounded, size: 18),
+        icon: SpinningIcon(
+          Icons.sync_rounded,
+          spinning: summary.syncing,
+          counterclockwise: true,
+          size: 18,
+          color: summary.syncing ? palette.muted : null,
+        ),
         label: Text(l10n.syncNow),
       ),
     );

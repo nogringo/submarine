@@ -5,6 +5,7 @@ import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
 
 import '../context.dart';
 import '../vaults/vault_controller.dart';
+import 'spinning_icon.dart';
 import 'spoken_status.dart';
 
 /// Where the sync of several vaults stands, as one: a signer that did not
@@ -130,15 +131,13 @@ class SyncButton extends StatelessWidget {
       onPressed: syncing
           ? null
           : () => Future.wait([for (final vault in vaults) vault.sync()]),
-      icon: syncing
-          ? SizedBox.square(
-              dimension: 18,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: context.palette.muted,
-              ),
-            )
-          : const Icon(Icons.sync_rounded),
+      icon: SpinningIcon(
+        Icons.sync_rounded,
+        spinning: syncing,
+        counterclockwise: true,
+        // Disabled while it spins, it keeps the color of the enabled one.
+        color: context.palette.muted,
+      ),
     );
   }
 }

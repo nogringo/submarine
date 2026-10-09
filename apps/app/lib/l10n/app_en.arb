@@ -48,14 +48,29 @@
   "@vaultColor": {
     "description": "Label above the color choices of a vault."
   },
-  "vaultColorOption": "Color {number}",
-  "@vaultColorOption": {
-    "description": "Accessibility label of one color choice, numbered from 1.",
-    "placeholders": {
-      "number": {
-        "type": "int"
-      }
-    }
+  "vaultColorBlue": "Blue",
+  "@vaultColorBlue": {
+    "description": "Accessibility label of the blue vault color."
+  },
+  "vaultColorOrange": "Orange",
+  "@vaultColorOrange": {
+    "description": "Accessibility label of the orange vault color."
+  },
+  "vaultColorGreen": "Green",
+  "@vaultColorGreen": {
+    "description": "Accessibility label of the green vault color."
+  },
+  "vaultColorPurple": "Purple",
+  "@vaultColorPurple": {
+    "description": "Accessibility label of the purple vault color."
+  },
+  "vaultColorPink": "Pink",
+  "@vaultColorPink": {
+    "description": "Accessibility label of the pink vault color."
+  },
+  "vaultColorGray": "Gray",
+  "@vaultColorGray": {
+    "description": "Accessibility label of the gray vault color."
   },
   "vaultKey": "Vault key",
   "@vaultKey": {

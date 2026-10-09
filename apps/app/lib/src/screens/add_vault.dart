@@ -193,7 +193,7 @@ class _VaultFormDialogState extends State<_VaultFormDialog> {
   }
 
   Color _defaultColor(Vaults vaults) =>
-      vaultColors[vaults.all.length % vaultColors.length];
+      VaultColor.values[vaults.all.length % VaultColor.values.length].color;
 
   void _showAuthUrl(String url) {
     if (mounted) setState(() => _authUrl = url);

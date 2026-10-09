@@ -46,9 +46,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get vaultColor => '颜色';
 
   @override
-  String vaultColorOption(int number) {
-    return '颜色 $number';
-  }
+  String get vaultColorBlue => '蓝色';
+
+  @override
+  String get vaultColorOrange => '橙色';
+
+  @override
+  String get vaultColorGreen => '绿色';
+
+  @override
+  String get vaultColorPurple => '紫色';
+
+  @override
+  String get vaultColorPink => '粉色';
+
+  @override
+  String get vaultColorGray => '灰色';
 
   @override
   String get vaultKey => '密码库密钥';

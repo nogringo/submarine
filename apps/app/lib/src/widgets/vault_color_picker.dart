@@ -17,16 +17,25 @@ class VaultColorPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Wrap(
     children: [
-      for (final (index, color) in vaultColors.indexed)
+      for (final color in VaultColor.values)
         _ColorSwatch(
-          color: color,
-          label: context.l10n.vaultColorOption(index + 1),
-          selected: color == selected,
-          onTap: () => onSelected(color),
+          color: color.color,
+          label: _name(context.l10n, color),
+          selected: color.color == selected,
+          onTap: () => onSelected(color.color),
         ),
     ],
   );
 }
+
+String _name(AppLocalizations l10n, VaultColor color) => switch (color) {
+  VaultColor.blue => l10n.vaultColorBlue,
+  VaultColor.orange => l10n.vaultColorOrange,
+  VaultColor.green => l10n.vaultColorGreen,
+  VaultColor.purple => l10n.vaultColorPurple,
+  VaultColor.pink => l10n.vaultColorPink,
+  VaultColor.gray => l10n.vaultColorGray,
+};
 
 class _ColorSwatch extends StatelessWidget {
   const _ColorSwatch({

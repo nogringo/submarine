@@ -49,9 +49,22 @@ class AppLocalizationsDe extends AppLocalizations {
   String get vaultColor => 'Farbe';
 
   @override
-  String vaultColorOption(int number) {
-    return 'Farbe $number';
-  }
+  String get vaultColorBlue => 'Blau';
+
+  @override
+  String get vaultColorOrange => 'Orange';
+
+  @override
+  String get vaultColorGreen => 'Grün';
+
+  @override
+  String get vaultColorPurple => 'Violett';
+
+  @override
+  String get vaultColorPink => 'Rosa';
+
+  @override
+  String get vaultColorGray => 'Grau';
 
   @override
   String get vaultKey => 'Tresorschlüssel';

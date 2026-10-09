@@ -49,9 +49,22 @@ class AppLocalizationsPt extends AppLocalizations {
   String get vaultColor => 'Cor';
 
   @override
-  String vaultColorOption(int number) {
-    return 'Cor $number';
-  }
+  String get vaultColorBlue => 'Azul';
+
+  @override
+  String get vaultColorOrange => 'Laranja';
+
+  @override
+  String get vaultColorGreen => 'Verde';
+
+  @override
+  String get vaultColorPurple => 'Roxo';
+
+  @override
+  String get vaultColorPink => 'Rosa';
+
+  @override
+  String get vaultColorGray => 'Cinzento';
 
   @override
   String get vaultKey => 'Chave do cofre';
@@ -1544,9 +1557,22 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get vaultColor => 'Cor';
 
   @override
-  String vaultColorOption(int number) {
-    return 'Cor $number';
-  }
+  String get vaultColorBlue => 'Azul';
+
+  @override
+  String get vaultColorOrange => 'Laranja';
+
+  @override
+  String get vaultColorGreen => 'Verde';
+
+  @override
+  String get vaultColorPurple => 'Roxo';
+
+  @override
+  String get vaultColorPink => 'Rosa';
+
+  @override
+  String get vaultColorGray => 'Cinza';
 
   @override
   String get vaultKey => 'Chave do cofre';

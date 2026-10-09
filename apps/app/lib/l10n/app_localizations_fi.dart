@@ -47,9 +47,22 @@ class AppLocalizationsFi extends AppLocalizations {
   String get vaultColor => 'Väri';
 
   @override
-  String vaultColorOption(int number) {
-    return 'Väri $number';
-  }
+  String get vaultColorBlue => 'Sininen';
+
+  @override
+  String get vaultColorOrange => 'Oranssi';
+
+  @override
+  String get vaultColorGreen => 'Vihreä';
+
+  @override
+  String get vaultColorPurple => 'Violetti';
+
+  @override
+  String get vaultColorPink => 'Pinkki';
+
+  @override
+  String get vaultColorGray => 'Harmaa';
 
   @override
   String get vaultKey => 'Holvin avain';

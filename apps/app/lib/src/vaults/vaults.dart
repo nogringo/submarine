@@ -16,14 +16,18 @@ import 'vault_controller.dart';
 import 'vault_storage.dart';
 import 'version_store.dart';
 
-const vaultColors = [
-  Color(0xFF2F6FD0),
-  Color(0xFFB95A22),
-  Color(0xFF2A7F61),
-  Color(0xFF8A4FBF),
-  Color(0xFFB8336A),
-  Color(0xFF5B6B7A),
-];
+enum VaultColor {
+  blue(Color(0xFF2F6FD0)),
+  orange(Color(0xFFB95A22)),
+  green(Color(0xFF2A7F61)),
+  purple(Color(0xFF8A4FBF)),
+  pink(Color(0xFFB8336A)),
+  gray(Color(0xFF5B6B7A));
+
+  const VaultColor(this.color);
+
+  final Color color;
+}
 
 /// Stands for every vault where a vault's public key is expected.
 const allVaultsId = 'all';

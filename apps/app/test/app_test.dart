@@ -97,7 +97,7 @@ void main() {
         VaultRecord(
           login: KeyLogin(privateKey),
           name: 'Personal',
-          color: vaultColors.first,
+          color: VaultColor.blue.color,
         ),
       ];
     }
@@ -108,13 +108,17 @@ void main() {
             const Bip340EventSignerFactory().generateKeyPair().$1,
           ),
           name: 'Family',
-          color: vaultColors[1],
+          color: VaultColor.orange.color,
         ),
       );
     }
     if (signer != null) {
       records.add(
-        VaultRecord(login: signer, name: 'Signed', color: vaultColors[2]),
+        VaultRecord(
+          login: signer,
+          name: 'Signed',
+          color: VaultColor.green.color,
+        ),
       );
     }
     if (signerKey != null) {
@@ -2565,7 +2569,7 @@ void main() {
         {
           'privateKey': const Bip340EventSignerFactory().generateKeyPair().$1,
           'name': 'Personal',
-          'color': vaultColors.first.toARGB32(),
+          'color': VaultColor.blue.color.toARGB32(),
         },
       ]),
     });
@@ -2584,7 +2588,7 @@ void main() {
     final record = VaultRecord(
       login: KeyLogin(const Bip340EventSignerFactory().generateKeyPair().$1),
       name: 'Personal',
-      color: vaultColors.first,
+      color: VaultColor.blue.color,
     );
     FlutterSecureStorage.setMockInitialValues({
       'vaults': jsonEncode([record.toJson()]),
@@ -2729,10 +2733,10 @@ void main() {
     await write(
       tester,
       find.byWidgetPredicate(
-        (widget) => widget is Semantics && widget.properties.label == 'Color 3',
+        (widget) => widget is Semantics && widget.properties.label == 'Green',
       ),
     );
-    expect((await saved())['color'], vaultColors[2].toARGB32());
+    expect((await saved())['color'], VaultColor.green.color.toARGB32());
 
     await tester.enterText(find.widgetWithText(TextField, 'Name'), ' ');
     await settle(tester);
@@ -2847,7 +2851,7 @@ void main() {
     await settle(tester);
     await tester.tap(find.byTooltip('Vault settings'));
     await settle(tester);
-    await tester.ensureVisible(find.text('Add a relay'));
+    await tester.ensureVisible(relayRow(first.url));
     await settle(tester);
     expect(inRow(first.url, find.text('Connected')), findsOneWidget);
     expect(saveEnabled(tester, section: 'Relays'), isFalse);

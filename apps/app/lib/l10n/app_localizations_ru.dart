@@ -49,9 +49,22 @@ class AppLocalizationsRu extends AppLocalizations {
   String get vaultColor => 'Цвет';
 
   @override
-  String vaultColorOption(int number) {
-    return 'Цвет $number';
-  }
+  String get vaultColorBlue => 'Синий';
+
+  @override
+  String get vaultColorOrange => 'Оранжевый';
+
+  @override
+  String get vaultColorGreen => 'Зелёный';
+
+  @override
+  String get vaultColorPurple => 'Фиолетовый';
+
+  @override
+  String get vaultColorPink => 'Розовый';
+
+  @override
+  String get vaultColorGray => 'Серый';
 
   @override
   String get vaultKey => 'Ключ хранилища';

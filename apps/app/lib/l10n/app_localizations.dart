@@ -187,11 +187,41 @@ abstract class AppLocalizations {
   /// **'Color'**
   String get vaultColor;
 
-  /// Accessibility label of one color choice, numbered from 1.
+  /// Accessibility label of the blue vault color.
   ///
   /// In en, this message translates to:
-  /// **'Color {number}'**
-  String vaultColorOption(int number);
+  /// **'Blue'**
+  String get vaultColorBlue;
+
+  /// Accessibility label of the orange vault color.
+  ///
+  /// In en, this message translates to:
+  /// **'Orange'**
+  String get vaultColorOrange;
+
+  /// Accessibility label of the green vault color.
+  ///
+  /// In en, this message translates to:
+  /// **'Green'**
+  String get vaultColorGreen;
+
+  /// Accessibility label of the purple vault color.
+  ///
+  /// In en, this message translates to:
+  /// **'Purple'**
+  String get vaultColorPurple;
+
+  /// Accessibility label of the pink vault color.
+  ///
+  /// In en, this message translates to:
+  /// **'Pink'**
+  String get vaultColorPink;
+
+  /// Accessibility label of the gray vault color.
+  ///
+  /// In en, this message translates to:
+  /// **'Gray'**
+  String get vaultColorGray;
 
   /// The vault key (an nsec): label of the field where it is entered, and title of the vault settings section and row showing it.
   ///

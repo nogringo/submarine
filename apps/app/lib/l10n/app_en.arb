@@ -1736,5 +1736,33 @@
   "mailboxKey": "Mailbox key",
   "@mailboxKey": {
     "description": "Label of the hidden field holding the private key of the mailbox of an email address."
+  },
+  "mailInboxRelays": "Inbox relays",
+  "@mailInboxRelays": {
+    "description": "Setting, and title of its dialog, listing the relays the emails of new email addresses arrive on (their kind:10050 list)."
+  },
+  "mailInboxRelaysExplanation": "Emails sent to new addresses arrive on these relays. Addresses created before keep theirs.",
+  "@mailInboxRelaysExplanation": {
+    "description": "In the inbox relays dialog: what the relays are for, and that changing them does not change the addresses already created."
+  },
+  "mailAddressRelays": "Address relays",
+  "@mailAddressRelays": {
+    "description": "Setting, and title of its dialog, listing the relays where new email addresses publish their inbox relays (their NIP-65 list)."
+  },
+  "mailAddressRelaysExplanation": "New addresses publish their inbox relays on these relays, where the bridge finds them. Addresses created before keep theirs.",
+  "@mailAddressRelaysExplanation": {
+    "description": "In the address relays dialog: what the relays are for, and that changing them does not change the addresses already created."
+  },
+  "changeMailRelays": "Change",
+  "@changeMailRelays": {
+    "description": "Button of an email relays setting opening its dialog."
+  },
+  "mailRelaysNeedOne": "New addresses need at least one relay.",
+  "@mailRelaysNeedOne": {
+    "description": "In an email relays dialog, when its list is empty."
+  },
+  "resetMailRelays": "Reset",
+  "@resetMailRelays": {
+    "description": "Button of an email relays dialog putting back the default relays."
   }
 }

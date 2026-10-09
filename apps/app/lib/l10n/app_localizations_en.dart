@@ -1384,4 +1384,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mailboxKey => 'Mailbox key';
+
+  @override
+  String get mailInboxRelays => 'Inbox relays';
+
+  @override
+  String get mailInboxRelaysExplanation =>
+      'Emails sent to new addresses arrive on these relays. Addresses created before keep theirs.';
+
+  @override
+  String get mailAddressRelays => 'Address relays';
+
+  @override
+  String get mailAddressRelaysExplanation =>
+      'New addresses publish their inbox relays on these relays, where the bridge finds them. Addresses created before keep theirs.';
+
+  @override
+  String get changeMailRelays => 'Change';
+
+  @override
+  String get mailRelaysNeedOne => 'New addresses need at least one relay.';
+
+  @override
+  String get resetMailRelays => 'Reset';
 }

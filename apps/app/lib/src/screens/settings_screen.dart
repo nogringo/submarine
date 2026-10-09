@@ -1,11 +1,12 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:ndk/ndk.dart' show Nip19;
 import 'package:nostr_passwords/nostr_passwords.dart'
-    show defaultMailBridge, parseMailBridge;
+    show defaultMailBridge, parseMailBridge, parseRelayUrl;
 
 import '../clipboard.dart';
 import '../context.dart';
@@ -113,7 +114,13 @@ class _Settings extends StatelessWidget {
               ),
               SettingsSection(
                 title: l10n.emailSettings,
-                child: const FieldCard(children: [_MailBridgeTile()]),
+                child: const FieldCard(
+                  children: [
+                    _MailBridgeTile(),
+                    _MailRelaysTile(list: MailRelayList.inbox),
+                    _MailRelaysTile(list: MailRelayList.address),
+                  ],
+                ),
               ),
               SettingsSection(
                 title: l10n.appearance,
@@ -346,6 +353,190 @@ class _MailBridgeDialogState extends State<_MailBridgeDialog> {
                     child: Text(l10n.cancel),
                   ),
                   FilledButton(onPressed: _submit, child: Text(l10n.save)),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+String _relayHost(String url) =>
+    url.startsWith('wss://') ? url.substring(6) : url;
+
+String _mailRelaysTitle(AppLocalizations l10n, MailRelayList list) =>
+    switch (list) {
+      MailRelayList.inbox => l10n.mailInboxRelays,
+      MailRelayList.address => l10n.mailAddressRelays,
+    };
+
+class _MailRelaysTile extends StatelessWidget {
+  const _MailRelaysTile({required this.list});
+
+  final MailRelayList list;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final mail = MailSettings.of(context);
+    return SettingsTile(
+      title: Text(_mailRelaysTitle(l10n, list)),
+      subtitle: Text(mail.relays(list).map(_relayHost).join(', ')),
+      trailing: TextButton(
+        onPressed: () => showDialog<void>(
+          context: context,
+          builder: (context) => _MailRelaysDialog(mail: mail, list: list),
+        ),
+        child: Text(l10n.changeMailRelays),
+      ),
+    );
+  }
+}
+
+class _MailRelaysDialog extends StatefulWidget {
+  const _MailRelaysDialog({required this.mail, required this.list});
+
+  final MailSettings mail;
+  final MailRelayList list;
+
+  @override
+  State<_MailRelaysDialog> createState() => _MailRelaysDialogState();
+}
+
+class _MailRelaysDialogState extends State<_MailRelaysDialog> {
+  late final _relays = [...widget.mail.relays(widget.list)];
+  final _url = TextEditingController();
+  String? _error;
+
+  @override
+  void dispose() {
+    _url.dispose();
+    super.dispose();
+  }
+
+  /// Adds the relay typed, if any. False when the text is not one to add.
+  bool _add() {
+    final text = _url.text;
+    if (text.trim().isEmpty) return true;
+    final l10n = context.l10n;
+    final url = parseRelayUrl(text);
+    final error = url == null
+        ? l10n.relayAddressInvalid
+        : _relays.contains(url)
+        ? l10n.relayAlreadyListed
+        : null;
+    setState(() {
+      _error = error;
+      if (url != null && error == null) {
+        _relays.add(url);
+        _url.clear();
+      }
+    });
+    return error == null;
+  }
+
+  void _reset() => setState(() {
+    _relays
+      ..clear()
+      ..addAll(widget.list.defaults);
+    _url.clear();
+    _error = null;
+  });
+
+  // A relay typed but not added yet is saved too.
+  void _save() {
+    if (!_add()) return;
+    unawaited(widget.mail.setRelays(widget.list, _relays));
+    Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final palette = context.palette;
+    return Dialog(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 440),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                _mailRelaysTitle(l10n, widget.list),
+                style: Theme.of(context).dialogTheme.titleTextStyle,
+              ),
+              const SizedBox(height: 8),
+              Text(switch (widget.list) {
+                MailRelayList.inbox => l10n.mailInboxRelaysExplanation,
+                MailRelayList.address => l10n.mailAddressRelaysExplanation,
+              }, style: TextStyle(fontSize: 13, color: palette.muted)),
+              const SizedBox(height: 20),
+              if (_relays.isEmpty)
+                Text(
+                  l10n.mailRelaysNeedOne,
+                  style: TextStyle(fontSize: 13, color: palette.muted),
+                )
+              else
+                FieldCard(
+                  children: [
+                    for (final url in _relays)
+                      SettingsTile(
+                        leading: Icon(
+                          Icons.cell_tower_rounded,
+                          size: 20,
+                          color: palette.muted,
+                        ),
+                        title: Text(
+                          _relayHost(url),
+                          style: const TextStyle(fontWeight: FontWeight.w500),
+                        ),
+                        trailing: IconButton(
+                          tooltip: l10n.removeRelay,
+                          onPressed: () => setState(() => _relays.remove(url)),
+                          icon: const Icon(Icons.close_rounded, size: 20),
+                        ),
+                      ),
+                  ],
+                ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _url,
+                autocorrect: false,
+                enableSuggestions: false,
+                keyboardType: TextInputType.url,
+                onSubmitted: (_) => _add(),
+                decoration: InputDecoration(
+                  labelText: l10n.relayAddress,
+                  hintText: 'wss://relay.example.com',
+                  errorText: _error,
+                  suffixIcon: IconButton(
+                    tooltip: l10n.addRelay,
+                    onPressed: _add,
+                    icon: const Icon(Icons.add_rounded),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              DialogButtons(
+                children: [
+                  TextButton(
+                    onPressed: listEquals(_relays, widget.list.defaults)
+                        ? null
+                        : _reset,
+                    child: Text(l10n.resetMailRelays),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(l10n.cancel),
+                  ),
+                  FilledButton(
+                    onPressed: _relays.isEmpty ? null : _save,
+                    child: Text(l10n.save),
+                  ),
                 ],
               ),
             ],

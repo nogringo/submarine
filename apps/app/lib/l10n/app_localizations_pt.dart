@@ -1391,6 +1391,30 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get mailboxKey => 'Chave da caixa de correio';
+
+  @override
+  String get mailInboxRelays => 'Relays de receção';
+
+  @override
+  String get mailInboxRelaysExplanation =>
+      'Os e-mails enviados para os novos endereços chegam a estes relays. Os endereços criados antes mantêm os seus.';
+
+  @override
+  String get mailAddressRelays => 'Relays do endereço';
+
+  @override
+  String get mailAddressRelaysExplanation =>
+      'Os novos endereços publicam os seus relays de receção nestes relays, onde a ponte os encontra. Os endereços criados antes mantêm os seus.';
+
+  @override
+  String get changeMailRelays => 'Alterar';
+
+  @override
+  String get mailRelaysNeedOne =>
+      'Os novos endereços precisam de pelo menos um relay.';
+
+  @override
+  String get resetMailRelays => 'Repor';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -2794,4 +2818,28 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get mailboxKey => 'Chave da caixa de e-mail';
+
+  @override
+  String get mailInboxRelays => 'Relays de recebimento';
+
+  @override
+  String get mailInboxRelaysExplanation =>
+      'Os e-mails enviados para os novos endereços chegam a estes relays. Os endereços criados antes mantêm os seus.';
+
+  @override
+  String get mailAddressRelays => 'Relays do endereço';
+
+  @override
+  String get mailAddressRelaysExplanation =>
+      'Os novos endereços publicam seus relays de recebimento nestes relays, onde a ponte os encontra. Os endereços criados antes mantêm os seus.';
+
+  @override
+  String get changeMailRelays => 'Alterar';
+
+  @override
+  String get mailRelaysNeedOne =>
+      'Os novos endereços precisam de pelo menos um relay.';
+
+  @override
+  String get resetMailRelays => 'Redefinir';
 }

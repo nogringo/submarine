@@ -2430,6 +2430,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mailbox key'**
   String get mailboxKey;
+
+  /// Setting, and title of its dialog, listing the relays the emails of new email addresses arrive on (their kind:10050 list).
+  ///
+  /// In en, this message translates to:
+  /// **'Inbox relays'**
+  String get mailInboxRelays;
+
+  /// In the inbox relays dialog: what the relays are for, and that changing them does not change the addresses already created.
+  ///
+  /// In en, this message translates to:
+  /// **'Emails sent to new addresses arrive on these relays. Addresses created before keep theirs.'**
+  String get mailInboxRelaysExplanation;
+
+  /// Setting, and title of its dialog, listing the relays where new email addresses publish their inbox relays (their NIP-65 list).
+  ///
+  /// In en, this message translates to:
+  /// **'Address relays'**
+  String get mailAddressRelays;
+
+  /// In the address relays dialog: what the relays are for, and that changing them does not change the addresses already created.
+  ///
+  /// In en, this message translates to:
+  /// **'New addresses publish their inbox relays on these relays, where the bridge finds them. Addresses created before keep theirs.'**
+  String get mailAddressRelaysExplanation;
+
+  /// Button of an email relays setting opening its dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get changeMailRelays;
+
+  /// In an email relays dialog, when its list is empty.
+  ///
+  /// In en, this message translates to:
+  /// **'New addresses need at least one relay.'**
+  String get mailRelaysNeedOne;
+
+  /// Button of an email relays dialog putting back the default relays.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get resetMailRelays;
 }
 
 class _AppLocalizationsDelegate

@@ -385,5 +385,12 @@
   "mailBridgeExplanation": "Tästä lähtien luodut sähköpostiosoitteet päättyvät tähän verkkotunnukseen. Aiemmin luodut säilyttävät omansa.",
   "mailBridgeInvalid": "Tämä ei ole verkkotunnus.",
   "emailAddressField": "Sähköpostiosoite",
-  "mailboxKey": "Postilaatikon avain"
+  "mailboxKey": "Postilaatikon avain",
+  "mailInboxRelays": "Vastaanottoreleet",
+  "mailInboxRelaysExplanation": "Uusiin osoitteisiin lähetetyt sähköpostit saapuvat näille releille. Aiemmin luodut osoitteet säilyttävät omansa.",
+  "mailAddressRelays": "Osoitteen releet",
+  "mailAddressRelaysExplanation": "Uudet osoitteet julkaisevat vastaanottoreleensä näillä releillä, joilta silta löytää ne. Aiemmin luodut osoitteet säilyttävät omansa.",
+  "changeMailRelays": "Vaihda",
+  "mailRelaysNeedOne": "Uudet osoitteet tarvitsevat vähintään yhden releen.",
+  "resetMailRelays": "Palauta oletukset"
 }

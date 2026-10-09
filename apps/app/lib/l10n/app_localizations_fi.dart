@@ -1387,4 +1387,28 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get mailboxKey => 'Postilaatikon avain';
+
+  @override
+  String get mailInboxRelays => 'Vastaanottoreleet';
+
+  @override
+  String get mailInboxRelaysExplanation =>
+      'Uusiin osoitteisiin lähetetyt sähköpostit saapuvat näille releille. Aiemmin luodut osoitteet säilyttävät omansa.';
+
+  @override
+  String get mailAddressRelays => 'Osoitteen releet';
+
+  @override
+  String get mailAddressRelaysExplanation =>
+      'Uudet osoitteet julkaisevat vastaanottoreleensä näillä releillä, joilta silta löytää ne. Aiemmin luodut osoitteet säilyttävät omansa.';
+
+  @override
+  String get changeMailRelays => 'Vaihda';
+
+  @override
+  String get mailRelaysNeedOne =>
+      'Uudet osoitteet tarvitsevat vähintään yhden releen.';
+
+  @override
+  String get resetMailRelays => 'Palauta oletukset';
 }

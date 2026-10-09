@@ -385,5 +385,12 @@
   "mailBridgeExplanation": "Gli indirizzi email creati da ora in poi finiscono con questo dominio. Quelli creati prima mantengono il loro.",
   "mailBridgeInvalid": "Questo non è un dominio.",
   "emailAddressField": "Indirizzo email",
-  "mailboxKey": "Chiave della casella"
+  "mailboxKey": "Chiave della casella",
+  "mailInboxRelays": "Relay di ricezione",
+  "mailInboxRelaysExplanation": "Le email inviate ai nuovi indirizzi arrivano su questi relay. Gli indirizzi creati prima mantengono i loro.",
+  "mailAddressRelays": "Relay dell'indirizzo",
+  "mailAddressRelaysExplanation": "I nuovi indirizzi pubblicano i loro relay di ricezione su questi relay, dove il ponte li trova. Gli indirizzi creati prima mantengono i loro.",
+  "changeMailRelays": "Cambia",
+  "mailRelaysNeedOne": "I nuovi indirizzi hanno bisogno di almeno un relay.",
+  "resetMailRelays": "Ripristina"
 }

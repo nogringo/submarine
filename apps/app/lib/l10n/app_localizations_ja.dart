@@ -1365,4 +1365,27 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get mailboxKey => 'メールボックスの鍵';
+
+  @override
+  String get mailInboxRelays => '受信リレー';
+
+  @override
+  String get mailInboxRelaysExplanation =>
+      '新しいアドレスに送られたメールはこれらのリレーに届きます。作成済みのアドレスはそのままです。';
+
+  @override
+  String get mailAddressRelays => 'アドレスのリレー';
+
+  @override
+  String get mailAddressRelaysExplanation =>
+      '新しいアドレスは受信リレーをこれらのリレーに公開し、ブリッジはそこでそれを見つけます。作成済みのアドレスはそのままです。';
+
+  @override
+  String get changeMailRelays => '変更';
+
+  @override
+  String get mailRelaysNeedOne => '新しいアドレスには少なくとも 1 つのリレーが必要です。';
+
+  @override
+  String get resetMailRelays => 'リセット';
 }

@@ -1394,4 +1394,28 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get mailboxKey => 'Clé de la boîte mail';
+
+  @override
+  String get mailInboxRelays => 'Relais de réception';
+
+  @override
+  String get mailInboxRelaysExplanation =>
+      'Les e-mails envoyés aux nouvelles adresses arrivent sur ces relais. Les adresses créées avant gardent les leurs.';
+
+  @override
+  String get mailAddressRelays => 'Relais de l\'adresse';
+
+  @override
+  String get mailAddressRelaysExplanation =>
+      'Les nouvelles adresses publient leurs relais de réception sur ces relais, où le pont les trouve. Les adresses créées avant gardent les leurs.';
+
+  @override
+  String get changeMailRelays => 'Changer';
+
+  @override
+  String get mailRelaysNeedOne =>
+      'Les nouvelles adresses ont besoin d\'au moins un relais.';
+
+  @override
+  String get resetMailRelays => 'Réinitialiser';
 }

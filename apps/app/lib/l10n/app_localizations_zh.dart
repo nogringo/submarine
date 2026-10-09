@@ -1353,4 +1353,26 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get mailboxKey => '邮箱密钥';
+
+  @override
+  String get mailInboxRelays => '收件中继';
+
+  @override
+  String get mailInboxRelaysExplanation => '发送到新地址的邮件会到达这些中继。之前创建的地址保持不变。';
+
+  @override
+  String get mailAddressRelays => '地址中继';
+
+  @override
+  String get mailAddressRelaysExplanation =>
+      '新地址在这些中继上发布其收件中继，桥接在那里找到它们。之前创建的地址保持不变。';
+
+  @override
+  String get changeMailRelays => '更改';
+
+  @override
+  String get mailRelaysNeedOne => '新地址至少需要一个中继。';
+
+  @override
+  String get resetMailRelays => '重置';
 }

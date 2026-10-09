@@ -3778,6 +3778,83 @@ void main() {
     await close(tester);
   });
 
+  testWidgets('changes the relays of new email addresses, and keeps them', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(390, 844));
+    await open(tester, items: [github]);
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+        mail: mail,
+      ),
+    );
+    await settle(tester);
+
+    await tester.tap(find.byTooltip('Settings'));
+    await settle(tester);
+    await tester.ensureVisible(find.text('Inbox relays'));
+    await settle(tester);
+    expect(find.text('relay.nmail.li, auth.nostr1.com'), findsOneWidget);
+    expect(
+      find.text('relay.nmail.li, nostr-01.yakihonne.com, relay.primal.net'),
+      findsOneWidget,
+    );
+
+    await tester.tap(settingsButton('Inbox relays', 'Change'));
+    await settle(tester);
+    await tester.enterText(find.byType(TextField), 'not a relay');
+    await tester.tap(find.byTooltip('Add a relay'));
+    await settle(tester);
+    expect(find.text('This is not a relay address.'), findsOneWidget);
+    await tester.enterText(find.byType(TextField), 'relay.nmail.li');
+    await tester.tap(find.byTooltip('Add a relay'));
+    await settle(tester);
+    expect(find.text('This relay is already in the list.'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Remove this relay').last);
+    await tester.enterText(find.byType(TextField), 'relay.example.com');
+    await tester.tap(find.text('Save'));
+    await settle(tester);
+    expect(find.text('relay.nmail.li, relay.example.com'), findsOneWidget);
+    await tester.runAsync(() async {
+      expect((await MailSettings.load()).relays(MailRelayList.inbox), [
+        'wss://relay.nmail.li',
+        'wss://relay.example.com',
+      ]);
+    });
+
+    await tester.tap(settingsButton('Inbox relays', 'Change'));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Remove this relay').first);
+    await settle(tester);
+    await tester.tap(find.byTooltip('Remove this relay'));
+    await settle(tester);
+    expect(find.text('New addresses need at least one relay.'), findsOneWidget);
+    expect(
+      tester
+          .widget<FilledButton>(find.widgetWithText(FilledButton, 'Save'))
+          .onPressed,
+      isNull,
+    );
+    await tester.tap(find.text('Reset'));
+    await settle(tester);
+    await tester.tap(find.text('Save'));
+    await settle(tester);
+    expect(find.text('relay.nmail.li, auth.nostr1.com'), findsOneWidget);
+    await tester.runAsync(() async {
+      expect(
+        await const FlutterSecureStorage().read(key: 'mailInboxRelays'),
+        isNull,
+      );
+    });
+    await close(tester);
+  });
+
   testWidgets('blocks screen capture until the settings allow it', (
     tester,
   ) async {

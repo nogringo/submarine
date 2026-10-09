@@ -385,5 +385,12 @@
   "mailBridgeExplanation": "Адреса почты, созданные с этого момента, заканчиваются этим доменом. Созданные раньше сохраняют свой.",
   "mailBridgeInvalid": "Это не домен.",
   "emailAddressField": "Адрес почты",
-  "mailboxKey": "Ключ почтового ящика"
+  "mailboxKey": "Ключ почтового ящика",
+  "mailInboxRelays": "Реле входящих",
+  "mailInboxRelaysExplanation": "Письма на новые адреса приходят на эти реле. Созданные раньше адреса сохраняют свои.",
+  "mailAddressRelays": "Реле адреса",
+  "mailAddressRelaysExplanation": "Новые адреса публикуют на этих реле свои реле входящих, где их находит мост. Созданные раньше адреса сохраняют свои.",
+  "changeMailRelays": "Изменить",
+  "mailRelaysNeedOne": "Новым адресам нужно хотя бы одно реле.",
+  "resetMailRelays": "Сбросить"
 }

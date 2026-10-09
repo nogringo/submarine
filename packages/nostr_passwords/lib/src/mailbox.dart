@@ -13,3 +13,18 @@ import 'package:ndk/ndk.dart';
     address: '${Nip19.encodePubKey(publicKey)}@$bridge',
   );
 }
+
+/// Relays a client gives the NIP-65 list of a new mailbox by default, those
+/// of the nmail app.
+const defaultMailboxRelays = [
+  'wss://relay.nmail.li',
+  'wss://nostr-01.yakihonne.com',
+  'wss://relay.primal.net',
+];
+
+/// Relays a client gives the `kind:10050` list of a new mailbox by default,
+/// those of the nmail app: the bridge sends the mailbox's emails to them.
+const defaultMailboxInboxRelays = [
+  'wss://relay.nmail.li',
+  'wss://auth.nostr1.com',
+];

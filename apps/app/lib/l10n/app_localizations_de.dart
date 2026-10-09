@@ -1391,4 +1391,28 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get mailboxKey => 'Postfachschlüssel';
+
+  @override
+  String get mailInboxRelays => 'Empfangs-Relays';
+
+  @override
+  String get mailInboxRelaysExplanation =>
+      'E-Mails an neue Adressen kommen auf diesen Relays an. Bereits erstellte Adressen behalten ihre.';
+
+  @override
+  String get mailAddressRelays => 'Adress-Relays';
+
+  @override
+  String get mailAddressRelaysExplanation =>
+      'Neue Adressen veröffentlichen ihre Empfangs-Relays auf diesen Relays, wo die Bridge sie findet. Bereits erstellte Adressen behalten ihre.';
+
+  @override
+  String get changeMailRelays => 'Ändern';
+
+  @override
+  String get mailRelaysNeedOne =>
+      'Neue Adressen brauchen mindestens ein Relay.';
+
+  @override
+  String get resetMailRelays => 'Zurücksetzen';
 }

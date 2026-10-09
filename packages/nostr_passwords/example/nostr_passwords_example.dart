@@ -168,6 +168,10 @@ Future<void> main() async {
     signerFactory: ndk.config.eventSignerFactory,
   );
   print('Sign up with ${mailbox.address}');
+  print(
+    'Its emails arrive on ${defaultMailboxInboxRelays.join(', ')}, '
+    'listed on ${defaultMailboxRelays.join(', ')}',
+  );
 
   // Bitwarden's JSON export, both ways, password protected or not.
   final bitwardenExport = File('bitwarden_export.json');

@@ -385,5 +385,12 @@
   "mailBridgeExplanation": "Les adresses e-mail créées à partir de maintenant finissent par ce domaine. Celles créées avant gardent le leur.",
   "mailBridgeInvalid": "Ce n'est pas un domaine.",
   "emailAddressField": "Adresse e-mail",
-  "mailboxKey": "Clé de la boîte mail"
+  "mailboxKey": "Clé de la boîte mail",
+  "mailInboxRelays": "Relais de réception",
+  "mailInboxRelaysExplanation": "Les e-mails envoyés aux nouvelles adresses arrivent sur ces relais. Les adresses créées avant gardent les leurs.",
+  "mailAddressRelays": "Relais de l'adresse",
+  "mailAddressRelaysExplanation": "Les nouvelles adresses publient leurs relais de réception sur ces relais, où le pont les trouve. Les adresses créées avant gardent les leurs.",
+  "changeMailRelays": "Changer",
+  "mailRelaysNeedOne": "Les nouvelles adresses ont besoin d'au moins un relais.",
+  "resetMailRelays": "Réinitialiser"
 }

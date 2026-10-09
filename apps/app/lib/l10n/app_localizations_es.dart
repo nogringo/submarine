@@ -1392,4 +1392,28 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get mailboxKey => 'Clave del buzón';
+
+  @override
+  String get mailInboxRelays => 'Relays de recepción';
+
+  @override
+  String get mailInboxRelaysExplanation =>
+      'Los correos enviados a las nuevas direcciones llegan a estos relays. Las direcciones creadas antes conservan los suyos.';
+
+  @override
+  String get mailAddressRelays => 'Relays de la dirección';
+
+  @override
+  String get mailAddressRelaysExplanation =>
+      'Las nuevas direcciones publican sus relays de recepción en estos relays, donde el puente los encuentra. Las direcciones creadas antes conservan los suyos.';
+
+  @override
+  String get changeMailRelays => 'Cambiar';
+
+  @override
+  String get mailRelaysNeedOne =>
+      'Las nuevas direcciones necesitan al menos un relay.';
+
+  @override
+  String get resetMailRelays => 'Restablecer';
 }

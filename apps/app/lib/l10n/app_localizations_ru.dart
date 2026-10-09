@@ -1422,4 +1422,27 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get mailboxKey => 'Ключ почтового ящика';
+
+  @override
+  String get mailInboxRelays => 'Реле входящих';
+
+  @override
+  String get mailInboxRelaysExplanation =>
+      'Письма на новые адреса приходят на эти реле. Созданные раньше адреса сохраняют свои.';
+
+  @override
+  String get mailAddressRelays => 'Реле адреса';
+
+  @override
+  String get mailAddressRelaysExplanation =>
+      'Новые адреса публикуют на этих реле свои реле входящих, где их находит мост. Созданные раньше адреса сохраняют свои.';
+
+  @override
+  String get changeMailRelays => 'Изменить';
+
+  @override
+  String get mailRelaysNeedOne => 'Новым адресам нужно хотя бы одно реле.';
+
+  @override
+  String get resetMailRelays => 'Сбросить';
 }

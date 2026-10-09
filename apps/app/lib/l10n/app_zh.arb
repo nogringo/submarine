@@ -385,5 +385,12 @@
   "mailBridgeExplanation": "从现在起创建的邮箱地址以此域名结尾。之前创建的地址保持不变。",
   "mailBridgeInvalid": "这不是一个域名。",
   "emailAddressField": "邮箱地址",
-  "mailboxKey": "邮箱密钥"
+  "mailboxKey": "邮箱密钥",
+  "mailInboxRelays": "收件中继",
+  "mailInboxRelaysExplanation": "发送到新地址的邮件会到达这些中继。之前创建的地址保持不变。",
+  "mailAddressRelays": "地址中继",
+  "mailAddressRelaysExplanation": "新地址在这些中继上发布其收件中继，桥接在那里找到它们。之前创建的地址保持不变。",
+  "changeMailRelays": "更改",
+  "mailRelaysNeedOne": "新地址至少需要一个中继。",
+  "resetMailRelays": "重置"
 }

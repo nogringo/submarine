@@ -385,5 +385,12 @@
   "mailBridgeExplanation": "今後作成するメールアドレスはこのドメインで終わります。作成済みのアドレスはそのままです。",
   "mailBridgeInvalid": "ドメインではありません。",
   "emailAddressField": "メールアドレス",
-  "mailboxKey": "メールボックスの鍵"
+  "mailboxKey": "メールボックスの鍵",
+  "mailInboxRelays": "受信リレー",
+  "mailInboxRelaysExplanation": "新しいアドレスに送られたメールはこれらのリレーに届きます。作成済みのアドレスはそのままです。",
+  "mailAddressRelays": "アドレスのリレー",
+  "mailAddressRelaysExplanation": "新しいアドレスは受信リレーをこれらのリレーに公開し、ブリッジはそこでそれを見つけます。作成済みのアドレスはそのままです。",
+  "changeMailRelays": "変更",
+  "mailRelaysNeedOne": "新しいアドレスには少なくとも 1 つのリレーが必要です。",
+  "resetMailRelays": "リセット"
 }

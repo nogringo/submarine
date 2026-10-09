@@ -15,6 +15,7 @@ import 'defaults.dart';
 import 'html_text.dart';
 import 'mail_bridge.dart';
 import 'relay_list.dart';
+import 'server_list.dart';
 
 /// A new mailbox at [bridge]: the nsec of a key made for it alone, for a
 /// hidden field of the item, and its address, that key's npub at [bridge].
@@ -67,18 +68,20 @@ String? _npubOf(String key, LocalEventSignerFactory signerFactory) {
   }
 }
 
-/// Publishes the relay lists of the mailbox of [key], an nsec, signed by that
-/// key: a NIP-65 list of [relays], to them and to [indexers], and a
-/// `kind:10050` list of [inboxRelays], the relays its emails arrive on, to
-/// [relays]. A bridge finds the first on the indexers, then the second.
+/// Publishes the lists of the mailbox of [key], an nsec, signed by that key: a
+/// NIP-65 list of [relays], to them and to [indexers], then to [relays] a
+/// `kind:10050` list of [inboxRelays], the relays its emails arrive on, and a
+/// `kind:10063` list of [blossomServers], where its large emails arrive. A
+/// bridge finds the first on the indexers, then the others.
 ///
 /// Local first, as a vault: done once the lists are saved in the ndk cache,
 /// which then sends them in the background.
-Future<void> publishMailboxRelays(
+Future<void> publishMailboxLists(
   Ndk ndk,
   String key, {
   required List<String> relays,
   required List<String> inboxRelays,
+  required List<String> blossomServers,
   List<String> indexers = defaultIndexerRelays,
 }) async {
   final signer = ndk.config.eventSignerFactory.create(
@@ -100,6 +103,10 @@ Future<void> publishMailboxRelays(
       content: '',
     ),
   );
+  final serverList = await signServerList(
+    ServerList(public: blossomServers),
+    signer,
+  );
   final account = Account(
     type: AccountType.privateKey,
     pubkey: signer.getPublicKey(),
@@ -108,6 +115,7 @@ Future<void> publishMailboxRelays(
   for (final (event, to) in [
     (relayList, {...relays, ...indexers}),
     (inboxList, relays),
+    (serverList, relays),
   ]) {
     await ndk.config.cache.saveEvent(event);
     await ndk.broadcast
@@ -148,8 +156,8 @@ class Mailbox {
   /// Where [fetchRelays] looks for the NIP-65 list.
   final List<String> indexers;
 
-  /// Where [download] looks for a large email, after the servers its sender
-  /// lists.
+  /// Where [download] looks for a large email, after the servers the mailbox
+  /// and its sender list.
   final List<String> blossomServers;
 
   /// By gift wrap id, null for one that holds no message. Kept in memory only,
@@ -259,15 +267,17 @@ class Mailbox {
   }
 
   /// [email] with its [Email.text], downloaded when it was too large for a
-  /// gift wrap (nostr-mail Blossom): from the servers its sender lists, then
-  /// [blossomServers]. Nothing is stored.
+  /// gift wrap (nostr-mail Blossom): from the servers the mailbox lists, where
+  /// the bridge puts it, then those its sender lists, then [blossomServers].
+  /// Nothing is stored.
   ///
   /// Throws an [EmailDownloadException] when no server gives it.
   Future<Email> download(Email email) async {
     final blob = email._blob;
     if (blob == null) return email;
     final servers = {
-      ...await _blossomServersOf(email.pubkey),
+      for (final pubkey in [signer.getPublicKey(), email.pubkey])
+        ...await _blossomServersOf(pubkey),
       ...blossomServers,
     };
     for (final server in servers) {
@@ -316,17 +326,35 @@ class Mailbox {
         .future;
   }
 
+  /// The Blossom servers [pubkey] lists, found as anyone's: its NIP-65 list on
+  /// [indexers], then its server list on the relays it writes to.
   Future<List<String>> _blossomServersOf(String pubkey) async {
-    final filter = Filter(kinds: [_blossomServersKind], authors: [pubkey]);
-    await _query(filter, {
-      ...await relays(),
-      ...indexers,
-    }, auth: const AuthPolicy.never());
-    final lists = await ndk.config.cache.loadEvents(
+    const auth = AuthPolicy.never();
+    await _query(
+      Filter(kinds: [Nip65.kKind], authors: [pubkey]),
+      indexers,
+      auth: auth,
+    );
+    final relayLists = await ndk.config.cache.loadEvents(
+      pubKeys: [pubkey],
+      kinds: [Nip65.kKind],
+    );
+    final writeRelays = {
+      for (final list in relayLists)
+        ...Nip65.fromEvent(list).relays.entries
+            .where((relay) => relay.value.isWrite)
+            .map((relay) => relay.key),
+    };
+    await _query(
+      Filter(kinds: [_blossomServersKind], authors: [pubkey]),
+      writeRelays,
+      auth: auth,
+    );
+    final serverLists = await ndk.config.cache.loadEvents(
       pubKeys: [pubkey],
       kinds: [_blossomServersKind],
     );
-    return [for (final list in lists) ...list.getTags('server')];
+    return [for (final list in serverLists) ...list.getTags('server')];
   }
 
   Future<MailMessage?> _open(Nip01Event wrap) async {

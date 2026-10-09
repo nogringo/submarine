@@ -241,8 +241,8 @@ void main() {
     final relay = _EmptyRelay();
     await startRelays(tester, [relay]);
     await tester.runAsync(() async {
-      for (final list in MailRelayList.values) {
-        await mail.setRelays(list, [relay.url]);
+      for (final list in [MailList.address, MailList.inbox]) {
+        await mail.setUrls(list, [relay.url]);
       }
     });
     return relay;
@@ -1998,16 +1998,17 @@ void main() {
     await close(tester);
   });
 
-  testWidgets('publishes the relays of a new email address with its item', (
+  testWidgets('publishes the lists of a new email address with its item', (
     tester,
   ) async {
     setScreen(tester, const Size(1280, 1600));
     await open(tester, items: [github]);
     final relay = await startMailRelay(tester);
-    // Never reached: the inbox list goes to the relays of the NIP-65 list.
-    await tester.runAsync(
-      () => mail.setRelays(MailRelayList.inbox, ['wss://inbox.example']),
-    );
+    await tester.runAsync(() async {
+      // Never reached: the inbox list goes to the relays of the NIP-65 list.
+      await mail.setUrls(MailList.inbox, ['wss://inbox.example']);
+      await mail.setUrls(MailList.servers, ['https://blossom.example']);
+    });
     await tester.pumpWidget(
       SubmarineApp(
         vaults: vaults,
@@ -2052,10 +2053,16 @@ void main() {
         10050: [
           ['relay', 'wss://inbox.example'],
         ],
+        10063: [
+          ['server', 'https://blossom.example'],
+        ],
       },
     );
-    await pumpUntil(tester, () => relay.received.length == 2);
-    expect({for (final event in relay.received) event['kind']}, {10002, 10050});
+    await pumpUntil(tester, () => relay.received.length == 3);
+    expect(
+      {for (final event in relay.received) event['kind']},
+      {10002, 10050, 10063},
+    );
 
     await tester.runAsync(
       () => ndk.config.cache.removeEvents(pubKeys: [pubkey]),
@@ -4173,7 +4180,7 @@ void main() {
     await settle(tester);
     expect(find.text('relay.nmail.li, relay.example.com'), findsOneWidget);
     await tester.runAsync(() async {
-      expect((await MailSettings.load()).relays(MailRelayList.inbox), [
+      expect((await MailSettings.load()).urls(MailList.inbox), [
         'wss://relay.nmail.li',
         'wss://relay.example.com',
       ]);
@@ -4202,6 +4209,57 @@ void main() {
         await const FlutterSecureStorage().read(key: 'mailInboxRelays'),
         isNull,
       );
+    });
+    await close(tester);
+  });
+
+  testWidgets('changes the servers of the large emails of new addresses', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(390, 844));
+    await open(tester, items: [github]);
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+        mail: mail,
+      ),
+    );
+    await settle(tester);
+
+    await tester.tap(find.byTooltip('Settings'));
+    await settle(tester);
+    await tester.ensureVisible(find.text('Large email servers'));
+    await settle(tester);
+    expect(
+      find.text('blossom.nmail.li, blossom.yakihonne.com, blossom.ditto.pub'),
+      findsOneWidget,
+    );
+
+    await tester.tap(settingsButton('Large email servers', 'Change'));
+    await settle(tester);
+    await tester.enterText(find.byType(TextField), 'not a server');
+    await tester.tap(find.byTooltip('Add a server'));
+    await settle(tester);
+    expect(find.text('This is not a server address.'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Remove this server').last);
+    await tester.enterText(find.byType(TextField), 'blossom.example.com/');
+    await tester.tap(find.text('Save'));
+    await settle(tester);
+    expect(
+      find.text('blossom.nmail.li, blossom.yakihonne.com, blossom.example.com'),
+      findsOneWidget,
+    );
+    await tester.runAsync(() async {
+      expect((await MailSettings.load()).urls(MailList.servers), [
+        'https://blossom.nmail.li',
+        'https://blossom.yakihonne.com',
+        'https://blossom.example.com',
+      ]);
     });
     await close(tester);
   });

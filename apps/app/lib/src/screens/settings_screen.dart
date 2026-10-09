@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:ndk/ndk.dart' show Nip19;
 import 'package:nostr_passwords/nostr_passwords.dart'
-    show defaultMailBridge, parseMailBridge, parseRelayUrl;
+    show defaultMailBridge, parseMailBridge, parseRelayUrl, parseServerUrl;
 
 import '../clipboard.dart';
 import '../context.dart';
@@ -117,8 +117,9 @@ class _Settings extends StatelessWidget {
                 child: const FieldCard(
                   children: [
                     _MailBridgeTile(),
-                    _MailRelaysTile(list: MailRelayList.inbox),
-                    _MailRelaysTile(list: MailRelayList.address),
+                    _MailListTile(list: MailList.inbox),
+                    _MailListTile(list: MailList.address),
+                    _MailListTile(list: MailList.servers),
                   ],
                 ),
               ),
@@ -363,31 +364,76 @@ class _MailBridgeDialogState extends State<_MailBridgeDialog> {
   }
 }
 
-String _relayHost(String url) =>
-    url.startsWith('wss://') ? url.substring(6) : url;
+String _host(String url) => url.replaceFirst(RegExp(r'^(wss|https)://'), '');
 
-String _mailRelaysTitle(AppLocalizations l10n, MailRelayList list) =>
-    switch (list) {
-      MailRelayList.inbox => l10n.mailInboxRelays,
-      MailRelayList.address => l10n.mailAddressRelays,
-    };
+/// What the setting of [list] says and takes, of relays or of servers.
+({
+  String title,
+  String explanation,
+  String needOne,
+  String address,
+  String hint,
+  String invalid,
+  String alreadyListed,
+  String add,
+  String remove,
+  IconData icon,
+  String? Function(String text) parse,
+})
+_describe(AppLocalizations l10n, MailList list) {
+  final (title, explanation) = switch (list) {
+    MailList.inbox => (l10n.mailInboxRelays, l10n.mailInboxRelaysExplanation),
+    MailList.address => (
+      l10n.mailAddressRelays,
+      l10n.mailAddressRelaysExplanation,
+    ),
+    MailList.servers => (l10n.mailServers, l10n.mailServersExplanation),
+  };
+  return list == MailList.servers
+      ? (
+          title: title,
+          explanation: explanation,
+          needOne: l10n.mailServersNeedOne,
+          address: l10n.serverAddress,
+          hint: 'https://blossom.example.com',
+          invalid: l10n.serverAddressInvalid,
+          alreadyListed: l10n.serverAlreadyListed,
+          add: l10n.addServer,
+          remove: l10n.removeServer,
+          icon: Icons.dns_rounded,
+          parse: parseServerUrl,
+        )
+      : (
+          title: title,
+          explanation: explanation,
+          needOne: l10n.mailRelaysNeedOne,
+          address: l10n.relayAddress,
+          hint: 'wss://relay.example.com',
+          invalid: l10n.relayAddressInvalid,
+          alreadyListed: l10n.relayAlreadyListed,
+          add: l10n.addRelay,
+          remove: l10n.removeRelay,
+          icon: Icons.cell_tower_rounded,
+          parse: parseRelayUrl,
+        );
+}
 
-class _MailRelaysTile extends StatelessWidget {
-  const _MailRelaysTile({required this.list});
+class _MailListTile extends StatelessWidget {
+  const _MailListTile({required this.list});
 
-  final MailRelayList list;
+  final MailList list;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final mail = MailSettings.of(context);
     return SettingsTile(
-      title: Text(_mailRelaysTitle(l10n, list)),
-      subtitle: Text(mail.relays(list).map(_relayHost).join(', ')),
+      title: Text(_describe(l10n, list).title),
+      subtitle: Text(mail.urls(list).map(_host).join(', ')),
       trailing: TextButton(
         onPressed: () => showDialog<void>(
           context: context,
-          builder: (context) => _MailRelaysDialog(mail: mail, list: list),
+          builder: (context) => _MailListDialog(mail: mail, list: list),
         ),
         child: Text(l10n.changeMailRelays),
       ),
@@ -395,18 +441,18 @@ class _MailRelaysTile extends StatelessWidget {
   }
 }
 
-class _MailRelaysDialog extends StatefulWidget {
-  const _MailRelaysDialog({required this.mail, required this.list});
+class _MailListDialog extends StatefulWidget {
+  const _MailListDialog({required this.mail, required this.list});
 
   final MailSettings mail;
-  final MailRelayList list;
+  final MailList list;
 
   @override
-  State<_MailRelaysDialog> createState() => _MailRelaysDialogState();
+  State<_MailListDialog> createState() => _MailListDialogState();
 }
 
-class _MailRelaysDialogState extends State<_MailRelaysDialog> {
-  late final _relays = [...widget.mail.relays(widget.list)];
+class _MailListDialogState extends State<_MailListDialog> {
+  late final _urls = [...widget.mail.urls(widget.list)];
   final _url = TextEditingController();
   String? _error;
 
@@ -416,21 +462,21 @@ class _MailRelaysDialogState extends State<_MailRelaysDialog> {
     super.dispose();
   }
 
-  /// Adds the relay typed, if any. False when the text is not one to add.
+  /// Adds the address typed, if any. False when the text is not one to add.
   bool _add() {
     final text = _url.text;
     if (text.trim().isEmpty) return true;
-    final l10n = context.l10n;
-    final url = parseRelayUrl(text);
+    final describe = _describe(context.l10n, widget.list);
+    final url = describe.parse(text);
     final error = url == null
-        ? l10n.relayAddressInvalid
-        : _relays.contains(url)
-        ? l10n.relayAlreadyListed
+        ? describe.invalid
+        : _urls.contains(url)
+        ? describe.alreadyListed
         : null;
     setState(() {
       _error = error;
       if (url != null && error == null) {
-        _relays.add(url);
+        _urls.add(url);
         _url.clear();
       }
     });
@@ -438,17 +484,17 @@ class _MailRelaysDialogState extends State<_MailRelaysDialog> {
   }
 
   void _reset() => setState(() {
-    _relays
+    _urls
       ..clear()
       ..addAll(widget.list.defaults);
     _url.clear();
     _error = null;
   });
 
-  // A relay typed but not added yet is saved too.
+  // An address typed but not added yet is saved too.
   void _save() {
     if (!_add()) return;
-    unawaited(widget.mail.setRelays(widget.list, _relays));
+    unawaited(widget.mail.setUrls(widget.list, _urls));
     Navigator.pop(context);
   }
 
@@ -456,6 +502,7 @@ class _MailRelaysDialogState extends State<_MailRelaysDialog> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final palette = context.palette;
+    final describe = _describe(l10n, widget.list);
     return Dialog(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 440),
@@ -466,37 +513,37 @@ class _MailRelaysDialogState extends State<_MailRelaysDialog> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                _mailRelaysTitle(l10n, widget.list),
+                describe.title,
                 style: Theme.of(context).dialogTheme.titleTextStyle,
               ),
               const SizedBox(height: 8),
-              Text(switch (widget.list) {
-                MailRelayList.inbox => l10n.mailInboxRelaysExplanation,
-                MailRelayList.address => l10n.mailAddressRelaysExplanation,
-              }, style: TextStyle(fontSize: 13, color: palette.muted)),
+              Text(
+                describe.explanation,
+                style: TextStyle(fontSize: 13, color: palette.muted),
+              ),
               const SizedBox(height: 20),
-              if (_relays.isEmpty)
+              if (_urls.isEmpty)
                 Text(
-                  l10n.mailRelaysNeedOne,
+                  describe.needOne,
                   style: TextStyle(fontSize: 13, color: palette.muted),
                 )
               else
                 FieldCard(
                   children: [
-                    for (final url in _relays)
+                    for (final url in _urls)
                       SettingsTile(
                         leading: Icon(
-                          Icons.cell_tower_rounded,
+                          describe.icon,
                           size: 20,
                           color: palette.muted,
                         ),
                         title: Text(
-                          _relayHost(url),
+                          _host(url),
                           style: const TextStyle(fontWeight: FontWeight.w500),
                         ),
                         trailing: IconButton(
-                          tooltip: l10n.removeRelay,
-                          onPressed: () => setState(() => _relays.remove(url)),
+                          tooltip: describe.remove,
+                          onPressed: () => setState(() => _urls.remove(url)),
                           icon: const Icon(Icons.close_rounded, size: 20),
                         ),
                       ),
@@ -510,11 +557,11 @@ class _MailRelaysDialogState extends State<_MailRelaysDialog> {
                 keyboardType: TextInputType.url,
                 onSubmitted: (_) => _add(),
                 decoration: InputDecoration(
-                  labelText: l10n.relayAddress,
-                  hintText: 'wss://relay.example.com',
+                  labelText: describe.address,
+                  hintText: describe.hint,
                   errorText: _error,
                   suffixIcon: IconButton(
-                    tooltip: l10n.addRelay,
+                    tooltip: describe.add,
                     onPressed: _add,
                     icon: const Icon(Icons.add_rounded),
                   ),
@@ -524,7 +571,7 @@ class _MailRelaysDialogState extends State<_MailRelaysDialog> {
               DialogButtons(
                 children: [
                   TextButton(
-                    onPressed: listEquals(_relays, widget.list.defaults)
+                    onPressed: listEquals(_urls, widget.list.defaults)
                         ? null
                         : _reset,
                     child: Text(l10n.resetMailRelays),
@@ -534,7 +581,7 @@ class _MailRelaysDialogState extends State<_MailRelaysDialog> {
                     child: Text(l10n.cancel),
                   ),
                   FilledButton(
-                    onPressed: _relays.isEmpty ? null : _save,
+                    onPressed: _urls.isEmpty ? null : _save,
                     child: Text(l10n.save),
                   ),
                 ],

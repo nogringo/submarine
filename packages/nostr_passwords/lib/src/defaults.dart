@@ -47,8 +47,9 @@ const defaultMailboxInboxRelays = [
   'wss://auth.nostr1.com',
 ];
 
-/// Blossom servers a client looks for a large email on, after those its sender
-/// lists: the defaults of nostr-mail.
+/// Blossom servers a client gives the `kind:10063` list of a new mailbox by
+/// default, where the bridge puts its large emails, and looks for a large email
+/// on after those the mailbox and its sender list: the defaults of nostr-mail.
 const defaultMailboxBlossomServers = [
   'https://blossom.nmail.li',
   'https://blossom.yakihonne.com',

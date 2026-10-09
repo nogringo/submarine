@@ -1459,4 +1459,14 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get resetMailRelays => 'リセット';
+
+  @override
+  String get mailServers => '大きなメールのサーバー';
+
+  @override
+  String get mailServersExplanation =>
+      '新しいアドレスは、リレーには大きすぎるメールを暗号化された状態でこれらのサーバーで受け取ります。作成済みのアドレスはそのままです。';
+
+  @override
+  String get mailServersNeedOne => '新しいアドレスには少なくとも 1 つのサーバーが必要です。';
 }

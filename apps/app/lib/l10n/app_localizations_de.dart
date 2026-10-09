@@ -1489,4 +1489,15 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get resetMailRelays => 'Zurücksetzen';
+
+  @override
+  String get mailServers => 'Server für große E-Mails';
+
+  @override
+  String get mailServersExplanation =>
+      'Neue Adressen empfangen E-Mails, die für ein Relay zu groß sind, verschlüsselt auf diesen Servern. Bereits erstellte Adressen behalten ihre.';
+
+  @override
+  String get mailServersNeedOne =>
+      'Neue Adressen brauchen mindestens einen Server.';
 }

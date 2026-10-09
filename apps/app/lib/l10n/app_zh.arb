@@ -415,5 +415,8 @@
   "mailAddressRelaysExplanation": "新地址在这些中继上发布其收件中继，桥接在那里找到它们。之前创建的地址保持不变。",
   "changeMailRelays": "更改",
   "mailRelaysNeedOne": "新地址至少需要一个中继。",
-  "resetMailRelays": "重置"
+  "resetMailRelays": "重置",
+  "mailServers": "大邮件服务器",
+  "mailServersExplanation": "新地址在这些服务器上接收对中继来说过大的加密邮件。之前创建的地址保持不变。",
+  "mailServersNeedOne": "新地址至少需要一个服务器。"
 }

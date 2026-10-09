@@ -1483,4 +1483,15 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get resetMailRelays => 'Palauta oletukset';
+
+  @override
+  String get mailServers => 'Suurten sähköpostien palvelimet';
+
+  @override
+  String get mailServersExplanation =>
+      'Uudet osoitteet vastaanottavat releelle liian suuret sähköpostit salattuina näille palvelimille. Aiemmin luodut osoitteet säilyttävät omansa.';
+
+  @override
+  String get mailServersNeedOne =>
+      'Uudet osoitteet tarvitsevat vähintään yhden palvelimen.';
 }

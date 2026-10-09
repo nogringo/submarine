@@ -415,5 +415,8 @@
   "mailAddressRelaysExplanation": "新しいアドレスは受信リレーをこれらのリレーに公開し、ブリッジはそこでそれを見つけます。作成済みのアドレスはそのままです。",
   "changeMailRelays": "変更",
   "mailRelaysNeedOne": "新しいアドレスには少なくとも 1 つのリレーが必要です。",
-  "resetMailRelays": "リセット"
+  "resetMailRelays": "リセット",
+  "mailServers": "大きなメールのサーバー",
+  "mailServersExplanation": "新しいアドレスは、リレーには大きすぎるメールを暗号化された状態でこれらのサーバーで受け取ります。作成済みのアドレスはそのままです。",
+  "mailServersNeedOne": "新しいアドレスには少なくとも 1 つのサーバーが必要です。"
 }

@@ -1517,4 +1517,14 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get resetMailRelays => 'Сбросить';
+
+  @override
+  String get mailServers => 'Серверы больших писем';
+
+  @override
+  String get mailServersExplanation =>
+      'Новые адреса получают на эти серверы в зашифрованном виде письма, слишком большие для реле. Созданные раньше адреса сохраняют свои.';
+
+  @override
+  String get mailServersNeedOne => 'Новым адресам нужен хотя бы один сервер.';
 }

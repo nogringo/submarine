@@ -1445,4 +1445,13 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get resetMailRelays => '重置';
+
+  @override
+  String get mailServers => '大邮件服务器';
+
+  @override
+  String get mailServersExplanation => '新地址在这些服务器上接收对中继来说过大的加密邮件。之前创建的地址保持不变。';
+
+  @override
+  String get mailServersNeedOne => '新地址至少需要一个服务器。';
 }

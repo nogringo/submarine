@@ -415,5 +415,8 @@
   "mailAddressRelaysExplanation": "Uudet osoitteet julkaisevat vastaanottoreleensä näillä releillä, joilta silta löytää ne. Aiemmin luodut osoitteet säilyttävät omansa.",
   "changeMailRelays": "Vaihda",
   "mailRelaysNeedOne": "Uudet osoitteet tarvitsevat vähintään yhden releen.",
-  "resetMailRelays": "Palauta oletukset"
+  "resetMailRelays": "Palauta oletukset",
+  "mailServers": "Suurten sähköpostien palvelimet",
+  "mailServersExplanation": "Uudet osoitteet vastaanottavat releelle liian suuret sähköpostit salattuina näille palvelimille. Aiemmin luodut osoitteet säilyttävät omansa.",
+  "mailServersNeedOne": "Uudet osoitteet tarvitsevat vähintään yhden palvelimen."
 }

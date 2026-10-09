@@ -1491,4 +1491,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get resetMailRelays => 'Réinitialiser';
+
+  @override
+  String get mailServers => 'Serveurs des gros e-mails';
+
+  @override
+  String get mailServersExplanation =>
+      'Les nouvelles adresses reçoivent sur ces serveurs, chiffrés, les e-mails trop gros pour un relais. Les adresses créées avant gardent les leurs.';
+
+  @override
+  String get mailServersNeedOne =>
+      'Les nouvelles adresses ont besoin d\'au moins un serveur.';
 }

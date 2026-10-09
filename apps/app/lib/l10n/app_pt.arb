@@ -415,5 +415,8 @@
   "mailAddressRelaysExplanation": "Os novos endereços publicam os seus relays de receção nestes relays, onde a ponte os encontra. Os endereços criados antes mantêm os seus.",
   "changeMailRelays": "Alterar",
   "mailRelaysNeedOne": "Os novos endereços precisam de pelo menos um relay.",
-  "resetMailRelays": "Repor"
+  "resetMailRelays": "Repor",
+  "mailServers": "Servidores de e-mails grandes",
+  "mailServersExplanation": "Os novos endereços recebem nestes servidores, cifrados, os e-mails demasiado grandes para um relay. Os endereços criados antes mantêm os seus.",
+  "mailServersNeedOne": "Os novos endereços precisam de pelo menos um servidor."
 }

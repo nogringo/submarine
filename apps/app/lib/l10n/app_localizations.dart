@@ -2593,7 +2593,7 @@ abstract class AppLocalizations {
   /// **'New addresses publish their inbox relays on these relays, where the bridge finds them. Addresses created before keep theirs.'**
   String get mailAddressRelaysExplanation;
 
-  /// Button of an email relays setting opening its dialog.
+  /// Button of an email relays or servers setting opening its dialog.
   ///
   /// In en, this message translates to:
   /// **'Change'**
@@ -2605,11 +2605,29 @@ abstract class AppLocalizations {
   /// **'New addresses need at least one relay.'**
   String get mailRelaysNeedOne;
 
-  /// Button of an email relays dialog putting back the default relays.
+  /// Button of an email relays or servers dialog putting back the defaults.
   ///
   /// In en, this message translates to:
   /// **'Reset'**
   String get resetMailRelays;
+
+  /// Setting, and title of its dialog, listing the Blossom servers where new email addresses receive the emails too large for a relay (their kind:10063 list).
+  ///
+  /// In en, this message translates to:
+  /// **'Large email servers'**
+  String get mailServers;
+
+  /// In the large email servers dialog: what the servers are for, and that changing them does not change the addresses already created.
+  ///
+  /// In en, this message translates to:
+  /// **'New addresses receive the emails too large for a relay on these servers, encrypted. Addresses created before keep theirs.'**
+  String get mailServersExplanation;
+
+  /// In the large email servers dialog, when its list is empty.
+  ///
+  /// In en, this message translates to:
+  /// **'New addresses need at least one server.'**
+  String get mailServersNeedOne;
 }
 
 class _AppLocalizationsDelegate

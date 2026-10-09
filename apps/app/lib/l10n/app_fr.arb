@@ -415,5 +415,8 @@
   "mailAddressRelaysExplanation": "Les nouvelles adresses publient leurs relais de réception sur ces relais, où le pont les trouve. Les adresses créées avant gardent les leurs.",
   "changeMailRelays": "Changer",
   "mailRelaysNeedOne": "Les nouvelles adresses ont besoin d'au moins un relais.",
-  "resetMailRelays": "Réinitialiser"
+  "resetMailRelays": "Réinitialiser",
+  "mailServers": "Serveurs des gros e-mails",
+  "mailServersExplanation": "Les nouvelles adresses reçoivent sur ces serveurs, chiffrés, les e-mails trop gros pour un relais. Les adresses créées avant gardent les leurs.",
+  "mailServersNeedOne": "Les nouvelles adresses ont besoin d'au moins un serveur."
 }

@@ -190,16 +190,18 @@ Future<void> main() async {
   );
   await vault.createItem(shop);
   // Once the item holding it is saved, the mailbox tells the bridge where its
-  // emails go: a NIP-65 list, on the indexers too, then a kind:10050 list.
+  // emails go: a NIP-65 list, on the indexers too, then a kind:10050 list, and
+  // a kind:10063 list for those too large for a gift wrap.
   for (final (:key, :address) in mailboxesOf(
     shop,
     signerFactory: ndk.config.eventSignerFactory,
   )) {
-    await publishMailboxRelays(
+    await publishMailboxLists(
       ndk,
       key,
       relays: defaultMailboxRelays,
       inboxRelays: defaultMailboxInboxRelays,
+      blossomServers: defaultMailboxBlossomServers,
     );
     print('$address receives emails');
   }

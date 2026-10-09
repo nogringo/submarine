@@ -6,15 +6,18 @@ import 'package:nostr_passwords/nostr_passwords.dart';
 
 import '../secure_storage.dart';
 
-/// The relay lists a new email address publishes.
-enum MailRelayList {
+/// The lists a new email address publishes.
+enum MailList {
   /// Its NIP-65 list, where the bridge finds its inbox.
   address('mailRelays', defaultMailboxRelays),
 
   /// Its `kind:10050` list, the relays its emails arrive on.
-  inbox('mailInboxRelays', defaultMailboxInboxRelays);
+  inbox('mailInboxRelays', defaultMailboxInboxRelays),
 
-  const MailRelayList(this._key, this.defaults);
+  /// Its `kind:10063` list, the Blossom servers its large emails arrive on.
+  servers('mailBlossomServers', defaultMailboxBlossomServers);
+
+  const MailList(this._key, this.defaults);
 
   final String _key;
   final List<String> defaults;
@@ -22,13 +25,13 @@ enum MailRelayList {
 
 /// The email settings picked on this device.
 class MailSettings extends ChangeNotifier {
-  MailSettings._(this._bridge, this._relays);
+  MailSettings._(this._bridge, this._urls);
 
   static const _bridgeKey = 'mailBridge';
 
   static Future<MailSettings> load() async =>
       MailSettings._(await secureStorage.read(key: _bridgeKey), {
-        for (final list in MailRelayList.values)
+        for (final list in MailList.values)
           if (await secureStorage.read(key: list._key) case final json?)
             list: (jsonDecode(json) as List).cast<String>(),
       });
@@ -48,17 +51,17 @@ class MailSettings extends ChangeNotifier {
     await secureStorage.write(key: _bridgeKey, value: _bridge);
   }
 
-  /// The relays of [list] that new email addresses get.
-  List<String> relays(MailRelayList list) => _relays[list] ?? list.defaults;
-  final Map<MailRelayList, List<String>> _relays;
+  /// The relays or servers of [list] that new email addresses get.
+  List<String> urls(MailList list) => _urls[list] ?? list.defaults;
+  final Map<MailList, List<String>> _urls;
 
-  /// Kept unset for the default relays, so that they follow new defaults.
-  Future<void> setRelays(MailRelayList list, List<String> relays) async {
-    final custom = listEquals(relays, list.defaults) ? null : [...relays];
+  /// Kept unset for the defaults, so that they follow new defaults.
+  Future<void> setUrls(MailList list, List<String> urls) async {
+    final custom = listEquals(urls, list.defaults) ? null : [...urls];
     if (custom == null) {
-      _relays.remove(list);
+      _urls.remove(list);
     } else {
-      _relays[list] = custom;
+      _urls[list] = custom;
     }
     notifyListeners();
     await secureStorage.write(

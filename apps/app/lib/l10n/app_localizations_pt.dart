@@ -1487,6 +1487,17 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get resetMailRelays => 'Repor';
+
+  @override
+  String get mailServers => 'Servidores de e-mails grandes';
+
+  @override
+  String get mailServersExplanation =>
+      'Os novos endereços recebem nestes servidores, cifrados, os e-mails demasiado grandes para um relay. Os endereços criados antes mantêm os seus.';
+
+  @override
+  String get mailServersNeedOne =>
+      'Os novos endereços precisam de pelo menos um servidor.';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -2986,4 +2997,15 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get resetMailRelays => 'Redefinir';
+
+  @override
+  String get mailServers => 'Servidores de e-mails grandes';
+
+  @override
+  String get mailServersExplanation =>
+      'Os novos endereços recebem nestes servidores, criptografados, os e-mails grandes demais para um relay. Os endereços criados antes mantêm os seus.';
+
+  @override
+  String get mailServersNeedOne =>
+      'Os novos endereços precisam de pelo menos um servidor.';
 }

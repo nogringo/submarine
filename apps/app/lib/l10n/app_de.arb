@@ -415,5 +415,8 @@
   "mailAddressRelaysExplanation": "Neue Adressen veröffentlichen ihre Empfangs-Relays auf diesen Relays, wo die Bridge sie findet. Bereits erstellte Adressen behalten ihre.",
   "changeMailRelays": "Ändern",
   "mailRelaysNeedOne": "Neue Adressen brauchen mindestens ein Relay.",
-  "resetMailRelays": "Zurücksetzen"
+  "resetMailRelays": "Zurücksetzen",
+  "mailServers": "Server für große E-Mails",
+  "mailServersExplanation": "Neue Adressen empfangen E-Mails, die für ein Relay zu groß sind, verschlüsselt auf diesen Servern. Bereits erstellte Adressen behalten ihre.",
+  "mailServersNeedOne": "Neue Adressen brauchen mindestens einen Server."
 }

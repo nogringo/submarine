@@ -1847,7 +1847,7 @@
   },
   "changeMailRelays": "Change",
   "@changeMailRelays": {
-    "description": "Button of an email relays setting opening its dialog."
+    "description": "Button of an email relays or servers setting opening its dialog."
   },
   "mailRelaysNeedOne": "New addresses need at least one relay.",
   "@mailRelaysNeedOne": {
@@ -1855,6 +1855,18 @@
   },
   "resetMailRelays": "Reset",
   "@resetMailRelays": {
-    "description": "Button of an email relays dialog putting back the default relays."
+    "description": "Button of an email relays or servers dialog putting back the defaults."
+  },
+  "mailServers": "Large email servers",
+  "@mailServers": {
+    "description": "Setting, and title of its dialog, listing the Blossom servers where new email addresses receive the emails too large for a relay (their kind:10063 list)."
+  },
+  "mailServersExplanation": "New addresses receive the emails too large for a relay on these servers, encrypted. Addresses created before keep theirs.",
+  "@mailServersExplanation": {
+    "description": "In the large email servers dialog: what the servers are for, and that changing them does not change the addresses already created."
+  },
+  "mailServersNeedOne": "New addresses need at least one server.",
+  "@mailServersNeedOne": {
+    "description": "In the large email servers dialog, when its list is empty."
   }
 }

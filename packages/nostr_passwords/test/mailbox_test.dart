@@ -111,7 +111,7 @@ void main() {
     });
   });
 
-  group('publishMailboxRelays', () {
+  group('publishMailboxLists', () {
     late Ndk ndk;
     late MockRelay relay;
     late MockRelay inbox;
@@ -126,15 +126,16 @@ void main() {
 
     tearDown(() => ndk.destroy());
 
-    test('saves both lists, signed by the mailbox key', () async {
+    test('saves its lists, signed by the mailbox key', () async {
       final mailbox = generateMailbox('uid.ovh', signerFactory: signerFactory);
       final pubkey = Nip19.decode(mailbox.address.split('@')[0]);
 
-      await publishMailboxRelays(
+      await publishMailboxLists(
         ndk,
         mailbox.key,
         relays: [relay.url],
         inboxRelays: [inbox.url],
+        blossomServers: ['https://blossom.example.com'],
         indexers: [indexer.url],
       );
 
@@ -152,7 +153,15 @@ void main() {
       expect(inboxList.tags, [
         ['relay', inbox.url],
       ]);
-      for (final event in [relayList, inboxList]) {
+      final [serverList] = await ndk.config.cache.loadEvents(
+        pubKeys: [pubkey],
+        kinds: [10063],
+      );
+      expect(serverList.tags, [
+        ['server', 'https://blossom.example.com'],
+      ]);
+      expect(serverList.content, isEmpty);
+      for (final event in [relayList, inboxList, serverList]) {
         expect(await Bip340EventVerifier().verify(event), isTrue);
       }
     });
@@ -160,11 +169,12 @@ void main() {
     test('sends the NIP-65 list to the indexers too, and no further', () async {
       final mailbox = generateMailbox('uid.ovh', signerFactory: signerFactory);
 
-      await publishMailboxRelays(
+      await publishMailboxLists(
         ndk,
         mailbox.key,
         relays: [relay.url],
         inboxRelays: [inbox.url],
+        blossomServers: ['https://blossom.example.com'],
         indexers: [indexer.url],
       );
 
@@ -173,7 +183,7 @@ void main() {
       };
       await _until(
         () =>
-            kinds(relay).containsAll([10002, 10050]) &&
+            kinds(relay).containsAll([10002, 10050, 10063]) &&
             kinds(indexer).contains(10002),
       );
       expect(kinds(indexer), {10002});
@@ -290,11 +300,12 @@ void main() {
         await inbox.startServer();
         addTearDown(inbox.stopServer);
         indexer = await _startRelay('indexer');
-        await publishMailboxRelays(
+        await publishMailboxLists(
           ndk,
           nsec,
           relays: [relay.url],
           inboxRelays: [inbox.url],
+          blossomServers: const [],
           indexers: [indexer.url],
         );
         reader = Ndk.emptyBootstrapRelaysConfig();
@@ -341,21 +352,20 @@ void main() {
       });
     });
 
-    test('downloads a large email from Blossom, checking its hash', () async {
+    /// Saves the gift wrap of [_email] as too large for one, and returns its
+    /// encrypted blob.
+    Future<List<int>> saveLargeEmail() async {
       final aes = cryptography.AesGcm.with256bits();
       final secretKey = await aes.newSecretKey();
       final box = await aes.encrypt(utf8.encode(_email), secretKey: secretKey);
       final blob = [...box.cipherText, ...box.mac.bytes];
-      final hash = sha256.convert(blob).toString();
-      final wrong = await _startBlobServer([1, 2, 3]);
-      final right = await _startBlobServer(blob);
       await ndk.config.cache.saveEvent(
         await _giftWrap(
           rumor(
             1301,
             '',
             tags: [
-              ['x', hash],
+              ['x', sha256.convert(blob).toString()],
               ['encryption-algorithm', 'aes-gcm'],
               ['decryption-key', base64Encode(await secretKey.extractBytes())],
               ['decryption-nonce', base64Encode(box.nonce)],
@@ -367,6 +377,13 @@ void main() {
           key,
         ),
       );
+      return blob;
+    }
+
+    test('downloads a large email from Blossom, checking its hash', () async {
+      final blob = await saveLargeEmail();
+      final wrong = await _startBlobServer([1, 2, 3]);
+      final right = await _startBlobServer(blob);
       final mailbox = mailboxOf(ndk, blossomServers: [wrong, right]);
 
       final [large as Email] = await mailbox.messages();
@@ -377,6 +394,69 @@ void main() {
       final email = await mailbox.download(large);
       expect(email.text, 'Your code is 123456');
       expect(email.wrapId, large.wrapId);
+    });
+
+    group('finds the servers', () {
+      late MockRelay indexer;
+      late MockRelay relay;
+
+      setUp(() async {
+        indexer = await _startRelay('indexer');
+        relay = await _startRelay('relay');
+      });
+
+      /// Sends [events] to [to] only, not to the cache of [ndk].
+      Future<void> publish(List<Nip01Event> events, String to) async {
+        for (final event in events) {
+          await ndk.broadcast
+              .broadcast(
+                nostrEvent: event,
+                specificRelays: [to],
+                saveToCache: false,
+              )
+              .broadcastDoneFuture;
+        }
+      }
+
+      Future<String> download() async {
+        final mailbox = mailboxOf(ndk, indexers: [indexer.url]);
+        final [large as Email] = await mailbox.messages();
+        return (await mailbox.download(large)).text!;
+      }
+
+      test('the mailbox lists, on the relays of its NIP-65 list', () async {
+        final blob = await saveLargeEmail();
+        final publisher = Ndk.emptyBootstrapRelaysConfig();
+        addTearDown(publisher.destroy);
+        await publishMailboxLists(
+          publisher,
+          nsec,
+          relays: [relay.url],
+          inboxRelays: [relay.url],
+          blossomServers: [await _startBlobServer(blob)],
+          indexers: [indexer.url],
+        );
+
+        expect(await download(), 'Your code is 123456');
+      });
+
+      test('its sender lists, on the relays it writes to', () async {
+        final blob = await saveLargeEmail();
+        await publish([
+          await signRelayList(
+            RelayList(public: {relay.url: ReadWriteMarker.writeOnly}),
+            sender,
+          ),
+        ], indexer.url);
+        await publish([
+          await signServerList(
+            ServerList(public: [await _startBlobServer(blob)]),
+            sender,
+          ),
+        ], relay.url);
+
+        expect(await download(), 'Your code is 123456');
+      });
     });
 
     test('tells when no Blossom server has a large email', () async {

@@ -394,11 +394,12 @@ class _FormState extends State<_Form> {
       signerFactory: signerFactory,
     )) {
       if (known.contains(key)) continue;
-      await publishMailboxRelays(
+      await publishMailboxLists(
         vaults.ndk,
         key,
-        relays: mail.relays(MailRelayList.address),
-        inboxRelays: mail.relays(MailRelayList.inbox),
+        relays: mail.urls(MailList.address),
+        inboxRelays: mail.urls(MailList.inbox),
+        blossomServers: mail.urls(MailList.servers),
         indexers: vaults.indexers,
       );
     }

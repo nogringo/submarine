@@ -1393,6 +1393,27 @@ class AppLocalizationsPt extends AppLocalizations {
   String get mailboxKey => 'Chave da caixa de correio';
 
   @override
+  String get inbox => 'Caixa de entrada';
+
+  @override
+  String get inboxFetching => 'A obter mensagens';
+
+  @override
+  String get inboxEmpty => 'Ainda sem mensagens';
+
+  @override
+  String get noSubject => '(sem assunto)';
+
+  @override
+  String get privateMessage => 'Mensagem privada';
+
+  @override
+  String get emailDownloadFailed => 'Não foi possível transferir este e-mail.';
+
+  @override
+  String get refreshInbox => 'Atualizar';
+
+  @override
   String get mailInboxRelays => 'Relays de receção';
 
   @override
@@ -2818,6 +2839,27 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get mailboxKey => 'Chave da caixa de e-mail';
+
+  @override
+  String get inbox => 'Caixa de entrada';
+
+  @override
+  String get inboxFetching => 'Buscando mensagens';
+
+  @override
+  String get inboxEmpty => 'Nenhuma mensagem ainda';
+
+  @override
+  String get noSubject => '(sem assunto)';
+
+  @override
+  String get privateMessage => 'Mensagem privada';
+
+  @override
+  String get emailDownloadFailed => 'Não foi possível baixar este e-mail.';
+
+  @override
+  String get refreshInbox => 'Atualizar';
 
   @override
   String get mailInboxRelays => 'Relays de recebimento';

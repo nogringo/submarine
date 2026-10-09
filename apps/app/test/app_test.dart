@@ -1967,6 +1967,8 @@ void main() {
       ),
       findsNothing,
     );
+    // The inbox of the saved item would fetch on the clock of the test.
+    await tester.runAsync(vaults.pauseSync);
     await write(tester, find.text('Save'));
 
     final items = (await tester.runAsync(vaults.all.single.vault.items))!;
@@ -2022,6 +2024,8 @@ void main() {
     final pubkey = const Bip340EventSignerFactory()
         .create(privateKey: Nip19.decode(key))
         .getPublicKey();
+    // The inbox of the saved item would fetch on the clock of the test.
+    await tester.runAsync(vaults.pauseSync);
     await write(tester, find.text('Save'));
 
     Future<List<Nip01Event>> lists() =>
@@ -2108,6 +2112,111 @@ void main() {
       isEmpty,
     );
     expect(relay.received, isEmpty);
+    await close(tester);
+  });
+
+  testWidgets('shows the inbox of an email address, and opens a message', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 1600));
+    const factory = Bip340EventSignerFactory();
+    final mailbox = generateMailbox('uid.ovh', signerFactory: factory);
+    await open(
+      tester,
+      items: [
+        Cipher(
+          type: CipherType.login,
+          name: 'Shop',
+          login: Login(username: mailbox.address),
+          fields: [
+            Field(
+              name: 'Mailbox key',
+              value: mailbox.key,
+              type: FieldType.hidden,
+            ),
+          ],
+        ),
+      ],
+    );
+    final recipient = factory
+        .create(privateKey: Nip19.decode(mailbox.key))
+        .getPublicKey();
+    final sender = factory.createWithNewKeyPair();
+    await tester.runAsync(() async {
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      for (final rumor in [
+        Nip01Event(
+          pubKey: sender.getPublicKey(),
+          kind: 1301,
+          tags: const [],
+          content:
+              'From: Example Store <noreply@store.example>\r\n'
+              'Subject: Your code\r\n'
+              '\r\n'
+              'Your code is 123456\r\n',
+          createdAt: now - 60,
+        ),
+        Nip01Event(
+          pubKey: sender.getPublicKey(),
+          kind: 14,
+          tags: [
+            ['p', recipient],
+          ],
+          content: 'Did it arrive?',
+          createdAt: now,
+        ),
+      ]) {
+        await ndk.config.cache.saveEvent(
+          await _giftWrap(rumor, sender, recipient),
+        );
+      }
+    });
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+        mail: mail,
+      ),
+    );
+    await settle(tester);
+
+    await tester.tap(find.text('Shop'));
+    await pumpUntil(tester, () => find.text('Your code').evaluate().isNotEmpty);
+
+    expect(find.text('Inbox'), findsOneWidget);
+    expect(find.text('Example Store'), findsOneWidget);
+    expect(find.text('Did it arrive?'), findsOneWidget);
+
+    await tester.runAsync(
+      () async => ndk.config.cache.saveEvent(
+        await _giftWrap(
+          Nip01Event(
+            pubKey: sender.getPublicKey(),
+            kind: 14,
+            tags: [
+              ['p', recipient],
+            ],
+            content: 'Still there?',
+          ),
+          sender,
+          recipient,
+        ),
+      ),
+    );
+    await tester.tap(find.byTooltip('Refresh'));
+    await pumpUntil(
+      tester,
+      () => find.text('Still there?').evaluate().isNotEmpty,
+    );
+    expect(find.text('Still there?'), findsOneWidget);
+
+    await tester.tap(find.text('Your code'));
+    await settle(tester);
+    expect(inDialog('Your code is 123456'), findsOneWidget);
+    expect(inDialog('Example Store <noreply@store.example>'), findsOneWidget);
     await close(tester);
   });
 
@@ -4671,6 +4780,30 @@ class FakeDeviceAuth implements DeviceAuth {
 }
 
 /// Accepts every event and holds none: enough for a vault to sync from it.
+/// [rumor] sealed by [sender], gift wrapped to [recipient], as NIP-59 does.
+Future<Nip01Event> _giftWrap(
+  Nip01Event rumor,
+  EventSigner sender,
+  String recipient,
+) async {
+  final seal = await sender.sign(
+    Nip01Event(
+      pubKey: sender.getPublicKey(),
+      kind: GiftWrap.kSealEventKind,
+      tags: const [],
+      content: (await sender.encryptNip44(
+        plaintext: Nip01EventModel.fromEntity(rumor).toJsonString(),
+        recipientPubKey: recipient,
+      ))!,
+    ),
+  );
+  return GiftWrap.wrapEvent(
+    recipientPublicKey: recipient,
+    sealEvent: seal,
+    eventSignerFactory: const Bip340EventSignerFactory(),
+  );
+}
+
 class _EmptyRelay {
   late final HttpServer _server;
   final received = <Map<String, dynamic>>[];

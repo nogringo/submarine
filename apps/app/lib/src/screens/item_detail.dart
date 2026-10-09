@@ -7,6 +7,7 @@ import '../items/field_tile.dart';
 import '../items/item_fields.dart';
 import '../items/item_filter.dart';
 import '../items/item_menu.dart';
+import '../mail/inbox.dart';
 import '../vaults/vaults.dart';
 import '../widgets/item_icon.dart';
 import '../widgets/vault_avatar.dart';
@@ -153,6 +154,10 @@ class ItemDetail extends StatelessWidget {
     final custom = customFields(l10n, cipher);
     final updated = cipher.revisionDate;
     final created = cipher.creationDate;
+    final mailboxes = mailboxesOf(
+      cipher,
+      signerFactory: Vaults.of(context).ndk.config.eventSignerFactory,
+    );
     const gap = SizedBox(height: 16);
     return SingleChildScrollView(
       // Clear of the system navigation bar, the app drawing edge to edge.
@@ -185,6 +190,18 @@ class ItemDetail extends StatelessWidget {
               ],
               if (cipher.passwordHistory.isNotEmpty) ...[
                 _PasswordHistory(entries: cipher.passwordHistory),
+                gap,
+              ],
+              for (final (:key, :address) in mailboxes) ...[
+                // Keyed, for the next item shown in its place not to take
+                // over its subscription.
+                Inbox(
+                  key: ValueKey(address),
+                  mailboxKey: key,
+                  title: mailboxes.length == 1
+                      ? l10n.inbox
+                      : '${l10n.inbox}: $address',
+                ),
                 gap,
               ],
               if (updated != null && created != null)

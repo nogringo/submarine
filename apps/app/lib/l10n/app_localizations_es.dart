@@ -1394,6 +1394,27 @@ class AppLocalizationsEs extends AppLocalizations {
   String get mailboxKey => 'Clave del buzón';
 
   @override
+  String get inbox => 'Bandeja de entrada';
+
+  @override
+  String get inboxFetching => 'Obteniendo mensajes';
+
+  @override
+  String get inboxEmpty => 'Aún no hay mensajes';
+
+  @override
+  String get noSubject => '(sin asunto)';
+
+  @override
+  String get privateMessage => 'Mensaje privado';
+
+  @override
+  String get emailDownloadFailed => 'No se pudo descargar este correo.';
+
+  @override
+  String get refreshInbox => 'Actualizar';
+
+  @override
   String get mailInboxRelays => 'Relays de recepción';
 
   @override

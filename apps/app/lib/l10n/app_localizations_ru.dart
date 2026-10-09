@@ -1424,6 +1424,27 @@ class AppLocalizationsRu extends AppLocalizations {
   String get mailboxKey => 'Ключ почтового ящика';
 
   @override
+  String get inbox => 'Входящие';
+
+  @override
+  String get inboxFetching => 'Получение сообщений';
+
+  @override
+  String get inboxEmpty => 'Сообщений пока нет';
+
+  @override
+  String get noSubject => '(без темы)';
+
+  @override
+  String get privateMessage => 'Личное сообщение';
+
+  @override
+  String get emailDownloadFailed => 'Не удалось загрузить это письмо.';
+
+  @override
+  String get refreshInbox => 'Обновить';
+
+  @override
   String get mailInboxRelays => 'Реле входящих';
 
   @override

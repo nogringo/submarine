@@ -278,13 +278,23 @@ class Vaults extends ChangeNotifier {
     return vault;
   }
 
+  /// Whether [pauseSync] stopped the syncing, for an inbox to stop too.
+  bool get syncPaused => _syncPaused;
+  var _syncPaused = false;
+
   /// What an app going to the background does: nothing keeps syncing.
-  Future<void> pauseSync() => Future.wait([
-    engine.stop(),
-    for (final vault in _vaults) vault.unsubscribe(),
-  ]);
+  Future<void> pauseSync() {
+    _syncPaused = true;
+    notifyListeners();
+    return Future.wait([
+      engine.stop(),
+      for (final vault in _vaults) vault.unsubscribe(),
+    ]);
+  }
 
   void resumeSync() {
+    _syncPaused = false;
+    notifyListeners();
     engine.start();
     for (final vault in _vaults) {
       vault.subscribe();

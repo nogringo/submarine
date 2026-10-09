@@ -1396,6 +1396,27 @@ class AppLocalizationsFr extends AppLocalizations {
   String get mailboxKey => 'Clé de la boîte mail';
 
   @override
+  String get inbox => 'Boîte de réception';
+
+  @override
+  String get inboxFetching => 'Récupération des messages';
+
+  @override
+  String get inboxEmpty => 'Aucun message pour l\'instant';
+
+  @override
+  String get noSubject => '(sans objet)';
+
+  @override
+  String get privateMessage => 'Message privé';
+
+  @override
+  String get emailDownloadFailed => 'Impossible de télécharger cet e-mail.';
+
+  @override
+  String get refreshInbox => 'Actualiser';
+
+  @override
   String get mailInboxRelays => 'Relais de réception';
 
   @override

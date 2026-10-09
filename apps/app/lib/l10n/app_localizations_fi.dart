@@ -1389,6 +1389,27 @@ class AppLocalizationsFi extends AppLocalizations {
   String get mailboxKey => 'Postilaatikon avain';
 
   @override
+  String get inbox => 'Saapuneet';
+
+  @override
+  String get inboxFetching => 'Haetaan viestejä';
+
+  @override
+  String get inboxEmpty => 'Ei vielä viestejä';
+
+  @override
+  String get noSubject => '(ei aihetta)';
+
+  @override
+  String get privateMessage => 'Yksityisviesti';
+
+  @override
+  String get emailDownloadFailed => 'Tätä sähköpostia ei voitu ladata.';
+
+  @override
+  String get refreshInbox => 'Päivitä';
+
+  @override
   String get mailInboxRelays => 'Vastaanottoreleet';
 
   @override

@@ -1393,6 +1393,28 @@ class AppLocalizationsDe extends AppLocalizations {
   String get mailboxKey => 'Postfachschlüssel';
 
   @override
+  String get inbox => 'Posteingang';
+
+  @override
+  String get inboxFetching => 'Nachrichten werden abgerufen';
+
+  @override
+  String get inboxEmpty => 'Noch keine Nachrichten';
+
+  @override
+  String get noSubject => '(kein Betreff)';
+
+  @override
+  String get privateMessage => 'Private Nachricht';
+
+  @override
+  String get emailDownloadFailed =>
+      'Diese E-Mail konnte nicht heruntergeladen werden.';
+
+  @override
+  String get refreshInbox => 'Aktualisieren';
+
+  @override
   String get mailInboxRelays => 'Empfangs-Relays';
 
   @override

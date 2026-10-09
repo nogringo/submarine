@@ -1355,6 +1355,27 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mailboxKey => '邮箱密钥';
 
   @override
+  String get inbox => '收件箱';
+
+  @override
+  String get inboxFetching => '正在获取消息';
+
+  @override
+  String get inboxEmpty => '还没有消息';
+
+  @override
+  String get noSubject => '(无主题)';
+
+  @override
+  String get privateMessage => '私信';
+
+  @override
+  String get emailDownloadFailed => '无法下载此邮件。';
+
+  @override
+  String get refreshInbox => '刷新';
+
+  @override
   String get mailInboxRelays => '收件中继';
 
   @override

@@ -191,6 +191,29 @@ Future<void> main() async {
     );
     print('$address receives emails');
   }
+  // Its emails and private messages, opened with the key the item holds.
+  final inbox = Mailbox(
+    ndk: ndk,
+    signer: ndk.config.eventSignerFactory.create(
+      privateKey: Nip19.decode(mailbox.key),
+    ),
+  );
+  await inbox.fetchRelays();
+  final arrivals = inbox.subscribe().listen((_) {});
+  await inbox.fetch();
+  for (final message in await inbox.messages()) {
+    switch (message) {
+      case Email(text: null):
+        // Too large for a gift wrap, it waits on Blossom.
+        final email = await inbox.download(message);
+        print('${email.subject}: ${email.text}');
+      case Email(:final subject, :final text):
+        print('$subject: $text');
+      case DirectMessage(:final text):
+        print('Message: $text');
+    }
+  }
+  await arrivals.cancel();
 
   // Bitwarden's JSON export, both ways, password protected or not.
   final bitwardenExport = File('bitwarden_export.json');

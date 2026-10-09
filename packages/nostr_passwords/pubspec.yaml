@@ -10,6 +10,8 @@ resolution: workspace
 dependencies:
   crypto: ^3.0.7
   cryptography: ^2.9.0
+  enough_mail_plus: ^2.2.4
+  html: ^0.15.7
   ndk: ^0.10.1
   nip49: ^1.2.0
   serverpod_argon2: ^0.1.0

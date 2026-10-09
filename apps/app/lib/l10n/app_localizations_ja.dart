@@ -1367,6 +1367,27 @@ class AppLocalizationsJa extends AppLocalizations {
   String get mailboxKey => 'メールボックスの鍵';
 
   @override
+  String get inbox => '受信トレイ';
+
+  @override
+  String get inboxFetching => 'メッセージを取得中';
+
+  @override
+  String get inboxEmpty => 'まだメッセージはありません';
+
+  @override
+  String get noSubject => '(件名なし)';
+
+  @override
+  String get privateMessage => 'プライベートメッセージ';
+
+  @override
+  String get emailDownloadFailed => 'このメールをダウンロードできませんでした。';
+
+  @override
+  String get refreshInbox => '更新';
+
+  @override
   String get mailInboxRelays => '受信リレー';
 
   @override

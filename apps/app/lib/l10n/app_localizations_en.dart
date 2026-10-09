@@ -1386,6 +1386,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mailboxKey => 'Mailbox key';
 
   @override
+  String get inbox => 'Inbox';
+
+  @override
+  String get inboxFetching => 'Fetching messages';
+
+  @override
+  String get inboxEmpty => 'No messages yet';
+
+  @override
+  String get noSubject => '(no subject)';
+
+  @override
+  String get privateMessage => 'Private message';
+
+  @override
+  String get emailDownloadFailed => 'This email could not be downloaded.';
+
+  @override
+  String get refreshInbox => 'Refresh';
+
+  @override
   String get mailInboxRelays => 'Inbox relays';
 
   @override

@@ -2431,6 +2431,48 @@ abstract class AppLocalizations {
   /// **'Mailbox key'**
   String get mailboxKey;
 
+  /// Title of the section of an item listing the emails and private messages its email address received.
+  ///
+  /// In en, this message translates to:
+  /// **'Inbox'**
+  String get inbox;
+
+  /// In an empty inbox, while the app fetches its messages from the relays.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching messages'**
+  String get inboxFetching;
+
+  /// In an inbox that received nothing.
+  ///
+  /// In en, this message translates to:
+  /// **'No messages yet'**
+  String get inboxEmpty;
+
+  /// Stands for the subject of an email that has none.
+  ///
+  /// In en, this message translates to:
+  /// **'(no subject)'**
+  String get noSubject;
+
+  /// A NIP-17 private message received by an email address, as opposed to an email.
+  ///
+  /// In en, this message translates to:
+  /// **'Private message'**
+  String get privateMessage;
+
+  /// In an opened email too large for a gift wrap, when no Blossom server gave it.
+  ///
+  /// In en, this message translates to:
+  /// **'This email could not be downloaded.'**
+  String get emailDownloadFailed;
+
+  /// Button next to the inbox title, fetching its latest messages from the relays again.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refreshInbox;
+
   /// Setting, and title of its dialog, listing the relays the emails of new email addresses arrive on (their kind:10050 list).
   ///
   /// In en, this message translates to:

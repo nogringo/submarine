@@ -1737,6 +1737,34 @@
   "@mailboxKey": {
     "description": "Label of the hidden field holding the private key of the mailbox of an email address."
   },
+  "inbox": "Inbox",
+  "@inbox": {
+    "description": "Title of the section of an item listing the emails and private messages its email address received."
+  },
+  "inboxFetching": "Fetching messages",
+  "@inboxFetching": {
+    "description": "In an empty inbox, while the app fetches its messages from the relays."
+  },
+  "inboxEmpty": "No messages yet",
+  "@inboxEmpty": {
+    "description": "In an inbox that received nothing."
+  },
+  "noSubject": "(no subject)",
+  "@noSubject": {
+    "description": "Stands for the subject of an email that has none."
+  },
+  "privateMessage": "Private message",
+  "@privateMessage": {
+    "description": "A NIP-17 private message received by an email address, as opposed to an email."
+  },
+  "emailDownloadFailed": "This email could not be downloaded.",
+  "@emailDownloadFailed": {
+    "description": "In an opened email too large for a gift wrap, when no Blossom server gave it."
+  },
+  "refreshInbox": "Refresh",
+  "@refreshInbox": {
+    "description": "Button next to the inbox title, fetching its latest messages from the relays again."
+  },
   "mailInboxRelays": "Inbox relays",
   "@mailInboxRelays": {
     "description": "Setting, and title of its dialog, listing the relays the emails of new email addresses arrive on (their kind:10050 list)."

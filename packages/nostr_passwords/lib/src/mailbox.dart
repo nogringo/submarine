@@ -11,6 +11,7 @@ import 'package:ndk/shared/helpers/relay_helper.dart';
 
 import 'cipher/cipher.dart';
 import 'cipher/field.dart';
+import 'defaults.dart';
 import 'html_text.dart';
 import 'mail_bridge.dart';
 import 'relay_list.dart';
@@ -78,7 +79,7 @@ Future<void> publishMailboxRelays(
   String key, {
   required List<String> relays,
   required List<String> inboxRelays,
-  List<String> indexers = indexerRelays,
+  List<String> indexers = defaultIndexerRelays,
 }) async {
   final signer = ndk.config.eventSignerFactory.create(
     privateKey: Nip19.decode(key),
@@ -122,30 +123,6 @@ Future<void> publishMailboxRelays(
   }
 }
 
-/// Relays a client gives the NIP-65 list of a new mailbox by default, those
-/// of the nmail app.
-const defaultMailboxRelays = [
-  'wss://relay.nmail.li',
-  'wss://nostr-01.yakihonne.com',
-  'wss://relay.primal.net',
-];
-
-/// Relays a client gives the `kind:10050` list of a new mailbox by default,
-/// those of the nmail app: the bridge sends the mailbox's emails to them.
-const defaultMailboxInboxRelays = [
-  'wss://relay.nmail.li',
-  'wss://auth.nostr1.com',
-];
-
-/// Blossom servers a client looks for a large email on, after those its sender
-/// lists: the defaults of nostr-mail.
-const defaultBlossomServers = [
-  'https://blossom.nmail.li',
-  'https://blossom.yakihonne.com',
-  'https://blossom.ditto.pub',
-  'https://blossom.primal.net',
-];
-
 const _inboxRelaysKind = 10050;
 const _blossomServersKind = 10063;
 const _emailKind = 1301;
@@ -161,8 +138,8 @@ class Mailbox {
   Mailbox({
     required this.ndk,
     required this.signer,
-    this.indexers = indexerRelays,
-    this.blossomServers = defaultBlossomServers,
+    this.indexers = defaultIndexerRelays,
+    this.blossomServers = defaultMailboxBlossomServers,
   });
 
   final Ndk ndk;

@@ -329,6 +329,57 @@ class AppLocalizationsPt extends AppLocalizations {
   String get relaysNeedOne => 'O cofre precisa de pelo menos um relay.';
 
   @override
+  String get fileServers => 'Servidores de ficheiros';
+
+  @override
+  String get fileServersDescription =>
+      'Os ficheiros anexados a este cofre são copiados para cada um destes servidores. Eles só veem ficheiros encriptados.';
+
+  @override
+  String get serverPrivate => 'Privado';
+
+  @override
+  String get removeServer => 'Remover este servidor';
+
+  @override
+  String get keepServer => 'Manter este servidor';
+
+  @override
+  String get addServer => 'Adicionar um servidor';
+
+  @override
+  String get serverAddress => 'Endereço do servidor';
+
+  @override
+  String get serverAddressInvalid => 'Isto não é um endereço de servidor.';
+
+  @override
+  String get serverAlreadyListed => 'Este servidor já está na lista.';
+
+  @override
+  String get serverKeepPrivate => 'Manter privado';
+
+  @override
+  String get serverKeepPrivateDescription =>
+      'Encriptado na lista de servidores do cofre: só quem tem a chave do cofre sabe que o cofre usa este servidor.';
+
+  @override
+  String get serversSaveFailed => 'Não foi possível guardar os servidores.';
+
+  @override
+  String get serversWaitForSync =>
+      'Pode alterar os servidores quando o cofre estiver sincronizado.';
+
+  @override
+  String get serverAdded => 'Novo';
+
+  @override
+  String get serverRemoved => 'Removido';
+
+  @override
+  String get serversNeedOne => 'O cofre precisa de pelo menos um servidor.';
+
+  @override
   String get add => 'Adicionar';
 
   @override
@@ -1766,6 +1817,57 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get relaysNeedOne => 'O cofre precisa de pelo menos um relay.';
+
+  @override
+  String get fileServers => 'Servidores de arquivos';
+
+  @override
+  String get fileServersDescription =>
+      'Os arquivos anexados a este cofre são copiados em cada um destes servidores. Eles só veem arquivos criptografados.';
+
+  @override
+  String get serverPrivate => 'Privado';
+
+  @override
+  String get removeServer => 'Remover este servidor';
+
+  @override
+  String get keepServer => 'Manter este servidor';
+
+  @override
+  String get addServer => 'Adicionar servidor';
+
+  @override
+  String get serverAddress => 'Endereço do servidor';
+
+  @override
+  String get serverAddressInvalid => 'Isso não é um endereço de servidor.';
+
+  @override
+  String get serverAlreadyListed => 'Este servidor já está na lista.';
+
+  @override
+  String get serverKeepPrivate => 'Manter privado';
+
+  @override
+  String get serverKeepPrivateDescription =>
+      'Criptografado na lista de servidores do cofre: só quem tem a chave do cofre sabe que o cofre o usa.';
+
+  @override
+  String get serversSaveFailed => 'Não foi possível salvar os servidores.';
+
+  @override
+  String get serversWaitForSync =>
+      'Você poderá alterar os servidores depois que o cofre for sincronizado.';
+
+  @override
+  String get serverAdded => 'Novo';
+
+  @override
+  String get serverRemoved => 'Removido';
+
+  @override
+  String get serversNeedOne => 'O cofre precisa de pelo menos um servidor.';
 
   @override
   String get add => 'Adicionar';

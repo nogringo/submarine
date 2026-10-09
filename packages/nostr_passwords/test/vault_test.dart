@@ -27,6 +27,10 @@ void main() {
     public: {'ws://127.0.0.1:2': ReadWriteMarker.readOnly},
     private: {'ws://127.0.0.1:3': ReadWriteMarker.writeOnly},
   );
+  const servers = ServerList(
+    public: ['https://blossom.nmail.li'],
+    private: ['https://files.alice.example'],
+  );
 
   setUp(() async {
     relay = MockRelay(name: 'vault relay');
@@ -431,6 +435,7 @@ void main() {
     });
 
     test('setRelayList copies the vault to the relays it adds', () async {
+      await vault.setServerList(servers);
       await vault.createItem(boulanger);
       await vault.createItem(Cipher(type: CipherType.login, name: 'Old'));
       final old = (await vault.items()).firstWhere(
@@ -451,7 +456,12 @@ void main() {
       List<int> kinds() => [
         for (final event in added.receivedEvents) event.kind,
       ];
-      await _until(() => kinds().contains(1059) && kinds().contains(5));
+      await _until(
+        () =>
+            kinds().contains(1059) &&
+            kinds().contains(5) &&
+            kinds().contains(10063),
+      );
       expect(kinds().where((kind) => kind == 1059), hasLength(1));
     });
 
@@ -506,6 +516,67 @@ void main() {
 
       final saved = await vault.relayList();
       expect(saved?.public, {'ws://127.0.0.1:4': ReadWriteMarker.readWrite});
+      expect(saved?.private, isEmpty);
+    });
+  });
+
+  group('server list', () {
+    test('currentServerList is the default one until it has a list', () async {
+      expect(await vault.serverList(), isNull);
+      expect(
+        (await vault.currentServerList()).public,
+        defaultVaultBlossomServers,
+      );
+
+      await vault.setServerList(servers);
+
+      final current = await vault.currentServerList();
+      expect(current.public, servers.public);
+      expect(current.private, servers.private);
+    });
+
+    test('setServerList saves the list, which push sends', () async {
+      await vault.setServerList(servers);
+
+      expect((await vault.unsent()).single.event?.kind, 10063);
+      expect(await vault.push(), isEmpty);
+      expect(relay.receivedEvents.last.kind, 10063);
+    });
+
+    test('serverList reads a list once', () async {
+      await vault.setServerList(servers);
+
+      expect(await vault.serverList(), same(await vault.serverList()));
+    });
+
+    test('a list replaces the one set the same second', () async {
+      // As in the CLI, where ndk's retries do not drop the one replaced.
+      final quiet = Ndk(
+        NdkConfig(
+          eventVerifier: Bip340EventVerifier(),
+          cache: MemCacheManager(),
+          bootstrapRelays: [],
+          pendingDeliveryRetriesEnabled: false,
+        ),
+      );
+      addTearDown(quiet.destroy);
+      final offline = Vault(
+        ndk: quiet,
+        signer: signer,
+        relays: ['ws://127.0.0.1:1'],
+        indexers: const [],
+      );
+      await offline.setServerList(servers);
+      final [replaced] = await offline.unsent();
+
+      await offline.setServerList(
+        const ServerList(public: ['https://nostr.download']),
+      );
+
+      final [left] = await offline.unsent();
+      expect(left.event?.id, isNot(replaced.event?.id));
+      final saved = await offline.serverList();
+      expect(saved?.public, ['https://nostr.download']);
       expect(saved?.private, isEmpty);
     });
   });
@@ -674,6 +745,25 @@ void main() {
       expect(held(second), isEmpty);
     });
 
+    test('gives each relay the newest server list', () async {
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      final older = await signServerList(
+        const ServerList(public: ['https://nostr.download']),
+        signer,
+        createdAt: now - 10,
+      );
+      final newer = await signServerList(servers, signer, createdAt: now);
+      await publish(older, relay);
+      await publish(newer, second);
+
+      expect(await vault.reconcile(), isEmpty);
+
+      for (final to in [relay, second, third]) {
+        expect(held(to), contains(newer.id));
+      }
+      expect((await vault.serverList())?.private, servers.private);
+    });
+
     test('follows the newest relay list, and sends it to its relays', () async {
       final listed = await _startRelay('listed relay');
       final wrap = await wrapItem('Boulanger');
@@ -771,6 +861,16 @@ void main() {
       );
     });
 
+    test('the server list comes with sync', () async {
+      await vault.setServerList(servers);
+
+      await syncedItems();
+
+      final synced = await otherVault.serverList();
+      expect(synced?.public, servers.public);
+      expect(synced?.private, servers.private);
+    });
+
     test('the relay list comes with fetchRelayList, not sync', () async {
       await vault.setRelayList(relays);
 
@@ -857,6 +957,7 @@ void main() {
       await vault.deleteItem(
         (await vault.items()).firstWhere((item) => item.id != kept.id),
       );
+      await vault.setServerList(servers);
       await vault.push();
       final handle = await otherVault.sync(engine);
       engine.start();
@@ -864,6 +965,7 @@ void main() {
           .watchStatus(handle)
           .firstWhere((status) => status.phase == SyncRequestPhase.synced);
       expect((await otherVault.items()).single.id, kept.id);
+      expect(await otherVault.serverList(), isNotNull);
       expect(store.entries, isNotEmpty);
 
       engine.release(handle);
@@ -873,6 +975,7 @@ void main() {
       expect(store.entries, isEmpty);
       expect(await otherVault.lastSync(engine), isNull);
       expect(await otherVault.openedItems(), isEmpty);
+      expect(await otherVault.serverList(), isNull);
 
       final [item] = await syncedItems();
       expect(item.id, kept.id);
@@ -925,7 +1028,7 @@ void main() {
       setUp(() async {
         received = [];
         subscription = otherVault.subscribe().listen(received.add);
-        await _until(() => relay.activeSubscriptionCount == 2);
+        await _until(() => relay.activeSubscriptionCount == 3);
       });
 
       tearDown(() => subscription.cancel());
@@ -968,9 +1071,18 @@ void main() {
 
         await _until(
           () =>
-              listed.activeSubscriptionCount == 2 &&
+              listed.activeSubscriptionCount == 3 &&
               relay.activeSubscriptionCount == 0,
         );
+      });
+
+      test('brings in a new server list', () async {
+        await vault.setServerList(servers);
+        await vault.push();
+
+        await _until(() => received.isNotEmpty);
+        expect(received.single.kind, 10063);
+        expect((await otherVault.serverList())?.private, servers.private);
       });
 
       test('closes the subscriptions once cancelled', () async {
@@ -988,7 +1100,7 @@ void main() {
         await vault.push();
 
         await _until(() => received.isNotEmpty && alsoReceived.isNotEmpty);
-        expect(relay.totalRequestedSubscriptionCount, 2);
+        expect(relay.totalRequestedSubscriptionCount, 3);
       });
 
       test('keeps the subscriptions while a listener is left', () async {
@@ -999,7 +1111,7 @@ void main() {
         await vault.createItem(boulanger);
         await vault.push();
         await _until(() => alsoReceived.isNotEmpty);
-        expect(relay.activeSubscriptionCount, 2);
+        expect(relay.activeSubscriptionCount, 3);
 
         await other.cancel();
         await _until(() => relay.activeSubscriptionCount == 0);
@@ -1010,7 +1122,7 @@ void main() {
         await _until(() => relay.activeSubscriptionCount == 0);
 
         subscription = otherVault.subscribe().listen(received.add);
-        await _until(() => relay.activeSubscriptionCount == 2);
+        await _until(() => relay.activeSubscriptionCount == 3);
         await vault.createItem(boulanger);
         await vault.push();
 
@@ -1024,7 +1136,7 @@ void main() {
       final received = <Nip01Event>[];
       final subscription = otherVault.subscribe().listen(received.add);
       addTearDown(subscription.cancel);
-      await _until(() => relay.activeSubscriptionCount == 2);
+      await _until(() => relay.activeSubscriptionCount == 3);
 
       final later = await vault.createItem(boulanger);
       await vault.push();
@@ -1042,7 +1154,7 @@ void main() {
       addTearDown(subscription.cancel);
 
       await _until(
-        () => relay.subscriptionsAuthenticatedAs(pubkey).length == 2,
+        () => relay.subscriptionsAuthenticatedAs(pubkey).length == 3,
       );
       expect(relay.subscriptionsRequestedOutside(pubkey), isEmpty);
     });

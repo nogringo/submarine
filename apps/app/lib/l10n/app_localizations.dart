@@ -613,6 +613,102 @@ abstract class AppLocalizations {
   /// **'The vault needs at least one relay.'**
   String get relaysNeedOne;
 
+  /// Title of the vault settings section listing the Blossom servers the vault keeps its files on.
+  ///
+  /// In en, this message translates to:
+  /// **'File servers'**
+  String get fileServers;
+
+  /// Under the title of the file servers section of the vault settings.
+  ///
+  /// In en, this message translates to:
+  /// **'The files attached to this vault are copied to each of these servers. They only see encrypted files.'**
+  String get fileServersDescription;
+
+  /// Under a server of the vault settings that is encrypted in the vault's server list.
+  ///
+  /// In en, this message translates to:
+  /// **'Private'**
+  String get serverPrivate;
+
+  /// Tooltip of the button removing a server from the vault.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this server'**
+  String get removeServer;
+
+  /// Tooltip of the button undoing the removal of a server from the draft.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep this server'**
+  String get keepServer;
+
+  /// Row of the vault settings opening the dialog that adds a server, and title of that dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a server'**
+  String get addServer;
+
+  /// Field of the server to add, an https:// URL.
+  ///
+  /// In en, this message translates to:
+  /// **'Server address'**
+  String get serverAddress;
+
+  /// Error when the server address is not an http URL.
+  ///
+  /// In en, this message translates to:
+  /// **'This is not a server address.'**
+  String get serverAddressInvalid;
+
+  /// Error when the server to add is already one of the vault.
+  ///
+  /// In en, this message translates to:
+  /// **'This server is already in the list.'**
+  String get serverAlreadyListed;
+
+  /// Switch of the add server dialog: on, the server is encrypted in the vault's server list.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep private'**
+  String get serverKeepPrivate;
+
+  /// Under the Keep private switch of the add server dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypted in the vault\'s server list: only those who have the vault key know the vault uses it.'**
+  String get serverKeepPrivateDescription;
+
+  /// Error when changing the servers of a vault failed.
+  ///
+  /// In en, this message translates to:
+  /// **'The servers could not be saved.'**
+  String get serversSaveFailed;
+
+  /// Under the servers of a vault that never synced, while they cannot be changed.
+  ///
+  /// In en, this message translates to:
+  /// **'You can change the servers once the vault has synced.'**
+  String get serversWaitForSync;
+
+  /// Status of a server added to the draft of the vault's servers, not saved yet.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get serverAdded;
+
+  /// Status of a server removed from the draft of the vault's servers, not saved yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed'**
+  String get serverRemoved;
+
+  /// Under the servers when the draft has none left, which cannot be saved.
+  ///
+  /// In en, this message translates to:
+  /// **'The vault needs at least one server.'**
+  String get serversNeedOne;
+
   /// Button confirming the addition of a relay or a custom field.
   ///
   /// In en, this message translates to:

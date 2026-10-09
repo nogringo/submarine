@@ -330,6 +330,58 @@ class AppLocalizationsDe extends AppLocalizations {
   String get relaysNeedOne => 'Der Tresor braucht mindestens ein Relay.';
 
   @override
+  String get fileServers => 'Dateiserver';
+
+  @override
+  String get fileServersDescription =>
+      'Die an diesen Tresor angehängten Dateien werden auf jeden dieser Server kopiert. Sie sehen nur verschlüsselte Dateien.';
+
+  @override
+  String get serverPrivate => 'Privat';
+
+  @override
+  String get removeServer => 'Diesen Server entfernen';
+
+  @override
+  String get keepServer => 'Server behalten';
+
+  @override
+  String get addServer => 'Server hinzufügen';
+
+  @override
+  String get serverAddress => 'Server-Adresse';
+
+  @override
+  String get serverAddressInvalid => 'Das ist keine Server-Adresse.';
+
+  @override
+  String get serverAlreadyListed => 'Dieser Server ist bereits in der Liste.';
+
+  @override
+  String get serverKeepPrivate => 'Privat halten';
+
+  @override
+  String get serverKeepPrivateDescription =>
+      'Verschlüsselt in der Serverliste des Tresors: Nur wer den Tresorschlüssel hat, weiß, dass der Tresor diesen Server nutzt.';
+
+  @override
+  String get serversSaveFailed =>
+      'Die Server konnten nicht gespeichert werden.';
+
+  @override
+  String get serversWaitForSync =>
+      'Du kannst die Server ändern, sobald der Tresor synchronisiert ist.';
+
+  @override
+  String get serverAdded => 'Neu';
+
+  @override
+  String get serverRemoved => 'Entfernt';
+
+  @override
+  String get serversNeedOne => 'Der Tresor braucht mindestens einen Server.';
+
+  @override
   String get add => 'Hinzufügen';
 
   @override

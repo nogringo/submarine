@@ -330,6 +330,57 @@ class AppLocalizationsEs extends AppLocalizations {
   String get relaysNeedOne => 'La caja fuerte necesita al menos un relay.';
 
   @override
+  String get fileServers => 'Servidores de archivos';
+
+  @override
+  String get fileServersDescription =>
+      'Los archivos adjuntos a esta caja fuerte se copian en cada uno de estos servidores. Solo ven archivos cifrados.';
+
+  @override
+  String get serverPrivate => 'Privado';
+
+  @override
+  String get removeServer => 'Quitar este servidor';
+
+  @override
+  String get keepServer => 'Conservar este servidor';
+
+  @override
+  String get addServer => 'Añadir servidor';
+
+  @override
+  String get serverAddress => 'Dirección del servidor';
+
+  @override
+  String get serverAddressInvalid => 'Esto no es una dirección de servidor.';
+
+  @override
+  String get serverAlreadyListed => 'Este servidor ya está en la lista.';
+
+  @override
+  String get serverKeepPrivate => 'Mantener privado';
+
+  @override
+  String get serverKeepPrivateDescription =>
+      'Cifrado en la lista de servidores de la caja fuerte: solo quienes tienen su clave saben que la caja fuerte lo usa.';
+
+  @override
+  String get serversSaveFailed => 'No se pudieron guardar los servidores.';
+
+  @override
+  String get serversWaitForSync =>
+      'Podrás cambiar los servidores cuando la caja fuerte se haya sincronizado.';
+
+  @override
+  String get serverAdded => 'Nuevo';
+
+  @override
+  String get serverRemoved => 'Quitado';
+
+  @override
+  String get serversNeedOne => 'La caja fuerte necesita al menos un servidor.';
+
+  @override
   String get add => 'Añadir';
 
   @override

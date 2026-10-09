@@ -36,9 +36,10 @@ Directory cacheDirectory(Map<String, String> environment) {
   return Directory(p.join(cacheHome, 'submarine'));
 }
 
-/// The relays listed in [config] (`{"relays": [...]}`), or [defaultRelays].
+/// The relays listed in [config] (`{"relays": [...]}`), or
+/// [defaultVaultRelays].
 List<String> configuredRelays(File config) {
-  if (!config.existsSync()) return defaultRelays;
+  if (!config.existsSync()) return defaultVaultRelays;
   try {
     final json = jsonDecode(config.readAsStringSync()) as Map<String, dynamic>;
     return (json['relays'] as List).cast<String>();

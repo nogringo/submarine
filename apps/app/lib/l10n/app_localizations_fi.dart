@@ -326,6 +326,57 @@ class AppLocalizationsFi extends AppLocalizations {
   String get relaysNeedOne => 'Holvi tarvitsee vähintään yhden releen.';
 
   @override
+  String get fileServers => 'Tiedostopalvelimet';
+
+  @override
+  String get fileServersDescription =>
+      'Tämän holvin liitetiedostot kopioidaan kaikille näille palvelimille. Ne näkevät vain salattuja tiedostoja.';
+
+  @override
+  String get serverPrivate => 'Yksityinen';
+
+  @override
+  String get removeServer => 'Poista tämä palvelin';
+
+  @override
+  String get keepServer => 'Säilytä tämä palvelin';
+
+  @override
+  String get addServer => 'Lisää palvelin';
+
+  @override
+  String get serverAddress => 'Palvelimen osoite';
+
+  @override
+  String get serverAddressInvalid => 'Tämä ei ole palvelimen osoite.';
+
+  @override
+  String get serverAlreadyListed => 'Tämä palvelin on jo luettelossa.';
+
+  @override
+  String get serverKeepPrivate => 'Pidä yksityisenä';
+
+  @override
+  String get serverKeepPrivateDescription =>
+      'Salattu holvin palvelinluettelossa: vain holvin avaimen haltijat tietävät, että holvi käyttää tätä palvelinta.';
+
+  @override
+  String get serversSaveFailed => 'Palvelimia ei voitu tallentaa.';
+
+  @override
+  String get serversWaitForSync =>
+      'Voit muuttaa palvelimia, kun holvi on synkronoitu.';
+
+  @override
+  String get serverAdded => 'Uusi';
+
+  @override
+  String get serverRemoved => 'Poistettu';
+
+  @override
+  String get serversNeedOne => 'Holvi tarvitsee vähintään yhden palvelimen.';
+
+  @override
   String get add => 'Lisää';
 
   @override

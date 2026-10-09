@@ -55,8 +55,8 @@ class Vaults extends ChangeNotifier {
     required SyncEngine engine,
     required VaultStorage storage,
     required Database database,
-    List<String> relays = defaultRelays,
-    List<String> indexers = indexerRelays,
+    List<String> relays = defaultVaultRelays,
+    List<String> indexers = defaultIndexerRelays,
     Duration signerPatience = defaultSignerPatience,
   }) async {
     final vaults = Vaults._(

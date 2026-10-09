@@ -325,6 +325,57 @@ class AppLocalizationsEn extends AppLocalizations {
   String get relaysNeedOne => 'The vault needs at least one relay.';
 
   @override
+  String get fileServers => 'File servers';
+
+  @override
+  String get fileServersDescription =>
+      'The files attached to this vault are copied to each of these servers. They only see encrypted files.';
+
+  @override
+  String get serverPrivate => 'Private';
+
+  @override
+  String get removeServer => 'Remove this server';
+
+  @override
+  String get keepServer => 'Keep this server';
+
+  @override
+  String get addServer => 'Add a server';
+
+  @override
+  String get serverAddress => 'Server address';
+
+  @override
+  String get serverAddressInvalid => 'This is not a server address.';
+
+  @override
+  String get serverAlreadyListed => 'This server is already in the list.';
+
+  @override
+  String get serverKeepPrivate => 'Keep private';
+
+  @override
+  String get serverKeepPrivateDescription =>
+      'Encrypted in the vault\'s server list: only those who have the vault key know the vault uses it.';
+
+  @override
+  String get serversSaveFailed => 'The servers could not be saved.';
+
+  @override
+  String get serversWaitForSync =>
+      'You can change the servers once the vault has synced.';
+
+  @override
+  String get serverAdded => 'New';
+
+  @override
+  String get serverRemoved => 'Removed';
+
+  @override
+  String get serversNeedOne => 'The vault needs at least one server.';
+
+  @override
   String get add => 'Add';
 
   @override

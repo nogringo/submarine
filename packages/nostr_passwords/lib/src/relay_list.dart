@@ -1,9 +1,9 @@
-import 'dart:convert';
-
 import 'package:ndk/domain_layer/entities/nip_65.dart';
 import 'package:ndk/domain_layer/entities/read_write_marker.dart';
 import 'package:ndk/ndk.dart';
 import 'package:ndk/shared/helpers/relay_helper.dart';
+
+import 'private_tags.dart';
 
 export 'package:ndk/domain_layer/entities/read_write_marker.dart';
 
@@ -70,70 +70,29 @@ String? parseRelayUrl(String text) {
   return host.contains('.') || host == 'localhost' ? url : null;
 }
 
-/// Relays a client gives a vault by default.
-const defaultRelays = [
-  'wss://relay.nmail.li',
-  'wss://relay.primal.net',
-  'wss://relay.nos.social',
-  'wss://relay.coinos.io',
-  'wss://relay.ditto.pub',
-  'wss://auth.nostr1.com',
-  'wss://relay.nostr.com',
-  'wss://nostr.oxtr.dev',
-  'wss://nostr.data.haus',
-  'wss://purplerelay.com',
-  'wss://relay.nostr.wirednet.jp',
-];
-
-/// Relays that keep anyone's relay list, where others look for the vault's.
-const indexerRelays = [
-  'wss://purplepag.es',
-  'wss://user.kindpag.es',
-  'wss://indexer.coracle.social',
-];
-
 /// [createdAt] is now by default.
 Future<Nip01Event> signRelayList(
   RelayList list,
   EventSigner vault, {
   int? createdAt,
-}) async {
-  final pubkey = vault.getPublicKey();
-  final content = list.private.isEmpty
-      ? ''
-      : await vault.encryptNip44(
-          plaintext: jsonEncode(_tags(list.private)),
-          recipientPubKey: pubkey,
-        );
-  if (content == null) throw StateError('Cannot encrypt the private relays');
-  return vault.sign(
-    Nip01Event(
-      pubKey: pubkey,
-      kind: Nip65.kKind,
-      tags: _tags(list.public),
-      content: content,
-      createdAt: createdAt ?? DateTime.now().millisecondsSinceEpoch ~/ 1000,
-    ),
-  );
-}
+}) async => vault.sign(
+  Nip01Event(
+    pubKey: vault.getPublicKey(),
+    kind: Nip65.kKind,
+    tags: _tags(list.public),
+    content: await encryptPrivateTags(_tags(list.private), vault),
+    createdAt: createdAt ?? DateTime.now().millisecondsSinceEpoch ~/ 1000,
+  ),
+);
 
 Future<RelayList> readRelayList(Nip01Event event, EventSigner vault) async {
-  final pubkey = vault.getPublicKey();
-  if (event.kind != Nip65.kKind || event.pubKey != pubkey) {
+  if (event.kind != Nip65.kKind || event.pubKey != vault.getPublicKey()) {
     throw FormatException('Event ${event.id} is not a relay list of the vault');
   }
-  var private = <String, ReadWriteMarker>{};
-  if (event.content.isNotEmpty) {
-    final plaintext = await vault.decryptNip44(
-      ciphertext: event.content,
-      senderPubKey: pubkey,
-    );
-    if (plaintext == null) {
-      throw FormatException('Cannot decrypt the private relays of ${event.id}');
-    }
-    private = _relays(jsonDecode(plaintext) as List);
-  }
-  return RelayList(public: _relays(event.tags), private: private);
+  return RelayList(
+    public: _relays(event.tags),
+    private: _relays(await decryptPrivateTags(event, vault)),
+  );
 }
 
 List<List<String>> _tags(Map<String, ReadWriteMarker> relays) => [

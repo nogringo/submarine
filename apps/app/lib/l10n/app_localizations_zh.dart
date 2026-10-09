@@ -317,6 +317,55 @@ class AppLocalizationsZh extends AppLocalizations {
   String get relaysNeedOne => '密码库至少需要一个中继。';
 
   @override
+  String get fileServers => '文件服务器';
+
+  @override
+  String get fileServersDescription => '附加到此密码库的文件会复制到以下每个服务器。它们只能看到加密的文件。';
+
+  @override
+  String get serverPrivate => '私密';
+
+  @override
+  String get removeServer => '移除此服务器';
+
+  @override
+  String get keepServer => '保留此服务器';
+
+  @override
+  String get addServer => '添加服务器';
+
+  @override
+  String get serverAddress => '服务器地址';
+
+  @override
+  String get serverAddressInvalid => '这不是有效的服务器地址。';
+
+  @override
+  String get serverAlreadyListed => '此服务器已在列表中。';
+
+  @override
+  String get serverKeepPrivate => '保持私密';
+
+  @override
+  String get serverKeepPrivateDescription =>
+      '在密码库的服务器列表中加密保存：只有拥有密码库密钥的人才知道密码库使用此服务器。';
+
+  @override
+  String get serversSaveFailed => '无法保存服务器。';
+
+  @override
+  String get serversWaitForSync => '密码库同步完成后，您才能更改服务器。';
+
+  @override
+  String get serverAdded => '新增';
+
+  @override
+  String get serverRemoved => '已移除';
+
+  @override
+  String get serversNeedOne => '密码库至少需要一个服务器。';
+
+  @override
   String get add => '添加';
 
   @override

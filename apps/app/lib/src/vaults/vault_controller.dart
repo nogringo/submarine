@@ -128,6 +128,14 @@ class VaultController extends ChangeNotifier {
   bool get relaysEditable => _relaysFetched && _lastSync != null;
   var _relaysFetched = false;
 
+  /// The vault's Blossom servers, null until read from the cache.
+  ServerList? get serverList => _serverList;
+  ServerList? _serverList;
+
+  /// Whether [setServerList] cannot replace a newer list, which comes with the
+  /// sync from the relays [relaysEditable] waits for.
+  bool get serversEditable => relaysEditable;
+
   /// Sends the unsent changes and fetches what changed on the relays now,
   /// rather than at the next pass. Asks the signer again for what it did not
   /// open.
@@ -157,6 +165,30 @@ class VaultController extends ChangeNotifier {
     await vault.setRelayList(list);
     await _readRelays();
     unawaited(_checkUnsent());
+  }
+
+  /// Saved once in the ndk cache, then sent to the relays.
+  Future<void> setServerList(ServerList list) async {
+    await vault.setServerList(list);
+    await _readServers();
+    unawaited(_checkUnsent());
+  }
+
+  Future<void> _readServers() async {
+    final ServerList list;
+    try {
+      list = await vault.currentServerList();
+    } catch (error, stack) {
+      _report(error, stack, 'while reading the server list of the vault');
+      return;
+    }
+    if (_disposed ||
+        (listEquals(list.public, _serverList?.public) &&
+            listEquals(list.private, _serverList?.private))) {
+      return;
+    }
+    _serverList = list;
+    notifyListeners();
   }
 
   Future<void> _readRelays() async {
@@ -332,7 +364,11 @@ class VaultController extends ChangeNotifier {
         _lastSync = lastSync;
         _loaded = _opened;
         notifyListeners();
-        if (!locked && !_openingHeld) unawaited(_open());
+        // The signer opens the private servers too.
+        if (!locked && !_openingHeld) {
+          unawaited(_open());
+          unawaited(_readServers());
+        }
         await _checkUnsent();
       } while (_reloadAgain);
     } catch (error, stack) {

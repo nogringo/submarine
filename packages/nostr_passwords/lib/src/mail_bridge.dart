@@ -1,6 +1,3 @@
-/// The nostr-mail bridge a client gives new email addresses by default.
-const defaultMailBridge = 'uid.ovh';
-
 final _domain = RegExp(
   r'^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$',
 );

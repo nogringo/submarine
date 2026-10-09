@@ -196,6 +196,11 @@ class _VaultSettingsState extends State<_VaultSettings> {
                 description: l10n.relaysDescription,
                 child: _Relays(vault: vault),
               ),
+              SettingsSection(
+                title: l10n.fileServers,
+                description: l10n.fileServersDescription,
+                child: _Servers(vault: vault),
+              ),
               Padding(
                 padding: const EdgeInsets.only(top: 28),
                 child: FieldCard(children: [_RemoveTile(vault: vault)]),
@@ -463,7 +468,7 @@ Future<bool> _confirmRemove(BuildContext context, VaultController vault) async {
   return remove ?? false;
 }
 
-/// Keeps the changes in a draft, published as a single relay list on save.
+/// The relays of the vault, and whether this device is connected to each.
 class _Relays extends StatefulWidget {
   const _Relays({required this.vault});
 
@@ -476,25 +481,170 @@ class _Relays extends StatefulWidget {
 class _RelaysState extends State<_Relays> {
   late final _connections =
       widget.vault.vault.ndk.connectivity.relayConnectivityChanges;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final vault = widget.vault;
+    final list = vault.relayList;
+    if (list == null) return const SizedBox.shrink();
+    final markers = {...list.public, ...list.private};
+    ReadWriteMarker markerOf(String url) =>
+        markers[url] ?? ReadWriteMarker.readWrite;
+    return StreamBuilder<List<RelayConnectivity>>(
+      stream: _connections,
+      builder: (context, snapshot) {
+        final connected = {
+          for (final connection in snapshot.data ?? <RelayConnectivity>[])
+            if (connection.isConnected) connection.url,
+        };
+        return _AddressList(
+          public: list.public.keys.toList(),
+          private: list.private.keys.toList(),
+          editable: vault.relaysEditable,
+          parse: parseRelayUrl,
+          icon: Icons.cell_tower_rounded,
+          hint: 'wss://relay.example.com',
+          texts: (
+            add: l10n.addRelay,
+            address: l10n.relayAddress,
+            invalid: l10n.relayAddressInvalid,
+            alreadyListed: l10n.relayAlreadyListed,
+            remove: l10n.removeRelay,
+            keep: l10n.keepRelay,
+            private: l10n.relayPrivate,
+            added: l10n.relayAdded,
+            removed: l10n.relayRemoved,
+            keepPrivate: l10n.relayKeepPrivate,
+            keepPrivateDescription: l10n.relayKeepPrivateDescription,
+            saveFailed: l10n.relaysSaveFailed,
+            waitForSync: l10n.relaysWaitForSync,
+            needOne: l10n.relaysNeedOne,
+          ),
+          status: (url) => connected.contains(cleanRelayUrl(url) ?? url)
+              ? (l10n.relayConnected, Icons.check_circle_outline_rounded)
+              : (l10n.relayNotConnected, Icons.circle_outlined),
+          save: (public, private) => vault.setRelayList(
+            RelayList(
+              public: {for (final url in public) url: markerOf(url)},
+              private: {for (final url in private) url: markerOf(url)},
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// The Blossom servers of the vault.
+class _Servers extends StatelessWidget {
+  const _Servers({required this.vault});
+
+  final VaultController vault;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final list = vault.serverList;
+    if (list == null) return const SizedBox.shrink();
+    return _AddressList(
+      public: list.public,
+      private: list.private,
+      editable: vault.serversEditable,
+      parse: parseServerUrl,
+      icon: Icons.dns_rounded,
+      hint: 'https://blossom.example.com',
+      texts: (
+        add: l10n.addServer,
+        address: l10n.serverAddress,
+        invalid: l10n.serverAddressInvalid,
+        alreadyListed: l10n.serverAlreadyListed,
+        remove: l10n.removeServer,
+        keep: l10n.keepServer,
+        private: l10n.serverPrivate,
+        added: l10n.serverAdded,
+        removed: l10n.serverRemoved,
+        keepPrivate: l10n.serverKeepPrivate,
+        keepPrivateDescription: l10n.serverKeepPrivateDescription,
+        saveFailed: l10n.serversSaveFailed,
+        waitForSync: l10n.serversWaitForSync,
+        needOne: l10n.serversNeedOne,
+      ),
+      save: (public, private) =>
+          vault.setServerList(ServerList(public: public, private: private)),
+    );
+  }
+}
+
+/// What an [_AddressList] says, of relays or of servers.
+typedef _AddressTexts = ({
+  String add,
+  String address,
+  String invalid,
+  String alreadyListed,
+  String remove,
+  String keep,
+  String private,
+  String added,
+  String removed,
+  String keepPrivate,
+  String keepPrivateDescription,
+  String saveFailed,
+  String waitForSync,
+  String needOne,
+});
+
+/// The addresses of a list of the vault, public or private. Keeps the changes
+/// in a draft, published as a single list on save.
+class _AddressList extends StatefulWidget {
+  const _AddressList({
+    required this.public,
+    required this.private,
+    required this.editable,
+    required this.parse,
+    required this.icon,
+    required this.hint,
+    required this.texts,
+    this.status,
+    required this.save,
+  });
+
+  final List<String> public;
+  final List<String> private;
+
+  /// Whether saving cannot replace a newer list.
+  final bool editable;
+
+  /// An address as the user types it, normalized, or null if invalid.
+  final String? Function(String text) parse;
+  final IconData icon;
+  final String hint;
+  final _AddressTexts texts;
+
+  /// What a listed address shows while the draft keeps it, if anything.
+  final (String, IconData) Function(String url)? status;
+  final Future<void> Function(List<String> public, List<String> private) save;
+
+  @override
+  State<_AddressList> createState() => _AddressListState();
+}
+
+class _AddressListState extends State<_AddressList> {
   final _removed = <String>{};
 
-  /// Whether each relay to add is private.
+  /// Whether each address to add is private.
   final _added = <String, bool>{};
   var _saving = false;
   String? _saveError;
 
   bool get _changed => _removed.isNotEmpty || _added.isNotEmpty;
 
-  RelayList _draft(RelayList list) {
-    var draft = list;
-    for (final url in _removed) {
-      draft = draft.without(url);
-    }
-    for (final MapEntry(key: url, value: private) in _added.entries) {
-      draft = draft.withRelay(url, private: private);
-    }
-    return draft;
-  }
+  List<String> _draft(List<String> listed, {required bool private}) => [
+    for (final url in listed)
+      if (!_removed.contains(url)) url,
+    for (final MapEntry(key: url, value: isPrivate) in _added.entries)
+      if (isPrivate == private) url,
+  ];
 
   void _discard() => setState(() {
     _removed.clear();
@@ -502,14 +652,14 @@ class _RelaysState extends State<_Relays> {
     _saveError = null;
   });
 
-  Future<void> _save(RelayList draft) async {
-    final l10n = context.l10n;
+  Future<void> _save(List<String> public, List<String> private) async {
+    final failed = widget.texts.saveFailed;
     setState(() {
       _saving = true;
       _saveError = null;
     });
     try {
-      await widget.vault.setRelayList(draft);
+      await widget.save(public, private);
       if (mounted) {
         setState(() {
           _removed.clear();
@@ -519,16 +669,22 @@ class _RelaysState extends State<_Relays> {
     } on SignerRequestCancelledException {
       // Cancelled by the user: the draft stays, to save again.
     } catch (_) {
-      if (mounted) setState(() => _saveError = l10n.relaysSaveFailed);
+      if (mounted) setState(() => _saveError = failed);
     } finally {
       if (mounted) setState(() => _saving = false);
     }
   }
 
-  Future<void> _add(RelayList draft) async {
+  Future<void> _add(List<String> draft) async {
     final added = await showDialog<(String, bool)>(
       context: context,
-      builder: (context) => _AddRelayDialog(draft: draft),
+      builder: (context) => _AddAddressDialog(
+        texts: widget.texts,
+        hint: widget.hint,
+        parse: widget.parse,
+        listed: (url) =>
+            draft.any((listed) => (widget.parse(listed) ?? listed) == url),
+      ),
     );
     if (added case (final url, final private) when mounted) {
       setState(() => _added[url] = private);
@@ -537,170 +693,164 @@ class _RelaysState extends State<_Relays> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
     final palette = context.palette;
-    final vault = widget.vault;
-    final list = vault.relayList;
-    if (list == null) return const SizedBox.shrink();
-    final editable = vault.relaysEditable && !_saving;
-    final draft = _draft(list);
+    final texts = widget.texts;
+    final editable = widget.editable && !_saving;
+    final public = _draft(widget.public, private: false);
+    final private = _draft(widget.private, private: true);
+    final empty = public.isEmpty && private.isEmpty;
     final message =
         _saveError ??
-        (!vault.relaysEditable
-            ? l10n.relaysWaitForSync
-            : draft.isEmpty
-            ? l10n.relaysNeedOne
+        (!widget.editable
+            ? texts.waitForSync
+            : empty
+            ? texts.needOne
             : null);
     IconButton removeButton(VoidCallback remove) => IconButton(
-      tooltip: l10n.removeRelay,
+      tooltip: texts.remove,
       onPressed: editable ? () => setState(remove) : null,
       icon: const Icon(Icons.close_rounded, size: 20),
     );
-    return StreamBuilder<List<RelayConnectivity>>(
-      stream: _connections,
-      builder: (context, snapshot) {
-        final connected = {
-          for (final connection in snapshot.data ?? <RelayConnectivity>[])
-            if (connection.isConnected) connection.url,
-        };
-        bool isConnected(String url) =>
-            connected.contains(cleanRelayUrl(url) ?? url);
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        FieldCard(
           children: [
-            FieldCard(
-              children: [
-                for (final (relays, private) in [
-                  (list.public, false),
-                  (list.private, true),
-                ])
-                  for (final url in relays.keys)
-                    if (_removed.contains(url))
-                      _RelayTile(
-                        url: url,
-                        private: private,
-                        status: l10n.relayRemoved,
-                        statusIcon: Icons.remove_circle_outline_rounded,
-                        removed: true,
-                        action: IconButton(
-                          tooltip: l10n.keepRelay,
-                          onPressed: editable
-                              ? () => setState(() => _removed.remove(url))
-                              : null,
-                          icon: const Icon(Icons.undo_rounded, size: 20),
-                        ),
-                      )
-                    else
-                      _RelayTile(
-                        url: url,
-                        private: private,
-                        status: isConnected(url)
-                            ? l10n.relayConnected
-                            : l10n.relayNotConnected,
-                        statusIcon: isConnected(url)
-                            ? Icons.check_circle_outline_rounded
-                            : Icons.circle_outlined,
-                        action: removeButton(() => _removed.add(url)),
-                      ),
-                for (final MapEntry(key: url, value: private) in _added.entries)
-                  _RelayTile(
+            for (final (listed, isPrivate) in [
+              (widget.public, false),
+              (widget.private, true),
+            ])
+              for (final url in listed)
+                if (_removed.contains(url))
+                  _AddressTile(
                     url: url,
-                    private: private,
-                    status: l10n.relayAdded,
-                    statusIcon: Icons.add_circle_outline_rounded,
-                    action: removeButton(() => _added.remove(url)),
+                    icon: widget.icon,
+                    note: isPrivate ? texts.private : null,
+                    status: (
+                      texts.removed,
+                      Icons.remove_circle_outline_rounded,
+                    ),
+                    removed: true,
+                    action: IconButton(
+                      tooltip: texts.keep,
+                      onPressed: editable
+                          ? () => setState(() => _removed.remove(url))
+                          : null,
+                      icon: const Icon(Icons.undo_rounded, size: 20),
+                    ),
+                  )
+                else
+                  _AddressTile(
+                    url: url,
+                    icon: widget.icon,
+                    note: isPrivate ? texts.private : null,
+                    status: widget.status?.call(url),
+                    action: removeButton(() => _removed.add(url)),
                   ),
-                SettingsTile(
-                  leading: Icon(
-                    Icons.add_rounded,
-                    size: 20,
-                    color: editable ? palette.signal : palette.muted,
-                  ),
-                  title: Text(
-                    l10n.addRelay,
-                    style: editable ? null : TextStyle(color: palette.muted),
-                  ),
-                  onTap: editable ? () => _add(draft) : null,
-                ),
-              ],
-            ),
-            if (message != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                message,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: _saveError == null ? palette.muted : palette.danger,
-                ),
+            for (final MapEntry(key: url, value: isPrivate) in _added.entries)
+              _AddressTile(
+                url: url,
+                icon: widget.icon,
+                note: isPrivate ? texts.private : null,
+                status: (texts.added, Icons.add_circle_outline_rounded),
+                action: removeButton(() => _added.remove(url)),
               ),
-            ],
-            const SizedBox(height: 12),
-            // Always there: the page would scroll by itself as they go.
-            DialogButtons(
-              children: [
-                TextButton(
-                  onPressed: _changed && !_saving ? _discard : null,
-                  child: Text(l10n.cancel),
-                ),
-                FilledButton(
-                  onPressed: _changed && editable && !draft.isEmpty
-                      ? () => _save(draft)
-                      : null,
-                  child: Text(l10n.save),
-                ),
-              ],
+            SettingsTile(
+              leading: Icon(
+                Icons.add_rounded,
+                size: 20,
+                color: editable ? palette.signal : palette.muted,
+              ),
+              title: Text(
+                texts.add,
+                style: editable ? null : TextStyle(color: palette.muted),
+              ),
+              onTap: editable ? () => _add([...public, ...private]) : null,
             ),
           ],
-        );
-      },
+        ),
+        if (message != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            message,
+            style: TextStyle(
+              fontSize: 13,
+              color: _saveError == null ? palette.muted : palette.danger,
+            ),
+          ),
+        ],
+        const SizedBox(height: 12),
+        // Always there: the page would scroll by itself as they go.
+        DialogButtons(
+          children: [
+            TextButton(
+              onPressed: _changed && !_saving ? _discard : null,
+              child: Text(context.l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: _changed && editable && !empty
+                  ? () => _save(public, private)
+                  : null,
+              child: Text(context.l10n.save),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
 
 /// The draft shows in [status], so that the row keeps its height.
-class _RelayTile extends StatelessWidget {
-  const _RelayTile({
+class _AddressTile extends StatelessWidget {
+  const _AddressTile({
     required this.url,
-    required this.private,
-    required this.status,
-    required this.statusIcon,
+    required this.icon,
+    this.note,
+    this.status,
     this.removed = false,
     required this.action,
   });
 
   final String url;
-  final bool private;
-  final String status;
-  final IconData statusIcon;
+  final IconData icon;
+
+  /// Under the address, that it is private.
+  final String? note;
+  final (String, IconData)? status;
   final bool removed;
   final Widget action;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    final icon = Icon(statusIcon, size: 16, color: palette.muted);
+    final note = this.note;
     return SettingsTile(
-      leading: Icon(Icons.cell_tower_rounded, size: 20, color: palette.muted),
+      leading: Icon(icon, size: 20, color: palette.muted),
       title: Text(
-        url.startsWith('wss://') ? url.substring(6) : url,
+        url.replaceFirst(RegExp('^(wss|https)://'), ''),
         style: TextStyle(
           fontWeight: FontWeight.w500,
           color: removed ? palette.muted : null,
           decoration: removed ? TextDecoration.lineThrough : null,
         ),
       ),
-      subtitle: private ? Text(context.l10n.relayPrivate) : null,
+      subtitle: note != null ? Text(note) : null,
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Spelled out in the wide layout, a tooltip in the narrow one.
-          if (context.isWide) ...[
-            icon,
-            const SizedBox(width: 6),
-            Text(status, style: TextStyle(fontSize: 13, color: palette.muted)),
-          ] else
-            Tooltip(message: status, child: icon),
-          const SizedBox(width: 4),
+          if (status case (final text, final statusIcon)) ...[
+            // Spelled out in the wide layout, a tooltip in the narrow one.
+            if (context.isWide) ...[
+              Icon(statusIcon, size: 16, color: palette.muted),
+              const SizedBox(width: 6),
+              Text(text, style: TextStyle(fontSize: 13, color: palette.muted)),
+            ] else
+              Tooltip(
+                message: text,
+                child: Icon(statusIcon, size: 16, color: palette.muted),
+              ),
+            const SizedBox(width: 4),
+          ],
           action,
         ],
       ),
@@ -708,17 +858,27 @@ class _RelayTile extends StatelessWidget {
   }
 }
 
-/// Gives the relay to add, and whether it is private.
-class _AddRelayDialog extends StatefulWidget {
-  const _AddRelayDialog({required this.draft});
+/// Gives the address to add, and whether it is private.
+class _AddAddressDialog extends StatefulWidget {
+  const _AddAddressDialog({
+    required this.texts,
+    required this.hint,
+    required this.parse,
+    required this.listed,
+  });
 
-  final RelayList draft;
+  final _AddressTexts texts;
+  final String hint;
+  final String? Function(String text) parse;
+
+  /// Whether the draft lists the normalized address.
+  final bool Function(String url) listed;
 
   @override
-  State<_AddRelayDialog> createState() => _AddRelayDialogState();
+  State<_AddAddressDialog> createState() => _AddAddressDialogState();
 }
 
-class _AddRelayDialogState extends State<_AddRelayDialog> {
+class _AddAddressDialogState extends State<_AddAddressDialog> {
   final _url = TextEditingController();
   var _private = false;
   String? _error;
@@ -730,12 +890,12 @@ class _AddRelayDialogState extends State<_AddRelayDialog> {
   }
 
   void _submit() {
-    final l10n = context.l10n;
-    final url = parseRelayUrl(_url.text);
+    final texts = widget.texts;
+    final url = widget.parse(_url.text);
     final error = url == null
-        ? l10n.relayAddressInvalid
-        : widget.draft.contains(url)
-        ? l10n.relayAlreadyListed
+        ? texts.invalid
+        : widget.listed(url)
+        ? texts.alreadyListed
         : null;
     if (error != null) {
       setState(() => _error = error);
@@ -748,6 +908,7 @@ class _AddRelayDialogState extends State<_AddRelayDialog> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final palette = context.palette;
+    final texts = widget.texts;
     return Dialog(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 440),
@@ -758,7 +919,7 @@ class _AddRelayDialogState extends State<_AddRelayDialog> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                l10n.addRelay,
+                texts.add,
                 style: Theme.of(context).dialogTheme.titleTextStyle,
               ),
               const SizedBox(height: 20),
@@ -770,8 +931,8 @@ class _AddRelayDialogState extends State<_AddRelayDialog> {
                 keyboardType: TextInputType.url,
                 onSubmitted: (_) => _submit(),
                 decoration: InputDecoration(
-                  labelText: l10n.relayAddress,
-                  hintText: 'wss://relay.example.com',
+                  labelText: texts.address,
+                  hintText: widget.hint,
                   errorText: _error,
                 ),
               ),
@@ -785,7 +946,7 @@ class _AddRelayDialogState extends State<_AddRelayDialog> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            l10n.relayKeepPrivate,
+                            texts.keepPrivate,
                             style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
@@ -793,7 +954,7 @@ class _AddRelayDialogState extends State<_AddRelayDialog> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            l10n.relayKeepPrivateDescription,
+                            texts.keepPrivateDescription,
                             style: TextStyle(
                               fontSize: 13,
                               color: palette.muted,

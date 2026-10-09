@@ -330,6 +330,58 @@ class AppLocalizationsFr extends AppLocalizations {
   String get relaysNeedOne => 'Le coffre a besoin d\'au moins un relais.';
 
   @override
+  String get fileServers => 'Serveurs de fichiers';
+
+  @override
+  String get fileServersDescription =>
+      'Les fichiers joints à ce coffre sont copiés sur chacun de ces serveurs. Ils ne voient que des fichiers chiffrés.';
+
+  @override
+  String get serverPrivate => 'Privé';
+
+  @override
+  String get removeServer => 'Retirer ce serveur';
+
+  @override
+  String get keepServer => 'Garder ce serveur';
+
+  @override
+  String get addServer => 'Ajouter un serveur';
+
+  @override
+  String get serverAddress => 'Adresse du serveur';
+
+  @override
+  String get serverAddressInvalid => 'Ce n\'est pas une adresse de serveur.';
+
+  @override
+  String get serverAlreadyListed => 'Ce serveur est déjà dans la liste.';
+
+  @override
+  String get serverKeepPrivate => 'Garder privé';
+
+  @override
+  String get serverKeepPrivateDescription =>
+      'Chiffré dans la liste des serveurs du coffre : seuls ceux qui ont la clé du coffre savent que le coffre l\'utilise.';
+
+  @override
+  String get serversSaveFailed =>
+      'Les serveurs n\'ont pas pu être enregistrés.';
+
+  @override
+  String get serversWaitForSync =>
+      'Vous pourrez changer les serveurs une fois le coffre synchronisé.';
+
+  @override
+  String get serverAdded => 'Nouveau';
+
+  @override
+  String get serverRemoved => 'Retiré';
+
+  @override
+  String get serversNeedOne => 'Le coffre a besoin d\'au moins un serveur.';
+
+  @override
   String get add => 'Ajouter';
 
   @override

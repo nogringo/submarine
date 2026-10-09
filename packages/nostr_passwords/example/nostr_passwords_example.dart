@@ -36,7 +36,7 @@ Future<void> main() async {
   final vault = Vault(
     ndk: ndk,
     signer: signer,
-    relays: defaultRelays,
+    relays: defaultVaultRelays,
     cache: VersionCache(store, cacheKey),
   );
   // Or the key sealed for the signer alone, which opens it at each start:
@@ -120,6 +120,18 @@ Future<void> main() async {
   await vault.setRelayList(
     current.without('wss://relay.nos.social').withRelay(typed, private: true),
   );
+
+  // Its Blossom servers (BUD-03), the private ones encrypted to the vault. The
+  // list lives on the vault's relays and comes with the sync. Until it has one,
+  // the vault uses vault.blossomServers, defaultVaultBlossomServers here.
+  final servers = await vault.currentServerList();
+  await vault.setServerList(
+    servers
+        .without('https://nostr.download')
+        // As a user types it: https:// when it has no scheme.
+        .withServer('files.alice.example', private: true),
+  );
+  print('Private servers: ${(await vault.serverList())?.private.join(', ')}');
 
   // Reads the whole vault from every relay, then gives the cache and each
   // relay what it lacks, such as what a relay dropped over time.

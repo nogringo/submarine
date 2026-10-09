@@ -49,7 +49,7 @@ void main() {
     tearDown(() => directory.deleteSync(recursive: true));
 
     test('falls back to the default relays', () {
-      expect(configuredRelays(config), defaultRelays);
+      expect(configuredRelays(config), defaultVaultRelays);
     });
 
     test('reads the relays of the config file', () {

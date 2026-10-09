@@ -13,9 +13,11 @@ import 'cipher/cipher.dart';
 import 'cipher/field.dart';
 import 'cipher/json.dart';
 import 'cipher/password_history.dart';
+import 'defaults.dart';
 import 'envelope.dart';
 import 'item.dart';
 import 'relay_list.dart';
+import 'server_list.dart';
 import 'version_cache.dart';
 import 'version_event.dart';
 
@@ -28,7 +30,8 @@ class Vault {
     required this.ndk,
     required this.signer,
     required this.relays,
-    this.indexers = indexerRelays,
+    this.indexers = defaultIndexerRelays,
+    this.blossomServers = defaultVaultBlossomServers,
     this.cache,
   });
 
@@ -41,6 +44,9 @@ class Vault {
 
   /// Where [setRelayList] publishes too.
   final List<String> indexers;
+
+  /// The vault's Blossom servers until it has a server list.
+  final List<String> blossomServers;
 
   /// Keeps what [signer] opened from one start to the next. Without it, each
   /// start asks [signer] to open every gift wrap again.
@@ -56,8 +62,12 @@ class Vault {
 
   Future<void>? _cacheRead;
 
-  /// Keeps the vault's gift wraps and deletion requests synced from
-  /// [currentRelays] into the ndk cache. The relay list is left to
+  /// The newest server list read, by event id, for [serverList] to ask
+  /// [signer] once.
+  (String, ServerList)? _serverList;
+
+  /// Keeps the vault's gift wraps, deletion requests and server list synced
+  /// from [currentRelays] into the ndk cache. The relay list is left to
   /// [fetchRelayList].
   ///
   /// The handle holds the relays of the moment: once the relay list changed,
@@ -67,7 +77,7 @@ class Vault {
   /// authenticates as the vault (NIP-42): [signer] must be in `ndk.accounts`.
   Future<SyncHandle> sync(SyncEngine engine) async => engine.ensure(
     SyncRequest(
-      filters: [_wraps, _deletions],
+      filters: _filters,
       relays: await currentRelays(),
       authPubkey: signer.getPublicKey(),
       // Deletion requests are backdated like gift wraps, but the engine only
@@ -104,7 +114,7 @@ class Vault {
     final relays = await currentRelays();
     // Without explicit relays, ndk would ask its bootstrap relays.
     if (generation != _liveGeneration || relays.isEmpty) return;
-    for (final filter in [_wraps, _deletions]) {
+    for (final filter in _filters) {
       final response = ndk.requests.subscription(
         // A limit holds for stored events only, while a `since` would also
         // drop the new gift wraps, which are backdated.
@@ -155,6 +165,14 @@ class Vault {
 
   Filter get _deletions =>
       Filter(kinds: [Deletion.kKind], authors: [signer.getPublicKey()]);
+
+  Filter get _serverLists => Filter(
+    kinds: [Blossom.kBlossomUserServerList],
+    authors: [signer.getPublicKey()],
+  );
+
+  /// What the vault keeps on [currentRelays].
+  List<Filter> get _filters => [_wraps, _deletions, _serverLists];
 
   /// Items found in the ndk cache, see [sync] to fill it, once [signer] opened
   /// the gift wraps never opened on this device. Drops from the cache the gift
@@ -308,20 +326,13 @@ class Vault {
   ///
   /// A relay list goes as wide as it can (NIP-65): to [relays], to the relays
   /// it lists and to [indexers]. The relays it adds get a copy of the vault's
-  /// gift wraps and deletion requests, which they do not hold yet.
+  /// gift wraps, deletion requests and server list, which they do not hold
+  /// yet.
   Future<void> setRelayList(RelayList list) async {
     final previous = await _loadRelayList();
     final before = await currentRelays();
     await _save(
-      await signRelayList(
-        list,
-        signer,
-        // Of two lists made in the same second, relays keep the lowest id.
-        createdAt: max(
-          DateTime.now().millisecondsSinceEpoch ~/ 1000,
-          (previous?.createdAt ?? 0) + 1,
-        ),
-      ),
+      await signRelayList(list, signer, createdAt: _replacing(previous)),
     );
     await _copyTo([
       for (final relay in await currentRelays())
@@ -330,8 +341,40 @@ class Vault {
     await _followRelays();
   }
 
+  /// The vault's server list in the ndk cache, or [blossomServers], public,
+  /// while it has none. The list to change for [setServerList], once [sync]
+  /// got the newest one: an older one would replace it.
+  Future<ServerList> currentServerList() async {
+    final list = await serverList();
+    if (list != null && !list.isEmpty) return list;
+    return ServerList(public: blossomServers);
+  }
+
+  /// The vault's server list found in the ndk cache, see [sync] to fill it, or
+  /// null if it has none.
+  Future<ServerList?> serverList() async {
+    final event = await _loadServerList();
+    if (event == null) return null;
+    if (_serverList case (final id, final list) when id == event.id) {
+      return list;
+    }
+    final list = await readServerList(event, signer);
+    _serverList = (event.id, list);
+    return list;
+  }
+
+  /// Saves [list] as the vault's server list, in place of the previous one.
+  /// It goes to [currentRelays], with the rest of the vault.
+  Future<void> setServerList(ServerList list) async {
+    final previous = await _loadServerList();
+    await _save(
+      await signServerList(list, signer, createdAt: _replacing(previous)),
+    );
+  }
+
   /// Brings the ndk cache and every relay of [currentRelays] to the same gift
-  /// wraps and deletion requests, each one getting what it lacks, once
+  /// wraps, deletion requests and server list, each one getting what it
+  /// lacks, once
   /// [fetchRelayList] fetched the newest relay list. That list then goes to
   /// all the relays [setRelayList] publishes it to.
   ///
@@ -348,8 +391,7 @@ class Vault {
     Future<void> fetch(String relay) async {
       try {
         held[relay] = {
-          for (final filter in [_wraps, _deletions])
-            ...await _fetchAll(relay, filter),
+          for (final filter in _filters) ...await _fetchAll(relay, filter),
         };
       } on _LeftOut catch (leftOut) {
         unsynced[relay] = leftOut.reason;
@@ -398,14 +440,17 @@ class Vault {
   }
 
   /// The changes saved in the cache that no relay accepted yet. Forgets the
-  /// relay lists a newer one replaced, which ndk never sends.
+  /// relay and server lists a newer one replaced, which ndk never sends.
   Future<List<EventDeliverySnapshot>> unsent() async {
-    final relayList = (await _loadRelayList())?.id;
+    final newest = {
+      (await _loadRelayList())?.id,
+      (await _loadServerList())?.id,
+    };
     final unsent = <EventDeliverySnapshot>[];
     for (final delivery in await ndk.broadcast.loadPendingDeliveries()) {
       final event = delivery.event;
       if (event == null || !_isOwn(event)) continue;
-      if (event.kind == Nip65.kKind && event.id != relayList) {
+      if (_lists.contains(event.kind) && !newest.contains(event.id)) {
         // ndk's retries would drop it, but the CLI turns them off.
         await ndk.config.cache.removeRelayDeliveryTargets(event.id);
         await ndk.config.cache.removeEventDeliveryRecord(event.id);
@@ -426,12 +471,12 @@ class Vault {
   /// fill the cache again.
   Future<void> forget(SyncEngine engine) async {
     final pubkey = signer.getPublicKey();
-    for (final filter in [_wraps, _deletions]) {
+    for (final filter in _filters) {
       await engine.forgetFilter(filter, authPubkey: pubkey);
     }
     await ndk.config.cache.removeEvents(
       pubKeys: [pubkey],
-      kinds: [Deletion.kKind, Nip65.kKind],
+      kinds: [Deletion.kKind, ..._lists],
     );
     await ndk.config.cache.removeEvents(
       kinds: [GiftWrap.kGiftWrapEventkind],
@@ -444,14 +489,27 @@ class Vault {
     }
     _versions.clear();
     _cacheRead = null;
+    _serverList = null;
   }
 
   /// Whether [event] is one of this vault's: the cache may hold other vaults.
   bool _isOwn(Nip01Event event) => switch (event.kind) {
     GiftWrap.kGiftWrapEventkind => event.pTags.contains(signer.getPublicKey()),
-    Deletion.kKind || Nip65.kKind => event.pubKey == signer.getPublicKey(),
+    Deletion.kKind ||
+    Nip65.kKind ||
+    Blossom.kBlossomUserServerList => event.pubKey == signer.getPublicKey(),
     _ => false,
   };
+
+  /// The replaceable lists of the vault.
+  static const _lists = [Nip65.kKind, Blossom.kBlossomUserServerList];
+
+  /// The `created_at` of a list that replaces [previous].
+  int _replacing(Nip01Event? previous) => max(
+    DateTime.now().millisecondsSinceEpoch ~/ 1000,
+    // Of two lists made in the same second, relays keep the lowest id.
+    (previous?.createdAt ?? 0) + 1,
+  );
 
   Future<Envelope> _update(Item item, Cipher cipher, DateTime now) async {
     // item.cipher may be the very object the caller edited.
@@ -492,6 +550,12 @@ class Vault {
   Future<Nip01Event?> _loadRelayList() async =>
       (await ndk.config.cache.loadEvents(
         kinds: [Nip65.kKind],
+        pubKeys: [signer.getPublicKey()],
+      )).firstOrNull;
+
+  Future<Nip01Event?> _loadServerList() async =>
+      (await ndk.config.cache.loadEvents(
+        kinds: [Blossom.kBlossomUserServerList],
         pubKeys: [signer.getPublicKey()],
       )).firstOrNull;
 
@@ -598,8 +662,8 @@ class Vault {
   }
 
   /// The vault's events in the cache that belong on its relays: the deletion
-  /// requests, and the gift wraps they spare that open, as anyone can send one
-  /// to the vault.
+  /// requests, the gift wraps they spare that open, as anyone can send one to
+  /// the vault, and the server list.
   Future<List<Nip01Event>> _shareable() async {
     await open();
     final deletions = await _loadDeletions();
@@ -608,6 +672,7 @@ class Vault {
       for (final wrap in await _loadWraps())
         if (!deleted.contains(wrap.id) && _versions.containsKey(wrap.id)) wrap,
       ...deletions,
+      ?await _loadServerList(),
     ];
   }
 

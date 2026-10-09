@@ -258,9 +258,21 @@ void main() {
   Finder inDialog(String text) =>
       find.descendant(of: find.byType(Dialog), matching: find.text(text));
 
-  bool saveEnabled(WidgetTester tester) => tester
-      .widget<FilledButton>(find.widgetWithText(FilledButton, 'Save'))
-      .enabled;
+  /// [finder] in the settings section titled [title].
+  Finder inSection(String title, Finder finder) => find.descendant(
+    of: find.ancestor(
+      of: find.text(title),
+      matching: find.byType(SettingsSection),
+    ),
+    matching: finder,
+  );
+
+  bool saveEnabled(WidgetTester tester, {String? section}) {
+    final save = find.widgetWithText(FilledButton, 'Save');
+    return tester
+        .widget<FilledButton>(section == null ? save : inSection(section, save))
+        .enabled;
+  }
 
   /// Taps [button], whose write needs real time to reach the cache.
   Future<void> write(WidgetTester tester, Finder button) async {
@@ -2792,7 +2804,7 @@ void main() {
     await tester.ensureVisible(find.text('Add a relay'));
     await settle(tester);
     expect(inRow(first.url, find.text('Connected')), findsOneWidget);
-    expect(saveEnabled(tester), isFalse);
+    expect(saveEnabled(tester, section: 'Relays'), isFalse);
     final rowHeight = tester.getSize(relayRow(first.url)).height;
 
     await tester.tap(inRow(first.url, find.byTooltip('Remove this relay')));
@@ -2800,10 +2812,10 @@ void main() {
     expect(inRow(first.url, find.text('Removed')), findsOneWidget);
     expect(tester.getSize(relayRow(first.url)).height, rowHeight);
     expect(find.text('The vault needs at least one relay.'), findsOneWidget);
-    expect(saveEnabled(tester), isFalse);
+    expect(saveEnabled(tester, section: 'Relays'), isFalse);
     await tester.tap(inRow(first.url, find.byTooltip('Keep this relay')));
     await settle(tester);
-    expect(saveEnabled(tester), isFalse);
+    expect(saveEnabled(tester, section: 'Relays'), isFalse);
 
     await tester.tap(find.text('Add a relay'));
     await settle(tester);
@@ -2832,14 +2844,17 @@ void main() {
     expect(family.relayList?.urls, {first.url});
     expect(relayLists(first), 0);
 
-    await tester.ensureVisible(find.text('Save'));
+    await tester.ensureVisible(inSection('Relays', find.text('Save')));
     await settle(tester);
-    await write(tester, find.widgetWithText(FilledButton, 'Save'));
+    await write(
+      tester,
+      inSection('Relays', find.widgetWithText(FilledButton, 'Save')),
+    );
     expect(family.relayList?.public, isEmpty);
     expect(family.relayList?.private.keys, [second.url]);
     expect(relayRow(first.url), findsNothing);
     expect(inRow(second.url, find.text('Private')), findsOneWidget);
-    expect(saveEnabled(tester), isFalse);
+    expect(saveEnabled(tester, section: 'Relays'), isFalse);
     await tester.runAsync(() async {
       while (relayLists(first) == 0 || relayLists(second) == 0) {
         await Future<void>.delayed(const Duration(milliseconds: 10));
@@ -2850,17 +2865,14 @@ void main() {
     await close(tester);
   }, variant: TargetPlatformVariant.only(TargetPlatform.macOS));
 
-  testWidgets('keeps the page still as a relay removal is undone', (
-    tester,
-  ) async {
+  testWidgets('keeps the page still as a removal is undone', (tester) async {
     setScreen(tester, const Size(1280, 800));
-    final first = _EmptyRelay();
-    final second = _EmptyRelay();
-    await startRelays(tester, [first, second]);
-    await open(tester, withFamily: true, relays: [first.url, second.url]);
+    final relay = _EmptyRelay();
+    await startRelays(tester, [relay]);
+    await open(tester, withFamily: true, relays: [relay.url]);
     final family = vaults.all.single;
     await tester.runAsync(() async {
-      while (!family.relaysEditable) {
+      while (!family.serversEditable || family.serverList == null) {
         await Future<void>.delayed(const Duration(milliseconds: 10));
       }
     });
@@ -2875,7 +2887,8 @@ void main() {
       ),
     );
     await settle(tester);
-    final row = find.widgetWithText(SettingsTile, first.url);
+    // The last list of the page.
+    final row = find.widgetWithText(SettingsTile, 'nostr.download');
 
     await tester.tap(find.byTooltip('Family'));
     await settle(tester);
@@ -2884,19 +2897,19 @@ void main() {
     await tester.ensureVisible(row);
     await settle(tester);
     await tester.tap(
-      find.descendant(of: row, matching: find.byTooltip('Remove this relay')),
+      find.descendant(of: row, matching: find.byTooltip('Remove this server')),
     );
     await settle(tester);
-    await tester.ensureVisible(find.text('Save'));
+    await tester.ensureVisible(find.text('Remove from this device'));
     await settle(tester);
     final position = tester.getTopLeft(row);
 
     await tester.tap(
-      find.descendant(of: row, matching: find.byTooltip('Keep this relay')),
+      find.descendant(of: row, matching: find.byTooltip('Keep this server')),
     );
     await settle(tester);
     expect(tester.getTopLeft(row), position);
-    expect(saveEnabled(tester), isFalse);
+    expect(saveEnabled(tester, section: 'File servers'), isFalse);
     await close(tester);
   });
 
@@ -2925,22 +2938,23 @@ void main() {
     );
     await settle(tester);
 
+    final row = find.widgetWithText(SettingsTile, relay.url);
+
     await tester.tap(find.byTooltip('Vaults'));
     await settle(tester);
     await tester.tap(find.byTooltip('Vault settings'));
     await settle(tester);
-    await tester.ensureVisible(find.text('Add a relay'));
+    await tester.ensureVisible(row);
     await settle(tester);
     await tester.tap(
-      find.descendant(
-        of: find.widgetWithText(SettingsTile, relay.url),
-        matching: find.byTooltip('Remove this relay'),
-      ),
+      find.descendant(of: row, matching: find.byTooltip('Remove this relay')),
     );
     await settle(tester);
     expect(find.byTooltip('Removed'), findsOneWidget);
     bool cancelEnabled() => tester
-        .widget<TextButton>(find.widgetWithText(TextButton, 'Cancel'))
+        .widget<TextButton>(
+          inSection('Relays', find.widgetWithText(TextButton, 'Cancel')),
+        )
         .enabled;
 
     tester.view.physicalSize = const Size(1280, 800);
@@ -2952,6 +2966,93 @@ void main() {
     await settle(tester);
     expect(find.byTooltip('Removed'), findsOneWidget);
     expect(cancelEnabled(), isTrue);
+    await close(tester);
+  });
+
+  testWidgets('changes the servers of a vault in its settings', (tester) async {
+    setScreen(tester, const Size(1280, 800));
+    final relay = _EmptyRelay();
+    await startRelays(tester, [relay]);
+    await open(tester, withFamily: true, relays: [relay.url]);
+    final family = vaults.all.single;
+    await tester.runAsync(() async {
+      while (!family.serversEditable || family.serverList == null) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+    });
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+        mail: mail,
+      ),
+    );
+    await settle(tester);
+    Finder serverRow(String host) => find.widgetWithText(SettingsTile, host);
+    Finder inRow(String host, Finder finder) =>
+        find.descendant(of: serverRow(host), matching: finder);
+
+    await tester.tap(find.byTooltip('Family'));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Vault settings'));
+    await settle(tester);
+    await tester.ensureVisible(find.text('Add a server'));
+    await settle(tester);
+    for (final server in defaultVaultBlossomServers) {
+      expect(serverRow(server.substring(8)), findsOneWidget);
+    }
+    expect(saveEnabled(tester, section: 'File servers'), isFalse);
+
+    await tester.tap(
+      inRow('nostr.download', find.byTooltip('Remove this server')),
+    );
+    await settle(tester);
+    expect(inRow('nostr.download', find.text('Removed')), findsOneWidget);
+    await tester.tap(find.text('Add a server'));
+    await settle(tester);
+    final address = find.widgetWithText(TextField, 'Server address');
+    for (final invalid in ['wss://relay.example.com', 'dadazd']) {
+      await tester.enterText(address, invalid);
+      await tester.tap(inDialog('Add'));
+      await settle(tester);
+      expect(find.text('This is not a server address.'), findsOneWidget);
+    }
+    await tester.enterText(address, 'Blossom.nmail.li/');
+    await tester.tap(inDialog('Add'));
+    await settle(tester);
+    expect(find.text('This server is already in the list.'), findsOneWidget);
+    await tester.enterText(address, 'files.alice.example');
+    await tester.tap(
+      find.descendant(of: find.byType(Dialog), matching: find.byType(Switch)),
+    );
+    await tester.tap(inDialog('Add'));
+    await settle(tester);
+    expect(find.byType(Dialog), findsNothing);
+    expect(inRow('files.alice.example', find.text('New')), findsOneWidget);
+    expect(inRow('files.alice.example', find.text('Private')), findsOneWidget);
+
+    await tester.ensureVisible(inSection('File servers', find.text('Save')));
+    await settle(tester);
+    await write(
+      tester,
+      inSection('File servers', find.widgetWithText(FilledButton, 'Save')),
+    );
+    expect(family.serverList?.public, [
+      for (final server in defaultVaultBlossomServers)
+        if (server != 'https://nostr.download') server,
+    ]);
+    expect(family.serverList?.private, ['https://files.alice.example']);
+    expect(serverRow('nostr.download'), findsNothing);
+    expect(inRow('files.alice.example', find.text('Private')), findsOneWidget);
+    expect(saveEnabled(tester, section: 'File servers'), isFalse);
+    await tester.runAsync(() async {
+      while (!relay.received.any((event) => event['kind'] == 10063)) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+    });
     await close(tester);
   });
 
@@ -4433,10 +4534,11 @@ void main() {
         await checkAccessibility(tester);
       }
 
+      /// The Cancel of the route on top.
       Future<void> cancel() async {
-        await tester.ensureVisible(find.text('Cancel'));
+        await tester.ensureVisible(find.text('Cancel').last);
         await settle(tester);
-        await tester.tap(find.text('Cancel'));
+        await tester.tap(find.text('Cancel').last);
         await settle(tester);
       }
 

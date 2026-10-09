@@ -318,6 +318,56 @@ class AppLocalizationsJa extends AppLocalizations {
   String get relaysNeedOne => '保管庫には少なくとも 1 つのリレーが必要です。';
 
   @override
+  String get fileServers => 'ファイルサーバー';
+
+  @override
+  String get fileServersDescription =>
+      'この保管庫に添付されたファイルは、これらの各サーバーにコピーされます。サーバーから見えるのは、暗号化されたファイルだけです。';
+
+  @override
+  String get serverPrivate => '非公開';
+
+  @override
+  String get removeServer => 'このサーバーを削除';
+
+  @override
+  String get keepServer => 'このサーバーを残す';
+
+  @override
+  String get addServer => 'サーバーを追加';
+
+  @override
+  String get serverAddress => 'サーバーのアドレス';
+
+  @override
+  String get serverAddressInvalid => 'サーバーのアドレスではありません。';
+
+  @override
+  String get serverAlreadyListed => 'このサーバーはすでにリストにあります。';
+
+  @override
+  String get serverKeepPrivate => '非公開にする';
+
+  @override
+  String get serverKeepPrivateDescription =>
+      '保管庫のサーバーリスト内で暗号化されます。保管庫がこのサーバーを使っていることは、保管庫の鍵を持つ人にしかわかりません。';
+
+  @override
+  String get serversSaveFailed => 'サーバーを保存できませんでした。';
+
+  @override
+  String get serversWaitForSync => '保管庫の同期が完了すると、サーバーを変更できるようになります。';
+
+  @override
+  String get serverAdded => '新規';
+
+  @override
+  String get serverRemoved => '削除予定';
+
+  @override
+  String get serversNeedOne => '保管庫には少なくとも 1 つのサーバーが必要です。';
+
+  @override
   String get add => '追加';
 
   @override

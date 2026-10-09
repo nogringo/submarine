@@ -332,6 +332,57 @@ class AppLocalizationsIt extends AppLocalizations {
   String get relaysNeedOne => 'La cassaforte ha bisogno di almeno un relay.';
 
   @override
+  String get fileServers => 'Server di file';
+
+  @override
+  String get fileServersDescription =>
+      'I file allegati a questa cassaforte sono copiati su ciascuno di questi server. Vedono solo file cifrati.';
+
+  @override
+  String get serverPrivate => 'Privato';
+
+  @override
+  String get removeServer => 'Rimuovi questo server';
+
+  @override
+  String get keepServer => 'Mantieni questo server';
+
+  @override
+  String get addServer => 'Aggiungi un server';
+
+  @override
+  String get serverAddress => 'Indirizzo del server';
+
+  @override
+  String get serverAddressInvalid => 'Questo non è l\'indirizzo di un server.';
+
+  @override
+  String get serverAlreadyListed => 'Questo server è già nell\'elenco.';
+
+  @override
+  String get serverKeepPrivate => 'Mantieni privato';
+
+  @override
+  String get serverKeepPrivateDescription =>
+      'Cifrato nell\'elenco dei server della cassaforte: solo chi ha la chiave della cassaforte sa che la cassaforte lo usa.';
+
+  @override
+  String get serversSaveFailed => 'Impossibile salvare i server.';
+
+  @override
+  String get serversWaitForSync =>
+      'Potrai modificare i server una volta sincronizzata la cassaforte.';
+
+  @override
+  String get serverAdded => 'Nuovo';
+
+  @override
+  String get serverRemoved => 'Rimosso';
+
+  @override
+  String get serversNeedOne => 'La cassaforte ha bisogno di almeno un server.';
+
+  @override
   String get add => 'Aggiungi';
 
   @override

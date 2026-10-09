@@ -375,6 +375,70 @@
   "@relaysNeedOne": {
     "description": "Under the relays when the draft has none left, which cannot be saved."
   },
+  "fileServers": "File servers",
+  "@fileServers": {
+    "description": "Title of the vault settings section listing the Blossom servers the vault keeps its files on."
+  },
+  "fileServersDescription": "The files attached to this vault are copied to each of these servers. They only see encrypted files.",
+  "@fileServersDescription": {
+    "description": "Under the title of the file servers section of the vault settings."
+  },
+  "serverPrivate": "Private",
+  "@serverPrivate": {
+    "description": "Under a server of the vault settings that is encrypted in the vault's server list."
+  },
+  "removeServer": "Remove this server",
+  "@removeServer": {
+    "description": "Tooltip of the button removing a server from the vault."
+  },
+  "keepServer": "Keep this server",
+  "@keepServer": {
+    "description": "Tooltip of the button undoing the removal of a server from the draft."
+  },
+  "addServer": "Add a server",
+  "@addServer": {
+    "description": "Row of the vault settings opening the dialog that adds a server, and title of that dialog."
+  },
+  "serverAddress": "Server address",
+  "@serverAddress": {
+    "description": "Field of the server to add, an https:// URL."
+  },
+  "serverAddressInvalid": "This is not a server address.",
+  "@serverAddressInvalid": {
+    "description": "Error when the server address is not an http URL."
+  },
+  "serverAlreadyListed": "This server is already in the list.",
+  "@serverAlreadyListed": {
+    "description": "Error when the server to add is already one of the vault."
+  },
+  "serverKeepPrivate": "Keep private",
+  "@serverKeepPrivate": {
+    "description": "Switch of the add server dialog: on, the server is encrypted in the vault's server list."
+  },
+  "serverKeepPrivateDescription": "Encrypted in the vault's server list: only those who have the vault key know the vault uses it.",
+  "@serverKeepPrivateDescription": {
+    "description": "Under the Keep private switch of the add server dialog."
+  },
+  "serversSaveFailed": "The servers could not be saved.",
+  "@serversSaveFailed": {
+    "description": "Error when changing the servers of a vault failed."
+  },
+  "serversWaitForSync": "You can change the servers once the vault has synced.",
+  "@serversWaitForSync": {
+    "description": "Under the servers of a vault that never synced, while they cannot be changed."
+  },
+  "serverAdded": "New",
+  "@serverAdded": {
+    "description": "Status of a server added to the draft of the vault's servers, not saved yet."
+  },
+  "serverRemoved": "Removed",
+  "@serverRemoved": {
+    "description": "Status of a server removed from the draft of the vault's servers, not saved yet."
+  },
+  "serversNeedOne": "The vault needs at least one server.",
+  "@serversNeedOne": {
+    "description": "Under the servers when the draft has none left, which cannot be saved."
+  },
   "add": "Add",
   "@add": {
     "description": "Button confirming the addition of a relay or a custom field."

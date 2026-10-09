@@ -98,6 +98,14 @@ class VaultSession {
     return vault.currentRelayList();
   }
 
+  /// The vault's server list as of the last [sync], or the servers it starts
+  /// on while it has none. Never goes to the relays.
+  Future<ServerList> serverList() async {
+    // Without the newest list, a change would replace it with an older one.
+    await _ensureSynced();
+    return vault.currentServerList();
+  }
+
   Future<void> _ensureSynced() async {
     if (await lastSync() == null) {
       throw CliException(

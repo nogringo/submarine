@@ -342,6 +342,57 @@ class AppLocalizationsRu extends AppLocalizations {
   String get relaysNeedOne => 'Хранилищу нужно хотя бы одно реле.';
 
   @override
+  String get fileServers => 'Файловые серверы';
+
+  @override
+  String get fileServersDescription =>
+      'Файлы, прикреплённые к этому хранилищу, копируются на каждый из этих серверов. Они видят только зашифрованные файлы.';
+
+  @override
+  String get serverPrivate => 'Приватный';
+
+  @override
+  String get removeServer => 'Удалить этот сервер';
+
+  @override
+  String get keepServer => 'Оставить этот сервер';
+
+  @override
+  String get addServer => 'Добавить сервер';
+
+  @override
+  String get serverAddress => 'Адрес сервера';
+
+  @override
+  String get serverAddressInvalid => 'Это не адрес сервера.';
+
+  @override
+  String get serverAlreadyListed => 'Этот сервер уже есть в списке.';
+
+  @override
+  String get serverKeepPrivate => 'Сделать приватным';
+
+  @override
+  String get serverKeepPrivateDescription =>
+      'Зашифровано в списке серверов хранилища: только те, у кого есть его ключ, знают, что хранилище использует этот сервер.';
+
+  @override
+  String get serversSaveFailed => 'Не удалось сохранить серверы.';
+
+  @override
+  String get serversWaitForSync =>
+      'Серверы можно будет изменить после синхронизации хранилища.';
+
+  @override
+  String get serverAdded => 'Новый';
+
+  @override
+  String get serverRemoved => 'Удалён';
+
+  @override
+  String get serversNeedOne => 'Хранилищу нужен хотя бы один сервер.';
+
+  @override
   String get add => 'Добавить';
 
   @override

@@ -27,6 +27,10 @@ const defaultVaultBlossomServers = [
   'https://blossom.yakihonne.com',
   'https://blossom.ditto.pub',
   'https://nostr.download',
+  'https://blossom.dreamith.to',
+  'https://blossom.data.haus',
+  'https://cdn.hzrd149.com',
+  'https://blossom.jumble.social',
 ];
 
 /// The nostr-mail bridge a client gives new email addresses by default.

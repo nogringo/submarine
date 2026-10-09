@@ -57,10 +57,20 @@ dart run bin/submarine.dart relay list --pretty
 
 `server list` shows the Blossom servers the vault keeps its files on, and
 `server add` and `server remove` change its server list (BUD-03). While the
-vault has none, they start from `blossom.nmail.li`, `blossom.yakihonne.com`,
-`blossom.ditto.pub` and `nostr.download`. `--private` encrypts a server in the
-list, for the vault only to see. The list lives on the vault's relays: `sync`
-fetches it with the items, and sends it once changed.
+vault has none, they start from these servers:
+
+- `https://blossom.nmail.li`
+- `https://blossom.yakihonne.com`
+- `https://blossom.ditto.pub`
+- `https://nostr.download`
+- `https://blossom.dreamith.to`
+- `https://blossom.data.haus`
+- `https://cdn.hzrd149.com`
+- `https://blossom.jumble.social`
+
+`--private` encrypts a server in the list, for the vault only to see. The list
+lives on the vault's relays: `sync` fetches it with the items, and sends it
+once changed.
 
 ```sh
 dart run bin/submarine.dart server add files.example.com --private

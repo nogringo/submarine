@@ -12,6 +12,7 @@ import '../generator/generator_sheet.dart';
 import '../items/custom_fields_editor.dart';
 import '../items/item_fields.dart';
 import '../items/item_filter.dart';
+import '../mail/mail_settings.dart';
 import '../router.dart';
 import '../theme/theme.dart';
 import '../vaults/vault_controller.dart';
@@ -314,7 +315,9 @@ class _FormState extends State<_Form> {
 
     String? valueOf(TextEditingController controller) =>
         controller.text.isEmpty ? null : controller.text;
-    final vault = _vaultOf(Vaults.of(context));
+    final vaults = Vaults.of(context);
+    final vault = _vaultOf(vaults);
+    final mail = MailSettings.of(context);
     final cipher = (_cipher ?? Cipher(type: _type, name: name))
       ..name = name
       ..notes = valueOf(_notes)
@@ -349,6 +352,7 @@ class _FormState extends State<_Form> {
         final original? => await vault.updateItem(original, cipher),
         null => await vault.createItem(cipher),
       };
+      await _publishNewMailboxes(vaults, mail, cipher);
       if (!mounted) return;
       _leave(
         vaultPath(
@@ -368,6 +372,35 @@ class _FormState extends State<_Form> {
           _saveError = l10n.itemSaveFailed;
         });
       }
+    }
+  }
+
+  Future<void> _publishNewMailboxes(
+    Vaults vaults,
+    MailSettings mail,
+    Cipher cipher,
+  ) async {
+    final signerFactory = vaults.ndk.config.eventSignerFactory;
+    final known = {
+      if (_original case final original?)
+        for (final (:key, address: _) in mailboxesOf(
+          original.cipher,
+          signerFactory: signerFactory,
+        ))
+          key,
+    };
+    for (final (:key, address: _) in mailboxesOf(
+      cipher,
+      signerFactory: signerFactory,
+    )) {
+      if (known.contains(key)) continue;
+      await publishMailboxRelays(
+        vaults.ndk,
+        key,
+        relays: mail.relays(MailRelayList.address),
+        inboxRelays: mail.relays(MailRelayList.inbox),
+        indexers: vaults.indexers,
+      );
     }
   }
 

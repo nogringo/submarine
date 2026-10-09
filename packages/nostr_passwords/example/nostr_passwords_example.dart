@@ -168,10 +168,29 @@ Future<void> main() async {
     signerFactory: ndk.config.eventSignerFactory,
   );
   print('Sign up with ${mailbox.address}');
-  print(
-    'Its emails arrive on ${defaultMailboxInboxRelays.join(', ')}, '
-    'listed on ${defaultMailboxRelays.join(', ')}',
+  final shop = Cipher(
+    type: CipherType.login,
+    name: 'Shop',
+    login: Login(username: mailbox.address),
+    fields: [
+      Field(name: 'Mailbox key', value: mailbox.key, type: FieldType.hidden),
+    ],
   );
+  await vault.createItem(shop);
+  // Once the item holding it is saved, the mailbox tells the bridge where its
+  // emails go: a NIP-65 list, on the indexers too, then a kind:10050 list.
+  for (final (:key, :address) in mailboxesOf(
+    shop,
+    signerFactory: ndk.config.eventSignerFactory,
+  )) {
+    await publishMailboxRelays(
+      ndk,
+      key,
+      relays: defaultMailboxRelays,
+      inboxRelays: defaultMailboxInboxRelays,
+    );
+    print('$address receives emails');
+  }
 
   // Bitwarden's JSON export, both ways, password protected or not.
   final bitwardenExport = File('bitwarden_export.json');

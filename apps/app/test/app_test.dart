@@ -235,6 +235,19 @@ void main() {
     );
   }
 
+  /// Starts a relay for the email addresses saved from now on, as the default
+  /// ones are out of reach in a test, and returns it.
+  Future<_EmptyRelay> startMailRelay(WidgetTester tester) async {
+    final relay = _EmptyRelay();
+    await startRelays(tester, [relay]);
+    await tester.runAsync(() async {
+      for (final list in MailRelayList.values) {
+        await mail.setRelays(list, [relay.url]);
+      }
+    });
+    return relay;
+  }
+
   Future<void> settle(WidgetTester tester) async {
     for (var i = 0; i < 10; i++) {
       await tester.pump(const Duration(milliseconds: 100));
@@ -1911,6 +1924,7 @@ void main() {
   ) async {
     setScreen(tester, const Size(1280, 1600));
     await open(tester, items: [github]);
+    await startMailRelay(tester);
     await tester.runAsync(() => mail.setBridge('mail.example'));
     await tester.pumpWidget(
       SubmarineApp(
@@ -1967,6 +1981,133 @@ void main() {
         ('Mailbox key', key, FieldType.hidden),
       ],
     );
+    await close(tester);
+  });
+
+  testWidgets('publishes the relays of a new email address with its item', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 1600));
+    await open(tester, items: [github]);
+    final relay = await startMailRelay(tester);
+    // Never reached: the inbox list goes to the relays of the NIP-65 list.
+    await tester.runAsync(
+      () => mail.setRelays(MailRelayList.inbox, ['wss://inbox.example']),
+    );
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+        mail: mail,
+      ),
+    );
+    await settle(tester);
+
+    await tester.tap(find.byTooltip('New item'));
+    await settle(tester);
+    await tester.tap(find.text('Login'));
+    await settle(tester);
+    await tester.enterText(find.widgetWithText(TextField, 'Name'), 'Forum');
+    await tester.tap(find.text('Add a field'));
+    await settle(tester);
+    await tester.tap(find.text('Email address'));
+    await settle(tester);
+    final key = tester
+        .widget<TextField>(find.widgetWithText(TextField, 'Mailbox key'))
+        .controller!
+        .text;
+    final pubkey = const Bip340EventSignerFactory()
+        .create(privateKey: Nip19.decode(key))
+        .getPublicKey();
+    await write(tester, find.text('Save'));
+
+    Future<List<Nip01Event>> lists() =>
+        ndk.config.cache.loadEvents(pubKeys: [pubkey]);
+    final published = (await tester.runAsync(lists))!;
+    expect(
+      {for (final event in published) event.kind: event.tags},
+      {
+        10002: [
+          ['r', relay.url],
+        ],
+        10050: [
+          ['relay', 'wss://inbox.example'],
+        ],
+      },
+    );
+    await pumpUntil(tester, () => relay.received.length == 2);
+    expect({for (final event in relay.received) event['kind']}, {10002, 10050});
+
+    await tester.runAsync(
+      () => ndk.config.cache.removeEvents(pubKeys: [pubkey]),
+    );
+    await tester.tap(find.text('Edit'));
+    await settle(tester);
+    await tester.enterText(find.widgetWithText(TextField, 'Name'), 'Club');
+    await write(tester, find.text('Save'));
+    expect(find.text('Club'), findsWidgets);
+    expect(await tester.runAsync(lists), isEmpty);
+    await close(tester);
+  });
+
+  testWidgets('publishes nothing for an item the signer did not save', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 1600));
+    final signerApp = FakeSignerApp(tester);
+    await open(
+      tester,
+      signer: SignerAppLogin(
+        signerApp.signer.getPublicKey(),
+        package: 'com.greenart7c3.nostrsigner',
+      ),
+    );
+    final relay = await startMailRelay(tester);
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+        mail: mail,
+      ),
+    );
+    await settle(tester);
+
+    await tester.tap(find.byTooltip('New item'));
+    await settle(tester);
+    await tester.tap(find.text('Login'));
+    await settle(tester);
+    await tester.enterText(find.widgetWithText(TextField, 'Name'), 'Forum');
+    await tester.tap(find.text('Add a field'));
+    await settle(tester);
+    await tester.tap(find.text('Email address'));
+    await settle(tester);
+    final key = tester
+        .widget<TextField>(find.widgetWithText(TextField, 'Mailbox key'))
+        .controller!
+        .text;
+    final pubkey = const Bip340EventSignerFactory()
+        .create(privateKey: Nip19.decode(key))
+        .getPublicKey();
+    signerApp.hold = Completer();
+    await write(tester, find.text('Save'));
+    await tester.tap(find.byTooltip('1 request waits for your signer'));
+    await settle(tester);
+    await write(tester, inDialog('Cancel'));
+
+    expect(find.widgetWithText(TextField, 'Mailbox key'), findsOneWidget);
+    expect(
+      await tester.runAsync(
+        () => ndk.config.cache.loadEvents(pubKeys: [pubkey]),
+      ),
+      isEmpty,
+    );
+    expect(relay.received, isEmpty);
     await close(tester);
   });
 

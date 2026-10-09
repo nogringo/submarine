@@ -140,10 +140,9 @@ const defaultMailboxInboxRelays = [
 /// Blossom servers a client looks for a large email on, after those its sender
 /// lists: the defaults of nostr-mail.
 const defaultBlossomServers = [
-  'https://blossom.yakihonne.com',
   'https://blossom.nmail.li',
-  'https://blossom-01.uid.ovh',
-  'https://blossom-02.uid.ovh',
+  'https://blossom.yakihonne.com',
+  'https://blossom.ditto.pub',
   'https://blossom.primal.net',
 ];
 

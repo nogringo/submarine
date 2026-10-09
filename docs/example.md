@@ -169,3 +169,26 @@ The item holds the private key of its mailbox, a key created for this address on
 An item has a mailbox when a hidden field holds an nsec and the item holds the address `<npub of that nsec>@<domain>`: as the username, in a field, or as the identity's `email`. The field's name does not matter. The key ties the item to its mailbox, so the tie survives a Bitwarden export, a translated label or a renamed field. The address is required so that an nsec the user keeps in the vault for their own Nostr account is not taken for a mailbox.
 
 A key per address keeps the addresses of a vault from being tied together, keeps email spam out of the vault's events, and lets the client decrypt emails locally, without the vault's signer.
+
+## Attach a file to a password
+
+The file is encrypted and stored on the vault's Blossom servers. The item holds what it takes to find and decrypt it:
+
+```jsonc
+"data": {
+  // the rest of the item
+  "attachments": [
+    {
+      "id": "<attachment id>",
+      "fileName": "passport.pdf",
+      "key": "<base64 of a 32-byte key>",
+      "size": "482113",
+      "sha256": "<sha256 of the encrypted file>"
+    }
+  ]
+}
+```
+
+The file is encrypted with AES-256-GCM under a key created for this file only, so a random nonce never repeats under a key. The encrypted file is the 12-byte nonce, then the ciphertext, then the 16-byte tag. It is uploaded as `application/octet-stream` to every server of the vault's list. `size` is the size of the encrypted file in bytes, as in Bitwarden and in a Blossom blob descriptor, so `size` and `sha256` both describe the stored file. It is a string, as in Bitwarden. The original file is 28 bytes smaller.
+
+The fields are those Bitwarden stores for an attachment. Its `url` and `sizeName` are not stored: its server computes them in each response. Blossom addresses a file by its hash, so the item holds `sha256` instead of a URL, and a client looks for the file on the vault's servers when it reads it. Adding or removing a server changes no item.

@@ -516,6 +516,45 @@ void main() {
     await close(tester);
   });
 
+  testWidgets('shows the verification code and the seconds it has left', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    await open(
+      tester,
+      items: [
+        Cipher.fromJson(github.toJson())..login!.totp = 'JBSWY3DPEHPK3PXP',
+      ],
+    );
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+        mail: mail,
+      ),
+    );
+    await settle(tester);
+    await tester.tap(find.text('GitHub'));
+    await settle(tester);
+
+    expect(find.text('Verification code'), findsOneWidget);
+    final code = find.textContaining(RegExp(r'^\d{3} \d{3}$'));
+    expect(code, findsOneWidget);
+    final seconds = find.descendant(
+      of: find.ancestor(of: code, matching: find.byType(Row)).first,
+      matching: find.textContaining(RegExp(r'^\d{1,2}$')),
+    );
+    expect(seconds, findsOneWidget);
+    expect(
+      int.parse(tester.widget<Text>(seconds).data!),
+      inInclusiveRange(1, 30),
+    );
+    await close(tester);
+  });
+
   testWidgets('filters the items in a column of their own on a desktop', (
     tester,
   ) async {

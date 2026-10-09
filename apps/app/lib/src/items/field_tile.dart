@@ -1,7 +1,8 @@
-import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -196,21 +197,27 @@ class _TotpTile extends StatefulWidget {
   State<_TotpTile> createState() => _TotpTileState();
 }
 
-class _TotpTileState extends State<_TotpTile> {
-  late final Timer _ticker;
+class _TotpTileState extends State<_TotpTile>
+    with SingleTickerProviderStateMixin {
+  final _clock = ValueNotifier(DateTime.now());
+  late final Ticker _ticker;
 
   @override
   void initState() {
     super.initState();
-    _ticker = Timer.periodic(
-      const Duration(milliseconds: 500),
-      (_) => setState(() {}),
-    );
+    _ticker = createTicker((_) {
+      final second = _clock.value.millisecondsSinceEpoch ~/ 1000;
+      _clock.value = DateTime.now();
+      if (_clock.value.millisecondsSinceEpoch ~/ 1000 != second) {
+        setState(() {});
+      }
+    })..start();
   }
 
   @override
   void dispose() {
-    _ticker.cancel();
+    _ticker.dispose();
+    _clock.dispose();
     super.dispose();
   }
 
@@ -219,7 +226,7 @@ class _TotpTileState extends State<_TotpTile> {
     final palette = context.palette;
     final TotpCode totp;
     try {
-      totp = generateTotp(widget.totpKey);
+      totp = generateTotp(widget.totpKey, time: _clock.value);
     } on FormatException {
       return _TileLayout(
         label: widget.label,
@@ -229,8 +236,6 @@ class _TotpTileState extends State<_TotpTile> {
         ),
       );
     }
-    final period = totp.period.inSeconds;
-    final elapsed = DateTime.now().millisecondsSinceEpoch ~/ 1000 % period;
     return _TileLayout(
       label: widget.label,
       value: Row(
@@ -245,7 +250,7 @@ class _TotpTileState extends State<_TotpTile> {
             ),
           ),
           const SizedBox(width: 12),
-          _TotpRing(remaining: period - elapsed, period: period),
+          _TotpRing(clock: _clock, period: totp.period),
         ],
       ),
       actions: [CopyButton(value: totp.code, sensitive: true)],
@@ -259,30 +264,40 @@ class _TotpTileState extends State<_TotpTile> {
             '${code.substring(code.length ~/ 2)}';
 }
 
-class _TotpRing extends StatelessWidget {
-  const _TotpRing({required this.remaining, required this.period});
+/// Milliseconds before the code shown at [now] expires.
+int _msLeft(DateTime now, Duration period) =>
+    period.inMilliseconds - now.millisecondsSinceEpoch % period.inMilliseconds;
 
-  final int remaining;
-  final int period;
+class _TotpRing extends StatelessWidget {
+  const _TotpRing({required this.clock, required this.period});
+
+  final ValueListenable<DateTime> clock;
+  final Duration period;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
+    final seconds = (_msLeft(clock.value, period) + 999) ~/ 1000;
+    // Bitwarden's threshold, too short to paste the code before it changes.
+    final expiring = seconds <= 7;
     return SizedBox.square(
       dimension: 30,
-      child: CustomPaint(
-        painter: _RingPainter(
-          fraction: remaining / period,
-          track: palette.line,
-          color: palette.signal,
-        ),
-        child: Center(
-          child: Text(
-            '$remaining',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              color: palette.text,
+      child: RepaintBoundary(
+        child: CustomPaint(
+          painter: _RingPainter(
+            clock: clock,
+            period: period,
+            track: palette.line,
+            color: expiring ? palette.danger : palette.signal,
+          ),
+          child: Center(
+            child: Text(
+              '$seconds',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: expiring ? palette.danger : palette.text,
+              ),
             ),
           ),
         ),
@@ -293,17 +308,20 @@ class _TotpRing extends StatelessWidget {
 
 class _RingPainter extends CustomPainter {
   _RingPainter({
-    required this.fraction,
+    required this.clock,
+    required this.period,
     required this.track,
     required this.color,
-  });
+  }) : super(repaint: clock);
 
-  final double fraction;
+  final ValueListenable<DateTime> clock;
+  final Duration period;
   final Color track;
   final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
+    final fraction = _msLeft(clock.value, period) / period.inMilliseconds;
     final rect = (Offset.zero & size).deflate(1.5);
     final stroke = Paint()
       ..style = PaintingStyle.stroke
@@ -322,7 +340,10 @@ class _RingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_RingPainter old) =>
-      old.fraction != fraction || old.track != track || old.color != color;
+      old.clock != clock ||
+      old.period != period ||
+      old.track != track ||
+      old.color != color;
 }
 
 /// The page to open for a login URI, none for what is not a web address.

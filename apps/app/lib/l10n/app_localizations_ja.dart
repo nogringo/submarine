@@ -1335,4 +1335,28 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get removeVaultFailed => '保管庫を削除できませんでした。';
+
+  @override
+  String get emailSettings => 'メール';
+
+  @override
+  String get mailBridge => 'メールブリッジ';
+
+  @override
+  String mailBridgeDescription(String domain) {
+    return '新しいメールアドレスは @$domain で終わります';
+  }
+
+  @override
+  String get changeMailBridge => '変更';
+
+  @override
+  String get mailBridgeDomain => 'ドメイン';
+
+  @override
+  String get mailBridgeExplanation =>
+      '今後作成するメールアドレスはこのドメインで終わります。作成済みのアドレスはそのままです。';
+
+  @override
+  String get mailBridgeInvalid => 'ドメインではありません。';
 }

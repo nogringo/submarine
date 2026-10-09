@@ -1324,4 +1324,27 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get removeVaultFailed => '无法移除密码库。';
+
+  @override
+  String get emailSettings => '邮件';
+
+  @override
+  String get mailBridge => '邮件桥接';
+
+  @override
+  String mailBridgeDescription(String domain) {
+    return '新的邮箱地址以 @$domain 结尾';
+  }
+
+  @override
+  String get changeMailBridge => '更改';
+
+  @override
+  String get mailBridgeDomain => '域名';
+
+  @override
+  String get mailBridgeExplanation => '从现在起创建的邮箱地址以此域名结尾。之前创建的地址保持不变。';
+
+  @override
+  String get mailBridgeInvalid => '这不是一个域名。';
 }

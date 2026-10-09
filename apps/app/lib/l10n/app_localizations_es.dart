@@ -1362,4 +1362,28 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get removeVaultFailed => 'No se pudo quitar la caja fuerte.';
+
+  @override
+  String get emailSettings => 'Correo electrónico';
+
+  @override
+  String get mailBridge => 'Puente de correo';
+
+  @override
+  String mailBridgeDescription(String domain) {
+    return 'Las nuevas direcciones de correo terminan en @$domain';
+  }
+
+  @override
+  String get changeMailBridge => 'Cambiar';
+
+  @override
+  String get mailBridgeDomain => 'Dominio';
+
+  @override
+  String get mailBridgeExplanation =>
+      'Las direcciones de correo creadas a partir de ahora terminan en este dominio. Las creadas antes conservan el suyo.';
+
+  @override
+  String get mailBridgeInvalid => 'Esto no es un dominio.';
 }

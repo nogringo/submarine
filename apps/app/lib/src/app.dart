@@ -7,6 +7,7 @@ import 'clipboard.dart';
 import 'context.dart';
 import 'lock/app_lock.dart';
 import 'lock/lock_screen.dart';
+import 'mail/mail_settings.dart';
 import 'router.dart';
 import 'screen_capture.dart';
 import 'theme/appearance.dart';
@@ -22,6 +23,7 @@ class SubmarineApp extends StatefulWidget {
     required this.appearance,
     required this.clipboard,
     required this.screenCapture,
+    required this.mail,
   });
 
   final Vaults vaults;
@@ -29,6 +31,7 @@ class SubmarineApp extends StatefulWidget {
   final Appearance appearance;
   final AppClipboard clipboard;
   final ScreenCapture screenCapture;
+  final MailSettings mail;
 
   @override
   State<SubmarineApp> createState() => _SubmarineAppState();
@@ -74,30 +77,34 @@ class _SubmarineAppState extends State<SubmarineApp> {
         clipboard: widget.clipboard,
         child: ScreenCaptureScope(
           screenCapture: widget.screenCapture,
-          child: AppearanceScope(
-            appearance: widget.appearance,
-            child: ListenableBuilder(
-              listenable: widget.appearance,
-              builder: (context, _) => MaterialApp.router(
-                title: 'Submarine',
-                debugShowCheckedModeBanner: false,
-                theme: buildTheme(Palette.light, Brightness.light),
-                darkTheme: buildTheme(Palette.dark, Brightness.dark),
-                themeMode: widget.appearance.themeMode,
-                locale: widget.appearance.locale,
-                localizationsDelegates: AppLocalizations.localizationsDelegates,
-                supportedLocales: AppLocalizations.supportedLocales,
-                routerConfig: _router,
-                // Above the navigator, so that dialogs and menus hide too.
-                builder: (context, child) => AnnotatedRegion(
-                  value: systemBarsStyle(Theme.of(context).brightness),
-                  child: LockGate(
-                    lock: widget.lock,
-                    child: SignerRequestsFrame(
-                      onOpen: () => showSignerRequests(
-                        _router.routerDelegate.navigatorKey.currentContext!,
+          child: MailSettingsScope(
+            mail: widget.mail,
+            child: AppearanceScope(
+              appearance: widget.appearance,
+              child: ListenableBuilder(
+                listenable: widget.appearance,
+                builder: (context, _) => MaterialApp.router(
+                  title: 'Submarine',
+                  debugShowCheckedModeBanner: false,
+                  theme: buildTheme(Palette.light, Brightness.light),
+                  darkTheme: buildTheme(Palette.dark, Brightness.dark),
+                  themeMode: widget.appearance.themeMode,
+                  locale: widget.appearance.locale,
+                  localizationsDelegates:
+                      AppLocalizations.localizationsDelegates,
+                  supportedLocales: AppLocalizations.supportedLocales,
+                  routerConfig: _router,
+                  // Above the navigator, so that dialogs and menus hide too.
+                  builder: (context, child) => AnnotatedRegion(
+                    value: systemBarsStyle(Theme.of(context).brightness),
+                    child: LockGate(
+                      lock: widget.lock,
+                      child: SignerRequestsFrame(
+                        onOpen: () => showSignerRequests(
+                          _router.routerDelegate.navigatorKey.currentContext!,
+                        ),
+                        child: child!,
                       ),
-                      child: child!,
                     ),
                   ),
                 ),

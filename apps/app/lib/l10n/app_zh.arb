@@ -376,5 +376,12 @@
   "removeVaultKeyWarning": "请先保存好它的密钥：没有密钥，您将无法再次打开此密码库。",
   "removeVaultUnsent": "{count, plural, =1{1 项更改尚未发送，将会丢失。} other{{count} 项更改尚未发送，将会丢失。}}",
   "removeVaultConfirm": "移除",
-  "removeVaultFailed": "无法移除密码库。"
+  "removeVaultFailed": "无法移除密码库。",
+  "emailSettings": "邮件",
+  "mailBridge": "邮件桥接",
+  "mailBridgeDescription": "新的邮箱地址以 @{domain} 结尾",
+  "changeMailBridge": "更改",
+  "mailBridgeDomain": "域名",
+  "mailBridgeExplanation": "从现在起创建的邮箱地址以此域名结尾。之前创建的地址保持不变。",
+  "mailBridgeInvalid": "这不是一个域名。"
 }

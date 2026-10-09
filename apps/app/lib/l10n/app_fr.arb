@@ -376,5 +376,12 @@
   "removeVaultKeyWarning": "Gardez d'abord sa clé : sans elle, vous ne pourrez pas rouvrir le coffre.",
   "removeVaultUnsent": "{count, plural, =1{1 modification n'est pas encore envoyée et sera perdue.} other{{count} modifications ne sont pas encore envoyées et seront perdues.}}",
   "removeVaultConfirm": "Retirer",
-  "removeVaultFailed": "Le coffre n'a pas pu être retiré."
+  "removeVaultFailed": "Le coffre n'a pas pu être retiré.",
+  "emailSettings": "E-mail",
+  "mailBridge": "Pont e-mail",
+  "mailBridgeDescription": "Les nouvelles adresses e-mail finissent par @{domain}",
+  "changeMailBridge": "Changer",
+  "mailBridgeDomain": "Domaine",
+  "mailBridgeExplanation": "Les adresses e-mail créées à partir de maintenant finissent par ce domaine. Celles créées avant gardent le leur.",
+  "mailBridgeInvalid": "Ce n'est pas un domaine."
 }

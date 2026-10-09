@@ -160,6 +160,9 @@ Future<void> main() async {
     'Sign up as ${generateFirstName()} ${generateLastName()}, '
     'born ${generateBirthDate()}',
   );
+  // The bridge a user picked, as they typed it, or the default one.
+  final bridge = parseMailBridge(' @Mail.Example.com ') ?? defaultMailBridge;
+  print('New email addresses end with @$bridge');
 
   // Bitwarden's JSON export, both ways, password protected or not.
   final bitwardenExport = File('bitwarden_export.json');

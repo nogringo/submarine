@@ -376,5 +376,12 @@
   "removeVaultKeyWarning": "Guarda primero su clave: sin ella, no podrás volver a abrir la caja fuerte.",
   "removeVaultUnsent": "{count, plural, =1{1 cambio aún no se ha enviado y se perderá.} other{{count} cambios aún no se han enviado y se perderán.}}",
   "removeVaultConfirm": "Quitar",
-  "removeVaultFailed": "No se pudo quitar la caja fuerte."
+  "removeVaultFailed": "No se pudo quitar la caja fuerte.",
+  "emailSettings": "Correo electrónico",
+  "mailBridge": "Puente de correo",
+  "mailBridgeDescription": "Las nuevas direcciones de correo terminan en @{domain}",
+  "changeMailBridge": "Cambiar",
+  "mailBridgeDomain": "Dominio",
+  "mailBridgeExplanation": "Las direcciones de correo creadas a partir de ahora terminan en este dominio. Las creadas antes conservan el suyo.",
+  "mailBridgeInvalid": "Esto no es un dominio."
 }

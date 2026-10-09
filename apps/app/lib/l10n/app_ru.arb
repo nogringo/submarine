@@ -376,5 +376,12 @@
   "removeVaultKeyWarning": "Сначала сохраните его ключ: без него вы не сможете снова открыть хранилище.",
   "removeVaultUnsent": "{count, plural, one{{count} изменение ещё не отправлено и будет потеряно.} few{{count} изменения ещё не отправлены и будут потеряны.} many{{count} изменений ещё не отправлены и будут потеряны.} other{{count} изменения ещё не отправлены и будут потеряны.}}",
   "removeVaultConfirm": "Удалить",
-  "removeVaultFailed": "Не удалось удалить хранилище."
+  "removeVaultFailed": "Не удалось удалить хранилище.",
+  "emailSettings": "Почта",
+  "mailBridge": "Почтовый мост",
+  "mailBridgeDescription": "Новые адреса почты заканчиваются на @{domain}",
+  "changeMailBridge": "Изменить",
+  "mailBridgeDomain": "Домен",
+  "mailBridgeExplanation": "Адреса почты, созданные с этого момента, заканчиваются этим доменом. Созданные раньше сохраняют свой.",
+  "mailBridgeInvalid": "Это не домен."
 }

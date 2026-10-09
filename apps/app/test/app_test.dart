@@ -23,6 +23,7 @@ import 'package:submarine/src/generator/generator_settings.dart';
 import 'package:submarine/src/items/field_tile.dart';
 import 'package:submarine/src/lock/app_lock.dart';
 import 'package:submarine/src/lock/device_key.dart';
+import 'package:submarine/src/mail/mail_settings.dart';
 import 'package:submarine/src/screen_capture.dart';
 import 'package:submarine/src/screens/filter_column.dart';
 import 'package:submarine/src/storage_error_app.dart';
@@ -46,6 +47,7 @@ void main() {
   late Appearance appearance;
   late AppClipboard clipboard;
   late ScreenCapture screenCapture;
+  late MailSettings mail;
 
   final github = Cipher(
     type: CipherType.login,
@@ -152,6 +154,7 @@ void main() {
     appearance = await Appearance.load();
     clipboard = await AppClipboard.load();
     screenCapture = await ScreenCapture.load();
+    mail = await MailSettings.load();
   });
 
   /// Starts the app again on the same device, which keeps its storage and its
@@ -196,6 +199,7 @@ void main() {
     appearance.dispose();
     clipboard.dispose();
     screenCapture.dispose();
+    mail.dispose();
     await tester.runAsync(() async {
       await vaults.pauseSync();
       vaults.dispose();
@@ -333,6 +337,11 @@ void main() {
     return copies;
   }
 
+  Finder settingsButton(String title, String label) => find.descendant(
+    of: find.widgetWithText(SettingsTile, title),
+    matching: find.text(label),
+  );
+
   Finder settingsSwitch(String title) => find.descendant(
     of: find.widgetWithText(SettingsTile, title),
     matching: find.byType(Switch),
@@ -376,6 +385,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -429,6 +439,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -464,6 +475,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -512,6 +524,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -579,6 +592,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -617,6 +631,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -647,6 +662,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -710,6 +726,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -743,6 +760,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -811,6 +829,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -885,6 +904,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -983,6 +1003,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -1070,6 +1091,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -1116,6 +1138,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -1172,6 +1195,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -1238,6 +1262,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -1278,6 +1303,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -1315,6 +1341,7 @@ void main() {
           appearance: appearance,
           clipboard: clipboard,
           screenCapture: screenCapture,
+          mail: mail,
         ),
       );
       await settle(tester);
@@ -1352,6 +1379,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -1393,6 +1421,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -1429,6 +1458,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -1465,6 +1495,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -1503,6 +1534,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -1542,6 +1574,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -1593,6 +1626,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -1619,6 +1653,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -1644,6 +1679,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -1678,6 +1714,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -1744,6 +1781,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -1848,6 +1886,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -1879,6 +1918,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -1925,6 +1965,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -1975,6 +2016,7 @@ void main() {
       appearance: appearance,
       clipboard: clipboard,
       screenCapture: screenCapture,
+      mail: mail,
     );
     await tester.pumpWidget(app());
     await settle(tester);
@@ -2067,6 +2109,7 @@ void main() {
       appearance: appearance,
       clipboard: clipboard,
       screenCapture: screenCapture,
+      mail: mail,
     );
 
     await restart(tester);
@@ -2109,6 +2152,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -2209,6 +2253,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -2288,6 +2333,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -2340,6 +2386,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -2414,6 +2461,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -2509,6 +2557,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -2557,6 +2606,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -2603,6 +2653,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -2668,6 +2719,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -2720,6 +2772,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -2778,6 +2831,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -2843,6 +2897,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -2930,6 +2985,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -2977,6 +3033,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -3004,6 +3061,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -3037,6 +3095,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -3081,6 +3140,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -3127,6 +3187,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -3165,6 +3226,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -3211,6 +3273,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -3280,6 +3343,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -3302,6 +3366,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -3344,6 +3409,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -3353,7 +3419,7 @@ void main() {
     final current = find.widgetWithText(TextField, 'Current password');
     const wrong = 'This is not the lock password.';
 
-    await tester.tap(find.text('Change'));
+    await tester.tap(settingsButton('Lock password', 'Change'));
     await settle(tester);
     await tester.enterText(current, 'correct horse batter');
     await tester.enterText(
@@ -3412,6 +3478,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -3453,6 +3520,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -3481,6 +3549,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -3512,6 +3581,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -3554,11 +3624,14 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
 
     await tester.tap(find.byTooltip('Settings'));
+    await settle(tester);
+    await tester.ensureVisible(find.byTooltip('Language'));
     await settle(tester);
     await tester.tap(find.byTooltip('Language'));
     await settle(tester);
@@ -3585,6 +3658,62 @@ void main() {
     await close(tester);
   });
 
+  testWidgets('changes the email bridge in the settings, and keeps it', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(390, 844));
+    await open(tester, items: [github]);
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+        mail: mail,
+      ),
+    );
+    await settle(tester);
+
+    await tester.tap(find.byTooltip('Settings'));
+    await settle(tester);
+    await tester.ensureVisible(find.text('Email bridge'));
+    await settle(tester);
+    expect(find.text('New email addresses end with @uid.ovh'), findsOneWidget);
+
+    await tester.tap(settingsButton('Email bridge', 'Change'));
+    await settle(tester);
+    await tester.enterText(find.byType(TextField), 'https://mail.example');
+    await tester.tap(find.text('Save'));
+    await settle(tester);
+    expect(find.text('This is not a domain.'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), ' @Mail.Example ');
+    await tester.tap(find.text('Save'));
+    await settle(tester);
+    expect(
+      find.text('New email addresses end with @mail.example'),
+      findsOneWidget,
+    );
+    await tester.runAsync(() async {
+      expect((await MailSettings.load()).bridge, 'mail.example');
+    });
+
+    await tester.tap(settingsButton('Email bridge', 'Change'));
+    await settle(tester);
+    await tester.enterText(find.byType(TextField), '');
+    await tester.tap(find.text('Save'));
+    await settle(tester);
+    expect(find.text('New email addresses end with @uid.ovh'), findsOneWidget);
+    await tester.runAsync(() async {
+      expect(
+        await const FlutterSecureStorage().read(key: 'mailBridge'),
+        isNull,
+      );
+    });
+    await close(tester);
+  });
+
   testWidgets('blocks screen capture until the settings allow it', (
     tester,
   ) async {
@@ -3605,6 +3734,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -3652,6 +3782,7 @@ void main() {
           appearance: appearance,
           clipboard: clipboard,
           screenCapture: screenCapture,
+          mail: mail,
         ),
       );
       await settle(tester);
@@ -3710,6 +3841,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -3752,6 +3884,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -3780,6 +3913,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -3877,6 +4011,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);
@@ -4068,6 +4203,7 @@ void main() {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
     await settle(tester);

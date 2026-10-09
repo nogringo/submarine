@@ -1392,4 +1392,28 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get removeVaultFailed => 'Не удалось удалить хранилище.';
+
+  @override
+  String get emailSettings => 'Почта';
+
+  @override
+  String get mailBridge => 'Почтовый мост';
+
+  @override
+  String mailBridgeDescription(String domain) {
+    return 'Новые адреса почты заканчиваются на @$domain';
+  }
+
+  @override
+  String get changeMailBridge => 'Изменить';
+
+  @override
+  String get mailBridgeDomain => 'Домен';
+
+  @override
+  String get mailBridgeExplanation =>
+      'Адреса почты, созданные с этого момента, заканчиваются этим доменом. Созданные раньше сохраняют свой.';
+
+  @override
+  String get mailBridgeInvalid => 'Это не домен.';
 }

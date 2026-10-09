@@ -376,5 +376,12 @@
   "removeVaultKeyWarning": "Conserva prima la sua chiave: senza di essa non potrai riaprire la cassaforte.",
   "removeVaultUnsent": "{count, plural, =1{1 modifica non è ancora stata inviata e andrà persa.} other{{count} modifiche non sono ancora state inviate e andranno perse.}}",
   "removeVaultConfirm": "Rimuovi",
-  "removeVaultFailed": "Impossibile rimuovere la cassaforte."
+  "removeVaultFailed": "Impossibile rimuovere la cassaforte.",
+  "emailSettings": "Email",
+  "mailBridge": "Ponte email",
+  "mailBridgeDescription": "I nuovi indirizzi email finiscono con @{domain}",
+  "changeMailBridge": "Cambia",
+  "mailBridgeDomain": "Dominio",
+  "mailBridgeExplanation": "Gli indirizzi email creati da ora in poi finiscono con questo dominio. Quelli creati prima mantengono il loro.",
+  "mailBridgeInvalid": "Questo non è un dominio."
 }

@@ -1694,5 +1694,39 @@
   "removeVaultFailed": "The vault could not be removed.",
   "@removeVaultFailed": {
     "description": "Error under the row removing the vault, when this device could not save its vaults."
+  },
+  "emailSettings": "Email",
+  "@emailSettings": {
+    "description": "Section of the settings about the email addresses the app gives items."
+  },
+  "mailBridge": "Email bridge",
+  "@mailBridge": {
+    "description": "Setting, and title of its dialog, choosing the bridge: the service at a domain that receives the email sent to an address and passes it on to Nostr."
+  },
+  "mailBridgeDescription": "New email addresses end with @{domain}",
+  "@mailBridgeDescription": {
+    "description": "Under the email bridge setting: the domain new addresses get.",
+    "placeholders": {
+      "domain": {
+        "type": "String",
+        "example": "uid.ovh"
+      }
+    }
+  },
+  "changeMailBridge": "Change",
+  "@changeMailBridge": {
+    "description": "Button of the email bridge setting opening its dialog."
+  },
+  "mailBridgeDomain": "Domain",
+  "@mailBridgeDomain": {
+    "description": "Label of the field of the bridge's domain, such as uid.ovh."
+  },
+  "mailBridgeExplanation": "Email addresses created from now on end with this domain. Those created before keep theirs.",
+  "@mailBridgeExplanation": {
+    "description": "In the email bridge dialog: changing it does not change the addresses already created."
+  },
+  "mailBridgeInvalid": "This is not a domain.",
+  "@mailBridgeInvalid": {
+    "description": "Error under the bridge's domain when it is not a domain name."
   }
 }

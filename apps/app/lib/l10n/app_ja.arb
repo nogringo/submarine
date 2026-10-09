@@ -376,5 +376,12 @@
   "removeVaultKeyWarning": "先に保管庫の鍵を保存してください。鍵がないと、保管庫をもう一度開けません。",
   "removeVaultUnsent": "{count, plural, =1{未送信の変更が 1 件あり、失われます。} other{未送信の変更が {count} 件あり、失われます。}}",
   "removeVaultConfirm": "削除",
-  "removeVaultFailed": "保管庫を削除できませんでした。"
+  "removeVaultFailed": "保管庫を削除できませんでした。",
+  "emailSettings": "メール",
+  "mailBridge": "メールブリッジ",
+  "mailBridgeDescription": "新しいメールアドレスは @{domain} で終わります",
+  "changeMailBridge": "変更",
+  "mailBridgeDomain": "ドメイン",
+  "mailBridgeExplanation": "今後作成するメールアドレスはこのドメインで終わります。作成済みのアドレスはそのままです。",
+  "mailBridgeInvalid": "ドメインではありません。"
 }

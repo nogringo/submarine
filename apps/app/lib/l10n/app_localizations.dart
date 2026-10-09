@@ -2376,6 +2376,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The vault could not be removed.'**
   String get removeVaultFailed;
+
+  /// Section of the settings about the email addresses the app gives items.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get emailSettings;
+
+  /// Setting, and title of its dialog, choosing the bridge: the service at a domain that receives the email sent to an address and passes it on to Nostr.
+  ///
+  /// In en, this message translates to:
+  /// **'Email bridge'**
+  String get mailBridge;
+
+  /// Under the email bridge setting: the domain new addresses get.
+  ///
+  /// In en, this message translates to:
+  /// **'New email addresses end with @{domain}'**
+  String mailBridgeDescription(String domain);
+
+  /// Button of the email bridge setting opening its dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get changeMailBridge;
+
+  /// Label of the field of the bridge's domain, such as uid.ovh.
+  ///
+  /// In en, this message translates to:
+  /// **'Domain'**
+  String get mailBridgeDomain;
+
+  /// In the email bridge dialog: changing it does not change the addresses already created.
+  ///
+  /// In en, this message translates to:
+  /// **'Email addresses created from now on end with this domain. Those created before keep theirs.'**
+  String get mailBridgeExplanation;
+
+  /// Error under the bridge's domain when it is not a domain name.
+  ///
+  /// In en, this message translates to:
+  /// **'This is not a domain.'**
+  String get mailBridgeInvalid;
 }
 
 class _AppLocalizationsDelegate

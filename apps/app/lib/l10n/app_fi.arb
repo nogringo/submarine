@@ -376,5 +376,12 @@
   "removeVaultKeyWarning": "Tallenna ensin sen avain: ilman sitä et voi avata holvia uudelleen.",
   "removeVaultUnsent": "{count, plural, =1{1 muutos on vielä lähettämättä ja menetetään.} other{{count} muutosta on vielä lähettämättä ja menetetään.}}",
   "removeVaultConfirm": "Poista",
-  "removeVaultFailed": "Holvia ei voitu poistaa."
+  "removeVaultFailed": "Holvia ei voitu poistaa.",
+  "emailSettings": "Sähköposti",
+  "mailBridge": "Sähköpostisilta",
+  "mailBridgeDescription": "Uudet sähköpostiosoitteet päättyvät @{domain}",
+  "changeMailBridge": "Vaihda",
+  "mailBridgeDomain": "Verkkotunnus",
+  "mailBridgeExplanation": "Tästä lähtien luodut sähköpostiosoitteet päättyvät tähän verkkotunnukseen. Aiemmin luodut säilyttävät omansa.",
+  "mailBridgeInvalid": "Tämä ei ole verkkotunnus."
 }

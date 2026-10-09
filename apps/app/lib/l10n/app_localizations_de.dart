@@ -1361,4 +1361,28 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get removeVaultFailed => 'Der Tresor konnte nicht entfernt werden.';
+
+  @override
+  String get emailSettings => 'E-Mail';
+
+  @override
+  String get mailBridge => 'E-Mail-Bridge';
+
+  @override
+  String mailBridgeDescription(String domain) {
+    return 'Neue E-Mail-Adressen enden auf @$domain';
+  }
+
+  @override
+  String get changeMailBridge => 'Ändern';
+
+  @override
+  String get mailBridgeDomain => 'Domain';
+
+  @override
+  String get mailBridgeExplanation =>
+      'Ab jetzt erstellte E-Mail-Adressen enden auf diese Domain. Bereits erstellte behalten ihre.';
+
+  @override
+  String get mailBridgeInvalid => 'Das ist keine Domain.';
 }

@@ -376,5 +376,12 @@
   "removeVaultKeyWarning": "Guarde a chave dele antes: sem ela, você não poderá abrir o cofre de novo.",
   "removeVaultUnsent": "{count, plural, one{{count} alteração ainda não foi enviada e será perdida.} many{{count} de alterações ainda não foram enviadas e serão perdidas.} other{{count} alterações ainda não foram enviadas e serão perdidas.}}",
   "removeVaultConfirm": "Remover",
-  "removeVaultFailed": "Não foi possível remover o cofre."
+  "removeVaultFailed": "Não foi possível remover o cofre.",
+  "emailSettings": "E-mail",
+  "mailBridge": "Ponte de e-mail",
+  "mailBridgeDescription": "Os novos endereços de e-mail terminam em @{domain}",
+  "changeMailBridge": "Alterar",
+  "mailBridgeDomain": "Domínio",
+  "mailBridgeExplanation": "Os endereços de e-mail criados a partir de agora terminam neste domínio. Os criados antes mantêm o seu.",
+  "mailBridgeInvalid": "Isso não é um domínio."
 }

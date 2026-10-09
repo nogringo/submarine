@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:ndk/ndk.dart' show Nip19;
+import 'package:nostr_passwords/nostr_passwords.dart'
+    show defaultMailBridge, parseMailBridge;
 
 import '../clipboard.dart';
 import '../context.dart';
@@ -9,12 +13,14 @@ import '../items/field_tile.dart';
 import '../lock/app_lock.dart';
 import '../lock/lock_password_dialog.dart';
 import '../lock/lock_screen.dart';
+import '../mail/mail_settings.dart';
 import '../router.dart';
 import '../screen_capture.dart';
 import '../theme/appearance.dart';
 import '../theme/theme.dart';
 import '../vaults/vault_controller.dart';
 import '../vaults/vaults.dart';
+import '../widgets/dialog_buttons.dart';
 import '../widgets/settings_tile.dart';
 import '../widgets/vault_avatar.dart';
 import 'add_vault.dart';
@@ -104,6 +110,10 @@ class _Settings extends StatelessWidget {
                       ),
                   ],
                 ),
+              ),
+              SettingsSection(
+                title: l10n.emailSettings,
+                child: const FieldCard(children: [_MailBridgeTile()]),
               ),
               SettingsSection(
                 title: l10n.appearance,
@@ -235,6 +245,113 @@ class _BiometricsTileState extends State<_BiometricsTile> {
           ),
         );
       },
+    );
+  }
+}
+
+class _MailBridgeTile extends StatelessWidget {
+  const _MailBridgeTile();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final mail = MailSettings.of(context);
+    return SettingsTile(
+      title: Text(l10n.mailBridge),
+      subtitle: Text(l10n.mailBridgeDescription(mail.bridge)),
+      trailing: TextButton(
+        onPressed: () => showDialog<void>(
+          context: context,
+          builder: (context) => _MailBridgeDialog(mail: mail),
+        ),
+        child: Text(l10n.changeMailBridge),
+      ),
+    );
+  }
+}
+
+class _MailBridgeDialog extends StatefulWidget {
+  const _MailBridgeDialog({required this.mail});
+
+  final MailSettings mail;
+
+  @override
+  State<_MailBridgeDialog> createState() => _MailBridgeDialogState();
+}
+
+class _MailBridgeDialogState extends State<_MailBridgeDialog> {
+  late final _domain = TextEditingController(text: widget.mail.bridge);
+  String? _error;
+
+  @override
+  void dispose() {
+    _domain.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final text = _domain.text;
+    // Left empty for the default bridge, which the field shows as its hint.
+    final bridge = text.trim().isEmpty
+        ? defaultMailBridge
+        : parseMailBridge(text);
+    if (bridge == null) {
+      setState(() => _error = context.l10n.mailBridgeInvalid);
+      return;
+    }
+    unawaited(widget.mail.setBridge(bridge));
+    Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Dialog(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 440),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                l10n.mailBridge,
+                style: Theme.of(context).dialogTheme.titleTextStyle,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l10n.mailBridgeExplanation,
+                style: TextStyle(fontSize: 13, color: context.palette.muted),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: _domain,
+                autofocus: true,
+                autocorrect: false,
+                enableSuggestions: false,
+                keyboardType: TextInputType.url,
+                onSubmitted: (_) => _submit(),
+                decoration: InputDecoration(
+                  labelText: l10n.mailBridgeDomain,
+                  hintText: defaultMailBridge,
+                  errorText: _error,
+                ),
+              ),
+              const SizedBox(height: 24),
+              DialogButtons(
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(l10n.cancel),
+                  ),
+                  FilledButton(onPressed: _submit, child: Text(l10n.save)),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

@@ -1357,4 +1357,28 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get removeVaultFailed => 'Holvia ei voitu poistaa.';
+
+  @override
+  String get emailSettings => 'Sähköposti';
+
+  @override
+  String get mailBridge => 'Sähköpostisilta';
+
+  @override
+  String mailBridgeDescription(String domain) {
+    return 'Uudet sähköpostiosoitteet päättyvät @$domain';
+  }
+
+  @override
+  String get changeMailBridge => 'Vaihda';
+
+  @override
+  String get mailBridgeDomain => 'Verkkotunnus';
+
+  @override
+  String get mailBridgeExplanation =>
+      'Tästä lähtien luodut sähköpostiosoitteet päättyvät tähän verkkotunnukseen. Aiemmin luodut säilyttävät omansa.';
+
+  @override
+  String get mailBridgeInvalid => 'Tämä ei ole verkkotunnus.';
 }

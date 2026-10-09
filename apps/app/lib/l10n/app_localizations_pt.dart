@@ -1361,6 +1361,30 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get removeVaultFailed => 'Não foi possível remover o cofre.';
+
+  @override
+  String get emailSettings => 'E-mail';
+
+  @override
+  String get mailBridge => 'Ponte de e-mail';
+
+  @override
+  String mailBridgeDescription(String domain) {
+    return 'Os novos endereços de e-mail terminam em @$domain';
+  }
+
+  @override
+  String get changeMailBridge => 'Alterar';
+
+  @override
+  String get mailBridgeDomain => 'Domínio';
+
+  @override
+  String get mailBridgeExplanation =>
+      'Os endereços de e-mail criados a partir de agora terminam neste domínio. Os criados antes mantêm o seu.';
+
+  @override
+  String get mailBridgeInvalid => 'Isto não é um domínio.';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -2734,4 +2758,28 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get removeVaultFailed => 'Não foi possível remover o cofre.';
+
+  @override
+  String get emailSettings => 'E-mail';
+
+  @override
+  String get mailBridge => 'Ponte de e-mail';
+
+  @override
+  String mailBridgeDescription(String domain) {
+    return 'Os novos endereços de e-mail terminam em @$domain';
+  }
+
+  @override
+  String get changeMailBridge => 'Alterar';
+
+  @override
+  String get mailBridgeDomain => 'Domínio';
+
+  @override
+  String get mailBridgeExplanation =>
+      'Os endereços de e-mail criados a partir de agora terminam neste domínio. Os criados antes mantêm o seu.';
+
+  @override
+  String get mailBridgeInvalid => 'Isso não é um domínio.';
 }

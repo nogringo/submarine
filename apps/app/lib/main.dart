@@ -11,6 +11,7 @@ import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
 import 'src/app.dart';
 import 'src/clipboard.dart';
 import 'src/lock/app_lock.dart';
+import 'src/mail/mail_settings.dart';
 import 'src/screen_capture.dart';
 import 'src/storage_error_app.dart';
 import 'src/theme/appearance.dart';
@@ -56,6 +57,7 @@ Future<void> _start(Ndk ndk, SyncEngine engine, Database database) async {
     final appearance = await Appearance.load();
     final clipboard = await AppClipboard.load();
     final screenCapture = await ScreenCapture.load();
+    final mail = await MailSettings.load();
     runApp(
       SubmarineApp(
         vaults: vaults,
@@ -63,6 +65,7 @@ Future<void> _start(Ndk ndk, SyncEngine engine, Database database) async {
         appearance: appearance,
         clipboard: clipboard,
         screenCapture: screenCapture,
+        mail: mail,
       ),
     );
   } on PlatformException catch (error) {

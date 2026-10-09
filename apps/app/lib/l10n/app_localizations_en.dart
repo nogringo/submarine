@@ -1354,4 +1354,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get removeVaultFailed => 'The vault could not be removed.';
+
+  @override
+  String get emailSettings => 'Email';
+
+  @override
+  String get mailBridge => 'Email bridge';
+
+  @override
+  String mailBridgeDescription(String domain) {
+    return 'New email addresses end with @$domain';
+  }
+
+  @override
+  String get changeMailBridge => 'Change';
+
+  @override
+  String get mailBridgeDomain => 'Domain';
+
+  @override
+  String get mailBridgeExplanation =>
+      'Email addresses created from now on end with this domain. Those created before keep theirs.';
+
+  @override
+  String get mailBridgeInvalid => 'This is not a domain.';
 }

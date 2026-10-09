@@ -376,5 +376,12 @@
   "removeVaultKeyWarning": "Sichere zuerst den Tresorschlüssel: Ohne ihn kannst du den Tresor nicht wieder öffnen.",
   "removeVaultUnsent": "{count, plural, =1{1 Änderung ist noch nicht gesendet und geht verloren.} other{{count} Änderungen sind noch nicht gesendet und gehen verloren.}}",
   "removeVaultConfirm": "Entfernen",
-  "removeVaultFailed": "Der Tresor konnte nicht entfernt werden."
+  "removeVaultFailed": "Der Tresor konnte nicht entfernt werden.",
+  "emailSettings": "E-Mail",
+  "mailBridge": "E-Mail-Bridge",
+  "mailBridgeDescription": "Neue E-Mail-Adressen enden auf @{domain}",
+  "changeMailBridge": "Ändern",
+  "mailBridgeDomain": "Domain",
+  "mailBridgeExplanation": "Ab jetzt erstellte E-Mail-Adressen enden auf diese Domain. Bereits erstellte behalten ihre.",
+  "mailBridgeInvalid": "Das ist keine Domain."
 }

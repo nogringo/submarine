@@ -1364,4 +1364,28 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get removeVaultFailed => 'Impossibile rimuovere la cassaforte.';
+
+  @override
+  String get emailSettings => 'Email';
+
+  @override
+  String get mailBridge => 'Ponte email';
+
+  @override
+  String mailBridgeDescription(String domain) {
+    return 'I nuovi indirizzi email finiscono con @$domain';
+  }
+
+  @override
+  String get changeMailBridge => 'Cambia';
+
+  @override
+  String get mailBridgeDomain => 'Dominio';
+
+  @override
+  String get mailBridgeExplanation =>
+      'Gli indirizzi email creati da ora in poi finiscono con questo dominio. Quelli creati prima mantengono il loro.';
+
+  @override
+  String get mailBridgeInvalid => 'Questo non è un dominio.';
 }

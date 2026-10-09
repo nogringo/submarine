@@ -148,3 +148,24 @@ A NIP-09 deletion request for each gift wrap of the item, one per version:
 It names the gift wrap, the only event relays hold. The gift wrap is signed by a one-time key, but NIP-59 has relays delete a `kind:1059` whose `p` tag matches the signer of the deletion request, here the vault. One request per gift wrap, with a random `created_at` as for gift wraps, keeps the requests from tying the versions of an item together.
 
 Other devices fetch the vault's `kind:5` events when they sync, and drop the gift wraps they name from their cache.
+
+## Give a password an email address
+
+The item holds the private key of its mailbox, a key created for this address only, in a hidden field. The address is that key's npub at a [nostr-mail](https://github.com/nogringo/nostr-mail) bridge:
+
+```jsonc
+"data": {
+  // the rest of the item
+  "login": {
+    // the rest of the login
+    "username": "npub1mbx...@bridge.example"
+  },
+  "fields": [
+    { "name": "Mailbox key", "value": "nsec1...", "type": 1, "linkedId": null }
+  ]
+}
+```
+
+An item has a mailbox when a hidden field holds an nsec and the item holds the address `<npub of that nsec>@<domain>`: as the username, in a field, or as the identity's `email`. The field's name does not matter. The key ties the item to its mailbox, so the tie survives a Bitwarden export, a translated label or a renamed field. The address is required so that an nsec the user keeps in the vault for their own Nostr account is not taken for a mailbox.
+
+A key per address keeps the addresses of a vault from being tied together, keeps email spam out of the vault's events, and lets the client decrypt emails locally, without the vault's signer.

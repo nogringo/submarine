@@ -1416,4 +1416,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get mailBridgeInvalid => 'Это не домен.';
+
+  @override
+  String get emailAddressField => 'Адрес почты';
+
+  @override
+  String get mailboxKey => 'Ключ почтового ящика';
 }

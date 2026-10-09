@@ -383,5 +383,7 @@
   "changeMailBridge": "変更",
   "mailBridgeDomain": "ドメイン",
   "mailBridgeExplanation": "今後作成するメールアドレスはこのドメインで終わります。作成済みのアドレスはそのままです。",
-  "mailBridgeInvalid": "ドメインではありません。"
+  "mailBridgeInvalid": "ドメインではありません。",
+  "emailAddressField": "メールアドレス",
+  "mailboxKey": "メールボックスの鍵"
 }

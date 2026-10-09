@@ -1381,4 +1381,10 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get mailBridgeInvalid => 'Tämä ei ole verkkotunnus.';
+
+  @override
+  String get emailAddressField => 'Sähköpostiosoite';
+
+  @override
+  String get mailboxKey => 'Postilaatikon avain';
 }

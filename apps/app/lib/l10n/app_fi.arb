@@ -383,5 +383,7 @@
   "changeMailBridge": "Vaihda",
   "mailBridgeDomain": "Verkkotunnus",
   "mailBridgeExplanation": "Tästä lähtien luodut sähköpostiosoitteet päättyvät tähän verkkotunnukseen. Aiemmin luodut säilyttävät omansa.",
-  "mailBridgeInvalid": "Tämä ei ole verkkotunnus."
+  "mailBridgeInvalid": "Tämä ei ole verkkotunnus.",
+  "emailAddressField": "Sähköpostiosoite",
+  "mailboxKey": "Postilaatikon avain"
 }

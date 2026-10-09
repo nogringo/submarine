@@ -1359,4 +1359,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get mailBridgeInvalid => 'ドメインではありません。';
+
+  @override
+  String get emailAddressField => 'メールアドレス';
+
+  @override
+  String get mailboxKey => 'メールボックスの鍵';
 }

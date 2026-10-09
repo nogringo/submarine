@@ -162,7 +162,12 @@ Future<void> main() async {
   );
   // The bridge a user picked, as they typed it, or the default one.
   final bridge = parseMailBridge(' @Mail.Example.com ') ?? defaultMailBridge;
-  print('New email addresses end with @$bridge');
+  // A key for this address alone, kept in a hidden field next to it.
+  final mailbox = generateMailbox(
+    bridge,
+    signerFactory: ndk.config.eventSignerFactory,
+  );
+  print('Sign up with ${mailbox.address}');
 
   // Bitwarden's JSON export, both ways, password protected or not.
   final bitwardenExport = File('bitwarden_export.json');

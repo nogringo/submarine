@@ -1388,4 +1388,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get mailBridgeInvalid => 'Ce n\'est pas un domaine.';
+
+  @override
+  String get emailAddressField => 'Adresse e-mail';
+
+  @override
+  String get mailboxKey => 'Clé de la boîte mail';
 }

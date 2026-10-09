@@ -17,6 +17,7 @@ export 'src/envelope.dart';
 export 'src/generator.dart';
 export 'src/item.dart';
 export 'src/mail_bridge.dart';
+export 'src/mailbox.dart';
 export 'src/relay_list.dart';
 export 'src/search.dart';
 export 'src/totp.dart';

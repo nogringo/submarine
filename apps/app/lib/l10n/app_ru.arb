@@ -383,5 +383,7 @@
   "changeMailBridge": "Изменить",
   "mailBridgeDomain": "Домен",
   "mailBridgeExplanation": "Адреса почты, созданные с этого момента, заканчиваются этим доменом. Созданные раньше сохраняют свой.",
-  "mailBridgeInvalid": "Это не домен."
+  "mailBridgeInvalid": "Это не домен.",
+  "emailAddressField": "Адрес почты",
+  "mailboxKey": "Ключ почтового ящика"
 }

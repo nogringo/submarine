@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
 
 import '../context.dart';
+import '../mail/mail_settings.dart';
 import '../theme/theme.dart';
+import '../vaults/vaults.dart';
 import 'item_fields.dart';
 
 /// A custom field in the item form, with the [field] it edits, whose other
@@ -51,7 +53,8 @@ class EditedField {
 
 /// The custom fields of an item of [type], as Bitwarden's form edits them:
 /// added with a type and a label, renamed, deleted and reordered. A login can
-/// also get a made-up first name, last name or birth date.
+/// also get a made-up first name, last name or birth date, and an email
+/// address of its own.
 class CustomFieldsEditor extends StatelessWidget {
   const CustomFieldsEditor({
     super.key,
@@ -104,10 +107,12 @@ class CustomFieldsEditor extends StatelessWidget {
         const PopupMenuDivider(),
         for (final (index, (label, _)) in madeUp.indexed)
           item(index, Icons.casino_outlined, label),
+        item(-2, Icons.alternate_email_rounded, l10n.emailAddressField),
       ],
     );
     if (choice == null || !button.mounted) return;
-    if (choice < 0) return _addCustom(button);
+    if (choice == -1) return _addCustom(button);
+    if (choice == -2) return _addMailbox(button);
     final (name, generate) = madeUp[choice];
     fields.add(
       EditedField(
@@ -115,6 +120,27 @@ class CustomFieldsEditor extends StatelessWidget {
         generate: generate,
       ),
     );
+    onChanged();
+  }
+
+  /// Adds an address at the bridge of the settings, and the key of its mailbox
+  /// in a hidden field.
+  void _addMailbox(BuildContext context) {
+    final l10n = context.l10n;
+    final mailbox = generateMailbox(
+      MailSettings.of(context).bridge,
+      signerFactory: Vaults.of(context).ndk.config.eventSignerFactory,
+    );
+    fields.addAll([
+      EditedField(Field(name: l10n.email, value: mailbox.address)),
+      EditedField(
+        Field(
+          name: l10n.mailboxKey,
+          value: mailbox.key,
+          type: FieldType.hidden,
+        ),
+      ),
+    ]);
     onChanged();
   }
 

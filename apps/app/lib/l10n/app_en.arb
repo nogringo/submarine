@@ -1728,5 +1728,13 @@
   "mailBridgeInvalid": "This is not a domain.",
   "@mailBridgeInvalid": {
     "description": "Error under the bridge's domain when it is not a domain name."
+  },
+  "emailAddressField": "Email address",
+  "@emailAddressField": {
+    "description": "Choice of the menu adding a field to a login: an email address of its own at the bridge of the settings, whose key goes in a hidden field next to it."
+  },
+  "mailboxKey": "Mailbox key",
+  "@mailboxKey": {
+    "description": "Label of the hidden field holding the private key of the mailbox of an email address."
   }
 }

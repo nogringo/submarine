@@ -383,5 +383,7 @@
   "changeMailBridge": "更改",
   "mailBridgeDomain": "域名",
   "mailBridgeExplanation": "从现在起创建的邮箱地址以此域名结尾。之前创建的地址保持不变。",
-  "mailBridgeInvalid": "这不是一个域名。"
+  "mailBridgeInvalid": "这不是一个域名。",
+  "emailAddressField": "邮箱地址",
+  "mailboxKey": "邮箱密钥"
 }

@@ -1385,6 +1385,12 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get mailBridgeInvalid => 'Isto não é um domínio.';
+
+  @override
+  String get emailAddressField => 'Endereço de e-mail';
+
+  @override
+  String get mailboxKey => 'Chave da caixa de correio';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -2782,4 +2788,10 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get mailBridgeInvalid => 'Isso não é um domínio.';
+
+  @override
+  String get emailAddressField => 'Endereço de e-mail';
+
+  @override
+  String get mailboxKey => 'Chave da caixa de e-mail';
 }

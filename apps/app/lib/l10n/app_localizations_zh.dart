@@ -1347,4 +1347,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get mailBridgeInvalid => '这不是一个域名。';
+
+  @override
+  String get emailAddressField => '邮箱地址';
+
+  @override
+  String get mailboxKey => '邮箱密钥';
 }

@@ -2418,6 +2418,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This is not a domain.'**
   String get mailBridgeInvalid;
+
+  /// Choice of the menu adding a field to a login: an email address of its own at the bridge of the settings, whose key goes in a hidden field next to it.
+  ///
+  /// In en, this message translates to:
+  /// **'Email address'**
+  String get emailAddressField;
+
+  /// Label of the hidden field holding the private key of the mailbox of an email address.
+  ///
+  /// In en, this message translates to:
+  /// **'Mailbox key'**
+  String get mailboxKey;
 }
 
 class _AppLocalizationsDelegate

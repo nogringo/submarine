@@ -383,5 +383,7 @@
   "changeMailBridge": "Changer",
   "mailBridgeDomain": "Domaine",
   "mailBridgeExplanation": "Les adresses e-mail créées à partir de maintenant finissent par ce domaine. Celles créées avant gardent le leur.",
-  "mailBridgeInvalid": "Ce n'est pas un domaine."
+  "mailBridgeInvalid": "Ce n'est pas un domaine.",
+  "emailAddressField": "Adresse e-mail",
+  "mailboxKey": "Clé de la boîte mail"
 }

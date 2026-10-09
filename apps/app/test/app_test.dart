@@ -1906,6 +1906,70 @@ void main() {
         widget is SelectableText && (widget.data?.startsWith('nsec1') ?? false),
   );
 
+  testWidgets('gives a login an email address at the bridge of the settings', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 1600));
+    await open(tester, items: [github]);
+    await tester.runAsync(() => mail.setBridge('mail.example'));
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+        mail: mail,
+      ),
+    );
+    await settle(tester);
+    String textOf(String label) => tester
+        .widget<TextField>(find.widgetWithText(TextField, label))
+        .controller!
+        .text;
+    String addressOf(String nsec) {
+      final signer = const Bip340EventSignerFactory().create(
+        privateKey: Nip19.decode(nsec),
+      );
+      return '${Nip19.encodePubKey(signer.getPublicKey())}@mail.example';
+    }
+
+    await tester.tap(find.byTooltip('New item'));
+    await settle(tester);
+    await tester.tap(find.text('Login'));
+    await settle(tester);
+    await tester.enterText(find.widgetWithText(TextField, 'Name'), 'Forum');
+    await tester.tap(find.text('Add a field'));
+    await settle(tester);
+    await tester.tap(find.text('Email address'));
+    await settle(tester);
+    final address = textOf('Email');
+    final key = textOf('Mailbox key');
+    expect(address, addressOf(key));
+    expect(
+      find.descendant(
+        of: find.widgetWithText(TextField, 'Email'),
+        matching: find.byTooltip('Regenerate'),
+      ),
+      findsNothing,
+    );
+    await write(tester, find.text('Save'));
+
+    final items = (await tester.runAsync(vaults.all.single.vault.items))!;
+    final forum = items.singleWhere((item) => item.cipher.name == 'Forum');
+    expect(
+      [
+        for (final field in forum.cipher.fields)
+          (field.name, field.value, field.type),
+      ],
+      [
+        ('Email', address, FieldType.text),
+        ('Mailbox key', key, FieldType.hidden),
+      ],
+    );
+    await close(tester);
+  });
+
   testWidgets('shows the key of a vault in its settings on a phone', (
     tester,
   ) async {

@@ -1386,4 +1386,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get mailBridgeInvalid => 'Esto no es un dominio.';
+
+  @override
+  String get emailAddressField => 'Dirección de correo';
+
+  @override
+  String get mailboxKey => 'Clave del buzón';
 }

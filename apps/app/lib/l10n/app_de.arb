@@ -383,5 +383,7 @@
   "changeMailBridge": "Ändern",
   "mailBridgeDomain": "Domain",
   "mailBridgeExplanation": "Ab jetzt erstellte E-Mail-Adressen enden auf diese Domain. Bereits erstellte behalten ihre.",
-  "mailBridgeInvalid": "Das ist keine Domain."
+  "mailBridgeInvalid": "Das ist keine Domain.",
+  "emailAddressField": "E-Mail-Adresse",
+  "mailboxKey": "Postfachschlüssel"
 }

@@ -90,6 +90,8 @@
   "relaysNeedOne": "Хранилищу нужно хотя бы одно реле.",
   "fileServers": "Файловые серверы",
   "fileServersDescription": "Файлы, прикреплённые к этому хранилищу, копируются на каждый из этих серверов. Они видят только зашифрованные файлы.",
+  "relaysConnected": "Подключено: {connected} из {count}",
+  "fileServerCount": "{count, plural, one{{count} сервер} few{{count} сервера} many{{count} серверов} other{{count} сервера}}",
   "serverPrivate": "Приватный",
   "removeServer": "Удалить этот сервер",
   "keepServer": "Оставить этот сервер",

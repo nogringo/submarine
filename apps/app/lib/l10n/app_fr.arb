@@ -90,6 +90,8 @@
   "relaysNeedOne": "Le coffre a besoin d'au moins un relais.",
   "fileServers": "Serveurs de fichiers",
   "fileServersDescription": "Les fichiers joints à ce coffre sont copiés sur chacun de ces serveurs. Ils ne voient que des fichiers chiffrés.",
+  "relaysConnected": "{connected, plural, =0{Aucun connecté sur {count}} =1{1 connecté sur {count}} other{{connected} connectés sur {count}}}",
+  "fileServerCount": "{count, plural, =1{1 serveur} other{{count} serveurs}}",
   "serverPrivate": "Privé",
   "removeServer": "Retirer ce serveur",
   "keepServer": "Garder ce serveur",

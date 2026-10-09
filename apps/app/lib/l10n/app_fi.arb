@@ -90,6 +90,8 @@
   "relaysNeedOne": "Holvi tarvitsee vähintään yhden releen.",
   "fileServers": "Tiedostopalvelimet",
   "fileServersDescription": "Tämän holvin liitetiedostot kopioidaan kaikille näille palvelimille. Ne näkevät vain salattuja tiedostoja.",
+  "relaysConnected": "{connected}/{count} yhdistetty",
+  "fileServerCount": "{count, plural, =1{1 palvelin} other{{count} palvelinta}}",
   "serverPrivate": "Yksityinen",
   "removeServer": "Poista tämä palvelin",
   "keepServer": "Säilytä tämä palvelin",

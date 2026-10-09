@@ -90,6 +90,8 @@
   "relaysNeedOne": "La cassaforte ha bisogno di almeno un relay.",
   "fileServers": "Server di file",
   "fileServersDescription": "I file allegati a questa cassaforte sono copiati su ciascuno di questi server. Vedono solo file cifrati.",
+  "relaysConnected": "{connected, plural, =1{1 di {count} connesso} other{{connected} di {count} connessi}}",
+  "fileServerCount": "{count, plural, =1{1 server} other{{count} server}}",
   "serverPrivate": "Privato",
   "removeServer": "Rimuovi questo server",
   "keepServer": "Mantieni questo server",

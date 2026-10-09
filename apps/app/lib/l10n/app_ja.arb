@@ -90,6 +90,8 @@
   "relaysNeedOne": "保管庫には少なくとも 1 つのリレーが必要です。",
   "fileServers": "ファイルサーバー",
   "fileServersDescription": "この保管庫に添付されたファイルは、これらの各サーバーにコピーされます。サーバーから見えるのは、暗号化されたファイルだけです。",
+  "relaysConnected": "{count} 件中 {connected} 件に接続中",
+  "fileServerCount": "{count, plural, =1{1 件のサーバー} other{{count} 件のサーバー}}",
   "serverPrivate": "非公開",
   "removeServer": "このサーバーを削除",
   "keepServer": "このサーバーを残す",

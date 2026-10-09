@@ -336,6 +336,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get fileServersDescription => '附加到此密码库的文件会复制到以下每个服务器。它们只能看到加密的文件。';
 
   @override
+  String relaysConnected(int connected, int count) {
+    return '已连接 $connected/$count';
+  }
+
+  @override
+  String fileServerCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个服务器',
+      one: '1 个服务器',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get serverPrivate => '私密';
 
   @override

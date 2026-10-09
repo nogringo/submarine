@@ -346,6 +346,22 @@ class AppLocalizationsFi extends AppLocalizations {
       'Tämän holvin liitetiedostot kopioidaan kaikille näille palvelimille. Ne näkevät vain salattuja tiedostoja.';
 
   @override
+  String relaysConnected(int connected, int count) {
+    return '$connected/$count yhdistetty';
+  }
+
+  @override
+  String fileServerCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count palvelinta',
+      one: '1 palvelin',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get serverPrivate => 'Yksityinen';
 
   @override

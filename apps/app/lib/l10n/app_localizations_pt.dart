@@ -349,6 +349,28 @@ class AppLocalizationsPt extends AppLocalizations {
       'Os ficheiros anexados a este cofre são copiados para cada um destes servidores. Eles só veem ficheiros encriptados.';
 
   @override
+  String relaysConnected(int connected, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      connected,
+      locale: localeName,
+      other: '$connected de $count ligados',
+      one: '1 de $count ligado',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String fileServerCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count servidores',
+      one: '1 servidor',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get serverPrivate => 'Privado';
 
   @override
@@ -1861,6 +1883,28 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   @override
   String get fileServersDescription =>
       'Os arquivos anexados a este cofre são copiados em cada um destes servidores. Eles só veem arquivos criptografados.';
+
+  @override
+  String relaysConnected(int connected, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      connected,
+      locale: localeName,
+      other: '$connected de $count conectados',
+      one: '1 de $count conectado',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String fileServerCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count servidores',
+      one: '1 servidor',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get serverPrivate => 'Privado';

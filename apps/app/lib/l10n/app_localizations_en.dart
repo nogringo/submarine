@@ -345,6 +345,22 @@ class AppLocalizationsEn extends AppLocalizations {
       'The files attached to this vault are copied to each of these servers. They only see encrypted files.';
 
   @override
+  String relaysConnected(int connected, int count) {
+    return '$connected of $count connected';
+  }
+
+  @override
+  String fileServerCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count servers',
+      one: '1 server',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get serverPrivate => 'Private';
 
   @override

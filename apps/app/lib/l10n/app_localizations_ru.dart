@@ -362,6 +362,24 @@ class AppLocalizationsRu extends AppLocalizations {
       'Файлы, прикреплённые к этому хранилищу, копируются на каждый из этих серверов. Они видят только зашифрованные файлы.';
 
   @override
+  String relaysConnected(int connected, int count) {
+    return 'Подключено: $connected из $count';
+  }
+
+  @override
+  String fileServerCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count сервера',
+      many: '$count серверов',
+      few: '$count сервера',
+      one: '$count сервер',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get serverPrivate => 'Приватный';
 
   @override

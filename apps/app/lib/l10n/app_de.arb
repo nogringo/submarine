@@ -90,6 +90,8 @@
   "relaysNeedOne": "Der Tresor braucht mindestens ein Relay.",
   "fileServers": "Dateiserver",
   "fileServersDescription": "Die an diesen Tresor angehängten Dateien werden auf jeden dieser Server kopiert. Sie sehen nur verschlüsselte Dateien.",
+  "relaysConnected": "{connected} von {count} verbunden",
+  "fileServerCount": "{count, plural, =1{1 Server} other{{count} Server}}",
   "serverPrivate": "Privat",
   "removeServer": "Diesen Server entfernen",
   "keepServer": "Server behalten",

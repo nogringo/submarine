@@ -23,8 +23,6 @@ import '../widgets/vault_color_picker.dart';
 import '../widgets/vault_key_box.dart';
 import 'vault_navigation.dart';
 
-/// The settings of a vault: next to the rail in the wide layout, on a screen
-/// of their own in the narrow one.
 class VaultSettingsScreen extends StatelessWidget {
   const VaultSettingsScreen({super.key, required this.vaultId});
 
@@ -33,20 +31,79 @@ class VaultSettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vault = Vaults.of(context).byPubkey(vaultId);
-    final settings = vault == null
-        ? const SizedBox.shrink()
-        // Keeps the draft when the layout changes, and is new for each vault.
-        : _VaultSettings(key: GlobalObjectKey(vault), vault: vault);
+    return _VaultSettingsFrame(
+      vaultId: vaultId,
+      back: vaultPath(vaultId),
+      child: vault == null
+          ? const SizedBox.shrink()
+          // Keeps its state when the layout changes, and is new for each vault.
+          : _VaultSettings(key: GlobalObjectKey(vault), vault: vault),
+    );
+  }
+}
+
+/// The lists of a vault that its settings open, each on a page of its own.
+enum VaultList { relays, servers }
+
+/// A list of a vault, whose draft takes a Save of its own.
+class VaultListScreen extends StatefulWidget {
+  const VaultListScreen({super.key, required this.vaultId, required this.list});
+
+  final String vaultId;
+  final VaultList list;
+
+  @override
+  State<VaultListScreen> createState() => _VaultListScreenState();
+}
+
+class _VaultListScreenState extends State<VaultListScreen> {
+  /// Keeps the draft when the layout changes.
+  final _listKey = GlobalKey();
+
+  @override
+  Widget build(BuildContext context) {
+    final vaultId = widget.vaultId;
+    return _VaultSettingsFrame(
+      vaultId: vaultId,
+      back: vaultSettingsPath(vaultId),
+      child: switch ((Vaults.of(context).byPubkey(vaultId), widget.list)) {
+        (null, _) => const SizedBox.shrink(),
+        (final vault?, VaultList.relays) => _Relays(
+          key: _listKey,
+          vault: vault,
+        ),
+        (final vault?, VaultList.servers) => _Servers(
+          key: _listKey,
+          vault: vault,
+        ),
+      },
+    );
+  }
+}
+
+/// A page of the settings of a vault: next to the rail in the wide layout, on
+/// a screen of its own in the narrow one.
+class _VaultSettingsFrame extends StatelessWidget {
+  const _VaultSettingsFrame({
+    required this.vaultId,
+    required this.back,
+    required this.child,
+  });
+
+  final String vaultId;
+
+  /// Where going back leads when no page is under this one.
+  final String back;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
     if (!context.isWide) {
       return Scaffold(
         appBar: AppBar(
-          leading: BackButton(
-            onPressed: () => context.canPop()
-                ? context.pop()
-                : context.go(vaultPath(vaultId)),
-          ),
+          leading: BackButton(onPressed: () => _goBack(context, back)),
         ),
-        body: settings,
+        body: child,
       );
     }
     return Scaffold(
@@ -56,12 +113,31 @@ class VaultSettingsScreen extends StatelessWidget {
           children: [
             VaultRail(selectedVaultId: vaultId, selectedItemId: null),
             const VerticalDivider(width: 1),
-            Expanded(child: settings),
+            Expanded(child: child),
           ],
         ),
       ),
     );
   }
+}
+
+void _goBack(BuildContext context, String fallback) =>
+    context.canPop() ? context.pop() : context.go(fallback);
+
+/// [child] centered, at most as wide as the settings.
+class _SettingsWidth extends StatelessWidget {
+  const _SettingsWidth({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Align(
+    alignment: Alignment.topCenter,
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 720),
+      child: child,
+    ),
+  );
 }
 
 class _VaultSettings extends StatefulWidget {
@@ -116,97 +192,117 @@ class _VaultSettingsState extends State<_VaultSettings> {
         20,
         32 + MediaQuery.paddingOf(context).bottom,
       ),
-      child: Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 720),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _Header(vault: vault),
-              SettingsSection(
-                title: l10n.vaultNameAndColor,
-                description: l10n.vaultNameHelper,
-                child: FieldCard(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          TextField(
-                            controller: _name,
-                            textCapitalization: TextCapitalization.sentences,
-                            onChanged: _rename,
-                            decoration: InputDecoration(
-                              labelText: l10n.vaultName,
-                              errorText: _nameError,
-                            ),
+      child: _SettingsWidth(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _Header(
+              vault: vault,
+              title: vault.name,
+              subtitle: l10n.vaultSettings,
+            ),
+            SettingsSection(
+              title: l10n.vaultNameAndColor,
+              description: l10n.vaultNameHelper,
+              child: FieldCard(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextField(
+                          controller: _name,
+                          textCapitalization: TextCapitalization.sentences,
+                          onChanged: _rename,
+                          decoration: InputDecoration(
+                            labelText: l10n.vaultName,
+                            errorText: _nameError,
                           ),
+                        ),
+                        const SizedBox(height: 16),
+                        VaultColorPicker(
+                          selected: vault.color,
+                          onSelected: (color) => _edit(color: color),
+                        ),
+                        if (_saveError case final error?) ...[
                           const SizedBox(height: 16),
-                          VaultColorPicker(
-                            selected: vault.color,
-                            onSelected: (color) => _edit(color: color),
+                          Text(
+                            error,
+                            style: TextStyle(color: context.palette.danger),
                           ),
-                          if (_saveError case final error?) ...[
-                            const SizedBox(height: 16),
-                            Text(
-                              error,
-                              style: TextStyle(color: context.palette.danger),
-                            ),
-                          ],
                         ],
-                      ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              SettingsSection(
-                title: l10n.vaultKey,
-                child: FieldCard(
-                  children: [
-                    SettingsTile(
-                      title: Text(l10n.vaultPublicKey),
-                      subtitle: SelectableText(
-                        npub,
-                        style: monoStyle.copyWith(fontSize: 13),
-                      ),
-                      trailing: CopyButton(value: npub),
+            ),
+            SettingsSection(
+              title: l10n.vaultKey,
+              child: FieldCard(
+                children: [
+                  SettingsTile(
+                    title: Text(l10n.vaultPublicKey),
+                    subtitle: SelectableText(
+                      npub,
+                      style: monoStyle.copyWith(fontSize: 13),
                     ),
-                    switch (vault.record.login) {
-                      KeyLogin(:final privateKey) => _VaultKeyTile(
-                        privateKey: privateKey,
-                      ),
-                      SignerLogin login => SettingsTile(
-                        title: Text(signerName(l10n, login)),
-                        subtitle: Text(l10n.vaultSignerDescription),
-                      ),
+                    trailing: CopyButton(value: npub),
+                  ),
+                  switch (vault.record.login) {
+                    KeyLogin(:final privateKey) => _VaultKeyTile(
+                      privateKey: privateKey,
+                    ),
+                    SignerLogin login => SettingsTile(
+                      title: Text(signerName(l10n, login)),
+                      subtitle: Text(l10n.vaultSignerDescription),
+                    ),
+                  },
+                  if (vault.record.login is SignerLogin)
+                    _AskSignerTile(vault: vault),
+                ],
+              ),
+            ),
+            SettingsSection(
+              title: l10n.sync,
+              child: FieldCard(
+                children: [
+                  _SyncTile(vault: vault),
+                  _RelayConnections(
+                    vault: vault,
+                    builder: (context, connected) {
+                      final urls = vault.relayList?.urls;
+                      return _VaultListTile(
+                        vault: vault,
+                        list: VaultList.relays,
+                        summary: urls == null
+                            ? null
+                            : l10n.relaysConnected(
+                                urls.where(connected).length,
+                                urls.length,
+                              ),
+                      );
                     },
-                    if (vault.record.login is SignerLogin)
-                      _AskSignerTile(vault: vault),
-                  ],
-                ),
+                  ),
+                  _VaultListTile(
+                    vault: vault,
+                    list: VaultList.servers,
+                    summary: switch (vault.serverList) {
+                      final list? => l10n.fileServerCount(
+                        list.public.length + list.private.length,
+                      ),
+                      null => null,
+                    },
+                  ),
+                ],
               ),
-              SettingsSection(
-                title: l10n.sync,
-                child: FieldCard(children: [_SyncTile(vault: vault)]),
-              ),
-              SettingsSection(
-                title: l10n.relays,
-                description: l10n.relaysDescription,
-                child: _Relays(vault: vault),
-              ),
-              SettingsSection(
-                title: l10n.fileServers,
-                description: l10n.fileServersDescription,
-                child: _Servers(vault: vault),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 28),
-                child: FieldCard(children: [_RemoveTile(vault: vault)]),
-              ),
-            ],
-          ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 28),
+              child: FieldCard(children: [_RemoveTile(vault: vault)]),
+            ),
+          ],
         ),
       ),
     );
@@ -214,38 +310,85 @@ class _VaultSettingsState extends State<_VaultSettings> {
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.vault});
+  const _Header({
+    required this.vault,
+    required this.title,
+    required this.subtitle,
+    this.back,
+  });
 
   final VaultController vault;
+  final String title;
+  final String subtitle;
+
+  /// Where the back button leads in the wide layout, which has no app bar.
+  final String? back;
 
   @override
-  Widget build(BuildContext context) => Row(
-    children: [
-      VaultAvatar(vault: vault, size: 56),
-      const SizedBox(width: 16),
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              vault.name,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.w700,
-                height: 1.2,
+  Widget build(BuildContext context) {
+    final back = this.back;
+    return Row(
+      children: [
+        if (back != null && context.isWide) ...[
+          BackButton(onPressed: () => _goBack(context, back)),
+          const SizedBox(width: 8),
+        ],
+        VaultAvatar(vault: vault, size: 56),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w700,
+                  height: 1.2,
+                ),
               ),
-            ),
-            Text(
-              context.l10n.vaultSettings,
-              style: TextStyle(fontSize: 14, color: context.palette.muted),
-            ),
-          ],
+              Text(
+                subtitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 14, color: context.palette.muted),
+              ),
+            ],
+          ),
         ),
-      ),
-    ],
-  );
+      ],
+    );
+  }
+}
+
+/// A list of [vault] in its settings, opening its page.
+class _VaultListTile extends StatelessWidget {
+  const _VaultListTile({
+    required this.vault,
+    required this.list,
+    required this.summary,
+  });
+
+  final VaultController vault;
+  final VaultList list;
+  final String? summary;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final summary = this.summary;
+    return SettingsTile(
+      title: Text(switch (list) {
+        VaultList.relays => l10n.relays,
+        VaultList.servers => l10n.fileServers,
+      }),
+      subtitle: summary != null ? Text(summary) : null,
+      trailing: Icon(Icons.chevron_right_rounded, color: context.palette.muted),
+      onTap: () => context.push(vaultListPath(vault.pubkey, list)),
+    );
+  }
 }
 
 /// Hides the key until asked, as a password field does.
@@ -468,77 +611,100 @@ Future<bool> _confirmRemove(BuildContext context, VaultController vault) async {
   return remove ?? false;
 }
 
-/// The relays of the vault, and whether this device is connected to each.
-class _Relays extends StatefulWidget {
-  const _Relays({required this.vault});
+/// Rebuilds with whether this device is connected to each relay of [vault].
+class _RelayConnections extends StatefulWidget {
+  const _RelayConnections({required this.vault, required this.builder});
 
   final VaultController vault;
+  final Widget Function(
+    BuildContext context,
+    bool Function(String url) connected,
+  )
+  builder;
 
   @override
-  State<_Relays> createState() => _RelaysState();
+  State<_RelayConnections> createState() => _RelayConnectionsState();
 }
 
-class _RelaysState extends State<_Relays> {
+class _RelayConnectionsState extends State<_RelayConnections> {
   late final _connections =
       widget.vault.vault.ndk.connectivity.relayConnectivityChanges;
 
   @override
+  Widget build(BuildContext context) => StreamBuilder<List<RelayConnectivity>>(
+    stream: _connections,
+    builder: (context, snapshot) {
+      final connected = {
+        for (final connection in snapshot.data ?? <RelayConnectivity>[])
+          if (connection.isConnected) connection.url,
+      };
+      return widget.builder(
+        context,
+        (url) => connected.contains(cleanRelayUrl(url) ?? url),
+      );
+    },
+  );
+}
+
+/// The relays of the vault, and whether this device is connected to each.
+class _Relays extends StatelessWidget {
+  const _Relays({super.key, required this.vault});
+
+  final VaultController vault;
+
+  @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final vault = widget.vault;
     final list = vault.relayList;
     if (list == null) return const SizedBox.shrink();
     final markers = {...list.public, ...list.private};
     ReadWriteMarker markerOf(String url) =>
         markers[url] ?? ReadWriteMarker.readWrite;
-    return StreamBuilder<List<RelayConnectivity>>(
-      stream: _connections,
-      builder: (context, snapshot) {
-        final connected = {
-          for (final connection in snapshot.data ?? <RelayConnectivity>[])
-            if (connection.isConnected) connection.url,
-        };
-        return _AddressList(
-          public: list.public.keys.toList(),
-          private: list.private.keys.toList(),
-          editable: vault.relaysEditable,
-          parse: parseRelayUrl,
-          icon: Icons.cell_tower_rounded,
-          hint: 'wss://relay.example.com',
-          texts: (
-            add: l10n.addRelay,
-            address: l10n.relayAddress,
-            invalid: l10n.relayAddressInvalid,
-            alreadyListed: l10n.relayAlreadyListed,
-            remove: l10n.removeRelay,
-            keep: l10n.keepRelay,
-            private: l10n.relayPrivate,
-            added: l10n.relayAdded,
-            removed: l10n.relayRemoved,
-            keepPrivate: l10n.relayKeepPrivate,
-            keepPrivateDescription: l10n.relayKeepPrivateDescription,
-            saveFailed: l10n.relaysSaveFailed,
-            waitForSync: l10n.relaysWaitForSync,
-            needOne: l10n.relaysNeedOne,
+    return _RelayConnections(
+      vault: vault,
+      builder: (context, connected) => _AddressList(
+        vault: vault,
+        public: list.public.keys.toList(),
+        private: list.private.keys.toList(),
+        editable: vault.relaysEditable,
+        parse: parseRelayUrl,
+        icon: Icons.cell_tower_rounded,
+        hint: 'wss://relay.example.com',
+        texts: (
+          title: l10n.relays,
+          description: l10n.relaysDescription,
+          add: l10n.addRelay,
+          address: l10n.relayAddress,
+          invalid: l10n.relayAddressInvalid,
+          alreadyListed: l10n.relayAlreadyListed,
+          remove: l10n.removeRelay,
+          keep: l10n.keepRelay,
+          private: l10n.relayPrivate,
+          added: l10n.relayAdded,
+          removed: l10n.relayRemoved,
+          keepPrivate: l10n.relayKeepPrivate,
+          keepPrivateDescription: l10n.relayKeepPrivateDescription,
+          saveFailed: l10n.relaysSaveFailed,
+          waitForSync: l10n.relaysWaitForSync,
+          needOne: l10n.relaysNeedOne,
+        ),
+        status: (url) => connected(url)
+            ? (l10n.relayConnected, Icons.check_circle_outline_rounded)
+            : (l10n.relayNotConnected, Icons.circle_outlined),
+        save: (public, private) => vault.setRelayList(
+          RelayList(
+            public: {for (final url in public) url: markerOf(url)},
+            private: {for (final url in private) url: markerOf(url)},
           ),
-          status: (url) => connected.contains(cleanRelayUrl(url) ?? url)
-              ? (l10n.relayConnected, Icons.check_circle_outline_rounded)
-              : (l10n.relayNotConnected, Icons.circle_outlined),
-          save: (public, private) => vault.setRelayList(
-            RelayList(
-              public: {for (final url in public) url: markerOf(url)},
-              private: {for (final url in private) url: markerOf(url)},
-            ),
-          ),
-        );
-      },
+        ),
+      ),
     );
   }
 }
 
 /// The Blossom servers of the vault.
 class _Servers extends StatelessWidget {
-  const _Servers({required this.vault});
+  const _Servers({super.key, required this.vault});
 
   final VaultController vault;
 
@@ -548,6 +714,7 @@ class _Servers extends StatelessWidget {
     final list = vault.serverList;
     if (list == null) return const SizedBox.shrink();
     return _AddressList(
+      vault: vault,
       public: list.public,
       private: list.private,
       editable: vault.serversEditable,
@@ -555,6 +722,8 @@ class _Servers extends StatelessWidget {
       icon: Icons.dns_rounded,
       hint: 'https://blossom.example.com',
       texts: (
+        title: l10n.fileServers,
+        description: l10n.fileServersDescription,
         add: l10n.addServer,
         address: l10n.serverAddress,
         invalid: l10n.serverAddressInvalid,
@@ -578,6 +747,8 @@ class _Servers extends StatelessWidget {
 
 /// What an [_AddressList] says, of relays or of servers.
 typedef _AddressTexts = ({
+  String title,
+  String description,
   String add,
   String address,
   String invalid,
@@ -594,10 +765,11 @@ typedef _AddressTexts = ({
   String needOne,
 });
 
-/// The addresses of a list of the vault, public or private. Keeps the changes
-/// in a draft, published as a single list on save.
+/// The page of the addresses of a list of the vault, public or private. Keeps
+/// the changes in a draft, published as a single list on save.
 class _AddressList extends StatefulWidget {
   const _AddressList({
+    required this.vault,
     required this.public,
     required this.private,
     required this.editable,
@@ -609,6 +781,7 @@ class _AddressList extends StatefulWidget {
     required this.save,
   });
 
+  final VaultController vault;
   final List<String> public;
   final List<String> private;
 
@@ -714,86 +887,136 @@ class _AddressListState extends State<_AddressList> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        FieldCard(
-          children: [
-            for (final (listed, isPrivate) in [
-              (widget.public, false),
-              (widget.private, true),
-            ])
-              for (final url in listed)
-                if (_removed.contains(url))
-                  _AddressTile(
-                    url: url,
-                    icon: widget.icon,
-                    note: isPrivate ? texts.private : null,
-                    status: (
-                      texts.removed,
-                      Icons.remove_circle_outline_rounded,
-                    ),
-                    removed: true,
-                    action: IconButton(
-                      tooltip: texts.keep,
-                      onPressed: editable
-                          ? () => setState(() => _removed.remove(url))
-                          : null,
-                      icon: const Icon(Icons.undo_rounded, size: 20),
-                    ),
-                  )
-                else
-                  _AddressTile(
-                    url: url,
-                    icon: widget.icon,
-                    note: isPrivate ? texts.private : null,
-                    status: widget.status?.call(url),
-                    action: removeButton(() => _removed.add(url)),
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: _SettingsWidth(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _Header(
+                    vault: widget.vault,
+                    title: texts.title,
+                    subtitle: widget.vault.name,
+                    back: vaultSettingsPath(widget.vault.pubkey),
                   ),
-            for (final MapEntry(key: url, value: isPrivate) in _added.entries)
-              _AddressTile(
-                url: url,
-                icon: widget.icon,
-                note: isPrivate ? texts.private : null,
-                status: (texts.added, Icons.add_circle_outline_rounded),
-                action: removeButton(() => _added.remove(url)),
+                  const SizedBox(height: 28),
+                  Text(
+                    texts.description,
+                    style: TextStyle(fontSize: 13, color: palette.muted),
+                  ),
+                  const SizedBox(height: 12),
+                  FieldCard(
+                    children: [
+                      for (final (listed, isPrivate) in [
+                        (widget.public, false),
+                        (widget.private, true),
+                      ])
+                        for (final url in listed)
+                          if (_removed.contains(url))
+                            _AddressTile(
+                              url: url,
+                              icon: widget.icon,
+                              note: isPrivate ? texts.private : null,
+                              status: (
+                                texts.removed,
+                                Icons.remove_circle_outline_rounded,
+                              ),
+                              removed: true,
+                              action: IconButton(
+                                tooltip: texts.keep,
+                                onPressed: editable
+                                    ? () => setState(() => _removed.remove(url))
+                                    : null,
+                                icon: const Icon(Icons.undo_rounded, size: 20),
+                              ),
+                            )
+                          else
+                            _AddressTile(
+                              url: url,
+                              icon: widget.icon,
+                              note: isPrivate ? texts.private : null,
+                              status: widget.status?.call(url),
+                              action: removeButton(() => _removed.add(url)),
+                            ),
+                      for (final MapEntry(key: url, value: isPrivate)
+                          in _added.entries)
+                        _AddressTile(
+                          url: url,
+                          icon: widget.icon,
+                          note: isPrivate ? texts.private : null,
+                          status: (
+                            texts.added,
+                            Icons.add_circle_outline_rounded,
+                          ),
+                          action: removeButton(() => _added.remove(url)),
+                        ),
+                      SettingsTile(
+                        leading: Icon(
+                          Icons.add_rounded,
+                          size: 20,
+                          color: editable ? palette.signal : palette.muted,
+                        ),
+                        title: Text(
+                          texts.add,
+                          style: editable
+                              ? null
+                              : TextStyle(color: palette.muted),
+                        ),
+                        onTap: editable
+                            ? () => _add([...public, ...private])
+                            : null,
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            SettingsTile(
-              leading: Icon(
-                Icons.add_rounded,
-                size: 20,
-                color: editable ? palette.signal : palette.muted,
-              ),
-              title: Text(
-                texts.add,
-                style: editable ? null : TextStyle(color: palette.muted),
-              ),
-              onTap: editable ? () => _add([...public, ...private]) : null,
-            ),
-          ],
-        ),
-        if (message != null) ...[
-          const SizedBox(height: 8),
-          Text(
-            message,
-            style: TextStyle(
-              fontSize: 13,
-              color: _saveError == null ? palette.muted : palette.danger,
             ),
           ),
-        ],
-        const SizedBox(height: 12),
-        // Always there: the page would scroll by itself as they go.
-        DialogButtons(
-          children: [
-            TextButton(
-              onPressed: _changed && !_saving ? _discard : null,
-              child: Text(context.l10n.cancel),
+        ),
+        const Divider(),
+        Padding(
+          // Clear of the system navigation bar, the app drawing edge to edge.
+          padding: EdgeInsets.fromLTRB(
+            20,
+            12,
+            20,
+            12 + MediaQuery.paddingOf(context).bottom,
+          ),
+          child: _SettingsWidth(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Next to the buttons it explains, wherever the list scrolled.
+                if (message != null) ...[
+                  Text(
+                    message,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: _saveError == null
+                          ? palette.muted
+                          : palette.danger,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+                DialogButtons(
+                  children: [
+                    TextButton(
+                      onPressed: _changed && !_saving ? _discard : null,
+                      child: Text(context.l10n.cancel),
+                    ),
+                    FilledButton(
+                      onPressed: _changed && editable && !empty
+                          ? () => _save(public, private)
+                          : null,
+                      child: Text(context.l10n.save),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            FilledButton(
-              onPressed: _changed && editable && !empty
-                  ? () => _save(public, private)
-                  : null,
-              child: Text(context.l10n.save),
-            ),
-          ],
+          ),
         ),
       ],
     );

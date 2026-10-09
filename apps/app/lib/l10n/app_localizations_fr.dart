@@ -350,6 +350,29 @@ class AppLocalizationsFr extends AppLocalizations {
       'Les fichiers joints à ce coffre sont copiés sur chacun de ces serveurs. Ils ne voient que des fichiers chiffrés.';
 
   @override
+  String relaysConnected(int connected, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      connected,
+      locale: localeName,
+      other: '$connected connectés sur $count',
+      one: '1 connecté sur $count',
+      zero: 'Aucun connecté sur $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String fileServerCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count serveurs',
+      one: '1 serveur',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get serverPrivate => 'Privé';
 
   @override

@@ -90,6 +90,8 @@
   "relaysNeedOne": "La caja fuerte necesita al menos un relay.",
   "fileServers": "Servidores de archivos",
   "fileServersDescription": "Los archivos adjuntos a esta caja fuerte se copian en cada uno de estos servidores. Solo ven archivos cifrados.",
+  "relaysConnected": "{connected, plural, =1{1 de {count} conectado} other{{connected} de {count} conectados}}",
+  "fileServerCount": "{count, plural, =1{1 servidor} other{{count} servidores}}",
   "serverPrivate": "Privado",
   "removeServer": "Quitar este servidor",
   "keepServer": "Conservar este servidor",

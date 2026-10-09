@@ -350,6 +350,22 @@ class AppLocalizationsDe extends AppLocalizations {
       'Die an diesen Tresor angehängten Dateien werden auf jeden dieser Server kopiert. Sie sehen nur verschlüsselte Dateien.';
 
   @override
+  String relaysConnected(int connected, int count) {
+    return '$connected von $count verbunden';
+  }
+
+  @override
+  String fileServerCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Server',
+      one: '1 Server',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get serverPrivate => 'Privat';
 
   @override

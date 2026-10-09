@@ -90,6 +90,8 @@
   "relaysNeedOne": "O cofre precisa de pelo menos um relay.",
   "fileServers": "Servidores de arquivos",
   "fileServersDescription": "Os arquivos anexados a este cofre são copiados em cada um destes servidores. Eles só veem arquivos criptografados.",
+  "relaysConnected": "{connected, plural, =1{1 de {count} conectado} other{{connected} de {count} conectados}}",
+  "fileServerCount": "{count, plural, =1{1 servidor} other{{count} servidores}}",
   "serverPrivate": "Privado",
   "removeServer": "Remover este servidor",
   "keepServer": "Manter este servidor",

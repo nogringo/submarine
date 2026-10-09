@@ -312,7 +312,7 @@
   },
   "sync": "Sync",
   "@sync": {
-    "description": "Title of the vault settings section about syncing with the relays."
+    "description": "Title of the vault settings section about syncing: its status, and the relays and file servers the vault syncs with."
   },
   "syncAllSent": "Every change is saved online.",
   "@syncAllSent": {
@@ -320,11 +320,11 @@
   },
   "relays": "Relays",
   "@relays": {
-    "description": "Title of the vault settings section listing the relays the vault lives on."
+    "description": "Row of the vault settings opening the relays the vault lives on, and title of that page."
   },
   "relaysDescription": "This vault is copied to each of these relays. They only see encrypted data and its public key.",
   "@relaysDescription": {
-    "description": "Under the title of the relays section of the vault settings."
+    "description": "At the top of the page of the relays of a vault."
   },
   "relayConnected": "Connected",
   "@relayConnected": {
@@ -344,7 +344,7 @@
   },
   "addRelay": "Add a relay",
   "@addRelay": {
-    "description": "Row of the vault settings opening the dialog that adds a relay, and title of that dialog."
+    "description": "Row of the relays of a vault opening the dialog that adds a relay, and title of that dialog."
   },
   "relayAddress": "Relay address",
   "@relayAddress": {
@@ -392,11 +392,32 @@
   },
   "fileServers": "File servers",
   "@fileServers": {
-    "description": "Title of the vault settings section listing the Blossom servers the vault keeps its files on."
+    "description": "Row of the vault settings opening the Blossom servers the vault keeps its files on, and title of that page."
   },
   "fileServersDescription": "The files attached to this vault are copied to each of these servers. They only see encrypted files.",
   "@fileServersDescription": {
-    "description": "Under the title of the file servers section of the vault settings."
+    "description": "At the top of the page of the file servers of a vault."
+  },
+  "relaysConnected": "{connected} of {count} connected",
+  "@relaysConnected": {
+    "description": "Under Relays in the vault settings: how many of the vault's relays this device is connected to.",
+    "placeholders": {
+      "connected": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "fileServerCount": "{count, plural, =1{1 server} other{{count} servers}}",
+  "@fileServerCount": {
+    "description": "Under File servers in the vault settings: how many servers the vault keeps its files on.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "serverPrivate": "Private",
   "@serverPrivate": {
@@ -412,7 +433,7 @@
   },
   "addServer": "Add a server",
   "@addServer": {
-    "description": "Row of the vault settings opening the dialog that adds a server, and title of that dialog."
+    "description": "Row of the file servers of a vault opening the dialog that adds a server, and title of that dialog."
   },
   "serverAddress": "Server address",
   "@serverAddress": {

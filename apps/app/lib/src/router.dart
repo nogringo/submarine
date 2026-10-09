@@ -57,6 +57,9 @@ String editItemPath(String vaultId, ItemFilter filter, String itemId) =>
 
 String vaultSettingsPath(String vaultId) => '/vaults/$vaultId/settings';
 
+String vaultListPath(String vaultId, VaultList list) =>
+    '${vaultSettingsPath(vaultId)}/${list.name}';
+
 const generatorPath = '/generator';
 
 const settingsPath = '/settings';
@@ -105,6 +108,19 @@ GoRouter buildRouter(Vaults vaults) => GoRouter(
         key: state.pageKey,
         child: VaultSettingsScreen(vaultId: state.pathParameters['vaultId']!),
       ),
+      routes: [
+        for (final list in VaultList.values)
+          GoRoute(
+            path: list.name,
+            pageBuilder: (context, state) => _AdaptivePage(
+              key: state.pageKey,
+              child: VaultListScreen(
+                vaultId: state.pathParameters['vaultId']!,
+                list: list,
+              ),
+            ),
+          ),
+      ],
     ),
     // Each branch keeps its screens as they were left, in the order of
     // AppDestination.

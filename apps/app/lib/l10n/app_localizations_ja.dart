@@ -338,6 +338,22 @@ class AppLocalizationsJa extends AppLocalizations {
       'この保管庫に添付されたファイルは、これらの各サーバーにコピーされます。サーバーから見えるのは、暗号化されたファイルだけです。';
 
   @override
+  String relaysConnected(int connected, int count) {
+    return '$count 件中 $connected 件に接続中';
+  }
+
+  @override
+  String fileServerCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 件のサーバー',
+      one: '1 件のサーバー',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get serverPrivate => '非公開';
 
   @override

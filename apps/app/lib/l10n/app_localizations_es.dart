@@ -350,6 +350,28 @@ class AppLocalizationsEs extends AppLocalizations {
       'Los archivos adjuntos a esta caja fuerte se copian en cada uno de estos servidores. Solo ven archivos cifrados.';
 
   @override
+  String relaysConnected(int connected, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      connected,
+      locale: localeName,
+      other: '$connected de $count conectados',
+      one: '1 de $count conectado',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String fileServerCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count servidores',
+      one: '1 servidor',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get serverPrivate => 'Privado';
 
   @override

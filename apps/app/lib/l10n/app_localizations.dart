@@ -523,7 +523,7 @@ abstract class AppLocalizations {
   /// **'Close'**
   String get close;
 
-  /// Title of the vault settings section about syncing with the relays.
+  /// Title of the vault settings section about syncing: its status, and the relays and file servers the vault syncs with.
   ///
   /// In en, this message translates to:
   /// **'Sync'**
@@ -535,13 +535,13 @@ abstract class AppLocalizations {
   /// **'Every change is saved online.'**
   String get syncAllSent;
 
-  /// Title of the vault settings section listing the relays the vault lives on.
+  /// Row of the vault settings opening the relays the vault lives on, and title of that page.
   ///
   /// In en, this message translates to:
   /// **'Relays'**
   String get relays;
 
-  /// Under the title of the relays section of the vault settings.
+  /// At the top of the page of the relays of a vault.
   ///
   /// In en, this message translates to:
   /// **'This vault is copied to each of these relays. They only see encrypted data and its public key.'**
@@ -571,7 +571,7 @@ abstract class AppLocalizations {
   /// **'Remove this relay'**
   String get removeRelay;
 
-  /// Row of the vault settings opening the dialog that adds a relay, and title of that dialog.
+  /// Row of the relays of a vault opening the dialog that adds a relay, and title of that dialog.
   ///
   /// In en, this message translates to:
   /// **'Add a relay'**
@@ -643,17 +643,29 @@ abstract class AppLocalizations {
   /// **'The vault needs at least one relay.'**
   String get relaysNeedOne;
 
-  /// Title of the vault settings section listing the Blossom servers the vault keeps its files on.
+  /// Row of the vault settings opening the Blossom servers the vault keeps its files on, and title of that page.
   ///
   /// In en, this message translates to:
   /// **'File servers'**
   String get fileServers;
 
-  /// Under the title of the file servers section of the vault settings.
+  /// At the top of the page of the file servers of a vault.
   ///
   /// In en, this message translates to:
   /// **'The files attached to this vault are copied to each of these servers. They only see encrypted files.'**
   String get fileServersDescription;
+
+  /// Under Relays in the vault settings: how many of the vault's relays this device is connected to.
+  ///
+  /// In en, this message translates to:
+  /// **'{connected} of {count} connected'**
+  String relaysConnected(int connected, int count);
+
+  /// Under File servers in the vault settings: how many servers the vault keeps its files on.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 server} other{{count} servers}}'**
+  String fileServerCount(int count);
 
   /// Under a server of the vault settings that is encrypted in the vault's server list.
   ///
@@ -673,7 +685,7 @@ abstract class AppLocalizations {
   /// **'Keep this server'**
   String get keepServer;
 
-  /// Row of the vault settings opening the dialog that adds a server, and title of that dialog.
+  /// Row of the file servers of a vault opening the dialog that adds a server, and title of that dialog.
   ///
   /// In en, this message translates to:
   /// **'Add a server'**

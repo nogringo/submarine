@@ -362,6 +362,38 @@ class AppLocalizationsFi extends AppLocalizations {
   }
 
   @override
+  String relayLeftOut(String reason) {
+    return 'Ei synkronoitu: $reason';
+  }
+
+  @override
+  String get fullSync => 'Täysi synkronointi';
+
+  @override
+  String get fullSyncDescription =>
+      'Lukee koko holvin jokaisesta releestä ja antaa sitten kullekin sen, mitä siltä puuttuu, kuten sen, minkä se on ajan mittaan pudottanut.';
+
+  @override
+  String get fullSyncStart => 'Aloita';
+
+  @override
+  String get fullSyncDone => 'Jokaisella releellä on koko holvi.';
+
+  @override
+  String fullSyncLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count relettä ei ole vieläkään synkronoitu.',
+      one: '1 rele ei ole vieläkään synkronoitu.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get fullSyncFailed => 'Täyttä synkronointia ei voitu viedä loppuun.';
+
+  @override
   String get serverPrivate => 'Yksityinen';
 
   @override

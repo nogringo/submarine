@@ -373,6 +373,39 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String relayLeftOut(String reason) {
+    return 'Pas synchronisé : $reason';
+  }
+
+  @override
+  String get fullSync => 'Synchronisation complète';
+
+  @override
+  String get fullSyncDescription =>
+      'Lit tout le coffre sur chaque relais, puis donne à chacun ce qui lui manque, comme ce qu\'il a perdu avec le temps.';
+
+  @override
+  String get fullSyncStart => 'Lancer';
+
+  @override
+  String get fullSyncDone => 'Chaque relais a tout le coffre.';
+
+  @override
+  String fullSyncLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count relais ne sont toujours pas synchronisés.',
+      one: '1 relais n\'est toujours pas synchronisé.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get fullSyncFailed =>
+      'La synchronisation complète n\'a pas pu aboutir.';
+
+  @override
   String get serverPrivate => 'Privé';
 
   @override

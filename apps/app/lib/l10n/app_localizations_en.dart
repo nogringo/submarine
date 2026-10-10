@@ -361,6 +361,38 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String relayLeftOut(String reason) {
+    return 'Out of sync: $reason';
+  }
+
+  @override
+  String get fullSync => 'Full sync';
+
+  @override
+  String get fullSyncDescription =>
+      'Reads the whole vault on every relay, then gives each one what it lacks, such as what it dropped over time.';
+
+  @override
+  String get fullSyncStart => 'Start';
+
+  @override
+  String get fullSyncDone => 'Every relay holds the whole vault.';
+
+  @override
+  String fullSyncLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count relays are still out of sync.',
+      one: '1 relay is still out of sync.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get fullSyncFailed => 'The full sync could not finish.';
+
+  @override
   String get serverPrivate => 'Private';
 
   @override

@@ -371,6 +371,39 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String relayLeftOut(String reason) {
+    return 'Não sincronizado: $reason';
+  }
+
+  @override
+  String get fullSync => 'Sincronização completa';
+
+  @override
+  String get fullSyncDescription =>
+      'Lê o cofre inteiro em cada relay e depois dá a cada um o que lhe falta, como o que perdeu com o tempo.';
+
+  @override
+  String get fullSyncStart => 'Iniciar';
+
+  @override
+  String get fullSyncDone => 'Todos os relays têm o cofre inteiro.';
+
+  @override
+  String fullSyncLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count relays continuam por sincronizar.',
+      one: '1 relay continua por sincronizar.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get fullSyncFailed =>
+      'Não foi possível concluir a sincronização completa.';
+
+  @override
   String get serverPrivate => 'Privado';
 
   @override
@@ -1905,6 +1938,39 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
     );
     return '$_temp0';
   }
+
+  @override
+  String relayLeftOut(String reason) {
+    return 'Não sincronizado: $reason';
+  }
+
+  @override
+  String get fullSync => 'Sincronização completa';
+
+  @override
+  String get fullSyncDescription =>
+      'Lê o cofre inteiro em cada relay e depois dá a cada um o que falta nele, como o que ele perdeu com o tempo.';
+
+  @override
+  String get fullSyncStart => 'Iniciar';
+
+  @override
+  String get fullSyncDone => 'Todos os relays têm o cofre inteiro.';
+
+  @override
+  String fullSyncLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count relays ainda não estão sincronizados.',
+      one: '1 relay ainda não está sincronizado.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get fullSyncFailed =>
+      'Não foi possível concluir a sincronização completa.';
 
   @override
   String get serverPrivate => 'Privado';

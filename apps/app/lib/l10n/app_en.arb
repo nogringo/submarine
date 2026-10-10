@@ -419,6 +419,44 @@
       }
     }
   },
+  "relayLeftOut": "Out of sync: {reason}",
+  "@relayLeftOut": {
+    "description": "Under a relay of a vault that the last full sync left out, with why. The reason comes from the relay or the app, untranslated, such as \"timedOut\" or \"refused 2 events: blocked\".",
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "fullSync": "Full sync",
+  "@fullSync": {
+    "description": "In the Sync section of the vault settings: title of the row that reads the whole vault on every relay and gives each one what it lacks."
+  },
+  "fullSyncDescription": "Reads the whole vault on every relay, then gives each one what it lacks, such as what it dropped over time.",
+  "@fullSyncDescription": {
+    "description": "Under Full sync, what it does."
+  },
+  "fullSyncStart": "Start",
+  "@fullSyncStart": {
+    "description": "Button starting the full sync of a vault."
+  },
+  "fullSyncDone": "Every relay holds the whole vault.",
+  "@fullSyncDone": {
+    "description": "Under Full sync, once it ended with every relay in sync."
+  },
+  "fullSyncLeftOut": "{count, plural, =1{1 relay is still out of sync.} other{{count} relays are still out of sync.}}",
+  "@fullSyncLeftOut": {
+    "description": "Under Full sync, once it ended with relays it could not sync. Each of these relays tells why in its row, on the page of the relays.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "fullSyncFailed": "The full sync could not finish.",
+  "@fullSyncFailed": {
+    "description": "Under Full sync, when it stopped on an error."
+  },
   "serverPrivate": "Private",
   "@serverPrivate": {
     "description": "Under a server of the vault settings that is encrypted in the vault's server list."

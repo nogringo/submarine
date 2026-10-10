@@ -3017,6 +3017,85 @@ void main() {
     await close(tester);
   });
 
+  testWidgets(
+    'syncs a vault in full from its settings, and tells who is left',
+    (tester) async {
+      setScreen(tester, const Size(1280, 800));
+      final serving = _EmptyRelay();
+      final closing = _EmptyRelay(closing: 'blocked: not here');
+      await startRelays(tester, [serving, closing]);
+      await open(tester, items: [github], relays: [serving.url, closing.url]);
+      final personal = vaults.all.single;
+      await tester.pumpWidget(
+        SubmarineApp(
+          vaults: vaults,
+          lock: lock,
+          appearance: appearance,
+          clipboard: clipboard,
+          screenCapture: screenCapture,
+          mail: mail,
+        ),
+      );
+      await settle(tester);
+      Finder inRow(String url, Finder finder) => find.descendant(
+        of: find.widgetWithText(SettingsTile, url),
+        matching: finder,
+      );
+      int wraps(_EmptyRelay relay) =>
+          relay.received.where((event) => event['kind'] == 1059).length;
+      Future<void> reconcile() async {
+        await tester.ensureVisible(find.text('Start'));
+        await settle(tester);
+        final before = personal.leftOut;
+        await tester.runAsync(() async {
+          await tester.tap(find.text('Start'));
+          while (personal.reconciling || personal.leftOut == before) {
+            await Future<void>.delayed(const Duration(milliseconds: 10));
+          }
+        });
+        await settle(tester);
+      }
+
+      Future<void> openRelays() async {
+        await tester.ensureVisible(find.text('Relays'));
+        await settle(tester);
+        await tester.tap(find.text('Relays'));
+        await settle(tester);
+      }
+
+      await tester.tap(find.byTooltip('Personal'));
+      await settle(tester);
+      await tester.tap(find.byTooltip('Vault settings'));
+      await settle(tester);
+      expect(find.text('Full sync'), findsOneWidget);
+      expect(wraps(serving), 0);
+
+      await reconcile();
+      expect(wraps(serving), 1);
+      expect(wraps(closing), 0);
+      expect(find.text('1 relay is still out of sync.'), findsOneWidget);
+      await openRelays();
+      expect(
+        inRow(closing.url, find.text('Out of sync: closed: blocked: not here')),
+        findsOneWidget,
+      );
+      expect(
+        inRow(serving.url, find.textContaining('Out of sync')),
+        findsNothing,
+      );
+      await tester.tap(find.byTooltip('Back'));
+      await settle(tester);
+
+      closing.closing = null;
+      await reconcile();
+      expect(wraps(closing), 1);
+      expect(find.text('Every relay holds the whole vault.'), findsOneWidget);
+      await openRelays();
+      expect(find.textContaining('Out of sync'), findsNothing);
+      await close(tester);
+    },
+  );
+
   testWidgets('changes the servers of a vault in its settings', (tester) async {
     setScreen(tester, const Size(1280, 800));
     final relay = _EmptyRelay();
@@ -4658,6 +4737,9 @@ void main() {
         await tester.tap(find.byTooltip('Personal'));
         await settle(tester);
         await tapAndCheck(find.byTooltip('Vault settings'));
+        await tester.ensureVisible(find.text('Full sync'));
+        await settle(tester);
+        await checkAccessibility(tester);
         await tester.ensureVisible(find.text('Relays'));
         await settle(tester);
         await tapAndCheck(find.text('Relays'));
@@ -5017,6 +5099,11 @@ Future<Nip01Event> _giftWrap(
 }
 
 class _EmptyRelay {
+  _EmptyRelay({this.closing});
+
+  /// Why it ends every request with a CLOSED, if it does.
+  String? closing;
+
   late final HttpServer _server;
   final received = <Map<String, dynamic>>[];
 
@@ -5028,7 +5115,12 @@ class _EmptyRelay {
       socket.listen((data) {
         switch (jsonDecode(data as String)) {
           case ['REQ', final String id, ...]:
-            socket.add(jsonEncode(['EOSE', id]));
+            socket.add(
+              jsonEncode(switch (closing) {
+                final reason? => ['CLOSED', id, reason],
+                null => ['EOSE', id],
+              }),
+            );
           case ['EVENT', final Map<String, dynamic> event]:
             received.add(event);
             socket.add(jsonEncode(['OK', event['id'], true, '']));

@@ -667,6 +667,48 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 server} other{{count} servers}}'**
   String fileServerCount(int count);
 
+  /// Under a relay of a vault that the last full sync left out, with why. The reason comes from the relay or the app, untranslated, such as "timedOut" or "refused 2 events: blocked".
+  ///
+  /// In en, this message translates to:
+  /// **'Out of sync: {reason}'**
+  String relayLeftOut(String reason);
+
+  /// In the Sync section of the vault settings: title of the row that reads the whole vault on every relay and gives each one what it lacks.
+  ///
+  /// In en, this message translates to:
+  /// **'Full sync'**
+  String get fullSync;
+
+  /// Under Full sync, what it does.
+  ///
+  /// In en, this message translates to:
+  /// **'Reads the whole vault on every relay, then gives each one what it lacks, such as what it dropped over time.'**
+  String get fullSyncDescription;
+
+  /// Button starting the full sync of a vault.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get fullSyncStart;
+
+  /// Under Full sync, once it ended with every relay in sync.
+  ///
+  /// In en, this message translates to:
+  /// **'Every relay holds the whole vault.'**
+  String get fullSyncDone;
+
+  /// Under Full sync, once it ended with relays it could not sync. Each of these relays tells why in its row, on the page of the relays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 relay is still out of sync.} other{{count} relays are still out of sync.}}'**
+  String fullSyncLeftOut(int count);
+
+  /// Under Full sync, when it stopped on an error.
+  ///
+  /// In en, this message translates to:
+  /// **'The full sync could not finish.'**
+  String get fullSyncFailed;
+
   /// Under a server of the vault settings that is encrypted in the vault's server list.
   ///
   /// In en, this message translates to:

@@ -352,6 +352,37 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String relayLeftOut(String reason) {
+    return '未同步：$reason';
+  }
+
+  @override
+  String get fullSync => '完整同步';
+
+  @override
+  String get fullSyncDescription => '读取每个中继上的整个密码库，然后补上每个中继缺少的内容，例如它随时间丢失的内容。';
+
+  @override
+  String get fullSyncStart => '开始';
+
+  @override
+  String get fullSyncDone => '每个中继都保存着整个密码库。';
+
+  @override
+  String fullSyncLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个中继仍未同步。',
+      one: '1 个中继仍未同步。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get fullSyncFailed => '完整同步未能完成。';
+
+  @override
   String get serverPrivate => '私密';
 
   @override

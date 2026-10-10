@@ -380,6 +380,40 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String relayLeftOut(String reason) {
+    return 'Не синхронизировано: $reason';
+  }
+
+  @override
+  String get fullSync => 'Полная синхронизация';
+
+  @override
+  String get fullSyncDescription =>
+      'Читает всё хранилище на каждом реле, затем передаёт каждому то, чего ему не хватает, например то, что оно потеряло со временем.';
+
+  @override
+  String get fullSyncStart => 'Запустить';
+
+  @override
+  String get fullSyncDone => 'На каждом реле есть всё хранилище.';
+
+  @override
+  String fullSyncLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count реле всё ещё не синхронизированы.',
+      many: '$count реле всё ещё не синхронизированы.',
+      few: '$count реле всё ещё не синхронизированы.',
+      one: '$count реле всё ещё не синхронизировано.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get fullSyncFailed => 'Не удалось завершить полную синхронизацию.';
+
+  @override
   String get serverPrivate => 'Приватный';
 
   @override

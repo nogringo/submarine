@@ -90,7 +90,7 @@ class VaultController extends ChangeNotifier {
   }
 
   /// Whether a cancelled decryption keeps the versions from being asked to
-  /// open, until [sync].
+  /// open, until [sync] or [reconcile].
   var _openingHeld = false;
 
   /// Cancels [requests], whose actions fail. Asks the signer to open no
@@ -146,6 +146,37 @@ class VaultController extends ChangeNotifier {
     if (_handle case final handle?) handle.then(_engine.refresh),
     fetchRelays(),
   ]);
+
+  /// Whether [reconcile] runs.
+  bool get reconciling => _reconciling;
+  var _reconciling = false;
+
+  /// The relays the last [reconcile] left out of sync, with why, null until
+  /// one ended.
+  Map<String, String>? get leftOut => _leftOut;
+  Map<String, String>? _leftOut;
+
+  /// Reads the whole vault on each relay, then gives the cache and every relay
+  /// what it lacks, see [Vault.reconcile].
+  Future<void> reconcile() async {
+    if (_reconciling) return;
+    _reconciling = true;
+    // Vault.reconcile asks the signer to open what it shares anyway.
+    _openingHeld = false;
+    notifyListeners();
+    try {
+      final leftOut = await vault.reconcile();
+      _relaysFetched = true;
+      _leftOut = leftOut;
+    } finally {
+      _reconciling = false;
+      if (!_disposed) notifyListeners();
+    }
+    if (_disposed) return;
+    await _readRelays();
+    if (_handle case final handle?) unawaited(handle.then(_engine.refresh));
+    unawaited(_reload());
+  }
 
   /// Fetches the relay list another device may have changed, and moves the
   /// sync to its relays.

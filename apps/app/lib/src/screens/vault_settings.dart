@@ -269,6 +269,7 @@ class _VaultSettingsState extends State<_VaultSettings> {
               child: FieldCard(
                 children: [
                   _SyncTile(vault: vault),
+                  _FullSyncTile(vault: vault),
                   _RelayConnections(
                     vault: vault,
                     builder: (context, connected) {
@@ -514,6 +515,73 @@ class _SyncTile extends StatelessWidget {
   }
 }
 
+/// Its result shows here, and the reason of each relay left out in its row of
+/// the relays.
+class _FullSyncTile extends StatefulWidget {
+  const _FullSyncTile({required this.vault});
+
+  final VaultController vault;
+
+  @override
+  State<_FullSyncTile> createState() => _FullSyncTileState();
+}
+
+class _FullSyncTileState extends State<_FullSyncTile> {
+  var _failed = false;
+
+  Future<void> _reconcile() async {
+    setState(() => _failed = false);
+    try {
+      await widget.vault.reconcile();
+    } on SignerRequestCancelledException {
+      // Cancelled by the user, from the requests the signer waits for.
+    } catch (_) {
+      if (mounted) setState(() => _failed = true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final palette = context.palette;
+    final vault = widget.vault;
+    final (result, wrong) = switch (vault.leftOut) {
+      _ when vault.reconciling => (null, false),
+      _ when _failed => (l10n.fullSyncFailed, true),
+      null => (null, false),
+      final leftOut when leftOut.isEmpty => (l10n.fullSyncDone, false),
+      final leftOut => (l10n.fullSyncLeftOut(leftOut.length), true),
+    };
+    return SettingsTile(
+      title: Text(l10n.fullSync),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.fullSyncDescription),
+          if (result != null)
+            Text(
+              result,
+              style: wrong ? TextStyle(color: palette.danger) : null,
+            ),
+        ],
+      ),
+      trailing: OutlinedButton.icon(
+        // Opening what it shares takes the key, which a locked vault has not.
+        onPressed: vault.reconciling || vault.locked ? null : _reconcile,
+        style: settingsButtonStyle,
+        icon: SpinningIcon(
+          Icons.sync_rounded,
+          spinning: vault.reconciling,
+          counterclockwise: true,
+          size: 18,
+          color: vault.reconciling ? palette.muted : null,
+        ),
+        label: Text(l10n.fullSyncStart),
+      ),
+    );
+  }
+}
+
 class _RemoveTile extends StatefulWidget {
   const _RemoveTile({required this.vault});
 
@@ -691,6 +759,10 @@ class _Relays extends StatelessWidget {
         status: (url) => connected(url)
             ? (l10n.relayConnected, Icons.check_circle_outline_rounded)
             : (l10n.relayNotConnected, Icons.circle_outlined),
+        problem: (url) => switch (vault.leftOut?[url]) {
+          final reason? => l10n.relayLeftOut(reason),
+          null => null,
+        },
         save: (public, private) => vault.setRelayList(
           RelayList(
             public: {for (final url in public) url: markerOf(url)},
@@ -778,6 +850,7 @@ class _AddressList extends StatefulWidget {
     required this.hint,
     required this.texts,
     this.status,
+    this.problem,
     required this.save,
   });
 
@@ -796,6 +869,9 @@ class _AddressList extends StatefulWidget {
 
   /// What a listed address shows while the draft keeps it, if anything.
   final (String, IconData) Function(String url)? status;
+
+  /// What went wrong with a listed address, if anything.
+  final String? Function(String url)? problem;
   final Future<void> Function(List<String> public, List<String> private) save;
 
   @override
@@ -937,6 +1013,7 @@ class _AddressListState extends State<_AddressList> {
                               icon: widget.icon,
                               note: isPrivate ? texts.private : null,
                               status: widget.status?.call(url),
+                              problem: widget.problem?.call(url),
                               action: removeButton(() => _removed.add(url)),
                             ),
                       for (final MapEntry(key: url, value: isPrivate)
@@ -1030,6 +1107,7 @@ class _AddressTile extends StatelessWidget {
     required this.icon,
     this.note,
     this.status,
+    this.problem,
     this.removed = false,
     required this.action,
   });
@@ -1040,6 +1118,9 @@ class _AddressTile extends StatelessWidget {
   /// Under the address, that it is private.
   final String? note;
   final (String, IconData)? status;
+
+  /// Under the address and [note].
+  final String? problem;
   final bool removed;
   final Widget action;
 
@@ -1047,6 +1128,7 @@ class _AddressTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.palette;
     final note = this.note;
+    final problem = this.problem;
     return SettingsTile(
       leading: Icon(icon, size: 20, color: palette.muted),
       title: Text(
@@ -1057,7 +1139,16 @@ class _AddressTile extends StatelessWidget {
           decoration: removed ? TextDecoration.lineThrough : null,
         ),
       ),
-      subtitle: note != null ? Text(note) : null,
+      subtitle: note == null && problem == null
+          ? null
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (note != null) Text(note),
+                if (problem != null)
+                  Text(problem, style: TextStyle(color: palette.danger)),
+              ],
+            ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

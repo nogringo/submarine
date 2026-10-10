@@ -354,6 +354,38 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String relayLeftOut(String reason) {
+    return '未同期：$reason';
+  }
+
+  @override
+  String get fullSync => '完全同期';
+
+  @override
+  String get fullSyncDescription =>
+      '各リレーで保管庫全体を読み込み、時間とともに失われたものなど、各リレーに足りないものを送ります。';
+
+  @override
+  String get fullSyncStart => '開始';
+
+  @override
+  String get fullSyncDone => 'すべてのリレーに保管庫全体があります。';
+
+  @override
+  String fullSyncLeftOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 件のリレーがまだ同期されていません。',
+      one: '1 件のリレーがまだ同期されていません。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get fullSyncFailed => '完全同期を完了できませんでした。';
+
+  @override
   String get serverPrivate => '非公開';
 
   @override

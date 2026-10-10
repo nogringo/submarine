@@ -249,6 +249,17 @@ Future<void> main() async {
   await File('vault_export.json')
       .writeAsString(await encryptBitwardenExport(export, '<file password>'));
 
+  // A file is encrypted under a key of its own, which the item holds. The
+  // encrypted file is for the vault's Blossom servers, which address it by
+  // attachment.sha256.
+  final (attachment, encryptedFile) = await encryptAttachment(
+    'recovery-codes.txt',
+    utf8.encode('3f7a-91c2 8be0-44d1'),
+  );
+  boulanger.cipher.attachments.add(attachment);
+  final file = await decryptAttachment(attachment, encryptedFile);
+  print('${attachment.fileName}: ${utf8.decode(file!)}');
+
   // The replaced password goes to the item's password history.
   final updated = await vault.updateItem(
     boulanger,

@@ -1,3 +1,4 @@
+import 'attachment.dart';
 import 'bank_account.dart';
 import 'drivers_license.dart';
 import 'field.dart';
@@ -45,12 +46,14 @@ class Cipher {
     this.driversLicense,
     this.passport,
     List<PasswordHistory>? passwordHistory,
+    List<Attachment>? attachments,
     this.creationDate,
     this.revisionDate,
     this.deletedDate,
     this.archivedDate,
   }) : fields = fields ?? [],
        passwordHistory = passwordHistory ?? [],
+       attachments = attachments ?? [],
        _source = const {} {
     creationDate ??= DateTime.now().toUtc();
     revisionDate ??= creationDate;
@@ -79,6 +82,7 @@ class Cipher {
         json['passwordHistory'],
         PasswordHistory.fromJson,
       ),
+      attachments = parseList(json['attachments'], Attachment.fromJson),
       creationDate = parseDate(json['creationDate']),
       revisionDate = parseDate(json['revisionDate']),
       deletedDate = parseDate(json['deletedDate']),
@@ -101,6 +105,7 @@ class Cipher {
   DriversLicense? driversLicense;
   Passport? passport;
   List<PasswordHistory> passwordHistory;
+  List<Attachment> attachments;
   DateTime? creationDate;
   DateTime? revisionDate;
   DateTime? deletedDate;
@@ -151,6 +156,10 @@ class Cipher {
     'driversLicense': driversLicense?.toJson(),
     'passport': passport?.toJson(),
     'passwordHistory': [for (final entry in passwordHistory) entry.toJson()],
+    // Left out, as in Bitwarden's export, until the item has a file.
+    'attachments': attachments.isEmpty && _source['attachments'] == null
+        ? null
+        : [for (final attachment in attachments) attachment.toJson()],
     'creationDate': formatDate(creationDate),
     'revisionDate': formatDate(revisionDate),
     'deletedDate': formatDate(deletedDate),

@@ -7,6 +7,7 @@
 - `Vault.reconcile()` reads the whole vault from each relay, then sends each relay what it lacks, once every relay answered.
 - `Vault.forget()` removes a vault from the device, and its relays keep it.
 - Trash, restore and permanent deletion (NIP-09).
+- File attachments in `Cipher.attachments`, as Bitwarden stores them with the SHA-256 of the encrypted file in place of a URL. `encryptAttachment()` encrypts a file with AES-256-GCM under a key of its own, and `decryptAttachment()` opens it.
 - The vault's relay list (NIP-65), its private relays encrypted to the vault. The vault lives on the relays it names.
 - `Vault.currentRelayList()` gives the list to change, and `RelayList.withRelay()` and `without()` change it. `parseRelayUrl()` reads a relay address as a user types it.
 - The vault's Blossom servers (BUD-03), its private servers encrypted to the vault, kept on its relays with the rest of the vault. `Vault.currentServerList()` gives the list to change, `defaultVaultBlossomServers` while it has none, and `ServerList.withServer()` and `without()` change it. `parseServerUrl()` reads a server address as a user types it.

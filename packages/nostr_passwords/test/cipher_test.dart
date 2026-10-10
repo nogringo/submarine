@@ -243,6 +243,47 @@ void main() {
     );
   });
 
+  test('the attachment of docs/example.md round-trips unchanged', () {
+    final json = {
+      'type': 2,
+      'name': 'Passport',
+      'favorite': false,
+      'reprompt': 0,
+      'fields': [],
+      'secureNote': {'type': 0},
+      'passwordHistory': [],
+      'attachments': [
+        {
+          'id': 'b1946ac92492d2347c6235b4d2611184',
+          'fileName': 'passport.pdf',
+          'key': 'q83vEjRWeJAbzdTvASNFZ4mrze8SNFZ4kKvN7wEjRWc=',
+          'size': '482113',
+          'sha256': '6e3a2d1f9c8b7a6e5d4c3b2a19f8e7d6c5b4a3928170f6e5d4c3b2a1908f7e6d',
+        },
+      ],
+    };
+
+    final cipher = Cipher.fromJson(jsonDecode(jsonEncode(json)));
+
+    expect(cipher.attachments.single.fileName, 'passport.pdf');
+    expect(cipher.attachments.single.size, '482113');
+    expect(cipher.toJson(), json);
+  });
+
+  test('a removed last attachment leaves an empty list', () {
+    final cipher = Cipher.fromJson({
+      'type': 2,
+      'name': 'Passport',
+      'attachments': [
+        {'id': 'a', 'fileName': 'f', 'key': 'k', 'size': '28', 'sha256': 's'},
+      ],
+    });
+
+    cipher.attachments.clear();
+
+    expect(cipher.toJson()['attachments'], isEmpty);
+  });
+
   group('subtitle', () {
     String? subtitleOf(CipherType type, Cipher Function(Cipher) fill) =>
         fill(Cipher(type: type, name: 'Item')).subtitle;

@@ -1,7 +1,9 @@
 library;
 
+export 'src/attachment_crypto.dart';
 export 'src/bitwarden_crypto.dart';
 export 'src/bitwarden_export.dart';
+export 'src/cipher/attachment.dart';
 export 'src/cipher/bank_account.dart';
 export 'src/cipher/cipher.dart';
 export 'src/cipher/drivers_license.dart';

@@ -1,9 +1,14 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { generateSecretKey, nip19 } from "nostr-tools";
+import * as nip49 from "nostr-tools/nip49";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { type BrowserName, type Extension, launch } from "./extension";
 
+const english = JSON.parse(await readFile(appArb("en"), "utf8"));
+
 describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
+  const secretKey = generateSecretKey();
   let extension: Extension;
 
   beforeAll(async () => {
@@ -39,6 +44,59 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
       return (globals.browser ?? globals.chrome).runtime.sendMessage({ method: "unknown" });
     });
     expect(JSON.parse(reply)).toEqual({ error: { code: "unknownMethod", message: "unknown" } });
+  });
+
+  it("refuses what is not a vault key", async () => {
+    await extension.click("button::-p-text(Open a vault)");
+    await extension.fill("input[name=key]", "hello");
+    await extension.fill("input[name=name]", "Home");
+    await extension.click("button[type=submit]");
+    await extension.popup.waitForSelector(`::-p-text(${english.vaultKeyInvalid})`);
+  });
+
+  it("opens a vault from its ncryptsec, once the password is right", async () => {
+    const { popup } = extension;
+    await extension.fill("input[name=key]", nip49.encrypt(secretKey, "a long password"));
+    await extension.fill("input[name=password]", "wrong");
+    await extension.click("button[type=submit]");
+    await popup.waitForSelector(`::-p-text(${english.vaultKeyPasswordWrong})`);
+    await extension.fill("input[name=password]", "a long password");
+    await extension.click("button[type=submit]");
+    const title = await popup.waitForSelector(".home-title");
+    expect(await title?.evaluate((h1) => h1.textContent)).toBe("All vaults");
+  });
+
+  it("lists the vault in the drawer, and shows it once chosen", async () => {
+    const { popup } = extension;
+    await extension.click("button[aria-label=Vaults]");
+    const options = await popup.waitForSelector("[role=listbox]");
+    expect(
+      await options?.$$eval(".drawer-row-title", (titles) =>
+        titles.map((title) => title.textContent),
+      ),
+    ).toEqual(["All vaults", "Home"]);
+    await extension.click("[role=option]::-p-text(Home)");
+    await popup.waitForSelector("[role=dialog]", { hidden: true });
+    await popup.waitForFunction(
+      () => document.querySelector(".home-title")?.textContent === "Home",
+    );
+  });
+
+  it("refuses a vault already open", async () => {
+    await extension.click("button[aria-label=Vaults]");
+    await extension.click("button::-p-text(Open a vault)");
+    await extension.fill("input[name=key]", nip19.nsecEncode(secretKey));
+    await extension.fill("input[name=name]", "Work");
+    await extension.click("button[type=submit]");
+    const error = english.vaultAlreadyOpen.replace("{name}", "Home");
+    await extension.popup.waitForSelector(`::-p-text(${error})`);
+    await extension.click("button::-p-text(Cancel)");
+  });
+
+  it("keeps the vaults when the popup opens again", async () => {
+    await extension.reload();
+    const title = await extension.popup.waitForSelector(".home-title");
+    expect(await title?.evaluate((h1) => h1.textContent)).toBe("All vaults");
   });
 });
 

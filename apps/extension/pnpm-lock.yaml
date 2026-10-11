@@ -8,12 +8,18 @@ importers:
 
   .:
     dependencies:
+      '@fontsource-variable/atkinson-hyperlegible-mono':
+        specifier: 5.3.0
+        version: 5.3.0
       '@fontsource-variable/atkinson-hyperlegible-next':
         specifier: 5.3.0
         version: 5.3.0
       '@fontsource/saira-stencil-one':
         specifier: 5.3.0
         version: 5.3.0
+      '@material-design-icons/svg':
+        specifier: 0.14.15
+        version: 0.14.15
       '@noble/curves':
         specifier: 2.0.1
         version: 2.0.1
@@ -162,6 +168,9 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@fontsource-variable/atkinson-hyperlegible-mono@5.3.0':
+    resolution: {integrity: sha512-0IbthhO18EEpLe69h+cmrsxCkl4yk80gMk+fAN3+9M5zQvoR1JlkzoJRR6U9/UXLYpVBGEXu+Md2LO8TIp30dw==}
+
   '@fontsource-variable/atkinson-hyperlegible-next@5.3.0':
     resolution: {integrity: sha512-UnLzNUy1RWoLDfydAatP4NaRm99X/WbQEph7q/PymJnCFIOOwKOx3pBmp5ys8trO0dM+CKGuJgeZP9fAR4mQpA==}
 
@@ -204,6 +213,9 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
+
+  '@material-design-icons/svg@0.14.15':
+    resolution: {integrity: sha512-6nbjwGwyJnphwQUscJAYqw1Tk6+W8KvsgOAeyVgzIFXVsHfgX5XyplTUcZ29wbcTUysMMyCUi1LYpmFKA/e61g==}
 
   '@noble/ciphers@2.1.1':
     resolution: {integrity: sha512-bysYuiVfhxNJuldNXlFEitTVdNnYUc+XNJZd7Qm2a5j1vZHgY+fazadNFWFaMK/2vye0JVlxV3gHmC0WDfAOQw==}
@@ -1427,6 +1439,8 @@ snapshots:
   '@biomejs/cli-win32-x64@2.5.15':
     optional: true
 
+  '@fontsource-variable/atkinson-hyperlegible-mono@5.3.0': {}
+
   '@fontsource-variable/atkinson-hyperlegible-next@5.3.0': {}
 
   '@fontsource/saira-stencil-one@5.3.0': {}
@@ -1475,6 +1489,8 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.6.0
+
+  '@material-design-icons/svg@0.14.15': {}
 
   '@noble/ciphers@2.1.1': {}
 

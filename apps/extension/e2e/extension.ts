@@ -8,7 +8,10 @@ export interface Extension {
   /** The popup, opened in a tab by the extension itself. */
   popup: Page;
   click(selector: string): Promise<void>;
+  fill(selector: string, text: string): Promise<void>;
   press(key: string): Promise<void>;
+  /** Opens the popup again, as when the user clicks the extension's icon once more. */
+  reload(): Promise<void>;
 }
 
 /**
@@ -37,7 +40,16 @@ export async function launch(name: BrowserName, language = "en"): Promise<Extens
       browser,
       popup,
       click: (selector) => popup.locator(selector).click(),
+      // Locator.fill sets a password field's value behind React's back: the text is pasted instead.
+      fill: async (selector, text) => {
+        const input = await popup.waitForSelector(selector);
+        await input?.evaluate((input) => (input as HTMLInputElement).select());
+        await popup.keyboard.sendCharacter(text);
+      },
       press: (key) => popup.keyboard.press(key as KeyInput),
+      reload: async () => {
+        await popup.reload();
+      },
     };
   }
   await browser.installExtension(path);
@@ -52,6 +64,20 @@ export async function launch(name: BrowserName, language = "en"): Promise<Extens
         (element as HTMLElement).focus();
         (element as HTMLElement).click();
       }),
+    fill: (selector, text) =>
+      popup.$eval(
+        selector,
+        (input, text) => {
+          (input as HTMLInputElement).focus();
+          // React listens to input events, and reads the value through the prototype's setter.
+          Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(
+            input,
+            text,
+          );
+          input.dispatchEvent(new Event("input", { bubbles: true }));
+        },
+        text,
+      ),
     press: (key) =>
       popup.evaluate((key) => {
         const target = document.activeElement ?? document.body;
@@ -59,6 +85,11 @@ export async function launch(name: BrowserName, language = "en"): Promise<Extens
           target.dispatchEvent(new KeyboardEvent(type, { key, bubbles: true, cancelable: true }));
         }
       }, key),
+    reload: async () => {
+      // The page goes away with the script that reloads it.
+      await popup.evaluate(() => location.reload()).catch(() => {});
+      await popup.waitForSelector("#root > *");
+    },
   };
 }
 

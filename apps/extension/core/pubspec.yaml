@@ -8,6 +8,7 @@ resolution: workspace
 
 dependencies:
   ndk: ^0.10.1
+  nostr_passwords: ^0.1.0
 
 dev_dependencies:
   lints: ^6.1.0

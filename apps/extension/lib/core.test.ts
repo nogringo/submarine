@@ -11,15 +11,17 @@ describe("callCore", () => {
   });
 
   it("sends the method and its arguments, and returns the result", async () => {
-    const send = reply({ result: { items: 3 } });
-    expect(await callCore("items", { vault: "a" })).toEqual({ items: 3 });
-    expect(send).toHaveBeenCalledWith({ method: "items", args: { vault: "a" } });
+    const vault = { pubkey: "a", name: "Home", color: 1 };
+    const send = reply({ result: [vault] });
+    expect(await callCore("vaults", {})).toEqual([vault]);
+    expect(send).toHaveBeenCalledWith({ method: "vaults", args: {} });
   });
 
   it("throws the error of the core with its code", async () => {
-    reply({ error: { code: "wrongPassword", message: null } });
-    const error = await callCore("unlock").catch((error: unknown) => error);
+    reply({ error: { code: "vaultAlreadyOpen", message: "Home" } });
+    const args = { key: "nsec1", name: "Work", color: 1 };
+    const error = await callCore("addVault", args).catch((error: unknown) => error);
     expect(error).toBeInstanceOf(CoreError);
-    expect(error).toMatchObject({ code: "wrongPassword", message: "wrongPassword" });
+    expect(error).toMatchObject({ code: "vaultAlreadyOpen", message: "Home" });
   });
 });

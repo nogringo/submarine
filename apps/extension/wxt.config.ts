@@ -5,6 +5,7 @@ export default defineConfig({
   manifestVersion: 3,
   manifest: ({ browser }) => ({
     name: "Submarine",
+    permissions: ["storage"],
     ...(browser === "firefox" && {
       browser_specific_settings: { gecko: { id: "submarine@uid.ovh" } },
     }),

@@ -1,0 +1,45 @@
+.color-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.color-picker-label {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.color-picker-swatches {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+/* 48 to tap, around the 36 that shows. */
+.color-swatch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.color-swatch[data-focus-visible] {
+  outline: 2px solid var(--text);
+  outline-offset: -2px;
+}
+
+.color-swatch-dot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: #fff;
+}
+
+.color-swatch[data-selected] .color-swatch-dot {
+  box-shadow: 0 0 0 2.5px var(--text);
+}

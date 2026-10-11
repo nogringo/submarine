@@ -6,6 +6,13 @@ export interface SubmarineCore {
   call(method: string, args: string): Promise<string>;
 }
 
+/** The strings the Dart core keeps, in the extension's local storage. */
+export const extensionStorage = {
+  get: async (key: string): Promise<string | undefined> =>
+    (await browser.storage.local.get(key))[key] as string | undefined,
+  set: (key: string, value: string) => browser.storage.local.set({ [key]: value }),
+};
+
 type CoreGlobals = typeof globalThis & {
   importScripts?: (...urls: string[]) => void;
   submarineCore?: SubmarineCore;
@@ -21,7 +28,7 @@ export function loadCore(): SubmarineCore {
     });
   }
   // Without a DOM, dart2js runs its microtasks on setTimeout, clamped to 4 ms once nested.
-  Object.assign(globals, { nostrCrypto, scheduleImmediate: queueMicrotask });
+  Object.assign(globals, { nostrCrypto, extensionStorage, scheduleImmediate: queueMicrotask });
   // Firefox runs the background as a page, where the manifest lists core.js first.
   globals.importScripts?.("/core.js");
   if (!globals.submarineCore) throw new Error("The Dart core did not load");

@@ -25,6 +25,11 @@
   font-size: 16px;
 }
 
-.welcome > .button {
+.welcome > .button.filled {
+  align-self: stretch;
   margin-top: 40px;
+}
+
+.welcome > .button.text {
+  margin-top: 24px;
 }

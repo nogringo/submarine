@@ -1,4 +1,5 @@
 @import "@fontsource-variable/atkinson-hyperlegible-next";
+@import "@fontsource-variable/atkinson-hyperlegible-mono";
 @import "@fontsource/saira-stencil-one";
 
 /*
@@ -23,6 +24,8 @@
   --danger: light-dark(#b3261e, #ff9585);
 
   --text-font: "Atkinson Hyperlegible Next Variable", system-ui, sans-serif;
+  /* Secrets, keys and codes, where every character must read unambiguously. */
+  --mono-font: "Atkinson Hyperlegible Mono Variable", ui-monospace, monospace;
   --wordmark-font: "Saira Stencil One", var(--text-font);
 }
 

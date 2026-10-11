@@ -1,4 +1,8 @@
 .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   min-height: 44px;
   padding: 0 16px;
   border: none;
@@ -11,14 +15,44 @@
   cursor: pointer;
 }
 
-.button.text[data-hovered] {
+.button[data-disabled] {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.button.text[data-hovered],
+.button.icon-button[data-hovered] {
   background: color-mix(in srgb, currentColor 8%, transparent);
 }
 
-.button.text[data-pressed] {
+.button.text[data-pressed],
+.button.icon-button[data-pressed] {
   background: color-mix(in srgb, currentColor 12%, transparent);
 }
 
 .button.muted {
+  color: var(--muted);
+}
+
+.button.filled {
+  min-height: 48px;
+  padding: 0 22px;
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.button.filled[data-hovered] {
+  background: color-mix(in srgb, var(--accent), var(--on-accent) 8%);
+}
+
+.button.filled[data-pressed] {
+  background: color-mix(in srgb, var(--accent), var(--on-accent) 12%);
+}
+
+.button.icon-button {
+  min-height: 40px;
+  width: 40px;
+  padding: 0;
+  border-radius: 50%;
   color: var(--muted);
 }

@@ -18,7 +18,12 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
       {
         type: 1,
         name: "GitHub",
-        login: { username: "alice", password: "hunter2", uris: [{ uri: "github.com" }] },
+        login: {
+          username: "alice",
+          password: "hunter2",
+          totp: "JBSWY3DPEHPK3PXP",
+          uris: [{ uri: "github.com" }],
+        },
         notes: "Recovery codes in the safe",
         fields: [{ name: "PIN", value: "1234", type: 1 }],
       },
@@ -133,6 +138,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     expect(await tiles()).toEqual([
       "Username: alice",
       "Password: ••••••••••••",
+      "Verification code",
       "Website: github.com",
       "Notes: Recovery codes in the safe",
       "PIN: ••••••••••••",
@@ -152,6 +158,23 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     await extension.click(".field-tile button[aria-label=Copy]");
     await extension.popup.waitForSelector(".field-tile button[aria-label=Copied]");
     expect(await extension.readClipboard()).toBe("alice");
+  });
+
+  it("shows the verification code as it counts down, and copies it", async () => {
+    const { popup } = extension;
+    const shown = () => popup.$eval(".totp-code", (code) => code.textContent ?? "");
+    expect(await shown()).toMatch(/^\d{3} \d{3}$/);
+    const seconds = Number(await popup.$eval(".totp-seconds", (left) => left.textContent));
+    expect(seconds).toBeGreaterThanOrEqual(1);
+    expect(seconds).toBeLessThanOrEqual(30);
+    const before = await shown();
+    await extension.click(".field-tile:has(.totp-code) button[aria-label=Copy]");
+    await popup.waitForSelector(".field-tile:has(.totp-code) button[aria-label=Copied]");
+    const after = await shown();
+    // A code may change between the two.
+    expect([before, after].map((code) => code.replace(" ", ""))).toContain(
+      await extension.readClipboard(),
+    );
   });
 
   it("goes back to the list with Escape, onto the item's row", async () => {

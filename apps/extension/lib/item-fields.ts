@@ -10,6 +10,8 @@ export type FieldKind =
   | "secret"
   /** A secret whose digits and special characters stand out once shown. */
   | "password"
+  /** A verification key, shown as its current code. */
+  | "totp"
   | "url"
   | "mono"
   /** Shown as is. */
@@ -38,6 +40,7 @@ export function typeFields(
       const login = cipher.login;
       add("username", login?.username);
       add("password", login?.password, "password");
+      add("verificationCode", login?.totp, "totp");
       for (const { uri } of login?.uris ?? []) add("website", uri, "url");
       for (const { rpId, creationDate } of login?.fido2Credentials ?? []) {
         const created = creationDate && formatDate(creationDate, dayFormat);

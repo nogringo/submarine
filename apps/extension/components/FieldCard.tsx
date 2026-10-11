@@ -6,6 +6,7 @@ import { useIntl } from "react-intl";
 import { type FieldRow, websiteUrl } from "@/lib/item-fields";
 import { IconButton, IconLink } from "./Button";
 import { CopyButton } from "./CopyButton";
+import { TotpTile } from "./TotpTile";
 import "./FieldCard.css";
 
 /** Rows sharing one rounded card, as the fields of an item do. */
@@ -21,6 +22,11 @@ export function FieldCard({ rows }: { rows: FieldRow[] }) {
 }
 
 function FieldTile({ row }: { row: FieldRow }) {
+  if (row.kind === "totp") return <TotpTile label={row.label} totpKey={row.value} />;
+  return <ValueTile row={row} />;
+}
+
+function ValueTile({ row }: { row: FieldRow }) {
   const { formatMessage: t } = useIntl();
   const [shown, setShown] = useState(false);
   const hidden = row.kind === "secret" || row.kind === "password";

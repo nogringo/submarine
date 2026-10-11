@@ -8,6 +8,7 @@ import 'package:submarine_extension_core/js_crypto.dart';
 import 'package:submarine_extension_core/js_events.dart';
 import 'package:submarine_extension_core/js_storage.dart';
 import 'package:submarine_extension_core/sync.dart';
+import 'package:submarine_extension_core/totp.dart';
 import 'package:submarine_extension_core/vaults.dart';
 
 void main() {
@@ -34,6 +35,10 @@ void main() {
     'items': (args) async => (await sync()).items(
       pubkey: args['vault'] as String?,
       query: args['query'] as String? ?? '',
+    ),
+    'totp': (args) async => totp(
+      args['key'] as String,
+      DateTime.fromMillisecondsSinceEpoch(args['at'] as int),
     ),
     'item': (args) async => (await sync()).item(
       pubkey: args['vault'] as String,

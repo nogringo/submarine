@@ -30,7 +30,7 @@ describe("typeFields", () => {
       login: {
         username: "alice",
         password: "hunter2",
-        totp: null,
+        totp: "JBSWY3DPEHPK3PXP",
         uris: [{ uri: "github.com" }, { uri: " " }, { uri: "https://gist.github.com" }],
         fido2Credentials: [
           { rpId: "github.com", creationDate: "2026-10-01T12:00:00.000Z" },
@@ -41,6 +41,7 @@ describe("typeFields", () => {
     expect(typeFields(login, intl)).toEqual([
       { label: "Username", value: "alice", kind: "text" },
       { label: "Password", value: "hunter2", kind: "password" },
+      { label: "Verification code", value: "JBSWY3DPEHPK3PXP", kind: "totp" },
       { label: "Website", value: "github.com", kind: "url" },
       { label: "Website", value: "https://gist.github.com", kind: "url" },
       { label: "Passkey", value: "Created on Oct 1, 2026", kind: "info" },

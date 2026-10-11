@@ -1,0 +1,72 @@
+.totp-value {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.totp-code {
+  font-family: var(--mono-font);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  line-height: 1.2;
+}
+
+.totp-invalid {
+  color: var(--danger);
+}
+
+.totp-ring {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+}
+
+.totp-ring svg {
+  position: absolute;
+  inset: 0;
+  /* The arc starts at the top, as in the app. */
+  transform: rotate(-90deg);
+}
+
+.totp-ring circle {
+  fill: none;
+  stroke-width: 2.5;
+}
+
+.totp-ring-track {
+  stroke: var(--line);
+}
+
+/* 84.82 is the circumference, 2π × 13.5: the arc shrinks from whole to nothing over a period. */
+.totp-ring-left {
+  stroke: var(--signal);
+  stroke-dasharray: 84.82;
+  stroke-linecap: round;
+  animation-name: totp-ring-left;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+}
+
+@keyframes totp-ring-left {
+  to {
+    stroke-dashoffset: 84.82;
+  }
+}
+
+.totp-seconds {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.totp-ring.expiring .totp-ring-left {
+  stroke: var(--danger);
+}
+
+.totp-ring.expiring .totp-seconds {
+  color: var(--danger);
+}

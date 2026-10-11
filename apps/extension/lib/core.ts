@@ -77,6 +77,8 @@ export interface CoreMethods {
   items: { args: { vault?: string; query?: string }; result: ItemSummary[] };
   /** Null once in the trash or gone. */
   item: { args: { vault: string; id: string }; result: Item | null };
+  /** The code of a verification key at `at`, in milliseconds, and how long a code lasts, in seconds. */
+  totp: { args: { key: string; at: number }; result: { code: string; period: number } };
 }
 
 /** Calls a method of the Dart core, which runs in the background. */

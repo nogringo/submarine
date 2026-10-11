@@ -1,5 +1,6 @@
 {
   "@@locale": "pt_BR",
+  "@@x-template": "extension_en.arb",
   "back": "Voltar",
   "lockOnBrowserRestart": "Ao reiniciar o navegador",
   "removeLockPasswordBodyBrowser": "A extensão deixa de pedir essa senha. As chaves dos cofres neste dispositivo passam a depender só do armazenamento do navegador."

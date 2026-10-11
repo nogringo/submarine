@@ -1,5 +1,6 @@
 {
   "@@locale": "de",
+  "@@x-template": "extension_en.arb",
   "back": "Zurück",
   "lockOnBrowserRestart": "Beim Neustart des Browsers",
   "removeLockPasswordBodyBrowser": "Die Erweiterung fragt nicht mehr danach. Die Tresorschlüssel auf diesem Gerät sind dann nur noch durch den Speicher des Browsers geschützt."

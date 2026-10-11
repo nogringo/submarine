@@ -1,5 +1,6 @@
 {
   "@@locale": "es",
+  "@@x-template": "extension_en.arb",
   "back": "Atrás",
   "lockOnBrowserRestart": "Al reiniciar el navegador",
   "removeLockPasswordBodyBrowser": "La extensión dejará de pedirla. Las claves de las cajas fuertes de este dispositivo quedarán protegidas solo por el almacenamiento del navegador."

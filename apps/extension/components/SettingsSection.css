@@ -32,7 +32,8 @@
   padding: 12px 12px 12px 16px;
 }
 
-.settings-tile + .settings-tile {
+/* Not "+": a select leaves an element of its own before its row. */
+.settings-tile ~ .settings-tile {
   border-top: 1px solid var(--line);
 }
 

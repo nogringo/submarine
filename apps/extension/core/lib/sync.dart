@@ -57,6 +57,20 @@ class VaultSync {
     ]);
   }
 
+  /// Stops for good, and lets go of the vaults: their keys and the items they
+  /// opened, as locking does.
+  Future<void> close() async {
+    _running = false;
+    for (final synced in _synced.values) {
+      await synced.close();
+      ndk.accounts.removeAccount(pubkey: synced.pubkey);
+    }
+    _synced.clear();
+    await _engine.dispose();
+    await ndk.destroy();
+    await _database.close();
+  }
+
   /// Syncs the vaults opened since [start] too.
   Future<void> update() async {
     if (!_running) return;

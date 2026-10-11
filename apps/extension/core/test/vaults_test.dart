@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:ndk/ndk.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
 import 'package:submarine_extension_core/core.dart';
+import 'package:submarine_extension_core/device_key.dart';
 import 'package:submarine_extension_core/vaults.dart';
 import 'package:test/test.dart';
 
@@ -17,9 +18,12 @@ void main() {
   late MemoryStore store;
   late Vaults vaults;
 
+  /// The vaults as the next start of the background reads them.
+  Vaults reopened() => Vaults(store, signers, DeviceKey(store, MemoryStore()));
+
   setUp(() {
     store = MemoryStore();
-    vaults = Vaults(store, signers);
+    vaults = reopened();
   });
 
   Matcher throwsCode(String code, [String? message]) => throwsA(
@@ -98,7 +102,7 @@ void main() {
     });
     expect(await vaults.edit(pubkey, color: 2), containsPair('color', 2));
 
-    final record = (await Vaults(store, signers).records()).single;
+    final record = (await reopened().records()).single;
     expect(record.name, 'Family');
     expect(record.color, 2);
     expect(record.privateKey, privateKey);
@@ -150,6 +154,6 @@ void main() {
       base64.decode(store.values['deviceKey']!),
     );
     expect(await deviceKey.decryptString(saved), contains(privateKey));
-    expect(await Vaults(store, signers).list(), hasLength(1));
+    expect(await reopened().list(), hasLength(1));
   });
 }

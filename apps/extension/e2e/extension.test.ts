@@ -11,6 +11,7 @@ const english = JSON.parse(await readFile(appArb("en"), "utf8"));
 describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
   const secretKey = generateSecretKey();
   let extension: Extension;
+  let lockPassword = "";
 
   beforeAll(async () => {
     await publishItems(secretKey, [
@@ -362,6 +363,70 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
       await new Promise((wait) => setTimeout(wait, 500));
     }
     expect(Date.now() - copied).toBeGreaterThan(9_000);
+  });
+
+  it("sets a lock password in the settings, 12 characters long at least", async () => {
+    const { popup } = extension;
+    await extension.click("button[aria-label=Vaults]");
+    await extension.click(".drawer button::-p-text(Settings)");
+    await extension.click(".settings button::-p-text(Set up)");
+    await extension.fill("[role=dialog] input[name=password]", "too short");
+    await extension.fill("[role=dialog] input[name=confirmation]", "too short");
+    await extension.click("[role=dialog] button[type=submit]");
+    await popup.waitForFunction(
+      (error) => document.querySelector("[role=dialog] .text-field-error")?.textContent === error,
+      {},
+      english.passwordMinLength.replace("{count}", "12"),
+    );
+    await extension.click("[role=dialog] button::-p-text(Generate a passphrase)");
+    await popup.waitForFunction(() => {
+      const [password, confirmation] =
+        document.querySelectorAll<HTMLInputElement>("[role=dialog] input");
+      return (
+        password?.type === "text" &&
+        password.value.length >= 12 &&
+        password.value === confirmation?.value
+      );
+    });
+    lockPassword = await popup.$eval(
+      "[role=dialog] input[name=password]",
+      (input) => (input as HTMLInputElement).value,
+    );
+    await extension.click("[role=dialog] button[type=submit]");
+    await popup.waitForSelector("[role=dialog]", { hidden: true });
+    await popup.waitForSelector(".settings button::-p-text(Set up)", { hidden: true });
+  });
+
+  it("locks the vaults from the list, behind the lock password", async () => {
+    const { popup } = extension;
+    await extension.press("Escape");
+    await popup.waitForSelector(".settings", { hidden: true });
+    await extension.click("button[aria-label=Lock]");
+    await popup.waitForSelector(`::-p-text(${english.vaultsLocked})`);
+    expect(await popup.$(".home")).toBeNull();
+    await extension.fill("input[name=password]", "not the lock password");
+    await extension.click("button[type=submit]");
+    await popup.waitForSelector(`::-p-text(${english.wrongLockPassword})`);
+    await extension.fill("input[name=password]", lockPassword);
+    await extension.click("button[type=submit]");
+    await popup.waitForSelector(".home-title");
+  });
+
+  it("stays unlocked as the popup opens again, until the browser closes", async () => {
+    const { popup } = extension;
+    await extension.reload();
+    await popup.waitForSelector(".home-title");
+    // As the browser does once it closes.
+    await popup.evaluate(() => {
+      type Api = { storage: { session: { clear(): Promise<void> } } };
+      const globals = globalThis as unknown as { browser?: Api; chrome: Api };
+      return (globals.browser ?? globals.chrome).storage.session.clear();
+    });
+    await extension.reload();
+    await popup.waitForSelector(`::-p-text(${english.vaultsLocked})`);
+    await extension.fill("input[name=password]", lockPassword);
+    await extension.click("button[type=submit]");
+    await popup.waitForSelector(".home-title");
   });
 
   it("keeps the vaults when the popup opens again, as renamed", async () => {

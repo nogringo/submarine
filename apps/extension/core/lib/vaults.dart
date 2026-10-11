@@ -4,11 +4,13 @@ import 'package:ndk/ndk.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
 
 import 'core.dart';
+import 'device_key.dart';
 
-/// Strings kept by the extension: its `storage.local`.
+/// Strings kept by the extension: its `storage.local` or `storage.session`.
 abstract interface class KeyValueStore {
   Future<String?> read(String key);
   Future<void> write(String key, String value);
+  Future<void> remove(String key);
 }
 
 /// A vault opened on this device. Its name and color stay on the device, as in
@@ -55,12 +57,12 @@ class VaultRecord {
 /// The vaults of this device, keys included, encrypted with the key of the
 /// device as the app keeps them.
 class Vaults {
-  Vaults(this._store, this._signers);
+  Vaults(this._store, this._signers, this._deviceKey);
 
   final KeyValueStore _store;
   final LocalEventSignerFactory _signers;
+  final DeviceKey _deviceKey;
 
-  static const _deviceKeyKey = 'deviceKey';
   static const _vaultsKey = 'vaults';
 
   /// The popup saves a name at each key typed: each write reads what the
@@ -71,7 +73,7 @@ class Vaults {
     final saved = await _store.read(_vaultsKey);
     if (saved == null) return [];
     final json =
-        await (await _deviceKey()).decryptString(saved) ??
+        await (await _deviceKey.read()).decryptString(saved) ??
         (throw CoreException('vaultsUnreadable'));
     return [
       for (final record in jsonDecode(json) as List)
@@ -156,7 +158,7 @@ class Vaults {
 
   Future<void> _save(List<VaultRecord> records) async => _store.write(
     _vaultsKey,
-    await (await _deviceKey()).encryptString(jsonEncode(records)),
+    await (await _deviceKey.read()).encryptString(jsonEncode(records)),
   );
 
   Map<String, Object> _summary(VaultRecord record) => {
@@ -164,12 +166,4 @@ class Vaults {
     'name': record.name,
     'color': record.color,
   };
-
-  Future<SymmetricCryptoKey> _deviceKey() async {
-    final saved = await _store.read(_deviceKeyKey);
-    if (saved != null) return SymmetricCryptoKey(base64.decode(saved));
-    final key = SymmetricCryptoKey.generate();
-    await _store.write(_deviceKeyKey, base64.encode(key.bytes));
-    return key;
-  }
 }

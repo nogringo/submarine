@@ -16,7 +16,8 @@ import "./TextField.css";
 
 /**
  * A labelled field, with its help below and its error in place of the help. A secret field is
- * hidden until shown; a mono one is written in the font that tells every character apart.
+ * hidden until shown, by its own button or by `shown`; a mono one is written in the font that tells
+ * every character apart.
  */
 export function TextField({
   label,
@@ -25,6 +26,8 @@ export function TextField({
   placeholder,
   secret,
   mono,
+  shown: shownProp,
+  onShownChange,
   ...props
 }: Omit<TextFieldProps, "children" | "isInvalid"> & {
   label: string;
@@ -33,9 +36,14 @@ export function TextField({
   placeholder?: string;
   secret?: boolean;
   mono?: boolean;
+  /** For several secret fields shown together. */
+  shown?: boolean;
+  onShownChange?: (shown: boolean) => void;
 }) {
   const { formatMessage: t } = useIntl();
-  const [shown, setShown] = useState(false);
+  const [ownShown, setOwnShown] = useState(false);
+  const shown = shownProp ?? ownShown;
+  const setShown = onShownChange ?? setOwnShown;
   return (
     <AriaTextField
       {...props}

@@ -1,6 +1,7 @@
 import 'package:ndk/ndk.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
 import 'package:sembast/sembast_memory.dart';
+import 'package:submarine_extension_core/device_key.dart';
 import 'package:submarine_extension_core/sync.dart';
 import 'package:submarine_extension_core/vaults.dart';
 import 'package:test/test.dart';
@@ -32,7 +33,8 @@ void main() {
         bootstrapRelays: [],
       ),
     );
-    vaults = Vaults(MemoryStore(), signers);
+    final store = MemoryStore();
+    vaults = Vaults(store, signers, DeviceKey(store, MemoryStore()));
     changes = 0;
     sync = VaultSync(
       ndk: ndk,
@@ -327,6 +329,18 @@ void main() {
     await addVault();
     await sync.update();
     await _until(() async => await opened() == 1);
+  });
+
+  test('lets go of the vaults once closed', () async {
+    await publish('Wifi');
+    await addVault();
+    await sync.start();
+    await _until(() async => await opened() == 1);
+
+    await sync.close();
+
+    expect(sync.states(), isEmpty);
+    expect(ndk.accounts.hasAccount(pubkey), isFalse);
   });
 
   test('reads what was opened before it starts', () async {

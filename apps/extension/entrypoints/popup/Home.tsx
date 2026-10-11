@@ -1,3 +1,4 @@
+import lockIcon from "@material-design-icons/svg/outlined/lock.svg";
 import settings from "@material-design-icons/svg/outlined/settings.svg";
 import tune from "@material-design-icons/svg/round/tune.svg";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -40,12 +41,16 @@ type Opened =
 export function Home({
   vaults,
   sync,
+  hasLockPassword,
+  onLock,
   onOpenVault,
   onVaultChanged,
   onVaultRemoved,
 }: {
   vaults: Vault[];
   sync: Sync;
+  hasLockPassword: boolean;
+  onLock: () => void;
   onOpenVault: () => void;
   onVaultChanged: (vault: Vault) => void;
   onVaultRemoved: (pubkey: string) => void;
@@ -171,6 +176,9 @@ export function Home({
             <SyncStatus pubkeys={pubkeys} states={sync.states} />
           </div>
           <SyncButton vault={vault?.pubkey} syncing={anySyncing(pubkeys, sync.states)} />
+          {hasLockPassword && (
+            <IconButton icon={lockIcon} label={t({ id: "lock" })} onPress={onLock} />
+          )}
         </header>
         <div className="home-search">
           {/* What the popup opens for: typing finds the item at once. */}
@@ -206,7 +214,7 @@ export function Home({
           onBack={back}
         />
       )}
-      {opened?.page === "settings" && <Settings onBack={back} />}
+      {opened?.page === "settings" && <Settings hasLockPassword={hasLockPassword} onBack={back} />}
     </main>
   );
 }

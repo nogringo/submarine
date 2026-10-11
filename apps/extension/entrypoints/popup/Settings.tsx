@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
+import { DialogTrigger } from "react-aria-components";
 import { type IntlShape, useIntl } from "react-intl";
+import { TextButton } from "@/components/Button";
+import { SetLockPasswordDialog } from "@/components/LockPasswordDialog";
 import { Page, PageHeader } from "@/components/Page";
 import { SelectTile } from "@/components/SelectTile";
-import { SettingsSection } from "@/components/SettingsSection";
+import { SettingsSection, SettingsTile } from "@/components/SettingsSection";
 import {
   type ClipboardTimeout,
   clipboardTimeouts,
@@ -11,7 +14,13 @@ import {
 } from "@/lib/clipboard";
 
 /** The settings of the extension on this device, as in the app. */
-export function Settings({ onBack }: { onBack: () => void }) {
+export function Settings({
+  hasLockPassword,
+  onBack,
+}: {
+  hasLockPassword: boolean;
+  onBack: () => void;
+}) {
   const intl = useIntl();
   const { formatMessage: t } = intl;
   const [clipboardTimeout, setClipboardTimeout] = useState<ClipboardTimeout>();
@@ -23,6 +32,17 @@ export function Settings({ onBack }: { onBack: () => void }) {
       <div className="page-content">
         <PageHeader title={t({ id: "settings" })} />
         <SettingsSection title={t({ id: "security" })}>
+          <SettingsTile
+            title={t({ id: "lockPassword" })}
+            description={t({ id: "lockPasswordDescription" })}
+          >
+            {!hasLockPassword && (
+              <DialogTrigger>
+                <TextButton>{t({ id: "setLockPassword" })}</TextButton>
+                <SetLockPasswordDialog />
+              </DialogTrigger>
+            )}
+          </SettingsTile>
           {clipboardTimeout && (
             <SelectTile
               title={t({ id: "clearClipboardAfter" })}

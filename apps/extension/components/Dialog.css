@@ -9,7 +9,8 @@
 }
 
 .dialog-modal {
-  max-width: 100%;
+  width: 100%;
+  max-width: 440px;
   max-height: 100%;
   overflow: auto;
   border-radius: 20px;
@@ -33,6 +34,17 @@
   gap: 12px;
   margin-top: 16px;
   color: var(--muted);
+}
+
+.dialog-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.dialog-fields > .button.text {
+  align-self: flex-start;
 }
 
 .dialog-actions {

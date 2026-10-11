@@ -60,11 +60,28 @@ export interface SyncState {
 /** The port a popup holds open for the vaults to sync, where the core tells what changed. */
 export const syncPort = "sync";
 
-/** What the core tells the popups through {@link syncPort}: the sync or the items of a vault moved. */
+/**
+ * What the core tells the popups through {@link syncPort}: the sync or the items of a vault moved,
+ * or the vaults locked or unlocked.
+ */
 export type CoreEvent = "vaultsChanged";
+
+/** Whether a lock password protects the vaults, and whether it must unlock them now. */
+export interface LockState {
+  hasPassword: boolean;
+  locked: boolean;
+}
 
 /** The core's methods: their arguments and their result. */
 export interface CoreMethods {
+  lockState: { args: Record<string, never>; result: LockState };
+  /** Of 12 characters at least. Leaves the vaults unlocked. */
+  setLockPassword: { args: { password: string }; result: null };
+  /** Stops the sync, and lets go of the vaults' keys and items until unlocked. */
+  lock: { args: Record<string, never>; result: null };
+  /** Fails with `wrongLockPassword`. */
+  unlock: { args: { password: string }; result: null };
+  generatePassphrase: { args: Record<string, never>; result: string };
   vaults: { args: Record<string, never>; result: Vault[] };
   /** Opens the vault of an nsec, a key in hex or an ncryptsec that the password decrypts. */
   addVault: {

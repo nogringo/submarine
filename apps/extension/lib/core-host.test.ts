@@ -151,4 +151,26 @@ describe("loadCore", () => {
     expect(globalThis).toMatchObject({ nostrCrypto, scheduleImmediate: queueMicrotask });
     expect(globalThis).toHaveProperty("window.crypto", globalThis.crypto);
   });
+
+  it("keeps the core's strings in the local storage, and its unlocked key in the session's", async () => {
+    fakeBrowser.reset();
+    Object.assign(globalThis, { submarineCore: fakeCore(async () => "") });
+    loadCore();
+    type Storage = {
+      get(key: string): Promise<string | undefined>;
+      set(key: string, value: string): Promise<void>;
+      remove(key: string): Promise<void>;
+    };
+    const { extensionStorage, extensionSessionStorage } = globalThis as unknown as {
+      extensionStorage: Storage;
+      extensionSessionStorage: Storage;
+    };
+    await extensionStorage.set("vaults", "sealed");
+    await extensionSessionStorage.set("deviceKey", "key");
+    expect(await browser.storage.local.get("vaults")).toEqual({ vaults: "sealed" });
+    expect(await browser.storage.session.get("deviceKey")).toEqual({ deviceKey: "key" });
+    await extensionSessionStorage.remove("deviceKey");
+    expect(await extensionSessionStorage.get("deviceKey")).toBeUndefined();
+    expect(await extensionStorage.get("vaults")).toBe("sealed");
+  });
 });

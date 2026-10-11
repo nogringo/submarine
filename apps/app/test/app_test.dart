@@ -425,13 +425,15 @@ void main() {
     await settle(tester);
 
     expect(find.text('Save the vault key'), findsOneWidget);
-    final nsec = tester.widget<SelectableText>(
-      find.byWidgetPredicate(
-        (widget) =>
-            widget is SelectableText &&
-            (widget.data?.startsWith('nsec1') ?? false),
-      ),
+    final nsecFinder = find.byWidgetPredicate(
+      (widget) =>
+          widget is SelectableText &&
+          (widget.data?.startsWith('nsec1') ?? false),
     );
+    expect(nsecFinder, findsNothing);
+    await tester.tap(find.byTooltip('Show'));
+    await settle(tester);
+    final nsec = tester.widget<SelectableText>(nsecFinder);
     final privateKey = parseVaultKey(nsec.data!);
     expect(
       vaults.all.single.record.login,
@@ -2294,7 +2296,9 @@ void main() {
 
     expect(find.text('Réglages du coffre'), findsOneWidget);
     expect(nsecText(), findsNothing);
-    await tester.tap(find.text('Afficher'));
+    await tester.ensureVisible(find.byTooltip('Afficher'));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Afficher'));
     await settle(tester);
     final nsec = tester.widget<SelectableText>(nsecText());
     expect(
@@ -2356,7 +2360,7 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(find.text('Show'), findsNothing);
+    expect(find.byTooltip('Show'), findsNothing);
     await close(tester);
   });
 

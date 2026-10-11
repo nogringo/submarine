@@ -251,8 +251,10 @@ class _VaultSettingsState extends State<_VaultSettings> {
                     trailing: CopyButton(value: npub),
                   ),
                   switch (vault.record.login) {
-                    KeyLogin(:final privateKey) => _VaultKeyTile(
-                      privateKey: privateKey,
+                    KeyLogin(:final privateKey) => SettingsTile(
+                      title: Text(l10n.vaultKey),
+                      subtitle: Text(l10n.vaultKeyDescription),
+                      below: VaultKeyBox(privateKey: privateKey),
                     ),
                     SignerLogin login => SettingsTile(
                       title: Text(signerName(l10n, login)),
@@ -388,35 +390,6 @@ class _VaultListTile extends StatelessWidget {
       subtitle: summary != null ? Text(summary) : null,
       trailing: Icon(Icons.chevron_right_rounded, color: context.palette.muted),
       onTap: () => context.push(vaultListPath(vault.pubkey, list)),
-    );
-  }
-}
-
-/// Hides the key until asked, as a password field does.
-class _VaultKeyTile extends StatefulWidget {
-  const _VaultKeyTile({required this.privateKey});
-
-  final String privateKey;
-
-  @override
-  State<_VaultKeyTile> createState() => _VaultKeyTileState();
-}
-
-class _VaultKeyTileState extends State<_VaultKeyTile> {
-  var _shown = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    return SettingsTile(
-      title: Text(l10n.vaultKey),
-      subtitle: Text(l10n.vaultKeyDescription),
-      trailing: OutlinedButton(
-        onPressed: () => setState(() => _shown = !_shown),
-        style: settingsButtonStyle,
-        child: Text(_shown ? l10n.hide : l10n.show),
-      ),
-      below: _shown ? VaultKeyBox(privateKey: widget.privateKey) : null,
     );
   }
 }

@@ -5,17 +5,26 @@ import '../context.dart';
 import '../theme/theme.dart';
 import 'copy_button.dart';
 
-/// A vault key, as an nsec, to copy.
-class VaultKeyBox extends StatelessWidget {
+/// A vault key, as an nsec, hidden until asked and copyable either way.
+class VaultKeyBox extends StatefulWidget {
   const VaultKeyBox({super.key, required this.privateKey});
 
   /// In hex.
   final String privateKey;
 
   @override
+  State<VaultKeyBox> createState() => _VaultKeyBoxState();
+}
+
+class _VaultKeyBoxState extends State<VaultKeyBox> {
+  var _shown = false;
+
+  @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final palette = context.palette;
-    final nsec = Nip19.encodePrivateKey(privateKey);
+    final nsec = Nip19.encodePrivateKey(widget.privateKey);
+    final style = monoStyle.copyWith(fontSize: 14, height: 1.4);
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 8, 4, 8),
       decoration: BoxDecoration(
@@ -26,9 +35,21 @@ class VaultKeyBox extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: SelectableText(
-              nsec,
-              style: monoStyle.copyWith(fontSize: 14, height: 1.4),
+            child: _shown
+                ? SelectableText(nsec, style: style)
+                : Text(
+                    '••••••••••••',
+                    semanticsLabel: l10n.hiddenValue,
+                    style: style,
+                  ),
+          ),
+          IconButton(
+            tooltip: _shown ? l10n.hide : l10n.show,
+            onPressed: () => setState(() => _shown = !_shown),
+            icon: Icon(
+              _shown
+                  ? Icons.visibility_off_outlined
+                  : Icons.visibility_outlined,
             ),
           ),
           CopyButton(value: nsec, sensitive: true),

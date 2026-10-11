@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
-import { TextButton } from "./Button";
+import { FilledButton, TextButton } from "./Button";
 import "./Dialog.css";
 
 /** A dialog with a title, a message and a Close button, opened by a DialogTrigger. */
@@ -24,6 +24,50 @@ export function MessageDialog({
           <div className="dialog-actions">
             <TextButton slot="close">{close}</TextButton>
           </div>
+        </Dialog>
+      </Modal>
+    </ModalOverlay>
+  );
+}
+
+/** A dialog asking to confirm an action that destroys, opened by a DialogTrigger. */
+export function ConfirmDialog({
+  title,
+  cancel,
+  confirm,
+  onConfirm,
+  children,
+}: {
+  title: string;
+  cancel: string;
+  confirm: string;
+  onConfirm: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <ModalOverlay className="dialog-overlay" isDismissable>
+      <Modal className="dialog-modal">
+        <Dialog className="dialog" role="alertdialog">
+          {({ close }) => (
+            <>
+              <Heading slot="title" className="dialog-title">
+                {title}
+              </Heading>
+              <div className="dialog-content">{children}</div>
+              <div className="dialog-actions">
+                <TextButton slot="close">{cancel}</TextButton>
+                <FilledButton
+                  danger
+                  onPress={() => {
+                    close();
+                    onConfirm();
+                  }}
+                >
+                  {confirm}
+                </FilledButton>
+              </div>
+            </>
+          )}
         </Dialog>
       </Modal>
     </ModalOverlay>

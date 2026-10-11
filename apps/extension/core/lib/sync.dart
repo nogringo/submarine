@@ -74,6 +74,16 @@ class VaultSync {
       if (pubkey == null || vault.pubkey == pubkey) vault.syncNow(),
   ]);
 
+  /// Removes the vault of [record] from this device, see [Vault.forget]: its
+  /// relays keep it. Remove its record first, for nothing to open it again.
+  Future<void> forget(VaultRecord record) async {
+    final synced = _open(record);
+    _synced.remove(synced.pubkey);
+    await synced.close();
+    ndk.accounts.removeAccount(pubkey: synced.pubkey);
+    await synced.vault.forget(_engine);
+  }
+
   /// Where the sync of each vault stands, for those [start] got to.
   List<Map<String, Object?>> states() => [
     for (final vault in _synced.values)
@@ -206,6 +216,16 @@ class _SyncedVault {
     await live?.cancel();
   }
 
+  var _closed = false;
+
+  /// Stops for good, as the sync would fill the cache again.
+  Future<void> close() async {
+    _closed = true;
+    await pause();
+    await _statuses?.cancel();
+    if (_handle case final handle?) _engine.release(await handle);
+  }
+
   /// Does nothing while paused.
   Future<void> syncNow() async {
     if (_live == null) return;
@@ -228,6 +248,7 @@ class _SyncedVault {
   /// Moves the sync to the relays the vault lives on, once they changed.
   Future<void> _follow() async {
     final relays = (await vault.currentRelays()).toSet();
+    if (_closed) return;
     if (_syncedRelays case final synced?
         when synced.length == relays.length && synced.containsAll(relays)) {
       return;
@@ -238,7 +259,7 @@ class _SyncedVault {
     final handle = await next;
     // After the new handle: the same relays would otherwise drop their sync.
     if (previous != null) unawaited(previous.then(_engine.release));
-    if (_handle != next) return;
+    if (_handle != next || _closed) return;
     unawaited(_statuses?.cancel());
     // Replays the current status, which triggers a read.
     _statuses = _engine.watchStatus(handle).listen((status) {

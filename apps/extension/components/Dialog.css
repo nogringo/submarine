@@ -28,6 +28,9 @@
 }
 
 .dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   margin-top: 16px;
   color: var(--muted);
 }
@@ -35,5 +38,6 @@
 .dialog-actions {
   display: flex;
   justify-content: flex-end;
+  gap: 8px;
   margin-top: 16px;
 }

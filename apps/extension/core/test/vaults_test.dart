@@ -130,6 +130,18 @@ void main() {
     expect((record.name, record.color), ('Family', 2));
   });
 
+  test('removes a vault, the others kept', () async {
+    const otherKey =
+        '7f7ff03d123792d6ac594bfa67bf6d0c0ab55b6b1fdb6249303fe861f1ccba9a';
+    await vaults.add(key: privateKey, name: 'Home', color: 1);
+    await vaults.add(key: otherKey, name: 'Work', color: 2);
+
+    expect((await vaults.remove(pubkey)).privateKey, privateKey);
+
+    expect([for (final vault in await vaults.list()) vault['name']], ['Work']);
+    await expectLater(vaults.remove(pubkey), throwsCode('vaultNotFound'));
+  });
+
   test('keeps the vaults encrypted with the key of the device', () async {
     await vaults.add(key: privateKey, name: 'Home', color: 1);
     final saved = store.values['vaults']!;

@@ -33,11 +33,13 @@ export function Home({
   sync,
   onOpenVault,
   onVaultChanged,
+  onVaultRemoved,
 }: {
   vaults: Vault[];
   sync: Sync;
   onOpenVault: () => void;
   onVaultChanged: (vault: Vault) => void;
+  onVaultRemoved: (pubkey: string) => void;
 }) {
   const { formatMessage: t } = useIntl();
   const [selected, setSelected] = useState(allVaults);
@@ -87,7 +89,7 @@ export function Home({
                         selectionMode="single"
                         selectionBehavior="replace"
                         disallowEmptySelection
-                        selectedKeys={[selected]}
+                        selectedKeys={[vault?.pubkey ?? allVaults]}
                         onSelectionChange={(keys) => {
                           if (keys !== "all") setSelected(String([...keys][0] ?? allVaults));
                           close();
@@ -172,7 +174,12 @@ export function Home({
         <ItemDetail vault={opened.vault} id={opened.id} revision={sync.revision} onBack={back} />
       )}
       {settingsVault && (
-        <VaultSettings vault={settingsVault} onChanged={onVaultChanged} onBack={back} />
+        <VaultSettings
+          vault={settingsVault}
+          onChanged={onVaultChanged}
+          onRemoved={onVaultRemoved}
+          onBack={back}
+        />
       )}
     </main>
   );

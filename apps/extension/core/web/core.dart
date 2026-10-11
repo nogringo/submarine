@@ -34,6 +34,12 @@ void main() {
       name: args['name'] as String?,
       color: args['color'] as int?,
     ),
+    'removeVault': (args) async {
+      final record = await vaults.remove(args['vault'] as String);
+      await (await sync()).forget(record);
+      emitVaultsChanged();
+      return null;
+    },
     'startSync': (_) async => (await sync()).start(),
     'stopSync': (_) async => (await sync()).stop(),
     'syncNow': (args) async =>

@@ -13,10 +13,54 @@
   font-size: 13px;
 }
 
-.settings-card {
+.settings-card:not(:first-child) {
+  margin-top: 12px;
+}
+
+/* Fields in a card, rather than rows. */
+.settings-fields {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin-top: 12px;
   padding: 16px;
+}
+
+.settings-tile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 12px 12px 16px;
+}
+
+.settings-tile + .settings-tile {
+  border-top: 1px solid var(--line);
+}
+
+.settings-tile-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.settings-tile-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.settings-tile-description {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.settings-tile-description.error {
+  color: var(--danger);
+}
+
+/* Half the row at most: the title keeps the rest with large text. */
+.settings-tile-end {
+  flex: none;
+  max-width: 50%;
 }

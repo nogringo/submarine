@@ -136,6 +136,18 @@ class Vaults {
         return _summary(record);
       });
 
+  /// Removes the vault [pubkey] from this device, and returns its record.
+  Future<VaultRecord> remove(String pubkey) => _write(() async {
+    final records = await this.records();
+    final index = records.indexWhere(
+      (record) => _signers.derivePublicKey(record.privateKey) == pubkey,
+    );
+    if (index == -1) throw CoreException('vaultNotFound');
+    final record = records.removeAt(index);
+    await _save(records);
+    return record;
+  });
+
   Future<T> _write<T>(Future<T> Function() write) {
     final written = _writing.then((_) => write());
     _writing = written.then((_) {}, onError: (_) {});

@@ -7,18 +7,24 @@ export function TextButton({ muted, ...props }: ButtonProps & { muted?: boolean 
   return <Button {...props} className={muted ? "button text muted" : "button text"} />;
 }
 
-/** The main action of a screen. */
+/** The main action of a screen, in red for one that destroys. */
 export function FilledButton({
   icon,
+  danger,
   children,
   ...props
-}: Omit<ButtonProps, "children"> & { icon?: string; children: string }) {
+}: Omit<ButtonProps, "children"> & { icon?: string; danger?: boolean; children: string }) {
   return (
-    <Button {...props} className="button filled">
+    <Button {...props} className={danger ? "button filled danger" : "button filled"}>
       {icon && <Icon src={icon} size={20} />}
       {children}
     </Button>
   );
+}
+
+/** The action of a row of settings, in red for one that destroys. */
+export function OutlinedButton({ danger, ...props }: ButtonProps & { danger?: boolean }) {
+  return <Button {...props} className={danger ? "button outlined danger" : "button outlined"} />;
 }
 
 /** A button showing an icon alone, named by its label. */

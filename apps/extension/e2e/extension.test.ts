@@ -331,6 +331,28 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
       await rows?.$$eval(".drawer-row-title", (titles) => titles.map((title) => title.textContent)),
     ).toEqual(["All vaults", "Family"]);
   });
+
+  it("asks before removing a vault from this device, and keeps it on Escape", async () => {
+    const { popup } = extension;
+    await extension.click(".drawer [role=row] button[aria-label='Vault settings']");
+    await extension.click(".vault-settings .settings-tile button");
+    const dialog = await popup.waitForSelector("[role=alertdialog]");
+    expect(await dialog?.$eval("h2", (title) => title.textContent)).toBe(
+      english.removeVaultTitle.replace("{name}", "Family"),
+    );
+    await extension.press("Escape");
+    await popup.waitForSelector("[role=alertdialog]", { hidden: true });
+    expect(await popup.$(".vault-settings")).not.toBeNull();
+  });
+
+  it("removes the vault from this device, for good", async () => {
+    const { popup } = extension;
+    await extension.click(".vault-settings .settings-tile button");
+    await extension.click("[role=alertdialog] button::-p-text(Remove)");
+    await popup.waitForSelector(".tagline");
+    await extension.reload();
+    await popup.waitForSelector(".tagline");
+  });
 });
 
 describe.each<BrowserName>(["chrome", "firefox"])("%s in French", (name) => {

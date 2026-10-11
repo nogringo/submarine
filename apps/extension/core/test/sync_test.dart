@@ -305,6 +305,30 @@ void main() {
     expect((item!['cipher'] as Map)['name'], 'Newer');
   });
 
+  test('forgets a vault removed, which its relays keep', () async {
+    await publish('Wifi');
+    await addVault();
+    await sync.start();
+    await _until(() async => await opened() == 1);
+
+    await sync.forget(await vaults.remove(pubkey));
+
+    expect(sync.states(), isEmpty);
+    expect(await sync.items(), isEmpty);
+    expect(await opened(), 0);
+    final wraps = await ndk.config.cache.loadEvents(
+      kinds: [GiftWrap.kGiftWrapEventkind],
+      tags: {
+        'p': [pubkey],
+      },
+    );
+    expect(wraps, isEmpty);
+
+    await addVault();
+    await sync.update();
+    await _until(() async => await opened() == 1);
+  });
+
   test('reads what was opened before it starts', () async {
     await publish('Wifi');
     await addVault();

@@ -49,6 +49,36 @@
   background: color-mix(in srgb, var(--accent), var(--on-accent) 12%);
 }
 
+.button.filled.danger {
+  background: var(--danger);
+  color: var(--background);
+}
+
+.button.filled.danger[data-hovered] {
+  background: color-mix(in srgb, var(--danger), var(--background) 8%);
+}
+
+.button.filled.danger[data-pressed] {
+  background: color-mix(in srgb, var(--danger), var(--background) 12%);
+}
+
+.button.outlined {
+  min-height: 40px;
+  border: 1px solid var(--outline);
+}
+
+.button.outlined[data-hovered] {
+  background: color-mix(in srgb, currentColor 8%, transparent);
+}
+
+.button.outlined[data-pressed] {
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.button.outlined.danger {
+  color: var(--danger);
+}
+
 .button.icon-button {
   min-height: 40px;
   width: 40px;

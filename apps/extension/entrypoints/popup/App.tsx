@@ -37,6 +37,9 @@ export function App() {
       onVaultChanged={(vault) =>
         setVaults((vaults) => vaults?.map((each) => (each.pubkey === vault.pubkey ? vault : each)))
       }
+      onVaultRemoved={(pubkey) =>
+        setVaults((vaults) => vaults?.filter((vault) => vault.pubkey !== pubkey))
+      }
     />
   );
 }

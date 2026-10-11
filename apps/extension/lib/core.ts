@@ -73,6 +73,8 @@ export interface CoreMethods {
   };
   /** Renames a vault or changes its color, on this device. */
   editVault: { args: { vault: string; name?: string; color?: number }; result: Vault };
+  /** Removes a vault from this device, its cache included, while its relays keep it. */
+  removeVault: { args: { vault: string }; result: null };
   /** Of one vault, or of all without one, at once rather than at the next pass. */
   syncNow: { args: { vault?: string }; result: null };
   /** Of the vaults syncing, while a popup holds {@link syncPort} open. */

@@ -1,8 +1,11 @@
 import { useState } from "react";
+import { DialogTrigger } from "react-aria-components";
 import { useIntl } from "react-intl";
+import { OutlinedButton } from "@/components/Button";
 import { ColorPicker } from "@/components/ColorPicker";
+import { ConfirmDialog } from "@/components/Dialog";
 import { Page, PageHeader } from "@/components/Page";
-import { SettingsSection } from "@/components/SettingsSection";
+import { SettingsSection, SettingsTile } from "@/components/SettingsSection";
 import { TextField } from "@/components/TextField";
 import { VaultAvatar } from "@/components/VaultAvatar";
 import { callCore, type Vault } from "@/lib/core";
@@ -12,16 +15,20 @@ import "./VaultSettings.css";
 export function VaultSettings({
   vault,
   onChanged,
+  onRemoved,
   onBack,
 }: {
   vault: Vault;
   onChanged: (vault: Vault) => void;
+  onRemoved: (pubkey: string) => void;
   onBack: () => void;
 }) {
   const { formatMessage: t } = useIntl();
   const [name, setName] = useState(vault.name);
   const [nameError, setNameError] = useState<string>();
   const [saveError, setSaveError] = useState<string>();
+  const [removing, setRemoving] = useState(false);
+  const [removeError, setRemoveError] = useState<string>();
 
   async function edit(changes: { name?: string; color?: number }) {
     setSaveError(undefined);
@@ -29,6 +36,18 @@ export function VaultSettings({
       onChanged(await callCore("editVault", { vault: vault.pubkey, ...changes }));
     } catch {
       setSaveError(t({ id: "vaultSaveFailed" }));
+    }
+  }
+
+  async function remove() {
+    setRemoving(true);
+    setRemoveError(undefined);
+    try {
+      await callCore("removeVault", { vault: vault.pubkey });
+      onRemoved(vault.pubkey);
+    } catch {
+      setRemoveError(t({ id: "removeVaultFailed" }));
+      setRemoving(false);
     }
   }
 
@@ -49,23 +68,47 @@ export function VaultSettings({
           title={t({ id: "vaultNameAndColor" })}
           description={t({ id: "vaultNameHelper" })}
         >
-          <TextField
-            name="name"
-            label={t({ id: "vaultName" })}
-            error={nameError}
-            value={name}
-            onChange={rename}
-          />
-          <ColorPicker
-            label={t({ id: "vaultColor" })}
-            value={vault.color}
-            onChange={(color) => void edit({ color })}
-          />
-          {saveError && (
-            <p className="vault-settings-error" role="alert">
-              {saveError}
-            </p>
-          )}
+          <div className="settings-fields">
+            <TextField
+              name="name"
+              label={t({ id: "vaultName" })}
+              error={nameError}
+              value={name}
+              onChange={rename}
+            />
+            <ColorPicker
+              label={t({ id: "vaultColor" })}
+              value={vault.color}
+              onChange={(color) => void edit({ color })}
+            />
+            {saveError && (
+              <p className="vault-settings-error" role="alert">
+                {saveError}
+              </p>
+            )}
+          </div>
+        </SettingsSection>
+        <SettingsSection>
+          <SettingsTile
+            title={t({ id: "removeVault" })}
+            description={t({ id: "removeVaultDescription" })}
+            error={removeError}
+          >
+            <DialogTrigger>
+              <OutlinedButton danger isPending={removing}>
+                {t({ id: "removeVaultConfirm" })}
+              </OutlinedButton>
+              <ConfirmDialog
+                title={t({ id: "removeVaultTitle" }, { name: vault.name })}
+                cancel={t({ id: "cancel" })}
+                confirm={t({ id: "removeVaultConfirm" })}
+                onConfirm={() => void remove()}
+              >
+                <p>{t({ id: "removeVaultBody" })}</p>
+                <p>{t({ id: "removeVaultKeyWarning" })}</p>
+              </ConfirmDialog>
+            </DialogTrigger>
+          </SettingsTile>
         </SettingsSection>
       </div>
     </Page>

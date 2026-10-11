@@ -143,6 +143,17 @@
   background: var(--text);
 }
 
+/* Stands in the place of an avatar. */
+.drawer-row-mark {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  color: var(--muted);
+}
+
 .drawer-row-title {
   flex: 1;
   overflow: hidden;

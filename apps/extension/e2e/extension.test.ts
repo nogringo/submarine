@@ -321,6 +321,49 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     await extension.click("button::-p-text(Cancel)");
   });
 
+  it("opens the settings from the drawer", async () => {
+    const { popup } = extension;
+    await extension.click("button[aria-label=Vaults]");
+    await extension.click(".drawer button::-p-text(Settings)");
+    await popup.waitForSelector("[role=dialog]", { hidden: true });
+    await popup.waitForFunction(
+      () =>
+        document.activeElement?.matches(".settings h1") &&
+        document.activeElement.textContent === "Settings",
+    );
+  });
+
+  it("empties the clipboard of a password after the delay chosen", async () => {
+    const { popup } = extension;
+    const select = ".settings .select-tile-button";
+    expect(await popup.$eval(select, (button) => button.textContent)).toContain("30 seconds");
+    await extension.click(select);
+    await extension.click("[role=option]::-p-text(10 seconds)");
+    await popup.waitForFunction(
+      (select) => document.querySelector(select)?.textContent?.includes("10 seconds"),
+      {},
+      select,
+    );
+    await extension.press("Escape");
+    await popup.waitForSelector(".settings", { hidden: true });
+    await extension.click(".item-row button[aria-label='Copy password']");
+    await popup.waitForFunction(
+      () => document.querySelector(".item-row [role=status]")?.textContent === "Copied",
+    );
+    const copied = Date.now();
+    expect(await extension.readClipboard()).toBe("hunter2");
+    // Firefox refused, once, a read made as the background emptied the clipboard.
+    const read = () =>
+      extension.readClipboard().catch((error: Error) => {
+        if (!error.message.includes("NotAllowedError")) throw error;
+      });
+    while ((await read()) !== "") {
+      expect(Date.now() - copied).toBeLessThan(20_000);
+      await new Promise((wait) => setTimeout(wait, 500));
+    }
+    expect(Date.now() - copied).toBeGreaterThan(9_000);
+  });
+
   it("keeps the vaults when the popup opens again, as renamed", async () => {
     await extension.reload();
     const title = await extension.popup.waitForSelector(".home-title");

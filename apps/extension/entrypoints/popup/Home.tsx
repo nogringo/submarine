@@ -1,4 +1,5 @@
 import settings from "@material-design-icons/svg/outlined/settings.svg";
+import tune from "@material-design-icons/svg/round/tune.svg";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Button,
@@ -12,6 +13,7 @@ import {
 } from "react-aria-components";
 import { useIntl } from "react-intl";
 import { IconButton } from "@/components/Button";
+import { Icon } from "@/components/Icon";
 import { SearchField } from "@/components/SearchField";
 import { SyncButton } from "@/components/SyncButton";
 import { SyncStatus } from "@/components/SyncStatus";
@@ -23,9 +25,16 @@ import type { Sync } from "@/lib/use-sync";
 import "./Home.css";
 import { ItemDetail } from "./ItemDetail";
 import { ItemList } from "./ItemList";
+import { Settings } from "./Settings";
 import { VaultSettings } from "./VaultSettings";
 
 const allVaults = "all";
+
+/** What shows over the list. */
+type Opened =
+  | { page: "item"; vault: Vault; id: string }
+  | { page: "vaultSettings"; pubkey: string }
+  | { page: "settings" };
 
 /** The vaults of this device, one of them or all of them shown. */
 export function Home({
@@ -49,20 +58,25 @@ export function Home({
   const pubkeys = vault ? [vault.pubkey] : vaults.map((vault) => vault.pubkey);
   const title = vault?.name ?? t({ id: "allVaults" });
   const items = useItems(vault?.pubkey, query, sync.revision);
-  const [opened, setOpened] = useState<{ vault: Vault; id: string }>();
-  const [settingsOf, setSettingsOf] = useState<string>();
-  const settingsVault = vaults.find((vault) => vault.pubkey === settingsOf);
-  const paged = opened !== undefined || settingsVault !== undefined;
+  const [opened, setOpened] = useState<Opened>();
+  const settingsVault =
+    opened?.page === "vaultSettings"
+      ? vaults.find((vault) => vault.pubkey === opened.pubkey)
+      : undefined;
+  // Gone with its vault, once removed.
+  const paged = opened !== undefined && (opened.page !== "vaultSettings" || !!settingsVault);
   // What the page opened from, which gets the focus back.
   const openedFrom = useRef<HTMLElement>(null);
   const vaultsButton = useRef<HTMLButtonElement>(null);
-  const back = useCallback(() => {
-    setOpened(undefined);
-    setSettingsOf(undefined);
-  }, []);
+  const back = useCallback(() => setOpened(undefined), []);
   useEffect(() => {
     if (!paged) openedFrom.current?.focus();
   }, [paged]);
+  /** From the drawer, gone once the page shows: the focus comes back to its button. */
+  const openFromDrawer = (page: Opened) => {
+    openedFrom.current = vaultsButton.current;
+    setOpened(page);
+  };
   return (
     <main className="home">
       {/* Kept under the page, its search and scroll included, out of reach while the page shows. */}
@@ -118,8 +132,7 @@ export function Home({
                               label={t({ id: "vaultSettings" })}
                               onPress={() => {
                                 close();
-                                openedFrom.current = vaultsButton.current;
-                                setSettingsOf(vault.pubkey);
+                                openFromDrawer({ page: "vaultSettings", pubkey: vault.pubkey });
                               }}
                             />
                           </GridListItem>
@@ -134,6 +147,18 @@ export function Home({
                       >
                         <OpenVaultMark size={40} />
                         <span className="drawer-row-title">{t({ id: "openVault" })}</span>
+                      </Button>
+                      <Button
+                        className="drawer-row"
+                        onPress={() => {
+                          close();
+                          openFromDrawer({ page: "settings" });
+                        }}
+                      >
+                        <span className="drawer-row-mark">
+                          <Icon src={tune} />
+                        </span>
+                        <span className="drawer-row-title">{t({ id: "settings" })}</span>
                       </Button>
                     </>
                   )}
@@ -166,11 +191,11 @@ export function Home({
             if (!itemVault) return;
             openedFrom.current =
               document.activeElement instanceof HTMLElement ? document.activeElement : null;
-            setOpened({ vault: itemVault, id: item.id });
+            setOpened({ page: "item", vault: itemVault, id: item.id });
           }}
         />
       </div>
-      {opened && (
+      {opened?.page === "item" && (
         <ItemDetail vault={opened.vault} id={opened.id} revision={sync.revision} onBack={back} />
       )}
       {settingsVault && (
@@ -181,6 +206,7 @@ export function Home({
           onBack={back}
         />
       )}
+      {opened?.page === "settings" && <Settings onBack={back} />}
     </main>
   );
 }

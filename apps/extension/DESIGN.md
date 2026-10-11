@@ -59,7 +59,7 @@ popup (React) ── runtime messages ──▶ background (Chrome service worke
 - `storage.local` holds the vault records (key, name, color, cache key), encrypted with a random device key, as in the app. With a lock password, it holds that device key wrapped by the password (`PasswordProtectedKey`, Argon2id with Bitwarden's defaults). Without one, it holds the device key as is, as the app does on the web, which has no keystore of the system either.
 - With a lock password, `storage.session` holds the device key while the extension is unlocked. It lives in memory only, survives the background being stopped, and is gone once the browser closes.
 - The popup copies, and the background empties the clipboard of a copied secret after the delay, as the popup is often closed by then. Chrome's service worker has no document: an offscreen document empties it. Firefox's background page does it itself. Both need `clipboardWrite`. Without `clipboardRead`, which would add a warning at install, the clipboard is emptied without checking what it holds, as the app does on the web, but a new copy from the extension cancels the pending one.
-- The popup takes the app's narrow layout, as on phones: the vaults in a drawer, All vaults by default, the item list, and the item detail over the list. Same tokens, Atkinson Hyperlegible, light and dark themes. A popup is at most 800 by 600 pixels.
+- The popup takes the app's narrow layout, as on phones: the vaults in a drawer, All vaults by default, the item list, and the item detail over the list. The settings are the last row of the drawer, as a popup has no room for the app's navigation bar. Same tokens, Atkinson Hyperlegible, light and dark themes. A popup is at most 800 by 600 pixels.
 
 ## Browser constraints
 

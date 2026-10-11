@@ -43,9 +43,9 @@ export function PageHeader({
   title,
   children,
 }: {
-  mark: ReactNode;
+  mark?: ReactNode;
   title: string;
-  children: ReactNode;
+  children?: ReactNode;
 }) {
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => {

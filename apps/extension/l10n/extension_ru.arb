@@ -1,4 +1,5 @@
 {
   "@@locale": "ru",
-  "back": "Назад"
+  "back": "Назад",
+  "lockOnBrowserRestart": "При перезапуске браузера"
 }

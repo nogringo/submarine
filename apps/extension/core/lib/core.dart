@@ -14,11 +14,13 @@ class CoreException implements Exception {
   String toString() => 'CoreException($code, $message)';
 }
 
-/// What the extension calls, one method at a time, in JSON.
+/// What the extension calls, one method at a time, in JSON, each after
+/// [before].
 class Core {
-  Core(this._methods);
+  Core(this._methods, {this._before});
 
   final Map<String, CoreMethod> _methods;
+  final Future<void> Function()? _before;
 
   /// Runs [method] with [args], a JSON object, and answers in JSON with
   /// `{"result": ...}` or `{"error": {"code": ..., "message": ...}}`.
@@ -26,6 +28,7 @@ class Core {
     try {
       final run = _methods[method];
       if (run == null) throw CoreException('unknownMethod', method);
+      await _before?.call();
       final result = await run(jsonDecode(args) as Map<String, dynamic>);
       return jsonEncode({'result': result});
     } on CoreException catch (error) {

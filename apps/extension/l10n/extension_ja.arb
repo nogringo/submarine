@@ -1,4 +1,5 @@
 {
   "@@locale": "ja",
-  "back": "戻る"
+  "back": "戻る",
+  "lockOnBrowserRestart": "ブラウザの再起動時"
 }

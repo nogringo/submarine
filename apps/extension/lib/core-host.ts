@@ -16,6 +16,9 @@ function storageFor(area: Browser.storage.StorageArea) {
   };
 }
 
+/** The alarm that wakes the background to lock the vaults once unused for the timeout. */
+export const lockAlarm = "lock";
+
 type CoreGlobals = typeof globalThis & {
   importScripts?: (...urls: string[]) => void;
   submarineCore?: SubmarineCore;
@@ -36,6 +39,10 @@ export function loadCore(): SubmarineCore {
     extensionStorage: storageFor(browser.storage.local),
     // Emptied once the browser closes, and out of reach of content scripts.
     extensionSessionStorage: storageFor(browser.storage.session),
+    extensionLockAlarm: {
+      schedule: (when: number) => void browser.alarms.create(lockAlarm, { when }),
+      cancel: () => void browser.alarms.clear(lockAlarm),
+    },
     scheduleImmediate: queueMicrotask,
   });
   // Firefox runs the background as a page, where the manifest lists core.js first.
@@ -92,6 +99,13 @@ export function followPopups(core: SubmarineCore): (port: Browser.runtime.Port) 
       void core.call("stopSync", "{}");
     });
   };
+}
+
+/** Lets the core lock the vaults when the alarm it set goes off, a popup open or not. */
+export function followLockAlarm(core: SubmarineCore) {
+  browser.alarms.onAlarm.addListener((alarm) => {
+    if (alarm.name === lockAlarm) void core.call("lockIfIdle", "{}");
+  });
 }
 
 export function answerExtensionPages(core: SubmarineCore) {

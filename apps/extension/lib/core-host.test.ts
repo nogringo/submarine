@@ -1,7 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Browser } from "wxt/browser";
 import { fakeBrowser } from "wxt/testing/fake-browser";
-import { answer, followPopups, loadCore, type SubmarineCore } from "./core-host";
+import {
+  answer,
+  followLockAlarm,
+  followPopups,
+  loadCore,
+  lockAlarm,
+  type SubmarineCore,
+} from "./core-host";
 import { nostrCrypto } from "./nostr-crypto";
 
 function fakeCore(reply: () => Promise<string>) {
@@ -172,5 +179,33 @@ describe("loadCore", () => {
     await extensionSessionStorage.remove("deviceKey");
     expect(await extensionSessionStorage.get("deviceKey")).toBeUndefined();
     expect(await extensionStorage.get("vaults")).toBe("sealed");
+  });
+});
+
+describe("followLockAlarm", () => {
+  beforeEach(() => {
+    fakeBrowser.reset();
+  });
+
+  it("schedules the alarm the core asks for, and lets the core lock once it goes off", async () => {
+    const core = fakeCore(async () => "");
+    Object.assign(globalThis, { submarineCore: core });
+    loadCore();
+    followLockAlarm(core);
+    const { extensionLockAlarm } = globalThis as unknown as {
+      extensionLockAlarm: { schedule(when: number): void; cancel(): void };
+    };
+    const when = Date.now() + 300_000;
+    const alarm = { scheduledTime: when, persistAcrossSessions: false };
+    extensionLockAlarm.schedule(when);
+    await vi.waitFor(async () =>
+      expect(await browser.alarms.get(lockAlarm)).toMatchObject({ scheduledTime: when }),
+    );
+    await fakeBrowser.alarms.onAlarm.trigger({ ...alarm, name: "other" });
+    expect(core.call).not.toHaveBeenCalled();
+    await fakeBrowser.alarms.onAlarm.trigger({ ...alarm, name: lockAlarm });
+    expect(core.call).toHaveBeenCalledWith("lockIfIdle", "{}");
+    extensionLockAlarm.cancel();
+    await vi.waitFor(async () => expect(await browser.alarms.get(lockAlarm)).toBeUndefined());
   });
 });

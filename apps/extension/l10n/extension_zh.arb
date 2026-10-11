@@ -1,4 +1,5 @@
 {
   "@@locale": "zh",
-  "back": "返回"
+  "back": "返回",
+  "lockOnBrowserRestart": "浏览器重启时"
 }

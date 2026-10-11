@@ -31,6 +31,20 @@ void main() {
     });
   });
 
+  test('runs before each method what it is given', () async {
+    final ran = <String>[];
+    final watched = Core({
+      'echo': (args) async {
+        ran.add('echo');
+        return args;
+      },
+    }, before: () async => ran.add('before'));
+
+    await watched.handle('echo', '{}');
+
+    expect(ran, ['before', 'echo']);
+  });
+
   test('answers any other error as internal', () async {
     expect(await call('crash'), {
       'error': {'code': 'internal', 'message': 'Bad state: boom'},

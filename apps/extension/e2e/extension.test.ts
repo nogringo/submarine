@@ -337,6 +337,8 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
   it("empties the clipboard of a password after the delay chosen", async () => {
     const { popup } = extension;
     const select = ".settings .select-tile-button";
+    // Shown once the delay is read.
+    await popup.waitForSelector(select);
     expect(await popup.$eval(select, (button) => button.textContent)).toContain("30 seconds");
     await extension.click(select);
     await extension.click("[role=option]::-p-text(10 seconds)");
@@ -356,7 +358,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     // Firefox refused, once, a read made as the background emptied the clipboard.
     const read = () =>
       extension.readClipboard().catch((error: Error) => {
-        if (!error.message.includes("NotAllowedError")) throw error;
+        if (!String(error).includes("NotAllowedError")) throw error;
       });
     while ((await read()) !== "") {
       expect(Date.now() - copied).toBeLessThan(20_000);
@@ -429,6 +431,28 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     await popup.waitForSelector(".home-title");
   });
 
+  it("locks as the popup closes, once set to lock immediately", async () => {
+    const { popup } = extension;
+    const choose = async (from: string, to: string) => {
+      await extension.click("button[aria-label=Vaults]");
+      await extension.click(".drawer button::-p-text(Settings)");
+      // Shown once the core tells the timeout.
+      await popup.waitForSelector(`.settings .select-tile-button::-p-text(${from})`);
+      await extension.click(`.settings .select-tile-button::-p-text(${from})`);
+      await extension.click(`[role=option]::-p-text(${to})`);
+      await popup.waitForSelector(`.settings .select-tile-button::-p-text(${to})`);
+    };
+    await choose("5 minutes", english.lockImmediately);
+    await extension.reload();
+    await popup.waitForSelector(`::-p-text(${english.vaultsLocked})`);
+    await extension.fill("input[name=password]", lockPassword);
+    await extension.click("button[type=submit]");
+    await popup.waitForSelector(".home-title");
+    await choose(english.lockImmediately, "On browser restart");
+    await extension.press("Escape");
+    await popup.waitForSelector(".settings", { hidden: true });
+  });
+
   it("keeps the vaults when the popup opens again, as renamed", async () => {
     await extension.reload();
     const title = await extension.popup.waitForSelector(".home-title");
@@ -447,6 +471,9 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     const dialog = await popup.waitForSelector("[role=alertdialog]");
     expect(await dialog?.$eval("h2", (title) => title.textContent)).toBe(
       english.removeVaultTitle.replace("{name}", "Family"),
+    );
+    await popup.waitForFunction(() =>
+      document.querySelector("[role=alertdialog]")?.contains(document.activeElement),
     );
     await extension.press("Escape");
     await popup.waitForSelector("[role=alertdialog]", { hidden: true });

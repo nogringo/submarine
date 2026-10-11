@@ -1,4 +1,5 @@
 {
   "@@locale": "it",
-  "back": "Indietro"
+  "back": "Indietro",
+  "lockOnBrowserRestart": "Al riavvio del browser"
 }

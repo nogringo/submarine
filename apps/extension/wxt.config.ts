@@ -6,7 +6,13 @@ export default defineConfig({
   manifest: ({ browser }) => ({
     name: "Submarine",
     // Chrome empties the clipboard from an offscreen document, Firefox from its background page.
-    permissions: ["storage", "clipboardWrite", ...(browser === "firefox" ? [] : ["offscreen"])],
+    permissions: [
+      "storage",
+      "clipboardWrite",
+      // Locks the vaults once unused for the timeout, the popup closed.
+      "alarms",
+      ...(browser === "firefox" ? [] : ["offscreen"]),
+    ],
     // Argon2id, which protects the key of the device with the lock password, is WebAssembly.
     content_security_policy: {
       extension_pages: "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';",

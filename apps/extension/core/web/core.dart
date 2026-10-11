@@ -4,10 +4,12 @@ import 'dart:js_interop_unsafe';
 import 'package:ndk/ndk.dart';
 import 'package:sembast_web/sembast_web.dart';
 import 'package:nostr_passwords/nostr_passwords.dart' show generatePassphrase;
+import 'package:submarine_extension_core/auto_lock.dart';
 import 'package:submarine_extension_core/core.dart';
 import 'package:submarine_extension_core/device_key.dart';
 import 'package:submarine_extension_core/js_crypto.dart';
 import 'package:submarine_extension_core/js_events.dart';
+import 'package:submarine_extension_core/js_lock_alarm.dart';
 import 'package:submarine_extension_core/js_storage.dart';
 import 'package:submarine_extension_core/sync.dart';
 import 'package:submarine_extension_core/totp.dart';
@@ -15,7 +17,9 @@ import 'package:submarine_extension_core/vaults.dart';
 
 void main() {
   const local = JsStorage.local();
-  final deviceKey = DeviceKey(local, const JsStorage.session());
+  const session = JsStorage.session();
+  final deviceKey = DeviceKey(local, session);
+  final autoLock = AutoLock(deviceKey, local, session, const JsLockAlarm());
   final vaults = Vaults(local, const JsEventSignerFactory(), deviceKey);
   Future<VaultSync>? opening;
   // The database opens once a popup asks for the sync or the items, not at
@@ -23,81 +27,109 @@ void main() {
   Future<VaultSync> sync() => opening ??= _openSync(vaults);
   // Whether a popup is open, for the sync to start again once unlocked.
   var popupOpen = false;
-  final core = Core({
-    'lockState': (_) async => {
-      'hasPassword': await deviceKey.hasPassword,
-      'locked': await deviceKey.locked,
+  Future<void> lock() async {
+    await deviceKey.lock();
+    autoLock.cancel();
+    final closing = opening;
+    opening = null;
+    await (await closing)?.close();
+    emitVaultsChanged();
+  }
+
+  final core = Core(
+    before: () async {
+      if (await autoLock.expired()) await lock();
     },
-    'setLockPassword': (args) async {
-      await deviceKey.setPassword(args['password'] as String);
-      emitVaultsChanged();
-      return null;
+    {
+      'lockState': (_) async => {
+        'hasPassword': await deviceKey.hasPassword,
+        'locked': await deviceKey.locked,
+      },
+      'setLockPassword': (args) async {
+        await deviceKey.setPassword(args['password'] as String);
+        await autoLock.used();
+        emitVaultsChanged();
+        return null;
+      },
+      'lock': (_) async {
+        await lock();
+        return null;
+      },
+      'unlock': (args) async {
+        if (!await deviceKey.unlock(args['password'] as String)) {
+          throw CoreException('wrongLockPassword');
+        }
+        await autoLock.used();
+        if (popupOpen) await (await sync()).start();
+        emitVaultsChanged();
+        return null;
+      },
+      'used': (_) async {
+        await autoLock.used();
+        return null;
+      },
+      // What the lock alarm wakes the background for: [Core.before] locks.
+      'lockIfIdle': (_) async => null,
+      'lockTimeout': (_) async => (await autoLock.timeout()).name,
+      'setLockTimeout': (args) async {
+        await autoLock.setTimeout(
+          LockTimeout.values.byName(args['timeout'] as String),
+        );
+        return null;
+      },
+      'generatePassphrase': (_) async => generatePassphrase(),
+      'vaults': (_) => vaults.list(),
+      'addVault': (args) async {
+        final vault = await vaults.add(
+          key: args['key'] as String,
+          password: args['password'] as String?,
+          name: args['name'] as String,
+          color: args['color'] as int,
+        );
+        if (opening != null) await (await sync()).update();
+        return vault;
+      },
+      'editVault': (args) => vaults.edit(
+        args['vault'] as String,
+        name: args['name'] as String?,
+        color: args['color'] as int?,
+      ),
+      'removeVault': (args) async {
+        final record = await vaults.remove(args['vault'] as String);
+        await (await sync()).forget(record);
+        emitVaultsChanged();
+        return null;
+      },
+      'startSync': (_) async {
+        popupOpen = true;
+        if (!await deviceKey.locked) await (await sync()).start();
+        return null;
+      },
+      'stopSync': (_) async {
+        popupOpen = false;
+        await (await opening)?.stop();
+        if (await autoLock.locksOnClose() && !await deviceKey.locked) {
+          await lock();
+        }
+        return null;
+      },
+      'syncNow': (args) async =>
+          (await sync()).syncNow(pubkey: args['vault'] as String?),
+      'syncStates': (_) async => (await sync()).states(),
+      'items': (args) async => (await sync()).items(
+        pubkey: args['vault'] as String?,
+        query: args['query'] as String? ?? '',
+      ),
+      'totp': (args) async => totp(
+        args['key'] as String,
+        DateTime.fromMillisecondsSinceEpoch(args['at'] as int),
+      ),
+      'item': (args) async => (await sync()).item(
+        pubkey: args['vault'] as String,
+        id: args['id'] as String,
+      ),
     },
-    'lock': (_) async {
-      await deviceKey.lock();
-      final closing = opening;
-      opening = null;
-      await (await closing)?.close();
-      emitVaultsChanged();
-      return null;
-    },
-    'unlock': (args) async {
-      if (!await deviceKey.unlock(args['password'] as String)) {
-        throw CoreException('wrongLockPassword');
-      }
-      if (popupOpen) await (await sync()).start();
-      emitVaultsChanged();
-      return null;
-    },
-    'generatePassphrase': (_) async => generatePassphrase(),
-    'vaults': (_) => vaults.list(),
-    'addVault': (args) async {
-      final vault = await vaults.add(
-        key: args['key'] as String,
-        password: args['password'] as String?,
-        name: args['name'] as String,
-        color: args['color'] as int,
-      );
-      if (opening != null) await (await sync()).update();
-      return vault;
-    },
-    'editVault': (args) => vaults.edit(
-      args['vault'] as String,
-      name: args['name'] as String?,
-      color: args['color'] as int?,
-    ),
-    'removeVault': (args) async {
-      final record = await vaults.remove(args['vault'] as String);
-      await (await sync()).forget(record);
-      emitVaultsChanged();
-      return null;
-    },
-    'startSync': (_) async {
-      popupOpen = true;
-      if (!await deviceKey.locked) await (await sync()).start();
-      return null;
-    },
-    'stopSync': (_) async {
-      popupOpen = false;
-      await (await opening)?.stop();
-      return null;
-    },
-    'syncNow': (args) async =>
-        (await sync()).syncNow(pubkey: args['vault'] as String?),
-    'syncStates': (_) async => (await sync()).states(),
-    'items': (args) async => (await sync()).items(
-      pubkey: args['vault'] as String?,
-      query: args['query'] as String? ?? '',
-    ),
-    'totp': (args) async => totp(
-      args['key'] as String,
-      DateTime.fromMillisecondsSinceEpoch(args['at'] as int),
-    ),
-    'item': (args) async => (await sync()).item(
-      pubkey: args['vault'] as String,
-      id: args['id'] as String,
-    ),
-  });
+  );
   globalContext['submarineCore'] = createJSInteropWrapper(_JsCore(core));
 }
 

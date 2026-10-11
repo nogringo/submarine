@@ -12,6 +12,7 @@ import {
   readClipboardTimeout,
   saveClipboardTimeout,
 } from "@/lib/clipboard";
+import { callCore, type LockTimeout, lockTimeouts } from "@/lib/core";
 
 /** The settings of the extension on this device, as in the app. */
 export function Settings({
@@ -24,8 +25,10 @@ export function Settings({
   const intl = useIntl();
   const { formatMessage: t } = intl;
   const [clipboardTimeout, setClipboardTimeout] = useState<ClipboardTimeout>();
+  const [lockTimeout, setLockTimeout] = useState<LockTimeout>();
   useEffect(() => {
     void readClipboardTimeout().then(setClipboardTimeout);
+    void callCore("lockTimeout", {}).then(setLockTimeout);
   }, []);
   return (
     <Page className="settings" onBack={onBack}>
@@ -43,6 +46,17 @@ export function Settings({
               </DialogTrigger>
             )}
           </SettingsTile>
+          {hasLockPassword && lockTimeout && (
+            <SelectTile
+              title={t({ id: "lockAfter" })}
+              value={lockTimeout}
+              options={lockTimeouts.map((id) => ({ id, label: lockTimeoutLabel(id, intl) }))}
+              onChange={(timeout) => {
+                setLockTimeout(timeout);
+                void callCore("setLockTimeout", { timeout });
+              }}
+            />
+          )}
           {clipboardTimeout && (
             <SelectTile
               title={t({ id: "clearClipboardAfter" })}
@@ -61,6 +75,27 @@ export function Settings({
       </div>
     </Page>
   );
+}
+
+function lockTimeoutLabel(timeout: LockTimeout, { formatMessage: t }: IntlShape) {
+  switch (timeout) {
+    case "immediately":
+      return t({ id: "lockImmediately" });
+    case "oneMinute":
+      return t({ id: "minutes" }, { count: 1 });
+    case "fiveMinutes":
+      return t({ id: "minutes" }, { count: 5 });
+    case "fifteenMinutes":
+      return t({ id: "minutes" }, { count: 15 });
+    case "thirtyMinutes":
+      return t({ id: "minutes" }, { count: 30 });
+    case "oneHour":
+      return t({ id: "hours" }, { count: 1 });
+    case "fourHours":
+      return t({ id: "hours" }, { count: 4 });
+    case "onRestart":
+      return t({ id: "lockOnBrowserRestart" });
+  }
 }
 
 function clipboardTimeoutLabel(timeout: ClipboardTimeout, { formatMessage: t }: IntlShape) {

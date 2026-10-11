@@ -1,4 +1,5 @@
 {
   "@@locale": "fr",
-  "back": "Retour"
+  "back": "Retour",
+  "lockOnBrowserRestart": "Au redémarrage du navigateur"
 }

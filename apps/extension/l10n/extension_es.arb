@@ -1,4 +1,5 @@
 {
   "@@locale": "es",
-  "back": "Atrás"
+  "back": "Atrás",
+  "lockOnBrowserRestart": "Al reiniciar el navegador"
 }

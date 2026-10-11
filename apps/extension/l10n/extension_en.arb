@@ -3,5 +3,9 @@
   "back": "Back",
   "@back": {
     "description": "Label of the button going back from an item to the list."
+  },
+  "lockOnBrowserRestart": "On browser restart",
+  "@lockOnBrowserRestart": {
+    "description": "Lock delay: the vaults lock only once the browser closes and starts again. Stands for the app's \"On app restart\"."
   }
 }

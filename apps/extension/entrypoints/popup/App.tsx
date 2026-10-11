@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { callCore, type LockState, type Vault } from "@/lib/core";
+import { useReportUse } from "@/lib/use-report-use";
 import { useSync } from "@/lib/use-sync";
 import "./App.css";
 import { Home } from "./Home";
@@ -18,6 +19,7 @@ export function App() {
     callCore("lockState", {}).then(setLock);
   }, [sync.revision]);
   const unlocked = lock?.locked === false;
+  useReportUse(unlocked && lock.hasPassword);
   useEffect(() => {
     // Locking lets go of them.
     if (unlocked) callCore("vaults", {}).then(setVaults);

@@ -1,4 +1,5 @@
 {
   "@@locale": "fi",
-  "back": "Takaisin"
+  "back": "Takaisin",
+  "lockOnBrowserRestart": "Kun selain käynnistyy uudelleen"
 }

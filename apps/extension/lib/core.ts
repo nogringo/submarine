@@ -72,6 +72,20 @@ export interface LockState {
   locked: boolean;
 }
 
+/** When the vaults lock themselves once a lock password protects them, as the app offers it. */
+export const lockTimeouts = [
+  "immediately",
+  "oneMinute",
+  "fiveMinutes",
+  "fifteenMinutes",
+  "thirtyMinutes",
+  "oneHour",
+  "fourHours",
+  "onRestart",
+] as const;
+
+export type LockTimeout = (typeof lockTimeouts)[number];
+
 /** The core's methods: their arguments and their result. */
 export interface CoreMethods {
   lockState: { args: Record<string, never>; result: LockState };
@@ -82,6 +96,10 @@ export interface CoreMethods {
   /** Fails with `wrongLockPassword`. */
   unlock: { args: { password: string }; result: null };
   generatePassphrase: { args: Record<string, never>; result: string };
+  /** A use of the popup, which pushes the lock back. */
+  used: { args: Record<string, never>; result: null };
+  lockTimeout: { args: Record<string, never>; result: LockTimeout };
+  setLockTimeout: { args: { timeout: LockTimeout }; result: null };
   vaults: { args: Record<string, never>; result: Vault[] };
   /** Opens the vault of an nsec, a key in hex or an ncryptsec that the password decrypts. */
   addVault: {

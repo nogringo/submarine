@@ -77,6 +77,7 @@ This repository is a Dart [pub workspace](https://dart.dev/go/pub-workspaces).
 | [`packages/nostr_passwords`](packages/nostr_passwords) | `nostr_passwords` | Reference Dart implementation of the protocol, reusable by any client. |
 | [`apps/app`](apps/app) | `submarine` | Flutter app for Android, iOS, macOS, Windows, Linux and web. |
 | [`apps/cli`](apps/cli) | `submarine_cli` | Command-line client. |
+| [`apps/extension/core`](apps/extension/core) | `submarine_extension_core` | Dart core of the browser extension, compiled to JavaScript. |
 
 It requires Flutter stable with Dart 3.13.4 or later. From the repository root, get the dependencies and analyze the whole workspace, then run the app or the CLI:
 
@@ -87,7 +88,13 @@ flutter analyze
 dart run apps/cli/bin/submarine.dart --help
 ```
 
-Run the tests from a package directory: `dart test` for Dart packages, `flutter test` for the Flutter app.
+The [browser extension](apps/extension) is built with [WXT](https://wxt.dev) and also requires Node.js 24 and pnpm. `pnpm dev` compiles its Dart core, then opens Chrome with the extension loaded (`pnpm dev:firefox` for Firefox):
+
+```sh
+(cd apps/extension && pnpm install && pnpm dev)
+```
+
+Run the tests from a package directory: `dart test` for Dart packages, `flutter test` for the Flutter app, `pnpm test` for the extension.
 
 Commit messages follow [Conventional Commits](https://www.conventionalcommits.org). Use the package as scope when a change targets one: `feat(cli): ...`, `fix(app): ...`, `docs(nostr_passwords): ...`.
 

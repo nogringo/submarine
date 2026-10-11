@@ -1,0 +1,10 @@
+name: submarine_extension_core
+description: Dart core of the Submarine browser extension, compiled to JavaScript.
+publish_to: none
+
+environment:
+  sdk: ^3.13.4
+resolution: workspace
+
+dev_dependencies:
+  lints: ^6.0.0

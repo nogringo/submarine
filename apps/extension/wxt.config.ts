@@ -5,7 +5,7 @@ export default defineConfig({
   modules: ["@wxt-dev/module-react"],
   manifestVersion: 3,
   manifest: ({ browser }) => ({
-    name: "Submarine",
+    name: "Submarine Password Manager",
     // Chrome empties the clipboard from an offscreen document, Firefox from its background page.
     permissions: [
       "storage",
@@ -19,7 +19,23 @@ export default defineConfig({
       extension_pages: "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';",
     },
     ...(browser === "firefox" && {
-      browser_specific_settings: { gecko: { id: "submarine@uid.ovh" } },
+      browser_specific_settings: {
+        gecko: {
+          id: "submarine@uid.ovh",
+          // The first version with Firefox's own consent to the data below.
+          strict_min_version: "140.0",
+          // What the extension sends to the vault's relays once it does all the app does, encrypted.
+          data_collection_permissions: {
+            required: [
+              "authenticationInfo",
+              "financialAndPaymentInfo",
+              "personallyIdentifyingInfo",
+              "personalCommunications",
+              "browsingActivity",
+            ],
+          },
+        },
+      },
     }),
   }),
   zip: {

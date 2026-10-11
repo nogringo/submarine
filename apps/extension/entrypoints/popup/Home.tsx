@@ -12,24 +12,30 @@ import {
 import { useIntl } from "react-intl";
 import { SyncStatus } from "@/components/SyncStatus";
 import { AllVaultsAvatar, OpenVaultMark, VaultAvatar } from "@/components/VaultAvatar";
-import type { SyncState, Vault } from "@/lib/core";
+import type { Vault } from "@/lib/core";
+import { useItems } from "@/lib/use-items";
+import type { Sync } from "@/lib/use-sync";
 import "./Home.css";
+import { ItemList } from "./ItemList";
 
 const allVaults = "all";
 
 /** The vaults of this device, one of them or all of them shown. */
 export function Home({
   vaults,
-  syncStates,
+  sync,
   onOpenVault,
 }: {
   vaults: Vault[];
-  syncStates: SyncState[];
+  sync: Sync;
   onOpenVault: () => void;
 }) {
   const { formatMessage: t } = useIntl();
   const [selected, setSelected] = useState(allVaults);
   const vault = vaults.find((vault) => vault.pubkey === selected);
+  const pubkeys = vault ? [vault.pubkey] : vaults.map((vault) => vault.pubkey);
+  const title = vault?.name ?? t({ id: "allVaults" });
+  const items = useItems(vault?.pubkey, sync.revision);
   return (
     <main className="home">
       <header className="home-header">
@@ -93,13 +99,20 @@ export function Home({
           </ModalOverlay>
         </DialogTrigger>
         <div className="home-heading">
-          <h1 className="home-title">{vault?.name ?? t({ id: "allVaults" })}</h1>
-          <SyncStatus
-            pubkeys={vault ? [vault.pubkey] : vaults.map((vault) => vault.pubkey)}
-            states={syncStates}
-          />
+          <h1 className="home-title">{title}</h1>
+          <SyncStatus pubkeys={pubkeys} states={sync.states} />
         </div>
       </header>
+      <ItemList
+        items={items}
+        vaults={vaults}
+        // A badge tells the vaults apart, which a single vault does not need.
+        showVault={!vault && vaults.length > 1}
+        label={title}
+        neverSynced={pubkeys.some(
+          (pubkey) => !sync.states.find((state) => state.pubkey === pubkey)?.lastSync,
+        )}
+      />
     </main>
   );
 }

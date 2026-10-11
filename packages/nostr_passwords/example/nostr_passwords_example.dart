@@ -153,7 +153,7 @@ Future<void> main() async {
   print('${(await vault.openedItems()).length} item(s) opened before');
   if (await vault.open()) print('The signer opened new versions');
 
-  final items = await vault.items();
+  final items = (await vault.items())..sort(compareItemsByName);
   for (final item in items) {
     print('${item.cipher.name}: ${item.cipher.subtitle}');
   }

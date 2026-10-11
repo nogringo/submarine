@@ -1,0 +1,57 @@
+/* The virtualizer pads the rows itself. */
+.item-list {
+  display: block;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  scrollbar-color: var(--outline) transparent;
+  scrollbar-width: thin;
+}
+
+.item-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  cursor: default;
+}
+
+.item-row[data-hovered] {
+  background: var(--surface);
+}
+
+/* Inside the row: the list's edge would cut an outline drawn around it. */
+.item-row[data-focus-visible] {
+  outline-offset: -2px;
+}
+
+.item-row-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.item-row-name,
+.item-row-subtitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-row-name {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.item-row-subtitle {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.item-list-empty {
+  margin: auto;
+  padding: 24px;
+  color: var(--muted);
+  text-align: center;
+}

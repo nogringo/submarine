@@ -9,7 +9,7 @@ import { Welcome } from "./Welcome";
 export function App() {
   const [vaults, setVaults] = useState<Vault[]>();
   const [opening, setOpening] = useState(false);
-  const syncStates = useSync();
+  const sync = useSync();
 
   useEffect(() => {
     callCore("vaults", {}).then(setVaults);
@@ -29,5 +29,5 @@ export function App() {
     );
   }
   if (vaults.length === 0) return <Welcome onOpenVault={() => setOpening(true)} />;
-  return <Home vaults={vaults} syncStates={syncStates} onOpenVault={() => setOpening(true)} />;
+  return <Home vaults={vaults} sync={sync} onOpenVault={() => setOpening(true)} />;
 }

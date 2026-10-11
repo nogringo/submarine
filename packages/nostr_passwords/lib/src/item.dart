@@ -13,6 +13,15 @@ class Item {
   late final Cipher cipher = Cipher.fromJson(current.data);
 }
 
+/// Orders items by name, ignoring case, then by id for the same name, as a
+/// list shows them.
+int compareItemsByName(Item a, Item b) {
+  final byName = a.cipher.name.toLowerCase().compareTo(
+    b.cipher.name.toLowerCase(),
+  );
+  return byName != 0 ? byName : a.id.compareTo(b.id);
+}
+
 /// Groups [versions] by item and keeps the heads of each. Concurrent heads are
 /// ordered by `modified_at`, then by `rev`, latest first.
 List<Item> resolveItems(Iterable<Envelope> versions) {

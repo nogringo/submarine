@@ -4,6 +4,7 @@ import { generateSecretKey, nip19 } from "nostr-tools";
 import * as nip49 from "nostr-tools/nip49";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { type BrowserName, type Extension, launch } from "./extension";
+import { publishItems } from "./vault-items";
 
 const english = JSON.parse(await readFile(appArb("en"), "utf8"));
 
@@ -12,6 +13,11 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
   let extension: Extension;
 
   beforeAll(async () => {
+    await publishItems(secretKey, [
+      { type: 2, name: "wifi" },
+      { type: 1, name: "GitHub", login: { username: "alice" } },
+      { type: 2, name: "Old bank", deletedDate: "2026-10-01T00:00:00.000Z" },
+    ]);
     extension = await launch(name);
   });
 
@@ -71,6 +77,19 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
       (synced) => document.querySelector(".sync-status")?.textContent === synced,
       { timeout: 20_000 },
       english.syncedJustNow,
+    );
+  });
+
+  it("lists the items of the vault by name, the trash left out", async () => {
+    const { popup } = extension;
+    await popup.waitForFunction(
+      () =>
+        [...document.querySelectorAll(".item-row-name")].map((name) => name.textContent).join() ===
+        "GitHub,wifi",
+      { timeout: 20_000 },
+    );
+    expect(await popup.$eval(".item-row-subtitle", (subtitle) => subtitle.textContent)).toBe(
+      "alice",
     );
   });
 

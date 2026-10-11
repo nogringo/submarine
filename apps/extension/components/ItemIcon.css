@@ -1,0 +1,23 @@
+.item-icon {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+}
+
+.item-icon-tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 25%;
+  background: var(--raised);
+  color: var(--text);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.item-icon-badge {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  display: flex;
+}

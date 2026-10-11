@@ -51,17 +51,20 @@ void main() {
     await relay.stopServer();
   });
 
-  /// Another device of the vault, which publishes to the relay at once.
-  Future<void> publish(String name) async {
+  /// Another device of the vault of [key], which publishes to the relay at
+  /// once.
+  Future<void> publish(String name, {Cipher? cipher, String? key}) async {
     final other = Ndk.emptyBootstrapRelaysConfig();
     addTearDown(other.destroy);
     final device = Vault(
       ndk: other,
-      signer: signers.create(privateKey: privateKey),
+      signer: signers.create(privateKey: key ?? privateKey),
       relays: [relay.url],
       indexers: const [],
     );
-    await device.createItem(Cipher(type: CipherType.secureNote, name: name));
+    await device.createItem(
+      cipher ?? Cipher(type: CipherType.secureNote, name: name),
+    );
     expect(await device.push(), isEmpty);
   }
 
@@ -114,6 +117,76 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 300));
 
     expect(await opened(), 0);
+  });
+
+  test('reads the items opened, trash left out, by name', () async {
+    await publish('wifi');
+    await publish(
+      'GitHub',
+      cipher: Cipher(
+        type: CipherType.login,
+        name: 'GitHub',
+        login: Login(username: 'alice'),
+      ),
+    );
+    await publish(
+      'Old bank',
+      cipher: Cipher(type: CipherType.secureNote, name: 'Old bank')
+        ..deletedDate = DateTime.utc(2026, 10, 1),
+    );
+    await addVault();
+    await sync.start();
+    await _until(() async => await opened() == 3);
+
+    final items = await sync.items();
+
+    expect(items, [
+      allOf(
+        containsPair('vault', pubkey),
+        containsPair('type', 1),
+        containsPair('name', 'GitHub'),
+        containsPair('subtitle', 'alice'),
+      ),
+      allOf(containsPair('type', 2), containsPair('name', 'wifi')),
+    ]);
+  });
+
+  test('reads the items of one vault or of all', () async {
+    final (otherKey, otherPubkey) = signers.generateKeyPair();
+    await publish('Wifi');
+    await publish('Alarm code', key: otherKey);
+    await addVault();
+    await vaults.add(key: otherKey, name: 'Work', color: 0xFF1F5FA8);
+    await sync.start();
+    await _until(() async => (await sync.items()).length == 2);
+
+    expect(
+      [for (final item in await sync.items(pubkey: otherPubkey)) item['name']],
+      ['Alarm code'],
+    );
+    expect(
+      [for (final item in await sync.items()) item['vault']],
+      [otherPubkey, pubkey],
+    );
+  });
+
+  test('reads what was opened before it starts', () async {
+    await publish('Wifi');
+    await addVault();
+    await sync.start();
+    await _until(() async => await opened() == 1);
+    await sync.stop();
+
+    final again = VaultSync(
+      ndk: ndk,
+      database: database,
+      vaults: vaults,
+      onChanged: () {},
+      relays: [relay.url],
+      indexers: const [],
+    );
+
+    expect([for (final item in await again.items()) item['name']], ['Wifi']);
   });
 
   test('syncs nothing before it starts', () async {

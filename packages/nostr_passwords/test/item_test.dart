@@ -75,4 +75,14 @@ void main() {
     expect([for (final item in items) item.id], ['boulanger', 'github']);
     expect(headRevs(items.first), ['v1']);
   });
+
+  test('compareItemsByName ignores case, then orders by id', () {
+    final items = resolveItems([
+      version('github', id: 'c'),
+      version('Boulanger', id: 'b'),
+      version('boulanger', id: 'a'),
+    ])..sort(compareItemsByName);
+
+    expect([for (final item in items) item.id], ['a', 'b', 'c']);
+  });
 }

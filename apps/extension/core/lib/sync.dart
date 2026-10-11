@@ -8,7 +8,7 @@ import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
 import 'vaults.dart';
 
 /// Keeps the vaults of this device synced from their relays, download only,
-/// from [start] to [stop]: while the popup is open.
+/// from [start] to [stop]: while the popup is open. Reads their items any time.
 class VaultSync {
   VaultSync({
     required this.ndk,
@@ -76,6 +76,32 @@ class VaultSync {
         'lastSync': vault.lastSync?.toIso8601String(),
       },
   ];
+
+  /// The items of the vault [pubkey], or of every vault, trash left out, by
+  /// name. Those opened so far: the sync opens what comes in.
+  Future<List<Map<String, Object?>>> items({String? pubkey}) async {
+    final vaults = [
+      for (final record in await _vaults.records())
+        if (_open(record) case final vault
+            when pubkey == null || vault.pubkey == pubkey)
+          vault,
+    ];
+    final items = [
+      for (final vault in vaults)
+        for (final item in await vault.vault.openedItems())
+          if (!item.cipher.isDeleted) (vault: vault.pubkey, item: item),
+    ]..sort((a, b) => compareItemsByName(a.item, b.item));
+    return [
+      for (final (:vault, :item) in items)
+        {
+          'vault': vault,
+          'id': item.id,
+          'type': item.cipher.type.value,
+          'name': item.cipher.name,
+          'subtitle': item.cipher.subtitle,
+        },
+    ];
+  }
 
   _SyncedVault _open(VaultRecord record) {
     final signer = ndk.config.eventSignerFactory.create(

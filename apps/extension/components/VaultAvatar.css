@@ -23,3 +23,14 @@
   border-radius: 50%;
   color: var(--signal);
 }
+
+.vault-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--background);
+  border-radius: 28%;
+  color: #fff;
+  font-weight: 700;
+  line-height: 1;
+}

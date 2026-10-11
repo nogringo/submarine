@@ -1,8 +1,15 @@
+.home {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .home-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 16px 8px 12px 10px;
+  /* The list adds 8 above its first row. */
+  padding: 16px 8px 4px 10px;
 }
 
 /* 48 to tap, around the 44 that shows. */

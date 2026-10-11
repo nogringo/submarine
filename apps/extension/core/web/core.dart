@@ -13,7 +13,8 @@ import 'package:submarine_extension_core/vaults.dart';
 void main() {
   final vaults = Vaults(const JsStorage(), const JsEventSignerFactory());
   Future<VaultSync>? opening;
-  // The database opens once a popup asks for the sync, not at each wake.
+  // The database opens once a popup asks for the sync or the items, not at
+  // each wake.
   Future<VaultSync> sync() => opening ??= _openSync(vaults);
   final core = Core({
     'vaults': (_) => vaults.list(),
@@ -30,6 +31,8 @@ void main() {
     'startSync': (_) async => (await sync()).start(),
     'stopSync': (_) async => (await sync()).stop(),
     'syncStates': (_) async => (await sync()).states(),
+    'items': (args) async =>
+        (await sync()).items(pubkey: args['vault'] as String?),
   });
   globalContext['submarineCore'] = createJSInteropWrapper(_JsCore(core));
 }

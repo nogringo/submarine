@@ -24,6 +24,18 @@ export interface Vault {
   color: number;
 }
 
+/** An item as a list shows it. */
+export interface ItemSummary {
+  /** The pubkey of its vault. */
+  vault: string;
+  id: string;
+  /** Bitwarden's cipher type: 1 for a login, 2 a secure note, and so on. */
+  type: number;
+  name: string;
+  /** A login's username, a card's brand and last digits, and so on. */
+  subtitle: string | null;
+}
+
 /** Where the sync of a vault stands. */
 export interface SyncState {
   pubkey: string;
@@ -49,6 +61,8 @@ export interface CoreMethods {
   };
   /** Of the vaults syncing, while a popup holds {@link syncPort} open. */
   syncStates: { args: Record<string, never>; result: SyncState[] };
+  /** Of one vault, or of all without one, trash left out, by name. */
+  items: { args: { vault?: string }; result: ItemSummary[] };
 }
 
 /** Calls a method of the Dart core, which runs in the background. */

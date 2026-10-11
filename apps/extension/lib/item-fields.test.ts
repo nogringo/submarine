@@ -2,7 +2,7 @@ import { createIntl } from "react-intl";
 import { beforeAll, describe, expect, it } from "vitest";
 import type { Cipher } from "./cipher";
 import { loadMessages } from "./i18n";
-import { customFields, typeFields, websiteUrl } from "./item-fields";
+import { customFields, historyRows, typeFields, websiteUrl } from "./item-fields";
 
 let intl: ReturnType<typeof createIntl>;
 
@@ -23,6 +23,7 @@ function cipher(parts: Partial<Cipher>): Cipher {
     bankAccount: null,
     driversLicense: null,
     passport: null,
+    passwordHistory: [],
     creationDate: null,
     revisionDate: null,
     ...parts,
@@ -228,6 +229,25 @@ describe("customFields", () => {
       { label: "Login", value: "Linked to Username", kind: "info" },
       { label: "Unknown link", value: "Linked to ?", kind: "info" },
       { label: "Plan", value: "Pro", kind: "text" },
+    ]);
+  });
+});
+
+describe("historyRows", () => {
+  it("shows each former password under the date and time it was replaced", () => {
+    const utc = createIntl({ locale: "en", timeZone: "UTC", messages: intl.messages });
+    const rows = historyRows(
+      cipher({
+        passwordHistory: [
+          { password: "hunter1", lastUsedDate: "2026-10-11T14:05:00.000Z" },
+          { password: "PIN: 1234", lastUsedDate: null },
+        ],
+      }),
+      utc,
+    );
+    expect(rows).toEqual([
+      { label: "Oct 11, 2026, 14:05", value: "hunter1", kind: "password" },
+      { label: "", value: "PIN: 1234", kind: "password" },
     ]);
   });
 });

@@ -55,3 +55,11 @@ export const dayFormat: Intl.DateTimeFormatOptions = {
   month: "short",
   day: "numeric",
 };
+
+/** A date and time as the app writes them, `yMMMd` then `Hm`: "Oct 11, 2026, 14:05". */
+export const dayTimeFormat: Intl.DateTimeFormatOptions = {
+  ...dayFormat,
+  hour: "numeric",
+  minute: "2-digit",
+  hourCycle: "h23",
+};

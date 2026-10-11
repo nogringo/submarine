@@ -21,7 +21,7 @@ export function FieldCard({ rows }: { rows: FieldRow[] }) {
   );
 }
 
-function FieldTile({ row }: { row: FieldRow }) {
+export function FieldTile({ row }: { row: FieldRow }) {
   if (row.kind === "totp") return <TotpTile label={row.label} totpKey={row.value} />;
   return <ValueTile row={row} />;
 }

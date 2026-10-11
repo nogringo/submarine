@@ -1,6 +1,6 @@
 import type { IntlShape } from "react-intl";
 import type { Cipher } from "./cipher";
-import { dayFormat } from "./i18n";
+import { dayFormat, dayTimeFormat } from "./i18n";
 
 type MessageId = FormatjsIntl.Message["ids"];
 
@@ -186,6 +186,15 @@ export function customFields(cipher: Cipher, { formatMessage: t }: IntlShape): F
         return { label, value: value ?? "", kind: "text" };
     }
   });
+}
+
+/** The passwords the item used before, each under the date it was replaced. */
+export function historyRows(cipher: Cipher, { formatDate }: IntlShape): FieldRow[] {
+  return cipher.passwordHistory.map(({ password, lastUsedDate }) => ({
+    label: lastUsedDate ? formatDate(lastUsedDate, dayTimeFormat) : "",
+    value: password,
+    kind: "password",
+  }));
 }
 
 /** The page to open for a login URI, none for what is not a web address. */

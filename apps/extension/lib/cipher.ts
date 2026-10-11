@@ -12,6 +12,7 @@ export interface Cipher {
   bankAccount: BankAccount | null;
   driversLicense: DriversLicense | null;
   passport: Passport | null;
+  passwordHistory: PasswordHistory[];
   /** In ISO 8601. */
   creationDate: string | null;
   revisionDate: string | null;
@@ -114,4 +115,10 @@ export interface Field {
   type: number;
   /** The field a linked one stands for, as Bitwarden numbers them. */
   linkedId: number | null;
+}
+
+export interface PasswordHistory {
+  password: string;
+  /** In ISO 8601. */
+  lastUsedDate: string | null;
 }

@@ -31,6 +31,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
         },
         notes: "Recovery codes in the safe",
         fields: [{ name: "PIN", value: "1234", type: 1 }],
+        passwordHistory: [{ password: "hunter1", lastUsedDate: "2026-10-01T09:30:00.000Z" }],
       },
       { type: 2, name: "Old bank", deletedDate: "2026-10-01T00:00:00.000Z" },
     ]);
@@ -179,6 +180,22 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     // A code may change between the two.
     expect([before, after].map((code) => code.replace(" ", ""))).toContain(
       await extension.readClipboard(),
+    );
+  });
+
+  it("unfolds the password history, its passwords hidden until shown", async () => {
+    const { popup } = extension;
+    const trigger = "h2 > button[aria-expanded]";
+    expect(await popup.$eval(trigger, (button) => button.textContent)).toBe("Password history 1");
+    expect(await popup.$$(".password-history .field-tile")).toHaveLength(0);
+    await extension.click(trigger);
+    await popup.waitForSelector(`${trigger}[aria-expanded=true]`);
+    expect(
+      await popup.$eval(".password-history .field-tile-label", (label) => label.textContent),
+    ).toContain("2026");
+    await extension.click(".password-history button[aria-label=Show]");
+    await popup.waitForFunction(
+      () => document.querySelector(".password-history .field-value")?.textContent === "hunter1",
     );
   });
 

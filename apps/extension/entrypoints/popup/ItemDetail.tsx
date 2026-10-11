@@ -5,11 +5,12 @@ import { IconButton } from "@/components/Button";
 import { FieldCard } from "@/components/FieldCard";
 import { Icon } from "@/components/Icon";
 import { ItemIcon, itemTypeIcon, itemTypeLabel } from "@/components/ItemIcon";
+import { PasswordHistoryCard } from "@/components/PasswordHistoryCard";
 import { VaultBadge } from "@/components/VaultAvatar";
 import type { Cipher } from "@/lib/cipher";
 import type { Vault } from "@/lib/core";
 import { dayFormat } from "@/lib/i18n";
-import { customFields, typeFields } from "@/lib/item-fields";
+import { customFields, historyRows, typeFields } from "@/lib/item-fields";
 import { useItem } from "@/lib/use-item";
 import "./ItemDetail.css";
 
@@ -65,6 +66,7 @@ function Content({ cipher, vault }: { cipher: Cipher; vault: Vault }) {
   }, []);
   const fields = typeFields(cipher, intl);
   const custom = customFields(cipher, intl);
+  const history = historyRows(cipher, intl);
   const notes = cipher.notes?.trim() ? cipher.notes : undefined;
   const { creationDate, revisionDate } = cipher;
   return (
@@ -95,6 +97,7 @@ function Content({ cipher, vault }: { cipher: Cipher; vault: Vault }) {
           <FieldCard rows={custom} />
         </section>
       )}
+      {history.length > 0 && <PasswordHistoryCard rows={history} />}
       {creationDate && revisionDate && (
         <p className="item-detail-dates">
           {t(

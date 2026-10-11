@@ -1,7 +1,6 @@
+import "./App.css";
+import { Welcome } from "./Welcome";
+
 export function App() {
-  return (
-    <main>
-      <h1>Submarine</h1>
-    </main>
-  );
+  return <Welcome />;
 }

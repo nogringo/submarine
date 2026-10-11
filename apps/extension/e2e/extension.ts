@@ -1,5 +1,5 @@
 import { resolve } from "node:path";
-import puppeteer, { type Browser, type Page } from "puppeteer";
+import puppeteer, { type Browser, type KeyInput, type Page } from "puppeteer";
 
 export type BrowserName = "chrome" | "firefox";
 
@@ -7,6 +7,8 @@ export interface Extension {
   browser: Browser;
   /** The popup, opened in a tab by the extension itself. */
   popup: Page;
+  click(selector: string): Promise<void>;
+  press(key: string): Promise<void>;
 }
 
 /** Starts a browser with the end-to-end build of the extension installed. */
@@ -20,8 +22,35 @@ export async function launch(name: BrowserName): Promise<Extension> {
           // Lets the tests run scripts in the extension's pages.
           args: ["-remote-allow-system-access"],
         });
-  if (name === "firefox") await browser.installExtension(path);
-  return { browser, popup: await waitForPopup(browser) };
+  if (name === "chrome") {
+    const popup = await waitForPopup(browser);
+    return {
+      browser,
+      popup,
+      click: (selector) => popup.locator(selector).click(),
+      press: (key) => popup.keyboard.press(key as KeyInput),
+    };
+  }
+  await browser.installExtension(path);
+  const popup = await waitForPopup(browser);
+  // WebDriver BiDi sends no input to an extension page: the events come from a script, as from a
+  // screen reader.
+  return {
+    browser,
+    popup,
+    click: (selector) =>
+      popup.$eval(selector, (element) => {
+        (element as HTMLElement).focus();
+        (element as HTMLElement).click();
+      }),
+    press: (key) =>
+      popup.evaluate((key) => {
+        const target = document.activeElement ?? document.body;
+        for (const type of ["keydown", "keyup"]) {
+          target.dispatchEvent(new KeyboardEvent(type, { key, bubbles: true, cancelable: true }));
+        }
+      }, key),
+  };
 }
 
 async function waitForPopup(browser: Browser): Promise<Page> {

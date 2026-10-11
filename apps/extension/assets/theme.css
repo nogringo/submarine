@@ -1,0 +1,51 @@
+@import "@fontsource-variable/atkinson-hyperlegible-next";
+@import "@fontsource/saira-stencil-one";
+
+/*
+ * Submarine's tokens, as in the app's Palette. --accent is a fill, for the main action and the
+ * selection; --signal is the accent as readable text. --outline edges a control at 3:1
+ * (WCAG 1.4.11), where --line only divides.
+ */
+:root {
+  color-scheme: light dark;
+  --background: light-dark(#e4ebef, #0b1e2d);
+  --surface: light-dark(#f3f6f8, #10283b);
+  --raised: light-dark(#ffffff, #183652);
+  --selected: light-dark(#d2dee6, #1e4163);
+  --line: light-dark(#c3d0d9, #284b6b);
+  --outline: light-dark(#6e8391, #648098);
+  --text: light-dark(#0b1e2d, #eaf0f4);
+  --muted: light-dark(#4b6374, #a0b5c5);
+  --accent: #ffd23f;
+  --on-accent: #0b1e2d;
+  --signal: light-dark(#8a5300, #ffd23f);
+  --symbol: light-dark(#1f5fa8, #8cc8ff);
+  --danger: light-dark(#b3261e, #ff9585);
+
+  --text-font: "Atkinson Hyperlegible Next Variable", system-ui, sans-serif;
+  --wordmark-font: "Saira Stencil One", var(--text-font);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--text);
+  font-family: var(--text-font);
+  font-size: 14px;
+  line-height: 1.43;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+[data-focus-visible] {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}

@@ -21,10 +21,13 @@
     "postinstall": "wxt prepare"
   },
   "dependencies": {
+    "@fontsource-variable/atkinson-hyperlegible-next": "5.3.0",
+    "@fontsource/saira-stencil-one": "5.3.0",
     "@noble/curves": "2.0.1",
     "@noble/hashes": "2.0.1",
     "nostr-tools": "2.25.2",
     "react": "19.3.0",
+    "react-aria-components": "1.22.1",
     "react-dom": "19.3.0"
   },
   "devDependencies": {

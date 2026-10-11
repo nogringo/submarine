@@ -1,0 +1,24 @@
+.button {
+  min-height: 44px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.button.text[data-hovered] {
+  background: color-mix(in srgb, currentColor 8%, transparent);
+}
+
+.button.text[data-pressed] {
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.button.muted {
+  color: var(--muted);
+}

@@ -1,0 +1,65 @@
+.sonar {
+  display: block;
+  overflow: visible;
+}
+
+.sonar-rings {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 1.5;
+}
+
+.sonar-signal {
+  fill: var(--accent);
+}
+
+.sonar-ping {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  vector-effect: non-scaling-stroke;
+  transform-box: fill-box;
+  transform-origin: center;
+  /* The radius eases out while the ping fades evenly, as in the app. */
+  animation:
+    sonar-grow 3.2s ease-out infinite,
+    sonar-fade 3.2s linear infinite;
+}
+
+.sonar-blip {
+  animation: sonar-blip 3.2s linear infinite;
+}
+
+@keyframes sonar-grow {
+  from {
+    transform: scale(0);
+  }
+}
+
+@keyframes sonar-fade {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes sonar-blip {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sonar-ping {
+    display: none;
+  }
+
+  .sonar-blip {
+    animation: none;
+  }
+}

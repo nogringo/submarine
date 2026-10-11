@@ -67,7 +67,7 @@ What the spike ran into, and what the extension does about it.
 - Firefox stops an event page after 30 seconds idle, even with a reply pending, a promise returned or a port open. While the core works, the background calls an extension API every 10 seconds.
 - Argon2 is WebAssembly: the extension pages' CSP is `script-src 'self' 'wasm-unsafe-eval'; object-src 'self';`.
 - Firefox Add-ons rebuilds the extension from its sources: the sources zip needs the Dart packages and instructions for the Dart SDK.
-- Firefox's WebDriver BiDi cannot open `moz-extension://` pages. Automated tests start Firefox with `-remote-allow-system-access` and use a build that opens its own page (`WXT_OPEN_POPUP_TAB=1`).
+- Firefox's WebDriver BiDi cannot open `moz-extension://` pages, nor send them mouse or keyboard input. The end-to-end tests start Firefox with `-remote-allow-system-access`, use a build that opens its own page (`--mode e2e`), and dispatch clicks and keys from a script there, as a screen reader does.
 
 ## Spike measurements
 

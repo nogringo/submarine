@@ -1,0 +1,30 @@
+.welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 24px;
+  text-align: center;
+}
+
+.wordmark {
+  margin-top: 32px;
+  font-family: var(--wordmark-font);
+  font-size: 40px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.tagline {
+  max-width: 360px;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 16px;
+}
+
+.welcome > .button {
+  margin-top: 40px;
+}

@@ -2,7 +2,7 @@ name: submarine_cli
 description: Command-line client for Submarine, a password manager built on Nostr.
 version: 0.1.0
 publish_to: none
-# repository: https://github.com/my_org/my_repo
+repository: https://github.com/nogringo/submarine/tree/main/apps/cli
 
 environment:
   sdk: ^3.13.4

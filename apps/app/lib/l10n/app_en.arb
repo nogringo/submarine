@@ -97,9 +97,21 @@
   "@saveVaultKeyTitle": {
     "description": "Title of the dialog showing the key of a vault just created."
   },
-  "saveVaultKeyBody": "Anyone who has this key can open the vault. Keep it somewhere safe: you need it to open the vault on another device, or to share it.",
-  "@saveVaultKeyBody": {
-    "description": "Asks to keep the key of a vault just created somewhere safe."
+  "encryptVaultKeyBody": "Choose a password to encrypt the vault key. You can then keep the encrypted key anywhere, since only this password opens it. Remember it: nobody can recover it for you.",
+  "@encryptVaultKeyBody": {
+    "description": "Asks for a password to encrypt the key of a vault (into an ncryptsec, NIP-49), before showing it."
+  },
+  "encryptedVaultKeyBody": "Keep this key wherever you like: an email to yourself, your notes, a cloud drive. It opens only with your password. You need both to open the vault on another device, or to share it.",
+  "@encryptedVaultKeyBody": {
+    "description": "Says where to keep a vault key encrypted with a password, shown under it."
+  },
+  "encryptKey": "Encrypt the key",
+  "@encryptKey": {
+    "description": "Button encrypting the vault key with the password typed above it."
+  },
+  "later": "Later",
+  "@later": {
+    "description": "Button closing the dialog of a vault just created without encrypting its key, which its settings export later."
   },
   "vaultSettings": "Vault settings",
   "@vaultSettings": {
@@ -132,6 +144,18 @@
   "vaultKeyDecrypting": "Decrypting the key",
   "@vaultKeyDecrypting": {
     "description": "Shown while an ncryptsec is decrypted with its password, which takes a moment."
+  },
+  "encryptedVaultKey": "Encrypted key",
+  "@encryptedVaultKey": {
+    "description": "Row of the vault settings exporting the vault key encrypted with a password."
+  },
+  "encryptedVaultKeyDescription": "A copy of the vault key to keep anywhere, which only its password opens.",
+  "@encryptedVaultKeyDescription": {
+    "description": "Explains the encrypted vault key, in the vault settings row that exports it."
+  },
+  "exportEncryptedVaultKey": "Export the encrypted key",
+  "@exportEncryptedVaultKey": {
+    "description": "Title of the dialog encrypting the vault key with a password, from the vault settings."
   },
   "otherWaysToOpen": "Other ways to open it",
   "@otherWaysToOpen": {
@@ -1737,9 +1761,9 @@
   "@newLockPassword": {
     "description": "Field of the lock password replacing the current one."
   },
-  "confirmLockPassword": "Confirm the password",
-  "@confirmLockPassword": {
-    "description": "Second field of a new lock password, to catch a typo."
+  "confirmPassword": "Confirm the password",
+  "@confirmPassword": {
+    "description": "Second field of a new password, to catch a typo."
   },
   "lockPasswordHelper": "At least {count} characters. Forgetting it removes the vaults from this device.",
   "@lockPasswordHelper": {
@@ -1750,18 +1774,18 @@
       }
     }
   },
-  "lockPasswordTooShort": "At least {count} characters.",
-  "@lockPasswordTooShort": {
-    "description": "Error when a new lock password is too short.",
+  "passwordMinLength": "At least {count} characters.",
+  "@passwordMinLength": {
+    "description": "Under a new password, or as its error when it is too short.",
     "placeholders": {
       "count": {
         "type": "int"
       }
     }
   },
-  "lockPasswordMismatch": "The passwords do not match.",
-  "@lockPasswordMismatch": {
-    "description": "Error when the confirmation differs from the new lock password."
+  "passwordMismatch": "The passwords do not match.",
+  "@passwordMismatch": {
+    "description": "Error when the confirmation differs from the new password."
   },
   "wrongLockPassword": "This is not the lock password.",
   "@wrongLockPassword": {
@@ -1769,7 +1793,7 @@
   },
   "generatePassphrase": "Generate a passphrase",
   "@generatePassphrase": {
-    "description": "Button filling the new lock password with a generated passphrase, shown in clear."
+    "description": "Button filling a new password, of the lock or of a vault key, with a generated passphrase, shown in clear."
   },
   "unlockWithBiometricsWithPassword": "Instead of typing the lock password, which keeps working.",
   "@unlockWithBiometricsWithPassword": {

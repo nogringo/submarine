@@ -85,8 +85,18 @@ class AppLocalizationsRu extends AppLocalizations {
   String get saveVaultKeyTitle => 'Сохраните ключ хранилища';
 
   @override
-  String get saveVaultKeyBody =>
-      'Любой, у кого есть этот ключ, может открыть хранилище. Храните его в надёжном месте: он понадобится, чтобы открыть хранилище на другом устройстве или поделиться им.';
+  String get encryptVaultKeyBody =>
+      'Выберите пароль, чтобы зашифровать ключ хранилища. Зашифрованный ключ можно хранить где угодно: открыть его может только этот пароль. Запомните его: никто не сможет восстановить его за вас.';
+
+  @override
+  String get encryptedVaultKeyBody =>
+      'Храните этот ключ где угодно: в письме самому себе, в заметках, в облаке. Он открывается только вашим паролем. Чтобы открыть хранилище на другом устройстве или поделиться им, понадобятся оба.';
+
+  @override
+  String get encryptKey => 'Зашифровать ключ';
+
+  @override
+  String get later => 'Позже';
 
   @override
   String get vaultSettings => 'Настройки хранилища';
@@ -113,6 +123,16 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get vaultKeyDecrypting => 'Расшифровка ключа';
+
+  @override
+  String get encryptedVaultKey => 'Зашифрованный ключ';
+
+  @override
+  String get encryptedVaultKeyDescription =>
+      'Копия ключа хранилища, которую можно хранить где угодно и которую открывает только её пароль.';
+
+  @override
+  String get exportEncryptedVaultKey => 'Экспортировать зашифрованный ключ';
 
   @override
   String get otherWaysToOpen => 'Другие способы открыть';
@@ -1432,7 +1452,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get newLockPassword => 'Новый пароль';
 
   @override
-  String get confirmLockPassword => 'Подтвердите пароль';
+  String get confirmPassword => 'Подтвердите пароль';
 
   @override
   String lockPasswordHelper(int count) {
@@ -1440,12 +1460,12 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String lockPasswordTooShort(int count) {
+  String passwordMinLength(int count) {
     return 'Не менее $count символов.';
   }
 
   @override
-  String get lockPasswordMismatch => 'Пароли не совпадают.';
+  String get passwordMismatch => 'Пароли не совпадают.';
 
   @override
   String get wrongLockPassword => 'Неверный пароль блокировки.';

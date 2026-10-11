@@ -85,8 +85,18 @@ class AppLocalizationsEs extends AppLocalizations {
   String get saveVaultKeyTitle => 'Guarda la clave de la caja fuerte';
 
   @override
-  String get saveVaultKeyBody =>
-      'Cualquiera que tenga esta clave puede abrir la caja fuerte. Guárdala en un lugar seguro: la necesitarás para abrir la caja fuerte en otro dispositivo o para compartirla.';
+  String get encryptVaultKeyBody =>
+      'Elige una contraseña para cifrar la clave de la caja fuerte. Luego podrás guardar la clave cifrada en cualquier sitio, porque solo esta contraseña la abre. Recuérdala: nadie podrá recuperarla por ti.';
+
+  @override
+  String get encryptedVaultKeyBody =>
+      'Guarda esta clave donde quieras: un correo a ti mismo, tus notas, una nube. Solo se abre con tu contraseña. Necesitarás ambas para abrir la caja fuerte en otro dispositivo o para compartirla.';
+
+  @override
+  String get encryptKey => 'Cifrar la clave';
+
+  @override
+  String get later => 'Más tarde';
 
   @override
   String get vaultSettings => 'Ajustes de la caja fuerte';
@@ -113,6 +123,16 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get vaultKeyDecrypting => 'Descifrando la clave';
+
+  @override
+  String get encryptedVaultKey => 'Clave cifrada';
+
+  @override
+  String get encryptedVaultKeyDescription =>
+      'Una copia de la clave de la caja fuerte que puedes guardar en cualquier sitio y que solo abre su contraseña.';
+
+  @override
+  String get exportEncryptedVaultKey => 'Exportar la clave cifrada';
 
   @override
   String get otherWaysToOpen => 'Otras formas de abrirla';
@@ -1405,7 +1425,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get newLockPassword => 'Nueva contraseña';
 
   @override
-  String get confirmLockPassword => 'Confirmar contraseña';
+  String get confirmPassword => 'Confirmar contraseña';
 
   @override
   String lockPasswordHelper(int count) {
@@ -1413,12 +1433,12 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String lockPasswordTooShort(int count) {
+  String passwordMinLength(int count) {
     return 'Al menos $count caracteres.';
   }
 
   @override
-  String get lockPasswordMismatch => 'Las contraseñas no coinciden.';
+  String get passwordMismatch => 'Las contraseñas no coinciden.';
 
   @override
   String get wrongLockPassword => 'Esta no es la contraseña de bloqueo.';

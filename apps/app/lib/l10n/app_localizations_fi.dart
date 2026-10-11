@@ -82,8 +82,18 @@ class AppLocalizationsFi extends AppLocalizations {
   String get saveVaultKeyTitle => 'Tallenna holvin avain';
 
   @override
-  String get saveVaultKeyBody =>
-      'Kuka tahansa, jolla on tämä avain, voi avata holvin. Säilytä se turvallisessa paikassa: tarvitset sitä avataksesi holvin toisella laitteella tai jakaaksesi sen.';
+  String get encryptVaultKeyBody =>
+      'Valitse salasana, jolla holvin avain salataan. Voit sitten säilyttää salattua avainta missä tahansa, koska vain tämä salasana avaa sen. Muista se: kukaan ei voi palauttaa sitä puolestasi.';
+
+  @override
+  String get encryptedVaultKeyBody =>
+      'Säilytä tätä avainta missä haluat: sähköpostissa itsellesi, muistiinpanoissasi, pilvipalvelussa. Se aukeaa vain salasanallasi. Tarvitset molemmat avataksesi holvin toisella laitteella tai jakaaksesi sen.';
+
+  @override
+  String get encryptKey => 'Salaa avain';
+
+  @override
+  String get later => 'Myöhemmin';
 
   @override
   String get vaultSettings => 'Holvin asetukset';
@@ -110,6 +120,16 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get vaultKeyDecrypting => 'Puretaan avaimen salausta';
+
+  @override
+  String get encryptedVaultKey => 'Salattu avain';
+
+  @override
+  String get encryptedVaultKeyDescription =>
+      'Holvin avaimen kopio, jota voit säilyttää missä tahansa ja jonka vain sen salasana avaa.';
+
+  @override
+  String get exportEncryptedVaultKey => 'Vie salattu avain';
 
   @override
   String get otherWaysToOpen => 'Muut avaustavat';
@@ -1395,7 +1415,7 @@ class AppLocalizationsFi extends AppLocalizations {
   String get newLockPassword => 'Uusi salasana';
 
   @override
-  String get confirmLockPassword => 'Vahvista salasana';
+  String get confirmPassword => 'Vahvista salasana';
 
   @override
   String lockPasswordHelper(int count) {
@@ -1403,12 +1423,12 @@ class AppLocalizationsFi extends AppLocalizations {
   }
 
   @override
-  String lockPasswordTooShort(int count) {
+  String passwordMinLength(int count) {
     return 'Vähintään $count merkkiä.';
   }
 
   @override
-  String get lockPasswordMismatch => 'Salasanat eivät täsmää.';
+  String get passwordMismatch => 'Salasanat eivät täsmää.';
 
   @override
   String get wrongLockPassword => 'Tämä ei ole lukitussalasana.';

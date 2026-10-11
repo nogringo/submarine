@@ -390,6 +390,12 @@ void main() {
     await settle(tester);
   }
 
+  Finder ncryptsecText() => find.byWidgetPredicate(
+    (widget) =>
+        widget is SelectableText &&
+        (widget.data?.startsWith('ncryptsec1') ?? false),
+  );
+
   testWidgets('welcomes a device without vaults, then creates one', (
     tester,
   ) async {
@@ -425,16 +431,33 @@ void main() {
     await settle(tester);
 
     expect(find.text('Save the vault key'), findsOneWidget);
-    final nsecFinder = find.byWidgetPredicate(
-      (widget) =>
-          widget is SelectableText &&
-          (widget.data?.startsWith('nsec1') ?? false),
-    );
-    expect(nsecFinder, findsNothing);
-    await tester.tap(find.byTooltip('Show'));
+    expect(find.widgetWithText(TextButton, 'Later'), findsOneWidget);
+    final passwordField = find.widgetWithText(TextField, 'Key password');
+    final encryptButton = find.widgetWithText(FilledButton, 'Encrypt the key');
+    await tester.enterText(passwordField, 'too short');
+    await tester.tap(encryptButton);
     await settle(tester);
-    final nsec = tester.widget<SelectableText>(nsecFinder);
-    final privateKey = parseVaultKey(nsec.data!);
+    expect(
+      tester.widget<TextField>(passwordField).decoration!.errorText,
+      'At least 12 characters.',
+    );
+
+    const password = 'correct horse battery';
+    await tester.enterText(passwordField, password);
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Confirm the password'),
+      password,
+    );
+    await tapUntil(
+      tester,
+      encryptButton,
+      () => ncryptsecText().evaluate().isNotEmpty,
+    );
+    final ncryptsec = tester.widget<SelectableText>(ncryptsecText()).data!;
+    final privateKey = await tester.runAsync(
+      () => decryptVaultKey(ncryptsec, password),
+    );
+    expect(privateKey, isNotNull);
     expect(
       vaults.all.single.record.login,
       isA<KeyLogin>().having((login) => login.privateKey, 'key', privateKey),
@@ -2742,6 +2765,64 @@ void main() {
     await close(tester);
   });
 
+  testWidgets('exports a vault key encrypted with a passphrase', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    final copies = watchClipboard(tester);
+    await open(tester, withFamily: true);
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+        mail: mail,
+      ),
+    );
+    await settle(tester);
+
+    await tester.tap(find.byTooltip('Family'));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Vault settings'));
+    await settle(tester);
+    await tester.tap(settingsButton('Encrypted key', 'Export'));
+    await settle(tester);
+    expect(find.text('Export the encrypted key'), findsOneWidget);
+    await tester.tap(find.text('Generate a passphrase'));
+    await settle(tester);
+    final passphrase = tester
+        .widget<TextField>(find.widgetWithText(TextField, 'Key password'))
+        .controller!
+        .text;
+    await tapUntil(
+      tester,
+      find.widgetWithText(FilledButton, 'Encrypt the key'),
+      () => ncryptsecText().evaluate().isNotEmpty,
+    );
+
+    final ncryptsec = tester.widget<SelectableText>(ncryptsecText()).data!;
+    expect(
+      await tester.runAsync(() => decryptVaultKey(ncryptsec, passphrase)),
+      (vaults.all.single.record.login as KeyLogin).privateKey,
+    );
+    await tester.tap(
+      find.descendant(
+        of: find.byType(Dialog),
+        matching: find.byTooltip('Copy'),
+      ),
+    );
+    await settle(tester);
+    expect(copies, [
+      {'text': ncryptsec, 'sensitive': false, 'clearAfter': null},
+    ]);
+    await tester.tap(find.text('Done'));
+    await settle(tester);
+    expect(find.text('Export the encrypted key'), findsNothing);
+    await close(tester);
+  });
+
   testWidgets('removes a vault from the device in its settings on a desktop', (
     tester,
   ) async {
@@ -4741,6 +4822,10 @@ void main() {
         await tester.tap(find.byTooltip('Personal'));
         await settle(tester);
         await tapAndCheck(find.byTooltip('Vault settings'));
+        await tester.ensureVisible(settingsButton('Encrypted key', 'Export'));
+        await settle(tester);
+        await tapAndCheck(settingsButton('Encrypted key', 'Export'));
+        await cancel();
         await tester.ensureVisible(find.text('Full sync'));
         await settle(tester);
         await checkAccessibility(tester);

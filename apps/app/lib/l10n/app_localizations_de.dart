@@ -85,8 +85,18 @@ class AppLocalizationsDe extends AppLocalizations {
   String get saveVaultKeyTitle => 'Tresorschlüssel sichern';
 
   @override
-  String get saveVaultKeyBody =>
-      'Wer diesen Schlüssel hat, kann den Tresor öffnen. Bewahre ihn sicher auf: Du brauchst ihn, um den Tresor auf einem anderen Gerät zu öffnen oder ihn zu teilen.';
+  String get encryptVaultKeyBody =>
+      'Wähle ein Passwort, um den Tresorschlüssel zu verschlüsseln. Den verschlüsselten Schlüssel kannst du dann überall aufbewahren, denn nur dieses Passwort öffnet ihn. Merke es dir: Niemand kann es für dich wiederherstellen.';
+
+  @override
+  String get encryptedVaultKeyBody =>
+      'Bewahre diesen Schlüssel auf, wo du willst: in einer E-Mail an dich selbst, in deinen Notizen, in einer Cloud. Er lässt sich nur mit deinem Passwort öffnen. Du brauchst beides, um den Tresor auf einem anderen Gerät zu öffnen oder ihn zu teilen.';
+
+  @override
+  String get encryptKey => 'Schlüssel verschlüsseln';
+
+  @override
+  String get later => 'Später';
 
   @override
   String get vaultSettings => 'Tresoreinstellungen';
@@ -114,6 +124,16 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get vaultKeyDecrypting => 'Schlüssel wird entschlüsselt';
+
+  @override
+  String get encryptedVaultKey => 'Verschlüsselter Schlüssel';
+
+  @override
+  String get encryptedVaultKeyDescription =>
+      'Eine Kopie des Tresorschlüssels, die du überall aufbewahren kannst und die nur ihr Passwort öffnet.';
+
+  @override
+  String get exportEncryptedVaultKey => 'Verschlüsselten Schlüssel exportieren';
 
   @override
   String get otherWaysToOpen => 'Weitere Möglichkeiten zum Öffnen';
@@ -1401,7 +1421,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get newLockPassword => 'Neues Passwort';
 
   @override
-  String get confirmLockPassword => 'Passwort bestätigen';
+  String get confirmPassword => 'Passwort bestätigen';
 
   @override
   String lockPasswordHelper(int count) {
@@ -1409,12 +1429,12 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String lockPasswordTooShort(int count) {
+  String passwordMinLength(int count) {
     return 'Mindestens $count Zeichen.';
   }
 
   @override
-  String get lockPasswordMismatch => 'Die Passwörter stimmen nicht überein.';
+  String get passwordMismatch => 'Die Passwörter stimmen nicht überein.';
 
   @override
   String get wrongLockPassword => 'Das ist nicht das Sperrpasswort.';

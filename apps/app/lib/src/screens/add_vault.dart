@@ -17,8 +17,8 @@ import '../vaults/vault_storage.dart';
 import '../vaults/vaults.dart';
 import '../widgets/copy_button.dart';
 import '../widgets/dialog_buttons.dart';
+import '../widgets/encrypt_vault_key_dialog.dart';
 import '../widgets/vault_color_picker.dart';
-import '../widgets/vault_key_box.dart';
 
 enum AddVaultChoice { create, open }
 
@@ -43,7 +43,11 @@ Future<void> addVaultWith(BuildContext context, AddVaultChoice choice) async {
       await showDialog<void>(
         context: context,
         barrierDismissible: false,
-        builder: (context) => _VaultKeyDialog(privateKey: privateKey),
+        builder: (context) => EncryptVaultKeyDialog(
+          privateKey: privateKey,
+          title: context.l10n.saveVaultKeyTitle,
+          dismissLabel: context.l10n.later,
+        ),
       );
     }
   }
@@ -440,7 +444,7 @@ class _VaultFormDialogState extends State<_VaultFormDialog> {
         onChanged: (_) => setState(() {}),
         decoration: InputDecoration(
           labelText: l10n.vaultKey,
-          hintText: 'nsec1...',
+          hintText: 'ncryptsec1...',
           helperText: l10n.vaultKeyHelper,
           helperMaxLines: 3,
           errorText: _keyError,
@@ -796,51 +800,6 @@ class _NostrConnectDialogState extends State<_NostrConnectDialog> {
                 child: TextButton(
                   onPressed: () => Navigator.pop(context),
                   child: Text(l10n.cancel),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _VaultKeyDialog extends StatelessWidget {
-  const _VaultKeyDialog({required this.privateKey});
-
-  final String privateKey;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final palette = context.palette;
-    return Dialog(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 480),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                l10n.saveVaultKeyTitle,
-                style: Theme.of(context).dialogTheme.titleTextStyle,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                l10n.saveVaultKeyBody,
-                style: TextStyle(color: palette.muted),
-              ),
-              const SizedBox(height: 20),
-              VaultKeyBox(privateKey: privateKey),
-              const SizedBox(height: 24),
-              Align(
-                alignment: Alignment.centerRight,
-                child: FilledButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(l10n.done),
                 ),
               ),
             ],

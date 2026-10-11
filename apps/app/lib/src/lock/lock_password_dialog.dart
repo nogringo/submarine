@@ -53,11 +53,11 @@ class _LockPasswordDialogState extends State<LockPasswordDialog> {
     setState(() {
       _currentError = null;
       _passwordError = _asksNew && password.length < minLockPasswordLength
-          ? l10n.lockPasswordTooShort(minLockPasswordLength)
+          ? l10n.passwordMinLength(minLockPasswordLength)
           : null;
       _confirmationError =
           _asksNew && _passwordError == null && _confirmation.text != password
-          ? l10n.lockPasswordMismatch
+          ? l10n.passwordMismatch
           : null;
     });
     if (_passwordError != null || _confirmationError != null) return;
@@ -134,7 +134,7 @@ class _LockPasswordDialogState extends State<LockPasswordDialog> {
                   gap,
                   PasswordField(
                     controller: _confirmation,
-                    label: l10n.confirmLockPassword,
+                    label: l10n.confirmPassword,
                     hidden: _hidden,
                     errorText: _confirmationError,
                     helperText: l10n.lockPasswordHelper(minLockPasswordLength),

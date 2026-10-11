@@ -81,8 +81,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get saveVaultKeyTitle => '保存密码库密钥';
 
   @override
-  String get saveVaultKeyBody =>
-      '任何拥有此密钥的人都能打开此密码库。请将它保存在安全的地方：在其他设备上打开此密码库或共享它时，都需要用到它。';
+  String get encryptVaultKeyBody =>
+      '请设置一个密码来加密密码库密钥。加密后的密钥只能用这个密码打开，因此可以存放在任何地方。请记住这个密码：没有人能帮您找回。';
+
+  @override
+  String get encryptedVaultKeyBody =>
+      '这个密钥可以存放在任何地方：发给自己的邮件、笔记、云盘。只有您的密码才能打开它。在其他设备上打开此密码库或共享它时，两者都需要。';
+
+  @override
+  String get encryptKey => '加密密钥';
+
+  @override
+  String get later => '稍后';
 
   @override
   String get vaultSettings => '密码库设置';
@@ -108,6 +118,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get vaultKeyDecrypting => '正在解密密钥';
+
+  @override
+  String get encryptedVaultKey => '加密的密钥';
+
+  @override
+  String get encryptedVaultKeyDescription => '密码库密钥的副本，可存放在任何地方，只有它的密码才能打开。';
+
+  @override
+  String get exportEncryptedVaultKey => '导出加密的密钥';
 
   @override
   String get otherWaysToOpen => '其他打开方式';
@@ -1363,7 +1382,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get newLockPassword => '新密码';
 
   @override
-  String get confirmLockPassword => '确认密码';
+  String get confirmPassword => '确认密码';
 
   @override
   String lockPasswordHelper(int count) {
@@ -1371,12 +1390,12 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String lockPasswordTooShort(int count) {
+  String passwordMinLength(int count) {
     return '至少需要 $count 个字符。';
   }
 
   @override
-  String get lockPasswordMismatch => '两次输入的密码不一致。';
+  String get passwordMismatch => '两次输入的密码不一致。';
 
   @override
   String get wrongLockPassword => '锁定密码不正确。';

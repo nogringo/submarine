@@ -81,8 +81,18 @@ class AppLocalizationsJa extends AppLocalizations {
   String get saveVaultKeyTitle => '保管庫の鍵を保存してください';
 
   @override
-  String get saveVaultKeyBody =>
-      'この鍵を持っている人は誰でも保管庫を開けます。安全な場所に保管してください。別のデバイスで保管庫を開くときや、保管庫を共有するときに必要です。';
+  String get encryptVaultKeyBody =>
+      '保管庫の鍵を暗号化するパスワードを決めてください。暗号化した鍵はこのパスワードでしか開けないため、どこに保管しても構いません。パスワードは忘れないでください。誰も復元できません。';
+
+  @override
+  String get encryptedVaultKeyBody =>
+      'この鍵は自分宛てのメール、メモ、クラウドなど、好きな場所に保管できます。開けるのはあなたのパスワードだけです。別のデバイスで保管庫を開くときや共有するときは、鍵とパスワードの両方が必要です。';
+
+  @override
+  String get encryptKey => '鍵を暗号化';
+
+  @override
+  String get later => '後で';
 
   @override
   String get vaultSettings => '保管庫の設定';
@@ -108,6 +118,16 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get vaultKeyDecrypting => '鍵を復号しています';
+
+  @override
+  String get encryptedVaultKey => '暗号化された鍵';
+
+  @override
+  String get encryptedVaultKeyDescription =>
+      'どこにでも保管できる保管庫の鍵のコピーです。開けるのはそのパスワードだけです。';
+
+  @override
+  String get exportEncryptedVaultKey => '暗号化された鍵をエクスポート';
 
   @override
   String get otherWaysToOpen => 'その他の開き方';
@@ -1375,7 +1395,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get newLockPassword => '新しいパスワード';
 
   @override
-  String get confirmLockPassword => 'パスワードの確認';
+  String get confirmPassword => 'パスワードの確認';
 
   @override
   String lockPasswordHelper(int count) {
@@ -1383,12 +1403,12 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String lockPasswordTooShort(int count) {
+  String passwordMinLength(int count) {
     return '$count 文字以上にしてください。';
   }
 
   @override
-  String get lockPasswordMismatch => 'パスワードが一致しません。';
+  String get passwordMismatch => 'パスワードが一致しません。';
 
   @override
   String get wrongLockPassword => 'ロック用パスワードが正しくありません。';

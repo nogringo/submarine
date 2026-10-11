@@ -85,8 +85,18 @@ class AppLocalizationsIt extends AppLocalizations {
   String get saveVaultKeyTitle => 'Conserva la chiave della cassaforte';
 
   @override
-  String get saveVaultKeyBody =>
-      'Chiunque abbia questa chiave può aprire la cassaforte. Conservala in un posto sicuro: ti servirà per aprire la cassaforte su un altro dispositivo o per condividerla.';
+  String get encryptVaultKeyBody =>
+      'Scegli una password per cifrare la chiave della cassaforte. Potrai poi conservare la chiave cifrata ovunque, perché solo questa password la apre. Ricordala: nessuno potrà recuperarla per te.';
+
+  @override
+  String get encryptedVaultKeyBody =>
+      'Conserva questa chiave dove vuoi: un\'email a te stesso, le tue note, un cloud. Si apre solo con la tua password. Ti serviranno entrambe per aprire la cassaforte su un altro dispositivo o per condividerla.';
+
+  @override
+  String get encryptKey => 'Cifra la chiave';
+
+  @override
+  String get later => 'Più tardi';
 
   @override
   String get vaultSettings => 'Impostazioni della cassaforte';
@@ -113,6 +123,16 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get vaultKeyDecrypting => 'Decifratura della chiave';
+
+  @override
+  String get encryptedVaultKey => 'Chiave cifrata';
+
+  @override
+  String get encryptedVaultKeyDescription =>
+      'Una copia della chiave della cassaforte da conservare ovunque, che solo la sua password apre.';
+
+  @override
+  String get exportEncryptedVaultKey => 'Esporta la chiave cifrata';
 
   @override
   String get otherWaysToOpen => 'Altri modi per aprirla';
@@ -1408,7 +1428,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get newLockPassword => 'Nuova password';
 
   @override
-  String get confirmLockPassword => 'Conferma la password';
+  String get confirmPassword => 'Conferma la password';
 
   @override
   String lockPasswordHelper(int count) {
@@ -1416,12 +1436,12 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
-  String lockPasswordTooShort(int count) {
+  String passwordMinLength(int count) {
     return 'Almeno $count caratteri.';
   }
 
   @override
-  String get lockPasswordMismatch => 'Le password non corrispondono.';
+  String get passwordMismatch => 'Le password non corrispondono.';
 
   @override
   String get wrongLockPassword => 'Questa non è la password di sblocco.';

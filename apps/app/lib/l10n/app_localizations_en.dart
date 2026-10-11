@@ -82,8 +82,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saveVaultKeyTitle => 'Save the vault key';
 
   @override
-  String get saveVaultKeyBody =>
-      'Anyone who has this key can open the vault. Keep it somewhere safe: you need it to open the vault on another device, or to share it.';
+  String get encryptVaultKeyBody =>
+      'Choose a password to encrypt the vault key. You can then keep the encrypted key anywhere, since only this password opens it. Remember it: nobody can recover it for you.';
+
+  @override
+  String get encryptedVaultKeyBody =>
+      'Keep this key wherever you like: an email to yourself, your notes, a cloud drive. It opens only with your password. You need both to open the vault on another device, or to share it.';
+
+  @override
+  String get encryptKey => 'Encrypt the key';
+
+  @override
+  String get later => 'Later';
 
   @override
   String get vaultSettings => 'Vault settings';
@@ -110,6 +120,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vaultKeyDecrypting => 'Decrypting the key';
+
+  @override
+  String get encryptedVaultKey => 'Encrypted key';
+
+  @override
+  String get encryptedVaultKeyDescription =>
+      'A copy of the vault key to keep anywhere, which only its password opens.';
+
+  @override
+  String get exportEncryptedVaultKey => 'Export the encrypted key';
 
   @override
   String get otherWaysToOpen => 'Other ways to open it';
@@ -1392,7 +1412,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newLockPassword => 'New password';
 
   @override
-  String get confirmLockPassword => 'Confirm the password';
+  String get confirmPassword => 'Confirm the password';
 
   @override
   String lockPasswordHelper(int count) {
@@ -1400,12 +1420,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String lockPasswordTooShort(int count) {
+  String passwordMinLength(int count) {
     return 'At least $count characters.';
   }
 
   @override
-  String get lockPasswordMismatch => 'The passwords do not match.';
+  String get passwordMismatch => 'The passwords do not match.';
 
   @override
   String get wrongLockPassword => 'This is not the lock password.';

@@ -13,6 +13,10 @@ Future<void> main() async {
   final privateKey = isEncryptedVaultKey(vaultKey)
       ? await decryptVaultKey(vaultKey, '<password>')
       : parseVaultKey(vaultKey);
+  // A copy to keep anywhere, a mail to oneself or a note: only the password
+  // opens it.
+  final backup = await encryptVaultKey(privateKey!, '<backup password>');
+  print('Vault key backup: $backup');
   // Any EventSigner works, a NIP-46 bunker or a NIP-07 extension too. A
   // bunker is asked for vaultSignerPermissions when it connects.
   const bunkerClient = Nip46ClientMetadata(
@@ -21,7 +25,7 @@ Future<void> main() async {
   );
   print('A bunker would be asked for ${bunkerClient.perms!.join(', ')}');
   final signer = const Bip340EventSignerFactory().create(
-    privateKey: privateKey!,
+    privateKey: privateKey,
   );
   // vault.sync authenticates as the vault, which ndk must know.
   ndk.accounts.addAccount(

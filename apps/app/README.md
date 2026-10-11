@@ -6,7 +6,7 @@ Flutter app for Submarine, a password manager built on [Nostr](https://nostr.how
 
 ## Features
 
-- **Vaults.** A vault is a Nostr account. Create one, or open one on as many devices as you like, with its key (an nsec, in hex, or an ncryptsec and its password) or through a signer that keeps the key out of the app: a browser extension (NIP-07) on the web, a bunker (NIP-46) everywhere, a signer app such as Amber (NIP-55) on Android. Each device gives its vaults its own names and colors.
+- **Vaults.** A vault is a Nostr account. Create one, or open one on as many devices as you like, with its key (an nsec, in hex, or an ncryptsec and its password) or through a signer that keeps the key out of the app: a browser extension (NIP-07) on the web, a bunker (NIP-46) everywhere, a signer app such as Amber (NIP-55) on Android. A new vault gives its key encrypted with a password you choose (an ncryptsec, NIP-49), to keep anywhere since only that password opens it, and its settings export it again. Each device gives its vaults its own names and colors.
 - **Items.** Logins, cards and secure notes can be created and edited. The other Bitwarden item types (identities, SSH keys, bank accounts, driver's licenses and passports) are shown but not editable yet.
 - **Search and filters.** Search works as in Bitwarden, ignoring case and accents. Filters narrow the list to a type, the favorites or the trash.
 - **Trash.** Items move to the trash, come back out of it, or are deleted for good.

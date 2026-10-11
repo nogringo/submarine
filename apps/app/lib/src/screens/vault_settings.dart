@@ -15,6 +15,7 @@ import '../vaults/vault_storage.dart';
 import '../vaults/vaults.dart';
 import '../widgets/copy_button.dart';
 import '../widgets/dialog_buttons.dart';
+import '../widgets/encrypt_vault_key_dialog.dart';
 import '../widgets/settings_tile.dart';
 import '../widgets/spinning_icon.dart';
 import '../widgets/sync_status.dart';
@@ -261,6 +262,8 @@ class _VaultSettingsState extends State<_VaultSettings> {
                       subtitle: Text(l10n.vaultSignerDescription),
                     ),
                   },
+                  if (vault.record.login case KeyLogin(:final privateKey))
+                    _EncryptedKeyTile(privateKey: privateKey),
                   if (vault.record.login is SignerLogin)
                     _AskSignerTile(vault: vault),
                 ],
@@ -390,6 +393,34 @@ class _VaultListTile extends StatelessWidget {
       subtitle: summary != null ? Text(summary) : null,
       trailing: Icon(Icons.chevron_right_rounded, color: context.palette.muted),
       onTap: () => context.push(vaultListPath(vault.pubkey, list)),
+    );
+  }
+}
+
+class _EncryptedKeyTile extends StatelessWidget {
+  const _EncryptedKeyTile({required this.privateKey});
+
+  /// In hex.
+  final String privateKey;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return SettingsTile(
+      title: Text(l10n.encryptedVaultKey),
+      subtitle: Text(l10n.encryptedVaultKeyDescription),
+      trailing: OutlinedButton.icon(
+        onPressed: () => showDialog<void>(
+          context: context,
+          builder: (context) => EncryptVaultKeyDialog(
+            privateKey: privateKey,
+            title: l10n.exportEncryptedVaultKey,
+          ),
+        ),
+        style: settingsButtonStyle,
+        icon: const Icon(Icons.lock_outline_rounded, size: 18),
+        label: Text(l10n.exportButton),
+      ),
     );
   }
 }

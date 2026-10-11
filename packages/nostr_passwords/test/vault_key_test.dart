@@ -55,5 +55,15 @@ void main() {
       );
       expect(await decryptVaultKey(ncryptsec, 'nostr '), isNull);
     });
+
+    test('is made with a password that alone opens it', () async {
+      const password = 'correct horse battery';
+      final encrypted = await encryptVaultKey(hexKey, password);
+
+      expect(isEncryptedVaultKey(encrypted), isTrue);
+      expect(await decryptVaultKey(encrypted, password), hexKey);
+      expect(await decryptVaultKey(encrypted, 'wrong horse battery'), isNull);
+      expect(await encryptVaultKey(hexKey, password), isNot(encrypted));
+    });
   });
 }

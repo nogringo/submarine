@@ -253,11 +253,29 @@ abstract class AppLocalizations {
   /// **'Save the vault key'**
   String get saveVaultKeyTitle;
 
-  /// Asks to keep the key of a vault just created somewhere safe.
+  /// Asks for a password to encrypt the key of a vault (into an ncryptsec, NIP-49), before showing it.
   ///
   /// In en, this message translates to:
-  /// **'Anyone who has this key can open the vault. Keep it somewhere safe: you need it to open the vault on another device, or to share it.'**
-  String get saveVaultKeyBody;
+  /// **'Choose a password to encrypt the vault key. You can then keep the encrypted key anywhere, since only this password opens it. Remember it: nobody can recover it for you.'**
+  String get encryptVaultKeyBody;
+
+  /// Says where to keep a vault key encrypted with a password, shown under it.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep this key wherever you like: an email to yourself, your notes, a cloud drive. It opens only with your password. You need both to open the vault on another device, or to share it.'**
+  String get encryptedVaultKeyBody;
+
+  /// Button encrypting the vault key with the password typed above it.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypt the key'**
+  String get encryptKey;
+
+  /// Button closing the dialog of a vault just created without encrypting its key, which its settings export later.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get later;
 
   /// Subtitle of the vault settings screen, and tooltip of the buttons opening it.
   ///
@@ -306,6 +324,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Decrypting the key'**
   String get vaultKeyDecrypting;
+
+  /// Row of the vault settings exporting the vault key encrypted with a password.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypted key'**
+  String get encryptedVaultKey;
+
+  /// Explains the encrypted vault key, in the vault settings row that exports it.
+  ///
+  /// In en, this message translates to:
+  /// **'A copy of the vault key to keep anywhere, which only its password opens.'**
+  String get encryptedVaultKeyDescription;
+
+  /// Title of the dialog encrypting the vault key with a password, from the vault settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Export the encrypted key'**
+  String get exportEncryptedVaultKey;
 
   /// In the open vault dialog, row unfolding the buttons that open a vault through a signer holding its key.
   ///
@@ -2443,11 +2479,11 @@ abstract class AppLocalizations {
   /// **'New password'**
   String get newLockPassword;
 
-  /// Second field of a new lock password, to catch a typo.
+  /// Second field of a new password, to catch a typo.
   ///
   /// In en, this message translates to:
   /// **'Confirm the password'**
-  String get confirmLockPassword;
+  String get confirmPassword;
 
   /// Under the fields of a new lock password.
   ///
@@ -2455,17 +2491,17 @@ abstract class AppLocalizations {
   /// **'At least {count} characters. Forgetting it removes the vaults from this device.'**
   String lockPasswordHelper(int count);
 
-  /// Error when a new lock password is too short.
+  /// Under a new password, or as its error when it is too short.
   ///
   /// In en, this message translates to:
   /// **'At least {count} characters.'**
-  String lockPasswordTooShort(int count);
+  String passwordMinLength(int count);
 
-  /// Error when the confirmation differs from the new lock password.
+  /// Error when the confirmation differs from the new password.
   ///
   /// In en, this message translates to:
   /// **'The passwords do not match.'**
-  String get lockPasswordMismatch;
+  String get passwordMismatch;
 
   /// Error when the typed password does not open the key of the device.
   ///
@@ -2473,7 +2509,7 @@ abstract class AppLocalizations {
   /// **'This is not the lock password.'**
   String get wrongLockPassword;
 
-  /// Button filling the new lock password with a generated passphrase, shown in clear.
+  /// Button filling a new password, of the lock or of a vault key, with a generated passphrase, shown in clear.
   ///
   /// In en, this message translates to:
   /// **'Generate a passphrase'**

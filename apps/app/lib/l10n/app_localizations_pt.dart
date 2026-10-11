@@ -85,8 +85,18 @@ class AppLocalizationsPt extends AppLocalizations {
   String get saveVaultKeyTitle => 'Guarde a chave do cofre';
 
   @override
-  String get saveVaultKeyBody =>
-      'Quem tiver esta chave pode abrir o cofre. Guarde-a num local seguro: precisa dela para abrir o cofre noutro dispositivo, ou para o partilhar.';
+  String get encryptVaultKeyBody =>
+      'Escolha uma palavra-passe para encriptar a chave do cofre. Depois pode guardar a chave encriptada em qualquer lado, porque só esta palavra-passe a abre. Memorize-a: ninguém a poderá recuperar por si.';
+
+  @override
+  String get encryptedVaultKeyBody =>
+      'Guarde esta chave onde quiser: um e-mail para si próprio, as suas notas, uma nuvem. Só abre com a sua palavra-passe. Precisa das duas para abrir o cofre noutro dispositivo, ou para o partilhar.';
+
+  @override
+  String get encryptKey => 'Encriptar a chave';
+
+  @override
+  String get later => 'Mais tarde';
 
   @override
   String get vaultSettings => 'Definições do cofre';
@@ -113,6 +123,16 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get vaultKeyDecrypting => 'A desencriptar a chave';
+
+  @override
+  String get encryptedVaultKey => 'Chave encriptada';
+
+  @override
+  String get encryptedVaultKeyDescription =>
+      'Uma cópia da chave do cofre para guardar em qualquer lado, que só a sua palavra-passe abre.';
+
+  @override
+  String get exportEncryptedVaultKey => 'Exportar a chave encriptada';
 
   @override
   String get otherWaysToOpen => 'Outras formas de o abrir';
@@ -1406,7 +1426,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get newLockPassword => 'Nova palavra-passe';
 
   @override
-  String get confirmLockPassword => 'Confirmar a palavra-passe';
+  String get confirmPassword => 'Confirmar a palavra-passe';
 
   @override
   String lockPasswordHelper(int count) {
@@ -1414,12 +1434,12 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String lockPasswordTooShort(int count) {
+  String passwordMinLength(int count) {
     return 'Pelo menos $count caracteres.';
   }
 
   @override
-  String get lockPasswordMismatch => 'As palavras-passe não coincidem.';
+  String get passwordMismatch => 'As palavras-passe não coincidem.';
 
   @override
   String get wrongLockPassword => 'Esta não é a palavra-passe de bloqueio.';
@@ -1648,8 +1668,18 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get saveVaultKeyTitle => 'Guarde a chave do cofre';
 
   @override
-  String get saveVaultKeyBody =>
-      'Quem tiver esta chave pode abrir o cofre. Guarde-a em um lugar seguro: você vai precisar dela para abrir o cofre em outro dispositivo ou para compartilhá-lo.';
+  String get encryptVaultKeyBody =>
+      'Escolha uma senha para criptografar a chave do cofre. Depois você pode guardar a chave criptografada em qualquer lugar, porque só essa senha a abre. Memorize-a: ninguém vai poder recuperá-la para você.';
+
+  @override
+  String get encryptedVaultKeyBody =>
+      'Guarde esta chave onde quiser: um e-mail para você mesmo, suas notas, uma nuvem. Ela só abre com a sua senha. Você vai precisar das duas para abrir o cofre em outro dispositivo ou para compartilhá-lo.';
+
+  @override
+  String get encryptKey => 'Criptografar a chave';
+
+  @override
+  String get later => 'Mais tarde';
 
   @override
   String get vaultSettings => 'Configurações do cofre';
@@ -1676,6 +1706,16 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get vaultKeyDecrypting => 'Descriptografando a chave';
+
+  @override
+  String get encryptedVaultKey => 'Chave criptografada';
+
+  @override
+  String get encryptedVaultKeyDescription =>
+      'Uma cópia da chave do cofre para guardar em qualquer lugar, que só a sua senha abre.';
+
+  @override
+  String get exportEncryptedVaultKey => 'Exportar a chave criptografada';
 
   @override
   String get otherWaysToOpen => 'Outras formas de abrir';
@@ -2983,7 +3023,7 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get newLockPassword => 'Nova senha';
 
   @override
-  String get confirmLockPassword => 'Confirmar senha';
+  String get confirmPassword => 'Confirmar senha';
 
   @override
   String lockPasswordHelper(int count) {
@@ -2991,12 +3031,12 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   }
 
   @override
-  String lockPasswordTooShort(int count) {
+  String passwordMinLength(int count) {
     return 'Pelo menos $count caracteres.';
   }
 
   @override
-  String get lockPasswordMismatch => 'As senhas não coincidem.';
+  String get passwordMismatch => 'As senhas não coincidem.';
 
   @override
   String get wrongLockPassword => 'Esta não é a senha de bloqueio.';

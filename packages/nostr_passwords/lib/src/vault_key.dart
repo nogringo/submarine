@@ -40,6 +40,17 @@ bool isEncryptedVaultKey(String text) {
   return hrp == Nip49.hrp && data.length == 91 * 2 && data.startsWith('02');
 }
 
+/// The shortest password to give [encryptVaultKey]: whoever holds the
+/// ncryptsec can guess at it offline.
+const minVaultKeyPasswordLength = 12;
+
+/// [privateKey], in hex, encrypted with [password] (NIP-49): an ncryptsec that
+/// can be kept anywhere, since only the password opens it.
+///
+/// Slow on purpose, like [decryptVaultKey].
+Future<String> encryptVaultKey(String privateKey, String password) =>
+    Nip49.encrypt(privateKey, password);
+
 /// The private key, in hex, of [ncryptsec], a vault key encrypted with
 /// [password] (NIP-49). Returns null when the password is wrong.
 ///

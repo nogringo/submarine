@@ -93,6 +93,24 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     );
   });
 
+  it("searches the items as the app does, from the field focused at once", async () => {
+    const { popup } = extension;
+    const rows = (count: number) =>
+      popup.waitForFunction(
+        (count) => document.querySelectorAll(".item-row").length === count,
+        {},
+        count,
+      );
+    expect(await popup.evaluate(() => document.activeElement?.getAttribute("type"))).toBe("search");
+    await extension.fill("input[type=search]", "ALICE");
+    await rows(1);
+    expect(await popup.$eval(".item-row-name", (name) => name.textContent)).toBe("GitHub");
+    await extension.fill("input[type=search]", "bank");
+    await popup.waitForSelector(`::-p-text(${english.noSearchResults})`);
+    await extension.press("Escape");
+    await rows(2);
+  });
+
   it("lists the vault in the drawer, and shows it once chosen", async () => {
     const { popup } = extension;
     await extension.click("button[aria-label=Vaults]");

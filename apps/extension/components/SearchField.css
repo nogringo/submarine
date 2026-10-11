@@ -1,0 +1,41 @@
+.search-field {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 2px 0 12px;
+  border: 1px solid var(--outline);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.search-field:focus-within {
+  border-color: var(--text);
+  box-shadow: inset 0 0 0 0.5px var(--text);
+}
+
+.search-field-input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 4px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 16px;
+  outline: none;
+}
+
+.search-field-input::placeholder {
+  color: var(--muted);
+}
+
+/* The clear button of the field stands in for the browser's own. */
+.search-field-input::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+/* Hidden rather than removed, for the field to keep its height. */
+.search-field[data-empty] .button {
+  visibility: hidden;
+}

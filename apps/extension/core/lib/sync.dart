@@ -78,23 +78,28 @@ class VaultSync {
   ];
 
   /// The items of the vault [pubkey], or of every vault, trash left out, by
-  /// name. Those opened so far: the sync opens what comes in.
-  Future<List<Map<String, Object?>>> items({String? pubkey}) async {
+  /// name, those [query] finds as the app's search does. Those opened so far:
+  /// the sync opens what comes in.
+  Future<List<Map<String, Object?>>> items({
+    String? pubkey,
+    String query = '',
+  }) async {
     final vaults = [
       for (final record in await _vaults.records())
         if (_open(record) case final vault
             when pubkey == null || vault.pubkey == pubkey)
           vault,
     ];
-    final items = [
+    final vaultOf = {
       for (final vault in vaults)
         for (final item in await vault.vault.openedItems())
-          if (!item.cipher.isDeleted) (vault: vault.pubkey, item: item),
-    ]..sort((a, b) => compareItemsByName(a.item, b.item));
+          if (!item.cipher.isDeleted) item: vault.pubkey,
+    };
+    final found = searchItems(vaultOf.keys, query)..sort(compareItemsByName);
     return [
-      for (final (:vault, :item) in items)
+      for (final item in found)
         {
-          'vault': vault,
+          'vault': vaultOf[item],
           'id': item.id,
           'type': item.cipher.type.value,
           'name': item.cipher.name,

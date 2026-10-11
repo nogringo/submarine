@@ -5,28 +5,29 @@ import type { ItemSummary, Vault } from "@/lib/core";
 import "./ItemList.css";
 
 /**
- * The items, a row each with their vault's badge when `showVault`, or why there are none. Nothing
- * until read.
+ * The items, a row each with their vault's badge when `showVault`, or why there are none: what was
+ * `searched` matches none, or the vaults have none. Nothing until read.
  */
 export function ItemList({
   items,
   vaults,
   showVault,
   label,
+  searched,
   neverSynced,
 }: {
   items: ItemSummary[] | undefined;
   vaults: Vault[];
   showVault: boolean;
   label: string;
+  searched: boolean;
   neverSynced: boolean;
 }) {
   const { formatMessage: t } = useIntl();
   if (!items) return null;
   if (items.length === 0) {
-    return (
-      <p className="item-list-empty">{t({ id: neverSynced ? "lookingForItems" : "noItems" })}</p>
-    );
+    const why = searched ? "noSearchResults" : neverSynced ? "lookingForItems" : "noItems";
+    return <p className="item-list-empty">{t({ id: why })}</p>;
   }
   return (
     // Bitwarden imports bring thousands of items: only the rows in sight are rendered.

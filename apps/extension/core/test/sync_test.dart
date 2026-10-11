@@ -170,6 +170,29 @@ void main() {
     );
   });
 
+  test('reads the items the search finds, as the app does', () async {
+    await publish(
+      'GitHub',
+      cipher: Cipher(
+        type: CipherType.login,
+        name: 'GitHub',
+        login: Login(username: 'alice', uris: [LoginUri('https://github.com')]),
+      ),
+    );
+    await publish('Société générale');
+    await addVault();
+    await sync.start();
+    await _until(() async => await opened() == 2);
+
+    Future<List<Object?>> names(String query) async => [
+      for (final item in await sync.items(query: query)) item['name'],
+    ];
+    expect(await names('societe'), ['Société générale']);
+    expect(await names('alice github.com'), ['GitHub']);
+    expect(await names('  '), ['GitHub', 'Société générale']);
+    expect(await names('bank'), isEmpty);
+  });
+
   test('reads what was opened before it starts', () async {
     await publish('Wifi');
     await addVault();

@@ -61,8 +61,8 @@ export interface CoreMethods {
   };
   /** Of the vaults syncing, while a popup holds {@link syncPort} open. */
   syncStates: { args: Record<string, never>; result: SyncState[] };
-  /** Of one vault, or of all without one, trash left out, by name. */
-  items: { args: { vault?: string }; result: ItemSummary[] };
+  /** Of one vault, or of all without one, trash left out, by name, as the app's search finds them. */
+  items: { args: { vault?: string; query?: string }; result: ItemSummary[] };
 }
 
 /** Calls a method of the Dart core, which runs in the background. */

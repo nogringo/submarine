@@ -31,8 +31,10 @@ void main() {
     'startSync': (_) async => (await sync()).start(),
     'stopSync': (_) async => (await sync()).stop(),
     'syncStates': (_) async => (await sync()).states(),
-    'items': (args) async =>
-        (await sync()).items(pubkey: args['vault'] as String?),
+    'items': (args) async => (await sync()).items(
+      pubkey: args['vault'] as String?,
+      query: args['query'] as String? ?? '',
+    ),
   });
   globalContext['submarineCore'] = createJSInteropWrapper(_JsCore(core));
 }

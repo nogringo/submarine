@@ -10,6 +10,7 @@ import {
   ModalOverlay,
 } from "react-aria-components";
 import { useIntl } from "react-intl";
+import { SearchField } from "@/components/SearchField";
 import { SyncStatus } from "@/components/SyncStatus";
 import { AllVaultsAvatar, OpenVaultMark, VaultAvatar } from "@/components/VaultAvatar";
 import type { Vault } from "@/lib/core";
@@ -32,10 +33,12 @@ export function Home({
 }) {
   const { formatMessage: t } = useIntl();
   const [selected, setSelected] = useState(allVaults);
+  // Kept from a vault to another, as in the app.
+  const [query, setQuery] = useState("");
   const vault = vaults.find((vault) => vault.pubkey === selected);
   const pubkeys = vault ? [vault.pubkey] : vaults.map((vault) => vault.pubkey);
   const title = vault?.name ?? t({ id: "allVaults" });
-  const items = useItems(vault?.pubkey, sync.revision);
+  const items = useItems(vault?.pubkey, query, sync.revision);
   return (
     <main className="home">
       <header className="home-header">
@@ -103,12 +106,17 @@ export function Home({
           <SyncStatus pubkeys={pubkeys} states={sync.states} />
         </div>
       </header>
+      <div className="home-search">
+        {/* What the popup opens for: typing finds the item at once. */}
+        <SearchField value={query} onChange={setQuery} autoFocus />
+      </div>
       <ItemList
         items={items}
         vaults={vaults}
         // A badge tells the vaults apart, which a single vault does not need.
         showVault={!vault && vaults.length > 1}
         label={title}
+        searched={query.trim() !== ""}
         neverSynced={pubkeys.some(
           (pubkey) => !sync.states.find((state) => state.pubkey === pubkey)?.lastSync,
         )}

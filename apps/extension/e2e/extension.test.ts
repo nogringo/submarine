@@ -254,16 +254,59 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
   it("lists the vault in the drawer, and shows it once chosen", async () => {
     const { popup } = extension;
     await extension.click("button[aria-label=Vaults]");
-    const options = await popup.waitForSelector("[role=listbox]");
+    const rows = await popup.waitForSelector(".drawer [role=grid]");
     expect(
-      await options?.$$eval(".drawer-row-title", (titles) =>
-        titles.map((title) => title.textContent),
-      ),
+      await rows?.$$eval(".drawer-row-title", (titles) => titles.map((title) => title.textContent)),
     ).toEqual(["All vaults", "Home"]);
-    await extension.click("[role=option]::-p-text(Home)");
+    await extension.click(".drawer [role=row]::-p-text(Home)");
     await popup.waitForSelector("[role=dialog]", { hidden: true });
     await popup.waitForFunction(
       () => document.querySelector(".home-title")?.textContent === "Home",
+    );
+  });
+
+  it("opens the settings of a vault from the drawer, its name read first", async () => {
+    const { popup } = extension;
+    await extension.click("button[aria-label=Vaults]");
+    await extension.click(".drawer [role=row] button[aria-label='Vault settings']");
+    await popup.waitForSelector("[role=dialog]", { hidden: true });
+    await popup.waitForFunction(
+      () =>
+        document.activeElement?.matches(".vault-settings h1") &&
+        document.activeElement.textContent === "Home",
+    );
+  });
+
+  it("renames the vault as the name is typed, never to nothing", async () => {
+    const { popup } = extension;
+    const field = ".vault-settings input[name=name]";
+    await extension.fill(field, "");
+    await extension.press("Backspace");
+    await popup.waitForSelector(`::-p-text(${english.vaultNameRequired})`);
+    await extension.fill(field, "Family");
+    await popup.waitForFunction(
+      () =>
+        document.querySelector(".vault-settings h1")?.textContent === "Family" &&
+        document.querySelector(".home-title")?.textContent === "Family",
+    );
+  });
+
+  it("changes the color of the vault", async () => {
+    const { popup } = extension;
+    await extension.click(".vault-settings .color-swatch:has(input[aria-label=Green])");
+    await popup.waitForFunction(
+      () =>
+        (document.querySelector(".home-vaults-button .vault-avatar") as HTMLElement | null)?.style
+          .background === "rgb(42, 127, 97)",
+    );
+  });
+
+  it("goes back to the list with Escape, onto the vaults button", async () => {
+    const { popup } = extension;
+    await extension.press("Escape");
+    await popup.waitForSelector(".vault-settings", { hidden: true });
+    await popup.waitForFunction(
+      () => document.activeElement?.getAttribute("aria-label") === "Vaults",
     );
   });
 
@@ -273,15 +316,20 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     await extension.fill("input[name=key]", nip19.nsecEncode(secretKey));
     await extension.fill("input[name=name]", "Work");
     await extension.click("button[type=submit]");
-    const error = english.vaultAlreadyOpen.replace("{name}", "Home");
+    const error = english.vaultAlreadyOpen.replace("{name}", "Family");
     await extension.popup.waitForSelector(`::-p-text(${error})`);
     await extension.click("button::-p-text(Cancel)");
   });
 
-  it("keeps the vaults when the popup opens again", async () => {
+  it("keeps the vaults when the popup opens again, as renamed", async () => {
     await extension.reload();
     const title = await extension.popup.waitForSelector(".home-title");
     expect(await title?.evaluate((h1) => h1.textContent)).toBe("All vaults");
+    await extension.click("button[aria-label=Vaults]");
+    const rows = await extension.popup.waitForSelector(".drawer [role=grid]");
+    expect(
+      await rows?.$$eval(".drawer-row-title", (titles) => titles.map((title) => title.textContent)),
+    ).toEqual(["All vaults", "Family"]);
   });
 });
 

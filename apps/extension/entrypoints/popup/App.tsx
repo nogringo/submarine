@@ -29,5 +29,14 @@ export function App() {
     );
   }
   if (vaults.length === 0) return <Welcome onOpenVault={() => setOpening(true)} />;
-  return <Home vaults={vaults} sync={sync} onOpenVault={() => setOpening(true)} />;
+  return (
+    <Home
+      vaults={vaults}
+      sync={sync}
+      onOpenVault={() => setOpening(true)}
+      onVaultChanged={(vault) =>
+        setVaults((vaults) => vaults?.map((each) => (each.pubkey === vault.pubkey ? vault : each)))
+      }
+    />
+  );
 }

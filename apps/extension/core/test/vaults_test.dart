@@ -87,6 +87,49 @@ void main() {
     );
   });
 
+  test('renames a vault and changes its color, its key kept', () async {
+    await vaults.add(key: privateKey, name: 'Home', color: 1);
+    final cacheKey = (await vaults.records()).single.cacheKey;
+
+    expect(await vaults.edit(pubkey, name: ' Family '), {
+      'pubkey': pubkey,
+      'name': 'Family',
+      'color': 1,
+    });
+    expect(await vaults.edit(pubkey, color: 2), containsPair('color', 2));
+
+    final record = (await Vaults(store, signers).records()).single;
+    expect(record.name, 'Family');
+    expect(record.color, 2);
+    expect(record.privateKey, privateKey);
+    expect(record.cacheKey, cacheKey);
+  });
+
+  test('refuses an empty name, or a vault not open', () async {
+    await vaults.add(key: privateKey, name: 'Home', color: 1);
+    await expectLater(
+      vaults.edit(pubkey, name: ' '),
+      throwsCode('vaultNameRequired'),
+    );
+    await expectLater(
+      vaults.edit(signers.derivePublicKey('${'1' * 63}2'), name: 'Work'),
+      throwsCode('vaultNotFound'),
+    );
+    expect((await vaults.records()).single.name, 'Home');
+  });
+
+  test('keeps every edit made at once', () async {
+    await vaults.add(key: privateKey, name: 'Home', color: 1);
+
+    await Future.wait([
+      vaults.edit(pubkey, name: 'Family'),
+      vaults.edit(pubkey, color: 2),
+    ]);
+
+    final record = (await vaults.records()).single;
+    expect((record.name, record.color), ('Family', 2));
+  });
+
   test('keeps the vaults encrypted with the key of the device', () async {
     await vaults.add(key: privateKey, name: 'Home', color: 1);
     final saved = store.values['vaults']!;

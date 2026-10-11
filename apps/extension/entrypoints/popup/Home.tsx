@@ -1,15 +1,17 @@
+import settings from "@material-design-icons/svg/outlined/settings.svg";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Button,
   Dialog,
   DialogTrigger,
+  GridList,
+  GridListItem,
   Heading,
-  ListBox,
-  ListBoxItem,
   Modal,
   ModalOverlay,
 } from "react-aria-components";
 import { useIntl } from "react-intl";
+import { IconButton } from "@/components/Button";
 import { SearchField } from "@/components/SearchField";
 import { SyncButton } from "@/components/SyncButton";
 import { SyncStatus } from "@/components/SyncStatus";
@@ -21,6 +23,7 @@ import type { Sync } from "@/lib/use-sync";
 import "./Home.css";
 import { ItemDetail } from "./ItemDetail";
 import { ItemList } from "./ItemList";
+import { VaultSettings } from "./VaultSettings";
 
 const allVaults = "all";
 
@@ -29,10 +32,12 @@ export function Home({
   vaults,
   sync,
   onOpenVault,
+  onVaultChanged,
 }: {
   vaults: Vault[];
   sync: Sync;
   onOpenVault: () => void;
+  onVaultChanged: (vault: Vault) => void;
 }) {
   const { formatMessage: t } = useIntl();
   const [selected, setSelected] = useState(allVaults);
@@ -43,19 +48,30 @@ export function Home({
   const title = vault?.name ?? t({ id: "allVaults" });
   const items = useItems(vault?.pubkey, query, sync.revision);
   const [opened, setOpened] = useState<{ vault: Vault; id: string }>();
-  // The row the item opened from, which gets the focus back.
+  const [settingsOf, setSettingsOf] = useState<string>();
+  const settingsVault = vaults.find((vault) => vault.pubkey === settingsOf);
+  const paged = opened !== undefined || settingsVault !== undefined;
+  // What the page opened from, which gets the focus back.
   const openedFrom = useRef<HTMLElement>(null);
-  const back = useCallback(() => setOpened(undefined), []);
+  const vaultsButton = useRef<HTMLButtonElement>(null);
+  const back = useCallback(() => {
+    setOpened(undefined);
+    setSettingsOf(undefined);
+  }, []);
   useEffect(() => {
-    if (!opened) openedFrom.current?.focus();
-  }, [opened]);
+    if (!paged) openedFrom.current?.focus();
+  }, [paged]);
   return (
     <main className="home">
-      {/* Kept under the item, its search and scroll included, out of reach while the item shows. */}
-      <div className="home-list" inert={opened !== undefined}>
+      {/* Kept under the page, its search and scroll included, out of reach while the page shows. */}
+      <div className="home-list" inert={paged}>
         <header className="home-header">
           <DialogTrigger>
-            <Button className="home-vaults-button" aria-label={t({ id: "vaults" })}>
+            <Button
+              ref={vaultsButton}
+              className="home-vaults-button"
+              aria-label={t({ id: "vaults" })}
+            >
               {vault ? <VaultAvatar vault={vault} size={44} /> : <AllVaultsAvatar size={44} />}
             </Button>
             <ModalOverlay className="drawer-overlay" isDismissable>
@@ -66,9 +82,10 @@ export function Home({
                       <Heading slot="title" className="drawer-title">
                         {t({ id: "vaults" })}
                       </Heading>
-                      <ListBox
+                      <GridList
                         aria-label={t({ id: "vaults" })}
                         selectionMode="single"
+                        selectionBehavior="replace"
                         disallowEmptySelection
                         selectedKeys={[selected]}
                         onSelectionChange={(keys) => {
@@ -77,16 +94,16 @@ export function Home({
                         }}
                         className="drawer-list"
                       >
-                        <ListBoxItem
+                        <GridListItem
                           id={allVaults}
                           textValue={t({ id: "allVaults" })}
                           className="drawer-row"
                         >
                           <AllVaultsAvatar size={40} />
                           <span className="drawer-row-title">{t({ id: "allVaults" })}</span>
-                        </ListBoxItem>
+                        </GridListItem>
                         {vaults.map((vault) => (
-                          <ListBoxItem
+                          <GridListItem
                             key={vault.pubkey}
                             id={vault.pubkey}
                             textValue={vault.name}
@@ -94,9 +111,18 @@ export function Home({
                           >
                             <VaultAvatar vault={vault} size={40} />
                             <span className="drawer-row-title">{vault.name}</span>
-                          </ListBoxItem>
+                            <IconButton
+                              icon={settings}
+                              label={t({ id: "vaultSettings" })}
+                              onPress={() => {
+                                close();
+                                openedFrom.current = vaultsButton.current;
+                                setSettingsOf(vault.pubkey);
+                              }}
+                            />
+                          </GridListItem>
                         ))}
-                      </ListBox>
+                      </GridList>
                       <Button
                         className="drawer-row"
                         onPress={() => {
@@ -144,6 +170,9 @@ export function Home({
       </div>
       {opened && (
         <ItemDetail vault={opened.vault} id={opened.id} revision={sync.revision} onBack={back} />
+      )}
+      {settingsVault && (
+        <VaultSettings vault={settingsVault} onChanged={onVaultChanged} onBack={back} />
       )}
     </main>
   );

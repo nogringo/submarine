@@ -1,0 +1,7 @@
+.vault-settings-subtitle {
+  color: var(--muted);
+}
+
+.vault-settings-error {
+  color: var(--danger);
+}

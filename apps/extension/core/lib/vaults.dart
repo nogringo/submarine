@@ -37,6 +37,13 @@ class VaultRecord {
   /// The key of the vault's [VersionCache].
   final String cacheKey;
 
+  VaultRecord copyWith({String? name, int? color}) => VaultRecord(
+    privateKey: privateKey,
+    name: name ?? this.name,
+    color: color ?? this.color,
+    cacheKey: cacheKey,
+  );
+
   Map<String, dynamic> toJson() => {
     'privateKey': privateKey,
     'name': name,
@@ -55,6 +62,10 @@ class Vaults {
 
   static const _deviceKeyKey = 'deviceKey';
   static const _vaultsKey = 'vaults';
+
+  /// The popup saves a name at each key typed: each write reads what the
+  /// previous one saved.
+  Future<void> _writing = Future.value();
 
   Future<List<VaultRecord>> records() async {
     final saved = await _store.read(_vaultsKey);
@@ -80,7 +91,7 @@ class Vaults {
     String? password,
     required String name,
     required int color,
-  }) async {
+  }) => _write(() async {
     final trimmed = name.trim();
     if (trimmed.isEmpty) throw CoreException('vaultNameRequired');
     final privateKey =
@@ -101,14 +112,40 @@ class Vaults {
       name: trimmed,
       color: color,
     );
-    await _store.write(
-      _vaultsKey,
-      await (await _deviceKey()).encryptString(
-        jsonEncode([...records, record]),
-      ),
-    );
+    await _save([...records, record]);
     return _summary(record);
+  });
+
+  /// Renames the vault [pubkey], or changes its color.
+  Future<Map<String, Object>> edit(String pubkey, {String? name, int? color}) =>
+      _write(() async {
+        final trimmed = name?.trim();
+        if (trimmed != null && trimmed.isEmpty) {
+          throw CoreException('vaultNameRequired');
+        }
+        final records = await this.records();
+        final index = records.indexWhere(
+          (record) => _signers.derivePublicKey(record.privateKey) == pubkey,
+        );
+        if (index == -1) throw CoreException('vaultNotFound');
+        final record = records[index] = records[index].copyWith(
+          name: trimmed,
+          color: color,
+        );
+        await _save(records);
+        return _summary(record);
+      });
+
+  Future<T> _write<T>(Future<T> Function() write) {
+    final written = _writing.then((_) => write());
+    _writing = written.then((_) {}, onError: (_) {});
+    return written;
   }
+
+  Future<void> _save(List<VaultRecord> records) async => _store.write(
+    _vaultsKey,
+    await (await _deviceKey()).encryptString(jsonEncode(records)),
+  );
 
   Map<String, Object> _summary(VaultRecord record) => {
     'pubkey': _signers.derivePublicKey(record.privateKey),

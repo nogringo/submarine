@@ -29,6 +29,11 @@ void main() {
       if (opening != null) await (await sync()).update();
       return vault;
     },
+    'editVault': (args) => vaults.edit(
+      args['vault'] as String,
+      name: args['name'] as String?,
+      color: args['color'] as int?,
+    ),
     'startSync': (_) async => (await sync()).start(),
     'stopSync': (_) async => (await sync()).stop(),
     'syncNow': (args) async =>

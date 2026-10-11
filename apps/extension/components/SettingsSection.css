@@ -1,0 +1,22 @@
+.settings-section {
+  margin-top: 12px;
+}
+
+.settings-section-title {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.settings-section-description {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.settings-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 12px;
+  padding: 16px;
+}

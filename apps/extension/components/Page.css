@@ -1,0 +1,55 @@
+.page {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--background);
+}
+
+.page-bar {
+  display: flex;
+  padding: 8px 8px 0;
+}
+
+.page-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+  padding: 8px 20px 32px;
+  overflow: auto;
+  scrollbar-color: var(--outline) transparent;
+  scrollbar-width: thin;
+}
+
+/* At their full height, for the content to scroll rather than squeeze them. */
+.page-content > * {
+  flex: none;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+
+.page-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.page-title {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+/* Focused for a screen reader to read it, not as a control. */
+.page-title:focus {
+  outline: none;
+}

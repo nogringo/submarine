@@ -15,7 +15,13 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
   beforeAll(async () => {
     await publishItems(secretKey, [
       { type: 2, name: "wifi" },
-      { type: 1, name: "GitHub", login: { username: "alice" } },
+      {
+        type: 1,
+        name: "GitHub",
+        login: { username: "alice", password: "hunter2", uris: [{ uri: "github.com" }] },
+        notes: "Recovery codes in the safe",
+        fields: [{ name: "PIN", value: "1234", type: 1 }],
+      },
       { type: 2, name: "Old bank", deletedDate: "2026-10-01T00:00:00.000Z" },
     ]);
     extension = await launch(name);
@@ -109,6 +115,48 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     await popup.waitForSelector(`::-p-text(${english.noSearchResults})`);
     await extension.press("Escape");
     await rows(2);
+  });
+
+  it("shows an item over the list, its secrets hidden until shown", async () => {
+    const { popup } = extension;
+    const tiles = () =>
+      popup.$$eval(".item-detail .field-tile", (tiles) =>
+        tiles.map((tile) =>
+          [...tile.querySelectorAll(".field-tile-label, .field-value")]
+            .map((part) => part.textContent)
+            .join(": "),
+        ),
+      );
+    // The row itself, GitHub before wifi: a text selector would click the name inside it.
+    await extension.click(".item-row");
+    await popup.waitForFunction(() => document.activeElement?.textContent === "GitHub", {});
+    expect(await tiles()).toEqual([
+      "Username: alice",
+      "Password: ••••••••••••",
+      "Website: github.com",
+      "Notes: Recovery codes in the safe",
+      "PIN: ••••••••••••",
+    ]);
+    expect(await popup.$eval("a[aria-label='Open website']", (link) => link.href)).toBe(
+      "https://github.com/",
+    );
+    await extension.click("button[aria-label=Show]");
+    await popup.waitForFunction(() =>
+      [...document.querySelectorAll(".field-value")].some(
+        (value) => value.textContent === "hunter2",
+      ),
+    );
+  });
+
+  it("goes back to the list with Escape, onto the item's row", async () => {
+    const { popup } = extension;
+    await extension.press("Escape");
+    await popup.waitForSelector(".item-detail", { hidden: true });
+    await popup.waitForFunction(
+      () =>
+        document.activeElement?.classList.contains("item-row") &&
+        document.activeElement.textContent?.includes("GitHub"),
+    );
   });
 
   it("lists the vault in the drawer, and shows it once chosen", async () => {

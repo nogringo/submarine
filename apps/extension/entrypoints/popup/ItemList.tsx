@@ -6,7 +6,7 @@ import "./ItemList.css";
 
 /**
  * The items, a row each with their vault's badge when `showVault`, or why there are none: what was
- * `searched` matches none, or the vaults have none. Nothing until read.
+ * `searched` matches none, or the vaults have none. Nothing until read. A row opens its item.
  */
 export function ItemList({
   items,
@@ -15,6 +15,7 @@ export function ItemList({
   label,
   searched,
   neverSynced,
+  onOpen,
 }: {
   items: ItemSummary[] | undefined;
   vaults: Vault[];
@@ -22,6 +23,7 @@ export function ItemList({
   label: string;
   searched: boolean;
   neverSynced: boolean;
+  onOpen: (item: ItemSummary) => void;
 }) {
   const { formatMessage: t } = useIntl();
   if (!items) return null;
@@ -32,9 +34,17 @@ export function ItemList({
   return (
     // Bitwarden imports bring thousands of items: only the rows in sight are rendered.
     <Virtualizer layout={ListLayout} layoutOptions={{ rowSize: 56, gap: 2, padding: 8 }}>
-      <GridList aria-label={label} items={items} className="item-list">
+      <GridList
+        aria-label={label}
+        items={items}
+        onAction={(key) => {
+          const item = items.find((item) => keyOf(item) === key);
+          if (item) onOpen(item);
+        }}
+        className="item-list"
+      >
         {(item) => (
-          <GridListItem id={`${item.vault}:${item.id}`} textValue={item.name} className="item-row">
+          <GridListItem id={keyOf(item)} textValue={item.name} className="item-row">
             <ItemIcon
               item={item}
               vault={showVault ? vaults.find((vault) => vault.pubkey === item.vault) : undefined}
@@ -48,4 +58,9 @@ export function ItemList({
       </GridList>
     </Virtualizer>
   );
+}
+
+/** Unique across the vaults. */
+function keyOf(item: ItemSummary): string {
+  return `${item.vault}:${item.id}`;
 }

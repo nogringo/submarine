@@ -1,0 +1,61 @@
+.field-card {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.field-tile {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 8px 12px 16px;
+}
+
+.field-tile + .field-tile {
+  border-top: 1px solid var(--line);
+}
+
+.field-tile-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.field-tile-label {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.field-value {
+  font-size: 16px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.field-value.password,
+.field-value.secret,
+.field-value.mono {
+  font-family: var(--mono-font);
+}
+
+.field-value.password {
+  font-size: 17px;
+}
+
+.field-value.secret,
+.field-value.mono {
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.field-value .digit {
+  color: var(--signal);
+}
+
+.field-value .symbol {
+  color: var(--symbol);
+}

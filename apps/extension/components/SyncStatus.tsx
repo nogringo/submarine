@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useIntl } from "react-intl";
 import type { SyncState } from "@/lib/core";
+import { dayFormat } from "@/lib/i18n";
 import { syncStatus } from "@/lib/sync-status";
 import "./SyncStatus.css";
 
@@ -16,10 +17,7 @@ export function SyncStatus({ pubkeys, states }: { pubkeys: string[]; states: Syn
   const status = syncStatus(pubkeys, states, now);
   const text =
     status.id === "syncedOn"
-      ? t(
-          { id: status.id },
-          { date: formatDate(status.date, { year: "numeric", month: "short", day: "numeric" }) },
-        )
+      ? t({ id: status.id }, { date: formatDate(status.date, dayFormat) })
       : t({ id: status.id }, status);
   // A screen reader announces a failure, as the app does, and nothing else.
   return status.id === "syncFailed" ? (

@@ -20,9 +20,13 @@ export function arbPlugin(): Plugin {
   };
 }
 
-/** The app's ARB files, imported by the extension and typed by their message ids. */
+/**
+ * The app's ARB files and the extension's own, imported by the extension and typed by their message
+ * ids.
+ */
 export default defineWxtModule((wxt) => {
   const l10n = resolve(wxt.config.root, "../app/lib/l10n");
+  const ownL10n = resolve(wxt.config.root, "l10n");
 
   addViteConfig(wxt, () => ({
     plugins: [arbPlugin()],
@@ -30,7 +34,10 @@ export default defineWxtModule((wxt) => {
   }));
 
   wxt.hook("prepare:types", async (_, entries) => {
-    const ids = Object.keys(messagesOf(await readFile(resolve(l10n, "app_en.arb"), "utf8")));
+    const ids = [
+      ...Object.keys(messagesOf(await readFile(resolve(l10n, "app_en.arb"), "utf8"))),
+      ...Object.keys(messagesOf(await readFile(resolve(ownL10n, "extension_en.arb"), "utf8"))),
+    ];
     entries.push({
       path: "types/messages.d.ts",
       text: `declare global {

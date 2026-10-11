@@ -14,11 +14,12 @@
   gap: 14px;
   padding: 8px 10px;
   border-radius: 12px;
-  cursor: default;
+  cursor: pointer;
 }
 
+/* Flutter's hover in the app: darker in light, lighter in dark. */
 .item-row[data-hovered] {
-  background: var(--surface);
+  background: color-mix(in srgb, var(--text) 4%, transparent);
 }
 
 /* Inside the row: the list's edge would cut an outline drawn around it. */

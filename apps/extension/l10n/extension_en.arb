@@ -1,0 +1,7 @@
+{
+  "@@locale": "en",
+  "back": "Back",
+  "@back": {
+    "description": "Label of the button going back from an item to the list."
+  }
+}

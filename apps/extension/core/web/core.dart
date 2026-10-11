@@ -35,6 +35,10 @@ void main() {
       pubkey: args['vault'] as String?,
       query: args['query'] as String? ?? '',
     ),
+    'item': (args) async => (await sync()).item(
+      pubkey: args['vault'] as String,
+      id: args['id'] as String,
+    ),
   });
   globalContext['submarineCore'] = createJSInteropWrapper(_JsCore(core));
 }

@@ -1,0 +1,87 @@
+.item-detail {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--background);
+}
+
+.item-detail-bar {
+  display: flex;
+  padding: 8px 8px 0;
+}
+
+.item-detail-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+  padding: 8px 20px 32px;
+  overflow: auto;
+  scrollbar-color: var(--outline) transparent;
+  scrollbar-width: thin;
+}
+
+/* At their full height, for the content to scroll rather than squeeze them. */
+.item-detail-content > * {
+  flex: none;
+}
+
+.item-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+
+.item-detail-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.item-detail-name {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+/* Focused for a screen reader to read it, not as a control. */
+.item-detail-name:focus {
+  outline: none;
+}
+
+.item-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  color: var(--muted);
+}
+
+.item-detail-meta-part {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.item-detail-section-title {
+  padding: 4px 4px 8px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.item-detail-dates {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.item-detail-missing {
+  margin: auto;
+  padding: 24px;
+  color: var(--muted);
+  text-align: center;
+}

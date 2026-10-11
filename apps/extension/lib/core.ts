@@ -1,3 +1,5 @@
+import type { Cipher } from "./cipher";
+
 export interface CoreRequest {
   method: string;
   args?: unknown;
@@ -36,6 +38,14 @@ export interface ItemSummary {
   subtitle: string | null;
 }
 
+/** An item in full. */
+export interface Item {
+  /** The pubkey of its vault. */
+  vault: string;
+  id: string;
+  cipher: Cipher;
+}
+
 /** Where the sync of a vault stands. */
 export interface SyncState {
   pubkey: string;
@@ -63,6 +73,8 @@ export interface CoreMethods {
   syncStates: { args: Record<string, never>; result: SyncState[] };
   /** Of one vault, or of all without one, trash left out, by name, as the app's search finds them. */
   items: { args: { vault?: string; query?: string }; result: ItemSummary[] };
+  /** Null once in the trash or gone. */
+  item: { args: { vault: string; id: string }; result: Item | null };
 }
 
 /** Calls a method of the Dart core, which runs in the background. */

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Button,
   Dialog,
@@ -17,6 +17,7 @@ import type { Vault } from "@/lib/core";
 import { useItems } from "@/lib/use-items";
 import type { Sync } from "@/lib/use-sync";
 import "./Home.css";
+import { ItemDetail } from "./ItemDetail";
 import { ItemList } from "./ItemList";
 
 const allVaults = "all";
@@ -39,88 +40,108 @@ export function Home({
   const pubkeys = vault ? [vault.pubkey] : vaults.map((vault) => vault.pubkey);
   const title = vault?.name ?? t({ id: "allVaults" });
   const items = useItems(vault?.pubkey, query, sync.revision);
+  const [opened, setOpened] = useState<{ vault: Vault; id: string }>();
+  // The row the item opened from, which gets the focus back.
+  const openedFrom = useRef<HTMLElement>(null);
+  const back = useCallback(() => setOpened(undefined), []);
+  useEffect(() => {
+    if (!opened) openedFrom.current?.focus();
+  }, [opened]);
   return (
     <main className="home">
-      <header className="home-header">
-        <DialogTrigger>
-          <Button className="home-vaults-button" aria-label={t({ id: "vaults" })}>
-            {vault ? <VaultAvatar vault={vault} size={44} /> : <AllVaultsAvatar size={44} />}
-          </Button>
-          <ModalOverlay className="drawer-overlay" isDismissable>
-            <Modal className="drawer">
-              <Dialog className="drawer-dialog">
-                {({ close }) => (
-                  <>
-                    <Heading slot="title" className="drawer-title">
-                      {t({ id: "vaults" })}
-                    </Heading>
-                    <ListBox
-                      aria-label={t({ id: "vaults" })}
-                      selectionMode="single"
-                      disallowEmptySelection
-                      selectedKeys={[selected]}
-                      onSelectionChange={(keys) => {
-                        if (keys !== "all") setSelected(String([...keys][0] ?? allVaults));
-                        close();
-                      }}
-                      className="drawer-list"
-                    >
-                      <ListBoxItem
-                        id={allVaults}
-                        textValue={t({ id: "allVaults" })}
-                        className="drawer-row"
+      {/* Kept under the item, its search and scroll included, out of reach while the item shows. */}
+      <div className="home-list" inert={opened !== undefined}>
+        <header className="home-header">
+          <DialogTrigger>
+            <Button className="home-vaults-button" aria-label={t({ id: "vaults" })}>
+              {vault ? <VaultAvatar vault={vault} size={44} /> : <AllVaultsAvatar size={44} />}
+            </Button>
+            <ModalOverlay className="drawer-overlay" isDismissable>
+              <Modal className="drawer">
+                <Dialog className="drawer-dialog">
+                  {({ close }) => (
+                    <>
+                      <Heading slot="title" className="drawer-title">
+                        {t({ id: "vaults" })}
+                      </Heading>
+                      <ListBox
+                        aria-label={t({ id: "vaults" })}
+                        selectionMode="single"
+                        disallowEmptySelection
+                        selectedKeys={[selected]}
+                        onSelectionChange={(keys) => {
+                          if (keys !== "all") setSelected(String([...keys][0] ?? allVaults));
+                          close();
+                        }}
+                        className="drawer-list"
                       >
-                        <AllVaultsAvatar size={40} />
-                        <span className="drawer-row-title">{t({ id: "allVaults" })}</span>
-                      </ListBoxItem>
-                      {vaults.map((vault) => (
                         <ListBoxItem
-                          key={vault.pubkey}
-                          id={vault.pubkey}
-                          textValue={vault.name}
+                          id={allVaults}
+                          textValue={t({ id: "allVaults" })}
                           className="drawer-row"
                         >
-                          <VaultAvatar vault={vault} size={40} />
-                          <span className="drawer-row-title">{vault.name}</span>
+                          <AllVaultsAvatar size={40} />
+                          <span className="drawer-row-title">{t({ id: "allVaults" })}</span>
                         </ListBoxItem>
-                      ))}
-                    </ListBox>
-                    <Button
-                      className="drawer-row"
-                      onPress={() => {
-                        close();
-                        onOpenVault();
-                      }}
-                    >
-                      <OpenVaultMark size={40} />
-                      <span className="drawer-row-title">{t({ id: "openVault" })}</span>
-                    </Button>
-                  </>
-                )}
-              </Dialog>
-            </Modal>
-          </ModalOverlay>
-        </DialogTrigger>
-        <div className="home-heading">
-          <h1 className="home-title">{title}</h1>
-          <SyncStatus pubkeys={pubkeys} states={sync.states} />
+                        {vaults.map((vault) => (
+                          <ListBoxItem
+                            key={vault.pubkey}
+                            id={vault.pubkey}
+                            textValue={vault.name}
+                            className="drawer-row"
+                          >
+                            <VaultAvatar vault={vault} size={40} />
+                            <span className="drawer-row-title">{vault.name}</span>
+                          </ListBoxItem>
+                        ))}
+                      </ListBox>
+                      <Button
+                        className="drawer-row"
+                        onPress={() => {
+                          close();
+                          onOpenVault();
+                        }}
+                      >
+                        <OpenVaultMark size={40} />
+                        <span className="drawer-row-title">{t({ id: "openVault" })}</span>
+                      </Button>
+                    </>
+                  )}
+                </Dialog>
+              </Modal>
+            </ModalOverlay>
+          </DialogTrigger>
+          <div className="home-heading">
+            <h1 className="home-title">{title}</h1>
+            <SyncStatus pubkeys={pubkeys} states={sync.states} />
+          </div>
+        </header>
+        <div className="home-search">
+          {/* What the popup opens for: typing finds the item at once. */}
+          <SearchField value={query} onChange={setQuery} autoFocus />
         </div>
-      </header>
-      <div className="home-search">
-        {/* What the popup opens for: typing finds the item at once. */}
-        <SearchField value={query} onChange={setQuery} autoFocus />
+        <ItemList
+          items={items}
+          vaults={vaults}
+          // A badge tells the vaults apart, which a single vault does not need.
+          showVault={!vault && vaults.length > 1}
+          label={title}
+          searched={query.trim() !== ""}
+          neverSynced={pubkeys.some(
+            (pubkey) => !sync.states.find((state) => state.pubkey === pubkey)?.lastSync,
+          )}
+          onOpen={(item) => {
+            const itemVault = vaults.find((vault) => vault.pubkey === item.vault);
+            if (!itemVault) return;
+            openedFrom.current =
+              document.activeElement instanceof HTMLElement ? document.activeElement : null;
+            setOpened({ vault: itemVault, id: item.id });
+          }}
+        />
       </div>
-      <ItemList
-        items={items}
-        vaults={vaults}
-        // A badge tells the vaults apart, which a single vault does not need.
-        showVault={!vault && vaults.length > 1}
-        label={title}
-        searched={query.trim() !== ""}
-        neverSynced={pubkeys.some(
-          (pubkey) => !sync.states.find((state) => state.pubkey === pubkey)?.lastSync,
-        )}
-      />
+      {opened && (
+        <ItemDetail vault={opened.vault} id={opened.id} revision={sync.revision} onBack={back} />
+      )}
     </main>
   );
 }

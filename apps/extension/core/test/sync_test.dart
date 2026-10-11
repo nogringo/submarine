@@ -52,8 +52,8 @@ void main() {
   });
 
   /// Another device of the vault of [key], which publishes to the relay at
-  /// once.
-  Future<void> publish(String name, {Cipher? cipher, String? key}) async {
+  /// once. Returns the id of the item.
+  Future<String> publish(String name, {Cipher? cipher, String? key}) async {
     final other = Ndk.emptyBootstrapRelaysConfig();
     addTearDown(other.destroy);
     final device = Vault(
@@ -62,10 +62,11 @@ void main() {
       relays: [relay.url],
       indexers: const [],
     );
-    await device.createItem(
+    final version = await device.createItem(
       cipher ?? Cipher(type: CipherType.secureNote, name: name),
     );
     expect(await device.push(), isEmpty);
+    return version.id;
   }
 
   Future<int> opened() async =>
@@ -191,6 +192,39 @@ void main() {
     expect(await names('alice github.com'), ['GitHub']);
     expect(await names('  '), ['GitHub', 'Société générale']);
     expect(await names('bank'), isEmpty);
+  });
+
+  test('reads an item in full, none once in the trash', () async {
+    await publish(
+      'GitHub',
+      cipher: Cipher(
+        type: CipherType.login,
+        name: 'GitHub',
+        login: Login(username: 'alice', password: 'hunter2'),
+      ),
+    );
+    final trashed = await publish(
+      'Old bank',
+      cipher: Cipher(type: CipherType.secureNote, name: 'Old bank')
+        ..deletedDate = DateTime.utc(2026, 10, 1),
+    );
+    await addVault();
+    await sync.start();
+    await _until(() async => await opened() == 2);
+    final [github] = await sync.items();
+
+    final item = await sync.item(pubkey: pubkey, id: github['id'] as String);
+
+    expect(item, containsPair('vault', pubkey));
+    expect(
+      (item!['cipher'] as Map)['login'],
+      allOf(
+        containsPair('username', 'alice'),
+        containsPair('password', 'hunter2'),
+      ),
+    );
+    expect(await sync.item(pubkey: pubkey, id: trashed), isNull);
+    expect(await sync.item(pubkey: pubkey, id: 'unknown'), isNull);
   });
 
   test('reads what was opened before it starts', () async {

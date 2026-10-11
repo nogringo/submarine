@@ -108,6 +108,24 @@ class VaultSync {
     ];
   }
 
+  /// The item [id] of the vault [pubkey], its cipher in Bitwarden's JSON, or
+  /// null once in the trash or gone.
+  Future<Map<String, Object?>?> item({
+    required String pubkey,
+    required String id,
+  }) async {
+    for (final record in await _vaults.records()) {
+      final vault = _open(record);
+      if (vault.pubkey != pubkey) continue;
+      for (final item in await vault.vault.openedItems()) {
+        if (item.id == id && !item.cipher.isDeleted) {
+          return {'vault': pubkey, 'id': id, 'cipher': item.cipher.toJson()};
+        }
+      }
+    }
+    return null;
+  }
+
   _SyncedVault _open(VaultRecord record) {
     final signer = ndk.config.eventSignerFactory.create(
       privateKey: record.privateKey,

@@ -48,9 +48,126 @@ export function typeFields(
       }
       break;
     }
+    case 3: {
+      const card = cipher.card;
+      add("cardholderName", card?.cardholderName);
+      add("cardBrand", card?.brand && cardBrandLabel(card.brand, t({ id: "cardBrandOther" })));
+      add("cardNumber", card?.number, "secret");
+      add("cardExpiration", join([card?.expMonth?.padStart(2, "0"), card?.expYear], " / "));
+      add("cardCode", card?.code, "secret");
+      break;
+    }
+    case 4: {
+      const identity = cipher.identity;
+      add(
+        "fullName",
+        join([identity?.title, identity?.firstName, identity?.middleName, identity?.lastName], " "),
+      );
+      add("username", identity?.username);
+      add("company", identity?.company);
+      add("email", identity?.email);
+      add("phone", identity?.phone);
+      add("ssn", identity?.ssn, "secret");
+      add("passportNumber", identity?.passportNumber);
+      add("licenseNumber", identity?.licenseNumber);
+      add(
+        "address",
+        join(
+          [
+            identity?.address1,
+            identity?.address2,
+            identity?.address3,
+            join([identity?.city, identity?.state, identity?.postalCode], ", "),
+            identity?.country,
+          ],
+          "\n",
+        ),
+      );
+      break;
+    }
+    case 5: {
+      const sshKey = cipher.sshKey;
+      add("privateKey", sshKey?.privateKey, "secret");
+      add("publicKey", sshKey?.publicKey, "mono");
+      add("fingerprint", sshKey?.keyFingerprint, "mono");
+      break;
+    }
+    case 6: {
+      const account = cipher.bankAccount;
+      add("bankName", account?.bankName);
+      add("accountHolder", account?.nameOnAccount);
+      if (account?.accountType != null) {
+        add(
+          "accountType",
+          t({ id: accountTypes[account.accountType] ?? "accountTypeOther" }),
+          "info",
+        );
+      }
+      add("accountNumber", account?.accountNumber, "secret");
+      add("routingNumber", account?.routingNumber);
+      add("branchNumber", account?.branchNumber);
+      add("pin", account?.pin, "secret");
+      add("swiftCode", account?.swiftCode);
+      add("iban", account?.iban);
+      add("bankPhone", account?.bankContactPhone);
+      break;
+    }
+    case 7: {
+      const license = cipher.driversLicense;
+      add("fullName", join([license?.firstName, license?.middleName, license?.lastName], " "));
+      add("dateOfBirth", license?.dateOfBirth);
+      add("licenseNumber", license?.licenseNumber);
+      add("issuingCountry", license?.issuingCountry);
+      add("issuingState", license?.issuingState);
+      add("issueDate", license?.issueDate);
+      add("expirationDate", license?.expirationDate);
+      add("issuingAuthority", license?.issuingAuthority);
+      add("licenseClass", license?.licenseClass);
+      break;
+    }
+    case 8: {
+      const passport = cipher.passport;
+      add("surname", passport?.surname);
+      add("givenName", passport?.givenName);
+      add("dateOfBirth", passport?.dateOfBirth);
+      add("sex", passport?.sex);
+      add("birthPlace", passport?.birthPlace);
+      add("nationality", passport?.nationality);
+      add("issuingCountry", passport?.issuingCountry);
+      add("passportNumber", passport?.passportNumber);
+      add("passportType", passport?.passportType);
+      add("nationalId", passport?.nationalIdentificationNumber);
+      add("issuingAuthority", passport?.issuingAuthority);
+      add("issueDate", passport?.issueDate);
+      add("expirationDate", passport?.expirationDate);
+      break;
+    }
   }
   return rows;
 }
+
+/** How Bitwarden's card brand shows. */
+function cardBrandLabel(brand: string, other: string): string {
+  if (brand === "Amex") return "American Express";
+  if (brand === "Other") return other;
+  return brand;
+}
+
+/** The parts with a value, trimmed, joined by `separator`, or undefined without any. */
+function join(parts: (string | null | undefined)[], separator: string): string | undefined {
+  const present = parts.map((part) => part?.trim()).filter((part) => !!part);
+  return present.length > 0 ? present.join(separator) : undefined;
+}
+
+/** By Bitwarden's bank account type. */
+const accountTypes: Record<string, MessageId> = {
+  checking: "accountTypeChecking",
+  savings: "accountTypeSavings",
+  certificateOfDeposit: "accountTypeCertificateOfDeposit",
+  lineOfCredit: "accountTypeLineOfCredit",
+  investmentBrokerage: "accountTypeInvestmentBrokerage",
+  moneyMarket: "accountTypeMoneyMarket",
+};
 
 export function customFields(cipher: Cipher, { formatMessage: t }: IntlShape): FieldRow[] {
   return cipher.fields.map(({ name, value, type, linkedId }) => {

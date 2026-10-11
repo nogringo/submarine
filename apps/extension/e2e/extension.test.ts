@@ -16,6 +16,11 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     await publishItems(secretKey, [
       { type: 2, name: "wifi" },
       {
+        type: 3,
+        name: "Visa",
+        card: { brand: "Visa", number: "4111111111111111", expMonth: "3", expYear: "2029" },
+      },
+      {
         type: 1,
         name: "GitHub",
         login: {
@@ -96,7 +101,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     await popup.waitForFunction(
       () =>
         [...document.querySelectorAll(".item-row-name")].map((name) => name.textContent).join() ===
-        "GitHub,wifi",
+        "GitHub,Visa,wifi",
       { timeout: 20_000 },
     );
     expect(await popup.$eval(".item-row-subtitle", (subtitle) => subtitle.textContent)).toBe(
@@ -119,7 +124,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     await extension.fill("input[type=search]", "bank");
     await popup.waitForSelector(`::-p-text(${english.noSearchResults})`);
     await extension.press("Escape");
-    await rows(2);
+    await rows(3);
   });
 
   it("shows an item over the list, its secrets hidden until shown", async () => {
@@ -195,6 +200,24 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
       () => document.querySelector(".item-row [role=status]")?.textContent === "Copied",
     );
     expect(await extension.readClipboard()).toBe("hunter2");
+  });
+
+  it("shows a card in detail, its number hidden", async () => {
+    const { popup } = extension;
+    await extension.click(".item-row[aria-label=Visa]");
+    await popup.waitForFunction(() => document.activeElement?.textContent === "Visa");
+    expect(
+      await popup.$$eval(".item-detail .field-tile", (tiles) =>
+        tiles.map((tile) =>
+          [...tile.querySelectorAll(".field-tile-label, .field-value")]
+            .map((part) => part.textContent)
+            .join(": "),
+        ),
+      ),
+    ).toEqual(["Brand: Visa", "Number: ••••••••••••", "Expiration: 03 / 2029"]);
+    expect(await popup.$eval(".item-detail-meta", (meta) => meta.textContent)).toContain("Card");
+    await extension.press("Escape");
+    await popup.waitForSelector(".item-detail", { hidden: true });
   });
 
   it("lists the vault in the drawer, and shows it once chosen", async () => {

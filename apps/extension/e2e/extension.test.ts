@@ -7,6 +7,8 @@ import { type BrowserName, type Extension, launch } from "./extension";
 import { publishItems } from "./vault-items";
 
 const english = JSON.parse(await readFile(appArb("en"), "utf8"));
+// Taller than the popup, for its copy button to sit below it.
+const cardNotes = Array(40).fill("Kept in the wallet").join("\n");
 
 describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
   const secretKey = generateSecretKey();
@@ -20,6 +22,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
         type: 3,
         name: "Visa",
         card: { brand: "Visa", number: "4111111111111111", expMonth: "3", expYear: "2029" },
+        notes: cardNotes,
       },
       {
         type: 1,
@@ -232,8 +235,19 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
             .join(": "),
         ),
       ),
-    ).toEqual(["Brand: Visa", "Number: ••••••••••••", "Expiration: 03 / 2029"]);
+    ).toEqual([
+      "Brand: Visa",
+      "Number: ••••••••••••",
+      "Expiration: 03 / 2029",
+      `Notes: ${cardNotes}`,
+    ]);
     expect(await popup.$eval(".item-detail-meta", (meta) => meta.textContent)).toContain("Card");
+    // The item scrolls on its own, the popup under it does not.
+    expect(
+      await popup.evaluate(
+        () => document.documentElement.scrollHeight - document.documentElement.clientHeight,
+      ),
+    ).toBe(0);
     await extension.press("Escape");
     await popup.waitForSelector(".item-detail", { hidden: true });
   });

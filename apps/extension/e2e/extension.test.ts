@@ -148,6 +148,12 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     );
   });
 
+  it("copies a field of the item", async () => {
+    await extension.click(".field-tile button[aria-label=Copy]");
+    await extension.popup.waitForSelector(".field-tile button[aria-label=Copied]");
+    expect(await extension.readClipboard()).toBe("alice");
+  });
+
   it("goes back to the list with Escape, onto the item's row", async () => {
     const { popup } = extension;
     await extension.press("Escape");
@@ -157,6 +163,15 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
         document.activeElement?.classList.contains("item-row") &&
         document.activeElement.textContent?.includes("GitHub"),
     );
+  });
+
+  it("copies the password of a login from its row, and tells a screen reader", async () => {
+    const { popup } = extension;
+    await extension.click(".item-row button[aria-label='Copy password']");
+    await popup.waitForFunction(
+      () => document.querySelector(".item-row [role=status]")?.textContent === "Copied",
+    );
+    expect(await extension.readClipboard()).toBe("hunter2");
   });
 
   it("lists the vault in the drawer, and shows it once chosen", async () => {

@@ -36,6 +36,8 @@ export interface ItemSummary {
   name: string;
   /** A login's username, a card's brand and last digits, and so on. */
   subtitle: string | null;
+  /** What the copy button of its row copies, as in the app. */
+  copies: "password" | "number" | null;
 }
 
 /** An item in full. */

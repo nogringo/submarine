@@ -24,12 +24,18 @@ export function FilledButton({
 /** A button showing an icon alone, named by its label. */
 export function IconButton({
   icon,
+  iconSize,
   label,
   ...props
-}: Omit<ButtonProps, "children"> & { icon: string; label: string; ref?: Ref<HTMLButtonElement> }) {
+}: Omit<ButtonProps, "children"> & {
+  icon: string;
+  iconSize?: number;
+  label: string;
+  ref?: Ref<HTMLButtonElement>;
+}) {
   return (
     <Button {...props} className="button icon-button" aria-label={label}>
-      <Icon src={icon} />
+      <Icon src={icon} size={iconSize} />
     </Button>
   );
 }

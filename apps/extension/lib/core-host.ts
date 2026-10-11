@@ -44,8 +44,8 @@ export function answer(
   message: unknown,
   sender: Browser.runtime.MessageSender,
 ): Promise<string> | undefined {
-  if (!fromExtensionPage(sender)) return;
-  const { method, args } = message as CoreRequest;
+  if (!fromExtensionPage(sender) || !isCoreRequest(message)) return;
+  const { method, args } = message;
   const keepAlive = keepBackgroundAlive();
   return core
     .call(method, JSON.stringify(args ?? {}))
@@ -95,7 +95,7 @@ export function answerExtensionPages(core: SubmarineCore) {
 }
 
 /** Whether a message or a port comes from one of the extension's own pages. */
-function fromExtensionPage(sender: Browser.runtime.MessageSender): boolean {
+export function fromExtensionPage(sender: Browser.runtime.MessageSender): boolean {
   // A content script sends from the URL of its web page.
   return sender.id === browser.runtime.id && !!sender.url?.startsWith(browser.runtime.getURL("/"));
 }
@@ -104,6 +104,10 @@ function fromExtensionPage(sender: Browser.runtime.MessageSender): boolean {
  * Firefox stops an event page after 30 s, a reply pending or a port open, and Chrome a service
  * worker, unless it calls an extension API. Clear the interval returned once done.
  */
-function keepBackgroundAlive(): ReturnType<typeof setInterval> {
+export function keepBackgroundAlive(): ReturnType<typeof setInterval> {
   return setInterval(() => browser.runtime.getPlatformInfo(), 10_000);
+}
+
+function isCoreRequest(message: unknown): message is CoreRequest {
+  return typeof message === "object" && message !== null && "method" in message;
 }

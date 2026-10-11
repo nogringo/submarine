@@ -147,9 +147,37 @@ void main() {
         containsPair('type', 1),
         containsPair('name', 'GitHub'),
         containsPair('subtitle', 'alice'),
+        containsPair('copies', null),
       ),
       allOf(containsPair('type', 2), containsPair('name', 'wifi')),
     ]);
+  });
+
+  test('tells what the row of an item copies, as in the app', () async {
+    await publish(
+      'GitHub',
+      cipher: Cipher(
+        type: CipherType.login,
+        name: 'GitHub',
+        login: Login(username: 'alice', password: 'hunter2'),
+      ),
+    );
+    await publish(
+      'Visa',
+      cipher: Cipher(
+        type: CipherType.card,
+        name: 'Visa',
+        card: PaymentCard(number: '4111111111111111'),
+      ),
+    );
+    await addVault();
+    await sync.start();
+    await _until(() async => await opened() == 2);
+
+    expect(
+      [for (final item in await sync.items()) item['copies']],
+      ['password', 'number'],
+    );
   });
 
   test('reads the items of one vault or of all', () async {

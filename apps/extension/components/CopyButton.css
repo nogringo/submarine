@@ -1,0 +1,7 @@
+.copy-button {
+  display: inline-flex;
+}
+
+.copy-button.copied .button {
+  color: var(--signal);
+}

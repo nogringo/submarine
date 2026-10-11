@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useIntl } from "react-intl";
 import { type FieldRow, websiteUrl } from "@/lib/item-fields";
 import { IconButton, IconLink } from "./Button";
+import { CopyButton } from "./CopyButton";
 import "./FieldCard.css";
 
 /** Rows sharing one rounded card, as the fields of an item do. */
@@ -51,6 +52,7 @@ function FieldTile({ row }: { row: FieldRow }) {
         />
       )}
       {website && <IconLink icon={openInNew} label={t({ id: "openWebsite" })} href={website} />}
+      {row.kind !== "info" && <CopyButton value={row.value} sensitive={hidden} />}
     </div>
   );
 }

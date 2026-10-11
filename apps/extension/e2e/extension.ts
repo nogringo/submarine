@@ -1,3 +1,4 @@
+import { createServer } from "node:http";
 import { resolve } from "node:path";
 import puppeteer, { type Browser, type KeyInput, type Page } from "puppeteer";
 
@@ -12,6 +13,7 @@ export interface Extension {
   press(key: string): Promise<void>;
   /** Opens the popup again, as when the user clicks the extension's icon once more. */
   reload(): Promise<void>;
+  readClipboard(): Promise<string>;
 }
 
 /**
@@ -32,7 +34,11 @@ export async function launch(name: BrowserName, language = "en"): Promise<Extens
           browser: "firefox",
           // Lets the tests run scripts in the extension's pages.
           args: ["-remote-allow-system-access"],
-          extraPrefsFirefox: { "intl.accept_languages": language },
+          extraPrefsFirefox: {
+            "intl.accept_languages": language,
+            // Lets a page read the clipboard without asking.
+            "dom.events.testing.asyncClipboard": true,
+          },
         });
   if (name === "chrome") {
     const popup = await waitForPopup(browser);
@@ -50,6 +56,7 @@ export async function launch(name: BrowserName, language = "en"): Promise<Extens
       reload: async () => {
         await popup.reload();
       },
+      readClipboard: chromeClipboardReader(browser, popup),
     };
   }
   await browser.installExtension(path);
@@ -90,6 +97,34 @@ export async function launch(name: BrowserName, language = "en"): Promise<Extens
       await popup.evaluate(() => location.reload()).catch(() => {});
       await popup.waitForSelector("#root > *");
     },
+    readClipboard: () => popup.evaluate(() => navigator.clipboard.readText()),
+  };
+}
+
+/**
+ * Chrome grants no permission to an extension's origin through the DevTools protocol: a tab of a
+ * local page reads the clipboard, which the browser shares, then gives the focus back to the popup.
+ */
+function chromeClipboardReader(browser: Browser, popup: Page): () => Promise<string> {
+  let reader: Promise<Page> | undefined;
+  const open = async () => {
+    const server = createServer((_request, response) => response.end()).listen(0);
+    server.unref();
+    browser.once("disconnected", () => server.close());
+    await new Promise((listening) => server.once("listening", listening));
+    const origin = `http://localhost:${(server.address() as { port: number }).port}`;
+    const page = await browser.newPage();
+    await page.goto(origin);
+    await browser.defaultBrowserContext().overridePermissions(origin, ["clipboard-read"]);
+    return page;
+  };
+  return async () => {
+    reader ??= open();
+    const page = await reader;
+    await page.bringToFront();
+    const text = await page.evaluate(() => navigator.clipboard.readText());
+    await popup.bringToFront();
+    return text;
   };
 }
 

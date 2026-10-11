@@ -104,6 +104,7 @@ class VaultSync {
           'type': item.cipher.type.value,
           'name': item.cipher.name,
           'subtitle': item.cipher.subtitle,
+          'copies': _rowCopy(item.cipher),
         },
     ];
   }
@@ -153,6 +154,15 @@ class VaultSync {
       onChanged,
     );
   }
+}
+
+/// What the copy button of an item's row copies, as in the app: the secret a
+/// login or a card is opened for.
+String? _rowCopy(Cipher cipher) {
+  bool present(String? value) => value != null && value.trim().isNotEmpty;
+  if (present(cipher.login?.password)) return 'password';
+  if (present(cipher.card?.number)) return 'number';
+  return null;
 }
 
 /// A vault synced from its relays, and live while resumed. Opens what comes in

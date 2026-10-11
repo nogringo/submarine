@@ -6,6 +6,7 @@ export interface Cipher {
   notes: string | null;
   fields: Field[];
   login: Login | null;
+  card: Card | null;
   /** In ISO 8601. */
   creationDate: string | null;
   revisionDate: string | null;
@@ -18,6 +19,10 @@ export interface Login {
   uris: { uri: string | null }[];
   /** Every value as a string, as Bitwarden exports them. */
   fido2Credentials: { rpId?: string; creationDate?: string }[];
+}
+
+export interface Card {
+  number: string | null;
 }
 
 export interface Field {

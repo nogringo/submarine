@@ -1,5 +1,6 @@
 {
   "@@locale": "ja",
   "back": "戻る",
-  "lockOnBrowserRestart": "ブラウザの再起動時"
+  "lockOnBrowserRestart": "ブラウザの再起動時",
+  "removeLockPasswordBodyBrowser": "拡張機能でパスワードを求められなくなります。このデバイス上の保管庫の鍵は、ブラウザのストレージだけで保護されるようになります。"
 }

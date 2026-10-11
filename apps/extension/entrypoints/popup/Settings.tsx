@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DialogTrigger } from "react-aria-components";
 import { type IntlShape, useIntl } from "react-intl";
 import { TextButton } from "@/components/Button";
-import { SetLockPasswordDialog } from "@/components/LockPasswordDialog";
+import { type LockPasswordChange, LockPasswordDialog } from "@/components/LockPasswordDialog";
 import { Page, PageHeader } from "@/components/Page";
 import { SelectTile } from "@/components/SelectTile";
 import { SettingsSection, SettingsTile } from "@/components/SettingsSection";
@@ -13,6 +13,7 @@ import {
   saveClipboardTimeout,
 } from "@/lib/clipboard";
 import { callCore, type LockTimeout, lockTimeouts } from "@/lib/core";
+import "./Settings.css";
 
 /** The settings of the extension on this device, as in the app. */
 export function Settings({
@@ -30,6 +31,21 @@ export function Settings({
     void readClipboardTimeout().then(setClipboardTimeout);
     void callCore("lockTimeout", {}).then(setLockTimeout);
   }, []);
+  const lockPasswordActions = useRef<HTMLDivElement>(null);
+  const hadLockPassword = useRef(hasLockPassword);
+  useEffect(() => {
+    // The button pressed went with the password set or removed: the one in its place gets the focus.
+    if (hadLockPassword.current !== hasLockPassword) {
+      lockPasswordActions.current?.querySelector("button")?.focus();
+    }
+    hadLockPassword.current = hasLockPassword;
+  }, [hasLockPassword]);
+  const lockPasswordButton = (change: LockPasswordChange, label: string) => (
+    <DialogTrigger>
+      <TextButton>{label}</TextButton>
+      <LockPasswordDialog change={change} />
+    </DialogTrigger>
+  );
   return (
     <Page className="settings" onBack={onBack}>
       <div className="page-content">
@@ -39,12 +55,16 @@ export function Settings({
             title={t({ id: "lockPassword" })}
             description={t({ id: "lockPasswordDescription" })}
           >
-            {!hasLockPassword && (
-              <DialogTrigger>
-                <TextButton>{t({ id: "setLockPassword" })}</TextButton>
-                <SetLockPasswordDialog />
-              </DialogTrigger>
-            )}
+            <div ref={lockPasswordActions} className="settings-lock-password-actions">
+              {hasLockPassword ? (
+                <>
+                  {lockPasswordButton("change", t({ id: "changeLockPassword" }))}
+                  {lockPasswordButton("remove", t({ id: "removeLockPassword" }))}
+                </>
+              ) : (
+                lockPasswordButton("set", t({ id: "setLockPassword" }))
+              )}
+            </div>
           </SettingsTile>
           {hasLockPassword && lockTimeout && (
             <SelectTile

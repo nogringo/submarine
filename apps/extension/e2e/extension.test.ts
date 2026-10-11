@@ -453,6 +453,54 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     await popup.waitForSelector(".settings", { hidden: true });
   });
 
+  it("changes the lock password, once given the current one", async () => {
+    const { popup } = extension;
+    await extension.click("button[aria-label=Vaults]");
+    await extension.click(".drawer button::-p-text(Settings)");
+    await extension.click(".settings button::-p-text(Change)");
+    // Nothing kept from the password typed before, in the dialog that set it.
+    await popup.waitForSelector("[role=dialog] input[name=current]");
+    expect(
+      await popup.$$eval("[role=dialog] input", (inputs) =>
+        inputs.map((input) => (input as HTMLInputElement).value),
+      ),
+    ).toEqual(["", "", ""]);
+    await extension.fill("[role=dialog] input[name=current]", "not the lock password");
+    await extension.fill("[role=dialog] input[name=password]", "a new lock password");
+    await extension.fill("[role=dialog] input[name=confirmation]", "a new lock password");
+    await extension.click("[role=dialog] button[type=submit]");
+    await popup.waitForFunction(
+      (error) => document.querySelector("[role=dialog] .text-field-error")?.textContent === error,
+      {},
+      english.wrongLockPassword,
+    );
+    await extension.fill("[role=dialog] input[name=current]", lockPassword);
+    await extension.click("[role=dialog] button[type=submit]");
+    await popup.waitForSelector("[role=dialog]", { hidden: true });
+    lockPassword = "a new lock password";
+    await extension.press("Escape");
+    await popup.waitForSelector(".settings", { hidden: true });
+    await extension.click("button[aria-label=Lock]");
+    await extension.fill("input[name=password]", lockPassword);
+    await extension.click("button[type=submit]");
+    await popup.waitForSelector(".home-title");
+  });
+
+  it("removes the lock password, once given the current one", async () => {
+    const { popup } = extension;
+    await extension.click("button[aria-label=Vaults]");
+    await extension.click(".drawer button::-p-text(Settings)");
+    await extension.click(".settings button::-p-text(Remove)");
+    await extension.fill("[role=dialog] input[name=current]", lockPassword);
+    await extension.click("[role=dialog] button[type=submit]");
+    await popup.waitForSelector("[role=dialog]", { hidden: true });
+    // In place of the button pressed, gone with the password.
+    await popup.waitForFunction(() => document.activeElement?.textContent === "Set up");
+    await extension.press("Escape");
+    await popup.waitForSelector(".settings", { hidden: true });
+    expect(await popup.$("button[aria-label=Lock]")).toBeNull();
+  });
+
   it("keeps the vaults when the popup opens again, as renamed", async () => {
     await extension.reload();
     const title = await extension.popup.waitForSelector(".home-title");
@@ -484,6 +532,42 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     const { popup } = extension;
     await extension.click(".vault-settings .settings-tile button");
     await extension.click("[role=alertdialog] button::-p-text(Remove)");
+    await popup.waitForSelector(".tagline");
+    await extension.reload();
+    await popup.waitForSelector(".tagline");
+  });
+});
+
+describe.each<BrowserName>(["chrome", "firefox"])("%s, the lock password forgotten", (name) => {
+  let extension: Extension;
+
+  beforeAll(async () => {
+    extension = await launch(name);
+  });
+
+  afterAll(async () => {
+    await extension?.browser.close();
+  });
+
+  it("removes the vaults from this device, and the lock password with them", async () => {
+    const { popup } = extension;
+    await extension.click("button::-p-text(Open a vault)");
+    await extension.fill("input[name=key]", nip19.nsecEncode(generateSecretKey()));
+    await extension.fill("input[name=name]", "Home");
+    await extension.click("button[type=submit]");
+    await popup.waitForSelector(".home-title");
+    await extension.click("button[aria-label=Vaults]");
+    await extension.click(".drawer button::-p-text(Settings)");
+    await extension.click(".settings button::-p-text(Set up)");
+    await extension.fill("[role=dialog] input[name=password]", "a forgotten password");
+    await extension.fill("[role=dialog] input[name=confirmation]", "a forgotten password");
+    await extension.click("[role=dialog] button[type=submit]");
+    await popup.waitForSelector("[role=dialog]", { hidden: true });
+    await extension.press("Escape");
+    await popup.waitForSelector(".settings", { hidden: true });
+    await extension.click("button[aria-label=Lock]");
+    await extension.click(`button::-p-text(${english.forgotLockPassword})`);
+    await extension.click(`[role=alertdialog] button::-p-text(${english.forgetVaults})`);
     await popup.waitForSelector(".tagline");
     await extension.reload();
     await popup.waitForSelector(".tagline");

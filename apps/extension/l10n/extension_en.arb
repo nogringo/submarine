@@ -7,5 +7,9 @@
   "lockOnBrowserRestart": "On browser restart",
   "@lockOnBrowserRestart": {
     "description": "Lock delay: the vaults lock only once the browser closes and starts again. Stands for the app's \"On app restart\"."
+  },
+  "removeLockPasswordBodyBrowser": "The extension no longer asks for it. The vault keys on this device then rest on the browser's storage only.",
+  "@removeLockPasswordBodyBrowser": {
+    "description": "Body of the dialog removing the lock password. Stands for the app's, whose keys rest on the secure storage of the device: the extension keeps them in the browser's storage."
   }
 }

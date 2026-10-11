@@ -1,5 +1,6 @@
 {
   "@@locale": "fr",
   "back": "Retour",
-  "lockOnBrowserRestart": "Au redémarrage du navigateur"
+  "lockOnBrowserRestart": "Au redémarrage du navigateur",
+  "removeLockPasswordBodyBrowser": "L'extension ne le demande plus. Les clés des coffres de cet appareil ne reposent alors plus que sur le stockage du navigateur."
 }

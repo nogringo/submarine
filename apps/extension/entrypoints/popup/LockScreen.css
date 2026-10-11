@@ -6,3 +6,7 @@
   margin-top: 40px;
   text-align: start;
 }
+
+.welcome.lock-screen > .button.text {
+  margin-top: 8px;
+}

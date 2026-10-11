@@ -31,7 +31,8 @@ class DeviceKey {
   /// while the lock password protects it and nothing unlocked it.
   Future<SymmetricCryptoKey> read() async {
     if (await hasPassword) {
-      // Left by a password set halfway: the key must not stay in clear.
+      // Left by a password set or removed halfway: the key must not stay in
+      // clear next to it.
       if (await _local.read(_clearKey) != null) await _local.remove(_clearKey);
       final unlocked = await _session.read(_unlockedKey);
       if (unlocked == null) throw CoreException('locked');
@@ -57,19 +58,56 @@ class DeviceKey {
     await _local.remove(_clearKey);
   }
 
+  /// Whether [current] is the lock password, which [password] then replaces.
+  Future<bool> changePassword(String current, String password) async {
+    if (password.length < minLockPasswordLength) {
+      throw CoreException('lockPasswordTooShort');
+    }
+    final key = await _open(current);
+    if (key == null) return false;
+    final protected = await PasswordProtectedKey.protect(key, password);
+    await _local.write(_protectedKey, jsonEncode(protected));
+    return true;
+  }
+
+  /// Whether [current] is the lock password, which then no longer protects the
+  /// key.
+  Future<bool> removePassword(String current) async {
+    final key = await _open(current);
+    if (key == null) return false;
+    await _local.write(_clearKey, _encode(key));
+    await _local.remove(_protectedKey);
+    await _session.remove(_unlockedKey);
+    return true;
+  }
+
+  /// Forgets the key, for a forgotten lock password: what it encrypted is
+  /// lost, and the next [read] makes a new one.
+  Future<void> forget() async {
+    await _session.remove(_unlockedKey);
+    await _local.remove(_protectedKey);
+    await _local.remove(_clearKey);
+  }
+
   Future<void> lock() => _session.remove(_unlockedKey);
 
   /// Whether [password] is the lock password, which then unlocks the vaults.
   Future<bool> unlock(String password) async {
-    final saved = await _local.read(_protectedKey);
-    if (saved == null) return true;
-    final protected = PasswordProtectedKey.fromJson(
-      jsonDecode(saved) as Map<String, dynamic>,
-    );
-    final key = await protected.open(password);
+    if (!await hasPassword) return true;
+    final key = await _open(password);
     if (key == null) return false;
     await _session.write(_unlockedKey, _encode(key));
     return true;
+  }
+
+  /// The key, if [password] is the lock password.
+  Future<SymmetricCryptoKey?> _open(String password) async {
+    final saved = await _local.read(_protectedKey);
+    if (saved == null) return null;
+    final protected = PasswordProtectedKey.fromJson(
+      jsonDecode(saved) as Map<String, dynamic>,
+    );
+    return protected.open(password);
   }
 
   static String _encode(SymmetricCryptoKey key) => base64.encode(key.bytes);

@@ -87,6 +87,56 @@ void main() {
     await expectLater(restarted.read(), throwsLocked);
   });
 
+  test('changes the lock password, once given the current one', () async {
+    final key = await deviceKey.read();
+    await deviceKey.setPassword(password);
+
+    expect(
+      await deviceKey.changePassword('not the password', 'another password'),
+      isFalse,
+    );
+    expect(
+      await deviceKey.changePassword(password, 'another password'),
+      isTrue,
+    );
+
+    await deviceKey.lock();
+    expect(await deviceKey.unlock(password), isFalse);
+    expect(await deviceKey.unlock('another password'), isTrue);
+    expect((await deviceKey.read()).bytes, key.bytes);
+  });
+
+  test('removes the lock password, once given the current one', () async {
+    await vaults.add(key: privateKey, name: 'Home', color: 1);
+    final key = await deviceKey.read();
+    await deviceKey.setPassword(password);
+
+    expect(await deviceKey.removePassword('not the password'), isFalse);
+    expect(await deviceKey.hasPassword, isTrue);
+    expect(await deviceKey.removePassword(password), isTrue);
+
+    expect(await deviceKey.hasPassword, isFalse);
+    final restarted = DeviceKey(local, MemoryStore());
+    expect(await restarted.locked, isFalse);
+    expect((await restarted.read()).bytes, key.bytes);
+    expect(await Vaults(local, signers, restarted).list(), hasLength(1));
+  });
+
+  test('forgets the key and the vaults, for a forgotten password', () async {
+    await vaults.add(key: privateKey, name: 'Home', color: 1);
+    final key = await deviceKey.read();
+    await deviceKey.setPassword(password);
+    await deviceKey.lock();
+
+    await vaults.forget();
+    await deviceKey.forget();
+
+    expect(await deviceKey.hasPassword, isFalse);
+    expect(await deviceKey.locked, isFalse);
+    expect(await vaults.list(), isEmpty);
+    expect((await deviceKey.read()).bytes, isNot(key.bytes));
+  });
+
   test('removes a key left in clear next to a lock password', () async {
     final key = await deviceKey.read();
     await deviceKey.setPassword(password);

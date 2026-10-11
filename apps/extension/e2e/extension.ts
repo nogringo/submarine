@@ -62,17 +62,20 @@ export async function launch(name: BrowserName, language = "en"): Promise<Extens
   await browser.installExtension(path);
   const popup = await waitForPopup(browser);
   // WebDriver BiDi sends no input to an extension page: the events come from a script, as from a
-  // screen reader.
+  // screen reader. Each waits for its element, as Chrome's locators do.
   return {
     browser,
     popup,
-    click: (selector) =>
-      popup.$eval(selector, (element) => {
+    click: async (selector) => {
+      await popup.waitForSelector(selector);
+      await popup.$eval(selector, (element) => {
         (element as HTMLElement).focus();
         (element as HTMLElement).click();
-      }),
-    fill: (selector, text) =>
-      popup.$eval(
+      });
+    },
+    fill: async (selector, text) => {
+      await popup.waitForSelector(selector);
+      await popup.$eval(
         selector,
         (input, text) => {
           (input as HTMLInputElement).focus();
@@ -84,7 +87,8 @@ export async function launch(name: BrowserName, language = "en"): Promise<Extens
           input.dispatchEvent(new Event("input", { bubbles: true }));
         },
         text,
-      ),
+      );
+    },
     press: (key) =>
       popup.evaluate((key) => {
         const target = document.activeElement ?? document.body;

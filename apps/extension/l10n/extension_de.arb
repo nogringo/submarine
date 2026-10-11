@@ -1,5 +1,6 @@
 {
   "@@locale": "de",
   "back": "Zurück",
-  "lockOnBrowserRestart": "Beim Neustart des Browsers"
+  "lockOnBrowserRestart": "Beim Neustart des Browsers",
+  "removeLockPasswordBodyBrowser": "Die Erweiterung fragt nicht mehr danach. Die Tresorschlüssel auf diesem Gerät sind dann nur noch durch den Speicher des Browsers geschützt."
 }

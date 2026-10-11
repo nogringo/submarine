@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { callCore, type LockState, type Vault } from "@/lib/core";
+import { callCore, type Vault } from "@/lib/core";
+import { useLockState } from "@/lib/use-lock-state";
 import { useReportUse } from "@/lib/use-report-use";
 import { useSync } from "@/lib/use-sync";
 import "./App.css";
@@ -9,15 +10,11 @@ import { OpenVault } from "./OpenVault";
 import { Welcome } from "./Welcome";
 
 export function App() {
-  const [lock, setLock] = useState<LockState>();
   const [vaults, setVaults] = useState<Vault[]>();
   const [opening, setOpening] = useState(false);
   const sync = useSync();
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: another popup may lock or unlock.
-  useEffect(() => {
-    callCore("lockState", {}).then(setLock);
-  }, [sync.revision]);
+  // Read again as the core tells: another popup or the lock delay may lock or unlock.
+  const { lock, read: readLock, lockNow } = useLockState(sync.revision);
   const unlocked = lock?.locked === false;
   useReportUse(unlocked && lock.hasPassword);
   useEffect(() => {
@@ -27,7 +24,7 @@ export function App() {
   }, [unlocked]);
 
   if (lock?.locked) {
-    return <LockScreen onUnlocked={() => setLock({ ...lock, locked: false })} />;
+    return <LockScreen onChanged={readLock} />;
   }
   if (!lock || !vaults) return null;
   if (opening) {
@@ -48,10 +45,7 @@ export function App() {
       vaults={vaults}
       sync={sync}
       hasLockPassword={lock.hasPassword}
-      onLock={() => {
-        setLock({ ...lock, locked: true });
-        void callCore("lock", {});
-      }}
+      onLock={lockNow}
       onOpenVault={() => setOpening(true)}
       onVaultChanged={(vault) =>
         setVaults((vaults) => vaults?.map((each) => (each.pubkey === vault.pubkey ? vault : each)))

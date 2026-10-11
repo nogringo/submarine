@@ -91,6 +91,12 @@ export interface CoreMethods {
   lockState: { args: Record<string, never>; result: LockState };
   /** Of 12 characters at least. Leaves the vaults unlocked. */
   setLockPassword: { args: { password: string }; result: null };
+  /** Fails with `wrongLockPassword`. */
+  changeLockPassword: { args: { current: string; password: string }; result: null };
+  /** Fails with `wrongLockPassword`. */
+  removeLockPassword: { args: { current: string }; result: null };
+  /** Removes every vault from this device, for a forgotten lock password, and the password. */
+  forgetVaults: { args: Record<string, never>; result: null };
   /** Stops the sync, and lets go of the vaults' keys and items until unlocked. */
   lock: { args: Record<string, never>; result: null };
   /** Fails with `wrongLockPassword`. */

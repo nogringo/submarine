@@ -11,6 +11,7 @@ import 'package:submarine_extension_core/js_crypto.dart';
 import 'package:submarine_extension_core/js_events.dart';
 import 'package:submarine_extension_core/js_lock_alarm.dart';
 import 'package:submarine_extension_core/js_storage.dart';
+import 'package:submarine_extension_core/reopenable.dart';
 import 'package:submarine_extension_core/sync.dart';
 import 'package:submarine_extension_core/totp.dart';
 import 'package:submarine_extension_core/vaults.dart';
@@ -21,18 +22,16 @@ void main() {
   final deviceKey = DeviceKey(local, session);
   final autoLock = AutoLock(deviceKey, local, session, const JsLockAlarm());
   final vaults = Vaults(local, const JsEventSignerFactory(), deviceKey);
-  Future<VaultSync>? opening;
   // The database opens once a popup asks for the sync or the items, not at
   // each wake.
-  Future<VaultSync> sync() => opening ??= _openSync(vaults);
+  final syncs = Reopenable(() => _openSync(vaults), (sync) => sync.close());
+  Future<VaultSync> sync() => syncs.open();
   // Whether a popup is open, for the sync to start again once unlocked.
   var popupOpen = false;
   Future<void> lock() async {
     await deviceKey.lock();
     autoLock.cancel();
-    final closing = opening;
-    opening = null;
-    await (await closing)?.close();
+    await syncs.close();
     emitVaultsChanged();
   }
 
@@ -48,6 +47,33 @@ void main() {
       'setLockPassword': (args) async {
         await deviceKey.setPassword(args['password'] as String);
         await autoLock.used();
+        emitVaultsChanged();
+        return null;
+      },
+      'changeLockPassword': (args) async {
+        final changed = await deviceKey.changePassword(
+          args['current'] as String,
+          args['password'] as String,
+        );
+        if (!changed) throw CoreException('wrongLockPassword');
+        return null;
+      },
+      'removeLockPassword': (args) async {
+        if (!await deviceKey.removePassword(args['current'] as String)) {
+          throw CoreException('wrongLockPassword');
+        }
+        autoLock.cancel();
+        emitVaultsChanged();
+        return null;
+      },
+      'forgetVaults': (_) async {
+        autoLock.cancel();
+        await vaults.forget();
+        // Every vault goes: the ndk cache, the sync coverage and the versions.
+        await syncs.close(
+          () => databaseFactoryWebWorker.deleteDatabase(_databaseName),
+        );
+        await deviceKey.forget();
         emitVaultsChanged();
         return null;
       },
@@ -86,7 +112,7 @@ void main() {
           name: args['name'] as String,
           color: args['color'] as int,
         );
-        if (opening != null) await (await sync()).update();
+        if (syncs.current case final current?) await (await current).update();
         return vault;
       },
       'editVault': (args) => vaults.edit(
@@ -107,7 +133,7 @@ void main() {
       },
       'stopSync': (_) async {
         popupOpen = false;
-        await (await opening)?.stop();
+        await (await syncs.current)?.stop();
         if (await autoLock.locksOnClose() && !await deviceKey.locked) {
           await lock();
         }
@@ -133,10 +159,12 @@ void main() {
   globalContext['submarineCore'] = createJSInteropWrapper(_JsCore(core));
 }
 
+const _databaseName = 'submarine';
+
 Future<VaultSync> _openSync(Vaults vaults) async {
   // The ndk cache, the sync coverage and the versions opened, together: the
   // coverage must never outlive the cache it describes.
-  final database = await databaseFactoryWebWorker.openDatabase('submarine');
+  final database = await databaseFactoryWebWorker.openDatabase(_databaseName);
   final ndk = Ndk(
     NdkConfig(
       eventVerifier: JsEventVerifier(),

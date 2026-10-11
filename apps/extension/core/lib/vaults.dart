@@ -150,6 +150,10 @@ class Vaults {
     return record;
   });
 
+  /// Removes every vault from this device, without reading them: what a
+  /// forgotten lock password leaves.
+  Future<void> forget() => _write(() => _store.remove(_vaultsKey));
+
   Future<T> _write<T>(Future<T> Function() write) {
     final written = _writing.then((_) => write());
     _writing = written.then((_) {}, onError: (_) {});

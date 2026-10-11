@@ -1,5 +1,6 @@
 {
   "@@locale": "zh",
   "back": "返回",
-  "lockOnBrowserRestart": "浏览器重启时"
+  "lockOnBrowserRestart": "浏览器重启时",
+  "removeLockPasswordBodyBrowser": "扩展程序将不再要求输入此密码。此设备上的密码库密钥将仅受浏览器存储的保护。"
 }

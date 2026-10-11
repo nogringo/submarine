@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Renders the app icon of every platform from sonar.svg, or from sonar-small.svg
-# under 48 px where the full sonar blurs. Needs rsvg-convert and magick.
+# Renders the icon of every platform and of the browser extension from sonar.svg,
+# or from sonar-small.svg under 48 px where the full sonar blurs. Needs
+# rsvg-convert and magick.
 set -euo pipefail
 cd "$(dirname "$0")"
 app=..
@@ -71,3 +72,10 @@ for size in 16 20 24 32 40 48 64 256; do
 done
 magick "$tmp"/windows-{16,20,24,32,40,48,64,256}.png -define icon:png-compression-size=256 \
   "$app/windows/runner/resources/app_icon.ico"
+
+extension=$app/../extension/public
+for size in 16 32 48 96; do
+  rounded $size 0 "$extension/icon-$size.png"
+done
+# The Chrome Web Store wants 96 px of artwork in a 128 px icon.
+rounded 128 128 "$extension/icon-128.png"

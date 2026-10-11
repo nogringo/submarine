@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { generateSecretKey, nip19 } from "nostr-tools";
 import * as nip49 from "nostr-tools/nip49";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { violations } from "./axe";
 import { type BrowserName, type Extension, launch } from "./extension";
 import { publishItems } from "./vault-items";
 
@@ -49,6 +50,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
   it("welcomes in the popup", async () => {
     const heading = await extension.popup.waitForSelector("h1");
     expect(await heading?.evaluate((h1) => h1.textContent)).toBe("Submarine");
+    expect(await violations(extension.popup)).toEqual([]);
   });
 
   it("explains Nostr in a dialog, closed with Escape", async () => {
@@ -59,6 +61,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     await popup.waitForFunction(() =>
       document.querySelector("[role=dialog]")?.contains(document.activeElement),
     );
+    expect(await violations(popup)).toEqual([]);
     await extension.press("Escape");
     await popup.waitForSelector("[role=dialog]", { hidden: true });
     await popup.waitForFunction(() => document.activeElement?.textContent === "Built on Nostr");
@@ -79,6 +82,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     await extension.fill("input[name=name]", "Home");
     await extension.click("button[type=submit]");
     await extension.popup.waitForSelector(`::-p-text(${english.vaultKeyInvalid})`);
+    expect(await violations(extension.popup)).toEqual([]);
   });
 
   it("opens a vault from its ncryptsec, once the password is right", async () => {
@@ -87,6 +91,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     await extension.fill("input[name=password]", "wrong");
     await extension.click("button[type=submit]");
     await popup.waitForSelector(`::-p-text(${english.vaultKeyPasswordWrong})`);
+    expect(await violations(popup)).toEqual([]);
     await extension.fill("input[name=password]", "a long password");
     await extension.click("button[type=submit]");
     const title = await popup.waitForSelector(".home-title");
@@ -112,6 +117,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     expect(await popup.$eval(".item-row-subtitle", (subtitle) => subtitle.textContent)).toBe(
       "alice",
     );
+    expect(await violations(popup)).toEqual([]);
   });
 
   it("searches the items as the app does, from the field focused at once", async () => {
@@ -128,6 +134,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     expect(await popup.$eval(".item-row-name", (name) => name.textContent)).toBe("GitHub");
     await extension.fill("input[type=search]", "bank");
     await popup.waitForSelector(`::-p-text(${english.noSearchResults})`);
+    expect(await violations(popup)).toEqual([]);
     await extension.press("Escape");
     await rows(3);
   });
@@ -201,6 +208,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     await popup.waitForFunction(
       () => document.querySelector(".password-history .field-value")?.textContent === "hunter1",
     );
+    expect(await violations(popup)).toEqual([]);
   });
 
   it("goes back to the list with Escape, onto the item's row", async () => {
@@ -248,6 +256,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
         () => document.documentElement.scrollHeight - document.documentElement.clientHeight,
       ),
     ).toBe(0);
+    expect(await violations(popup)).toEqual([]);
     await extension.press("Escape");
     await popup.waitForSelector(".item-detail", { hidden: true });
   });
@@ -287,6 +296,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     expect(
       await rows?.$$eval(".drawer-row-title", (titles) => titles.map((title) => title.textContent)),
     ).toEqual(["All vaults", "Home"]);
+    expect(await violations(popup)).toEqual([]);
     await extension.click(".drawer [role=row]::-p-text(Home)");
     await popup.waitForSelector("[role=dialog]", { hidden: true });
     await popup.waitForFunction(
@@ -312,6 +322,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     await extension.fill(field, "");
     await extension.press("Backspace");
     await popup.waitForSelector(`::-p-text(${english.vaultNameRequired})`);
+    expect(await violations(popup)).toEqual([]);
     await extension.fill(field, "Family");
     await popup.waitForFunction(
       () =>
@@ -369,6 +380,8 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     await popup.waitForSelector(select);
     expect(await popup.$eval(select, (button) => button.textContent)).toContain("30 seconds");
     await extension.click(select);
+    await popup.waitForSelector("[role=option]");
+    expect(await violations(popup)).toEqual([]);
     await extension.click("[role=option]::-p-text(10 seconds)");
     await popup.waitForFunction(
       (select) => document.querySelector(select)?.textContent?.includes("10 seconds"),
@@ -408,6 +421,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
       {},
       english.passwordMinLength.replace("{count}", "12"),
     );
+    expect(await violations(popup)).toEqual([]);
     await extension.click("[role=dialog] button::-p-text(Generate a passphrase)");
     await popup.waitForFunction(() => {
       const [password, confirmation] =
@@ -437,6 +451,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     await extension.fill("input[name=password]", "not the lock password");
     await extension.click("button[type=submit]");
     await popup.waitForSelector(`::-p-text(${english.wrongLockPassword})`);
+    expect(await violations(popup)).toEqual([]);
     await extension.fill("input[name=password]", lockPassword);
     await extension.click("button[type=submit]");
     await popup.waitForSelector(".home-title");
@@ -556,6 +571,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     await popup.waitForFunction(() =>
       document.querySelector("[role=alertdialog]")?.contains(document.activeElement),
     );
+    expect(await violations(popup)).toEqual([]);
     await extension.press("Escape");
     await popup.waitForSelector("[role=alertdialog]", { hidden: true });
     expect(await popup.$(".vault-settings")).not.toBeNull();
@@ -600,6 +616,8 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s, the lock password forgott
     await popup.waitForSelector(".settings", { hidden: true });
     await extension.click("button[aria-label=Lock]");
     await extension.click(`button::-p-text(${english.forgotLockPassword})`);
+    await popup.waitForSelector("[role=alertdialog]");
+    expect(await violations(popup)).toEqual([]);
     await extension.click(`[role=alertdialog] button::-p-text(${english.forgetVaults})`);
     await popup.waitForSelector(".tagline");
     await extension.reload();

@@ -255,6 +255,43 @@ void main() {
     expect(await sync.item(pubkey: pubkey, id: 'unknown'), isNull);
   });
 
+  test('shows the newest version of an item edited on two devices', () async {
+    final other = Ndk.emptyBootstrapRelaysConfig();
+    addTearDown(other.destroy);
+    final device = Vault(
+      ndk: other,
+      signer: signers.create(privateKey: privateKey),
+      relays: [relay.url],
+      indexers: const [],
+    );
+    final first = Item([
+      await device.createItem(
+        Cipher(type: CipherType.secureNote, name: 'Wifi'),
+      ),
+    ]);
+    // Both name the first version, as two devices that missed each other.
+    await device.updateItem(
+      first,
+      Cipher(type: CipherType.secureNote, name: 'Older'),
+    );
+    // Versions are dated to the millisecond, the same one would be a draw.
+    await Future<void>.delayed(const Duration(milliseconds: 5));
+    await device.updateItem(
+      first,
+      Cipher(type: CipherType.secureNote, name: 'Newer'),
+    );
+    expect(await device.push(), isEmpty);
+    await addVault();
+    await sync.start();
+    await _until(() async => await opened() == 3);
+
+    final [summary] = await sync.items();
+    final item = await sync.item(pubkey: pubkey, id: summary['id'] as String);
+
+    expect(summary['name'], 'Newer');
+    expect((item!['cipher'] as Map)['name'], 'Newer');
+  });
+
   test('reads what was opened before it starts', () async {
     await publish('Wifi');
     await addVault();

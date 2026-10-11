@@ -9,9 +9,10 @@ The first version brings the vaults into the browser to read them. It does what 
 It does:
 
 - Open several vaults, each from its key pasted as an nsec or an ncryptsec. Each vault gets a name and a color on this device, as in the app: neither is part of the protocol.
-- Sync them from their relays, download only, when the popup opens, and keep them live while it stays open. Nothing syncs while the popup is closed.
+- Rename a vault, change its color, or close it, which removes it from this device while its relays keep it, as in the app.
+- Sync them from their relays, download only, when the popup opens, and keep them live while it stays open. The app's sync button syncs now. Nothing syncs while the popup is closed.
 - List the items of one vault or of all vaults, with the app's search.
-- Show every item type in detail: login, secure note, card, identity, SSH key, bank account, driver's license and passport, with their notes and custom fields. An item edited on two devices at once shows its newest version, with a note to resolve it in the app. Items in the trash stay hidden.
+- Show every item type in detail: login, secure note, card, identity, SSH key, bank account, driver's license and passport, with their notes, custom fields and password history. An item edited on two devices at once shows its newest version, without a note, as in the app. Items in the trash stay hidden.
 - Copy a username, a password, a verification code or any field, and clear the clipboard after the delay chosen in the settings, 30 seconds by default as in the app.
 - Lock with a password, optional as in the app. Once one is set, the extension locks after the delay chosen in the settings, 5 minutes unused by default as in the app.
 - Settings: the lock delay and the clipboard delay, with the app's choices.
@@ -96,4 +97,5 @@ Candidates, added one at a time, in an order to decide:
 - Filling a login on an explicit action, a button in the popup or a keyboard shortcut. The license question comes back here.
 - Offering to save a login after signing in.
 - A menu in the page's fields, rendered in an isolated iframe against clickjacking.
+- The app's filters: favorites, each type, and the trash.
 - Opening a vault with a bunker, attachments, email addresses and their inbox, a side panel, Safari, passkeys.

@@ -1,7 +1,5 @@
-type WorkerGlobals = typeof globalThis & {
-  importScripts?: (...urls: string[]) => void;
-};
+import { answerExtensionPages, loadCore } from "@/lib/core-host";
 
 export default defineBackground(() => {
-  (globalThis as WorkerGlobals).importScripts?.("/core.js");
+  answerExtensionPages(loadCore());
 });

@@ -6,5 +6,9 @@ environment:
   sdk: ^3.13.4
 resolution: workspace
 
+dependencies:
+  ndk: ^0.10.1
+
 dev_dependencies:
-  lints: ^6.0.0
+  lints: ^6.1.0
+  test: ^1.33.0

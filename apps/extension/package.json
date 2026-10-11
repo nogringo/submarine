@@ -19,6 +19,9 @@
     "postinstall": "wxt prepare"
   },
   "dependencies": {
+    "@noble/curves": "2.0.1",
+    "@noble/hashes": "2.0.1",
+    "nostr-tools": "2.25.2",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },

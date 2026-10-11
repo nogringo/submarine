@@ -24,34 +24,37 @@
 }
 
 .select-tile-popover {
-  min-width: var(--trigger-width);
-  max-height: 300px;
+  min-width: max(var(--trigger-width), 112px);
   overflow: auto;
-  border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--raised);
   box-shadow: 0 8px 24px rgb(0 0 0 / 0.24);
 }
 
+/* The padding and the option height SelectTile.tsx counts on. */
 .select-tile-list {
-  padding: 6px 0;
+  padding: 8px 0;
   outline: none;
 }
 
 .select-tile-option {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  min-height: 44px;
+  height: 48px;
   padding: 0 16px;
   font-size: 15px;
+  white-space: nowrap;
   cursor: pointer;
   outline: none;
 }
 
-.select-tile-option[data-focused] {
-  background: color-mix(in srgb, var(--text) 8%, transparent);
+/* The option chosen, as the app's menu marks it. */
+.select-tile-option[data-selected] {
+  background: color-mix(in srgb, var(--text) 10%, transparent);
+}
+
+.select-tile-option[data-hovered]:not([data-selected]) {
+  background: color-mix(in srgb, var(--text) 5%, transparent);
 }
 
 .select-tile-option[data-focus-visible] {

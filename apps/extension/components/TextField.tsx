@@ -15,9 +15,9 @@ import { IconButton } from "./Button";
 import "./TextField.css";
 
 /**
- * A labelled field, with its help below and its error in place of the help. A secret field is
- * hidden until shown, by its own button or by `shown`; a mono one is written in the font that tells
- * every character apart.
+ * A labelled field, as the app's: its label inside until it takes the focus or a value, then on its
+ * outline. Its help below, its error in place of the help. A secret field is hidden until shown, by
+ * its own button or by `shown`; a mono one is written in the font that tells every character apart.
  */
 export function TextField({
   label,
@@ -48,11 +48,12 @@ export function TextField({
     <AriaTextField
       {...props}
       className="text-field"
+      data-filled={props.value ? true : undefined}
       isInvalid={error !== undefined}
       validationBehavior="aria"
     >
-      <Label className="text-field-label">{label}</Label>
       <Group className="text-field-box">
+        <Label className="text-field-label">{label}</Label>
         <Input
           className={mono ? "text-field-input mono" : "text-field-input"}
           type={secret && !shown ? "password" : "text"}
@@ -67,6 +68,12 @@ export function TextField({
             onPress={() => setShown(!shown)}
           />
         )}
+        {/* The label's width, cut out of the outline once the label is on it. */}
+        <fieldset className="text-field-outline" aria-hidden="true">
+          <legend>
+            <span>{label}</span>
+          </legend>
+        </fieldset>
       </Group>
       {error === undefined && description && (
         <Text slot="description" className="text-field-description">

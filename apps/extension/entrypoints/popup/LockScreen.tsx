@@ -55,9 +55,7 @@ export function LockScreen({ onChanged }: { onChanged: () => void }) {
         </FilledButton>
       </Form>
       <DialogTrigger>
-        <TextButton muted isDisabled={busy}>
-          {t({ id: "forgotLockPassword" })}
-        </TextButton>
+        <TextButton isDisabled={busy}>{t({ id: "forgotLockPassword" })}</TextButton>
         <ConfirmDialog
           title={t({ id: "forgetVaultsTitle" })}
           cancel={t({ id: "cancel" })}

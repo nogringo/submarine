@@ -94,7 +94,7 @@ The [browser extension](apps/extension) is built with [WXT](https://wxt.dev) and
 (cd apps/extension && pnpm install && pnpm dev)
 ```
 
-Run the tests from a package directory: `dart test` for Dart packages, `flutter test` for the Flutter app, `pnpm test` for the extension.
+Run the tests from a package directory: `dart test` for Dart packages, `flutter test` for the Flutter app, `pnpm test` for the extension. `pnpm test:e2e` runs the extension in Chrome and Firefox, once `pnpm e2e:browsers` has downloaded them.
 
 Commit messages follow [Conventional Commits](https://www.conventionalcommits.org). Use the package as scope when a change targets one: `feat(cli): ...`, `fix(app): ...`, `docs(nostr_passwords): ...`.
 

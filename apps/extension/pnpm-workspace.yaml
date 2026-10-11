@@ -1,0 +1,3 @@
+allowBuilds:
+  # The end-to-end tests download their browsers with pnpm e2e:browsers.
+  puppeteer: false

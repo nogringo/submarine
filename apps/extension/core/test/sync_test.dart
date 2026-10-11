@@ -120,6 +120,19 @@ void main() {
     expect(await opened(), 0);
   });
 
+  test('syncs a vault again at once when asked', () async {
+    await addVault();
+    await sync.start();
+    await _until(() async => sync.states().single['lastSync'] != null);
+    final before = sync.states().single['lastSync'];
+    // A pass covers whole seconds.
+    await Future<void>.delayed(const Duration(milliseconds: 1100));
+
+    await sync.syncNow(pubkey: pubkey);
+
+    await _until(() async => sync.states().single['lastSync'] != before);
+  });
+
   test('reads the items opened, trash left out, by name', () async {
     await publish('wifi');
     await publish(

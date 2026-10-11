@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { SyncState } from "./core";
-import { syncStatus } from "./sync-status";
+import { anySyncing, syncStatus } from "./sync-status";
 
 const now = new Date("2026-10-11T12:00:00Z");
 
@@ -44,5 +44,14 @@ describe("syncStatus", () => {
     ];
     expect(syncStatus(["a", "b"], states, now)).toEqual({ id: "syncFailed" });
     expect(syncStatus(["a"], states, now)).toEqual({ id: "syncedJustNow" });
+  });
+});
+
+describe("anySyncing", () => {
+  it("tells whether one of the vaults syncs, the others left out", () => {
+    const states = [state("a", "synced", "2026-10-11T11:59:30Z"), state("b", "syncing", null)];
+    expect(anySyncing(["a", "b"], states)).toBe(true);
+    expect(anySyncing(["a"], states)).toBe(false);
+    expect(anySyncing(["c"], states)).toBe(false);
   });
 });

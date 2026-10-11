@@ -11,9 +11,11 @@ import {
 } from "react-aria-components";
 import { useIntl } from "react-intl";
 import { SearchField } from "@/components/SearchField";
+import { SyncButton } from "@/components/SyncButton";
 import { SyncStatus } from "@/components/SyncStatus";
 import { AllVaultsAvatar, OpenVaultMark, VaultAvatar } from "@/components/VaultAvatar";
 import type { Vault } from "@/lib/core";
+import { anySyncing } from "@/lib/sync-status";
 import { useItems } from "@/lib/use-items";
 import type { Sync } from "@/lib/use-sync";
 import "./Home.css";
@@ -115,6 +117,7 @@ export function Home({
             <h1 className="home-title">{title}</h1>
             <SyncStatus pubkeys={pubkeys} states={sync.states} />
           </div>
+          <SyncButton vault={vault?.pubkey} syncing={anySyncing(pubkeys, sync.states)} />
         </header>
         <div className="home-search">
           {/* What the popup opens for: typing finds the item at once. */}

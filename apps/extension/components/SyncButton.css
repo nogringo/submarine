@@ -1,0 +1,24 @@
+.sync-button[data-pending] {
+  cursor: default;
+}
+
+.sync-button-arrows {
+  display: flex;
+}
+
+/* Counterclockwise, the way the arrows point. */
+.sync-button-arrows[data-turning] {
+  animation: sync-button-turn 1s linear infinite;
+}
+
+@keyframes sync-button-turn {
+  to {
+    rotate: -360deg;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sync-button-arrows[data-turning] {
+    animation: none;
+  }
+}

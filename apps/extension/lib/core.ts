@@ -71,6 +71,8 @@ export interface CoreMethods {
     args: { key: string; password?: string; name: string; color: number };
     result: Vault;
   };
+  /** Of one vault, or of all without one, at once rather than at the next pass. */
+  syncNow: { args: { vault?: string }; result: null };
   /** Of the vaults syncing, while a popup holds {@link syncPort} open. */
   syncStates: { args: Record<string, never>; result: SyncState[] };
   /** Of one vault, or of all without one, trash left out, by name, as the app's search finds them. */

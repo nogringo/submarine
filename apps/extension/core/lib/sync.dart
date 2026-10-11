@@ -67,6 +67,13 @@ class VaultSync {
     }
   }
 
+  /// Syncs the vault [pubkey], or every vault, at once rather than at the next
+  /// pass, as the app's sync button does.
+  Future<void> syncNow({String? pubkey}) => Future.wait([
+    for (final vault in _synced.values)
+      if (pubkey == null || vault.pubkey == pubkey) vault.syncNow(),
+  ]);
+
   /// Where the sync of each vault stands, for those [start] got to.
   List<Map<String, Object?>> states() => [
     for (final vault in _synced.values)
@@ -197,6 +204,15 @@ class _SyncedVault {
     final live = _live;
     _live = null;
     await live?.cancel();
+  }
+
+  /// Does nothing while paused.
+  Future<void> syncNow() async {
+    if (_live == null) return;
+    await Future.wait([
+      if (_handle case final handle?) handle.then(_engine.refresh),
+      _fetchRelays(),
+    ]);
   }
 
   /// Fetches the relay list another device may have changed.

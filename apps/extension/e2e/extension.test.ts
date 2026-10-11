@@ -237,6 +237,20 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     await popup.waitForSelector(".item-detail", { hidden: true });
   });
 
+  it("syncs again at once from the sync button, which waits meanwhile", async () => {
+    const { popup } = extension;
+    const button = "button[aria-label='Sync now']";
+    await extension.click(button);
+    await popup.waitForSelector(`${button}[aria-disabled=true]`);
+    await popup.waitForSelector(`${button}:not([aria-disabled])`, { timeout: 20_000 });
+    expect(await popup.evaluate(() => document.activeElement?.getAttribute("aria-label"))).toBe(
+      "Sync now",
+    );
+    expect(await popup.$eval(".sync-status", (status) => status.textContent)).toBe(
+      english.syncedJustNow,
+    );
+  });
+
   it("lists the vault in the drawer, and shows it once chosen", async () => {
     const { popup } = extension;
     await extension.click("button[aria-label=Vaults]");

@@ -31,6 +31,8 @@ void main() {
     },
     'startSync': (_) async => (await sync()).start(),
     'stopSync': (_) async => (await sync()).stop(),
+    'syncNow': (args) async =>
+        (await sync()).syncNow(pubkey: args['vault'] as String?),
     'syncStates': (_) async => (await sync()).states(),
     'items': (args) async => (await sync()).items(
       pubkey: args['vault'] as String?,

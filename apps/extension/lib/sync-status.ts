@@ -23,3 +23,8 @@ export function syncStatus(pubkeys: string[], states: SyncState[], now = new Dat
   if (hours < 24) return { id: "syncedHoursAgo", hours };
   return { id: "syncedOn", date: new Date(lastSync) };
 }
+
+/** Whether one of the vaults of `pubkeys` syncs, as the app's sync button turns. */
+export function anySyncing(pubkeys: string[], states: SyncState[]): boolean {
+  return states.some((state) => state.phase === "syncing" && pubkeys.includes(state.pubkey));
+}

@@ -20,6 +20,7 @@ import { SyncButton } from "@/components/SyncButton";
 import { SyncStatus } from "@/components/SyncStatus";
 import { AllVaultsAvatar, OpenVaultMark, VaultAvatar } from "@/components/VaultAvatar";
 import type { Vault } from "@/lib/core";
+import { forgetOpenedItem, readOpenedItem, saveOpenedItem } from "@/lib/opened-item";
 import { anySyncing } from "@/lib/sync-status";
 import { useItems } from "@/lib/use-items";
 import type { Sync } from "@/lib/use-sync";
@@ -64,6 +65,21 @@ export function Home({
   const title = vault?.name ?? t({ id: "allVaults" });
   const items = useItems(vault?.pubkey, query, sync.revision);
   const [opened, setOpened] = useState<Opened>();
+  // The item the last popup showed, shown again once read.
+  const [restored, setRestored] = useState(false);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: read once, as the list shows.
+  useEffect(() => {
+    void readOpenedItem().then((item) => {
+      const itemVault = vaults.find((vault) => vault.pubkey === item?.vault);
+      if (item && itemVault) setOpened({ page: "item", vault: itemVault, id: item.id });
+      setRestored(true);
+    });
+  }, []);
+  useEffect(() => {
+    if (!restored) return;
+    if (opened?.page === "item") void saveOpenedItem({ vault: opened.vault.pubkey, id: opened.id });
+    else void forgetOpenedItem();
+  }, [opened, restored]);
   const settingsVault =
     opened?.page === "vaultSettings"
       ? vaults.find((vault) => vault.pubkey === opened.pubkey)
@@ -73,15 +89,18 @@ export function Home({
   // What the page opened from, which gets the focus back.
   const openedFrom = useRef<HTMLElement>(null);
   const vaultsButton = useRef<HTMLButtonElement>(null);
+  const search = useRef<HTMLInputElement>(null);
   const back = useCallback(() => setOpened(undefined), []);
   useEffect(() => {
-    if (!paged) openedFrom.current?.focus();
+    // An item shown again from the last popup opened from nothing here.
+    if (!paged) (openedFrom.current ?? search.current)?.focus();
   }, [paged]);
   /** From the drawer, gone once the page shows: the focus comes back to its button. */
   const openFromDrawer = (page: Opened) => {
     openedFrom.current = vaultsButton.current;
     setOpened(page);
   };
+  if (!restored) return null;
   return (
     <main className="home">
       {/* Kept under the page, its search and scroll included, out of reach while the page shows. */}
@@ -182,7 +201,7 @@ export function Home({
         </header>
         <div className="home-search">
           {/* What the popup opens for: typing finds the item at once. */}
-          <SearchField value={query} onChange={setQuery} autoFocus />
+          <SearchField value={query} onChange={setQuery} autoFocus inputRef={search} />
         </div>
         <ItemList
           items={items}

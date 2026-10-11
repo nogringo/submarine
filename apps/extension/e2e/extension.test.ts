@@ -252,6 +252,20 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     await popup.waitForSelector(".item-detail", { hidden: true });
   });
 
+  it("shows the item again as the popup opens again, until back to the list", async () => {
+    const { popup } = extension;
+    await extension.click(".item-row[aria-label=GitHub]");
+    await popup.waitForFunction(() => document.activeElement?.textContent === "GitHub");
+    await extension.reload();
+    await popup.waitForFunction(() => document.activeElement?.textContent === "GitHub");
+    await extension.press("Escape");
+    await popup.waitForSelector(".item-detail", { hidden: true });
+    await popup.waitForFunction(() => document.activeElement?.matches(".search-field-input"));
+    await extension.reload();
+    await popup.waitForSelector(".home-title");
+    expect(await popup.$(".item-detail")).toBeNull();
+  });
+
   it("syncs again at once from the sync button, which waits meanwhile", async () => {
     const { popup } = extension;
     const button = "button[aria-label='Sync now']";
@@ -445,7 +459,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     await popup.waitForSelector(".home-title");
   });
 
-  it("locks as the popup closes, once set to lock immediately", async () => {
+  it("locks as the popup closes, once set to lock immediately, the item shown forgotten", async () => {
     const { popup } = extension;
     const choose = async (from: string, to: string) => {
       await extension.click("button[aria-label=Vaults]");
@@ -457,11 +471,16 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
       await popup.waitForSelector(`.settings .select-tile-button::-p-text(${to})`);
     };
     await choose("5 minutes", english.lockImmediately);
+    await extension.press("Escape");
+    await popup.waitForSelector(".settings", { hidden: true });
+    await extension.click(".item-row[aria-label=GitHub]");
+    await popup.waitForSelector(".item-detail");
     await extension.reload();
     await popup.waitForSelector(`::-p-text(${english.vaultsLocked})`);
     await extension.fill("input[name=password]", lockPassword);
     await extension.click("button[type=submit]");
     await popup.waitForSelector(".home-title");
+    expect(await popup.$(".item-detail")).toBeNull();
     await choose(english.lockImmediately, "On browser restart");
     await extension.press("Escape");
     await popup.waitForSelector(".settings", { hidden: true });

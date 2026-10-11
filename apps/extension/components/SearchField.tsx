@@ -1,6 +1,6 @@
 import close from "@material-design-icons/svg/round/close.svg";
 import search from "@material-design-icons/svg/round/search.svg";
-import { useEffect, useRef } from "react";
+import { type RefObject, useEffect, useRef } from "react";
 import { SearchField as AriaSearchField, Input } from "react-aria-components";
 import { useIntl } from "react-intl";
 import { IconButton } from "./Button";
@@ -12,13 +12,16 @@ export function SearchField({
   value,
   onChange,
   autoFocus,
+  inputRef,
 }: {
   value: string;
   onChange: (value: string) => void;
   autoFocus?: boolean;
+  inputRef?: RefObject<HTMLInputElement | null>;
 }) {
   const { formatMessage: t } = useIntl();
-  const input = useRef<HTMLInputElement>(null);
+  const ownInput = useRef<HTMLInputElement>(null);
+  const input = inputRef ?? ownInput;
   useEffect(() => {
     const apple = /Mac|iPhone|iPad/.test(navigator.platform);
     const focus = (event: KeyboardEvent) => {
@@ -31,7 +34,7 @@ export function SearchField({
     };
     document.addEventListener("keydown", focus);
     return () => document.removeEventListener("keydown", focus);
-  }, []);
+  }, [input]);
   return (
     <AriaSearchField
       aria-label={t({ id: "searchItems" })}

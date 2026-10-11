@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { callCore, type Vault } from "@/lib/core";
+import { forgetOpenedItem } from "@/lib/opened-item";
 import { useLockState } from "@/lib/use-lock-state";
 import { useReportUse } from "@/lib/use-report-use";
 import { useSync } from "@/lib/use-sync";
@@ -22,6 +23,10 @@ export function App() {
     if (unlocked) callCore("vaults", {}).then(setVaults);
     else setVaults(undefined);
   }, [unlocked]);
+  useEffect(() => {
+    // However they locked, a popup sees it before unlocking them.
+    if (lock?.locked) void forgetOpenedItem();
+  }, [lock?.locked]);
 
   if (lock?.locked) {
     return <LockScreen onChanged={readLock} />;

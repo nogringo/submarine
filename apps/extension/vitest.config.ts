@@ -1,11 +1,12 @@
 import { configDefaults, defineConfig } from "vitest/config";
 import { WxtVitest } from "wxt/testing/vitest-plugin";
+import { arbPlugin } from "./modules/arb";
 
 export default defineConfig({
   test: {
     projects: [
       {
-        plugins: [WxtVitest()],
+        plugins: [WxtVitest(), arbPlugin()],
         test: { name: "unit", exclude: [...configDefaults.exclude, "e2e/**"] },
       },
       {

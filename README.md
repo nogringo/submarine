@@ -88,7 +88,7 @@ flutter analyze
 dart run apps/cli/bin/submarine.dart --help
 ```
 
-The [browser extension](apps/extension) is built with [WXT](https://wxt.dev) and also requires Node.js 24 and pnpm. `pnpm dev` compiles its Dart core, then opens Chrome with the extension loaded (`pnpm dev:firefox` for Firefox):
+The [browser extension](apps/extension) is built with [WXT](https://wxt.dev) and also requires Node.js 24 and pnpm. `pnpm dev` compiles its Dart core, builds the extension into `apps/extension/.output/chrome-mv3-dev` and rebuilds it on every change. Load that folder from `chrome://extensions`, with the developer mode on, as an unpacked extension (on macOS, Cmd+Shift+. shows the hidden `.output` folder in the file picker). `pnpm dev:firefox` builds `firefox-mv3-dev`, loaded from `about:debugging` as a temporary add-on.
 
 ```sh
 (cd apps/extension && pnpm install && pnpm dev)

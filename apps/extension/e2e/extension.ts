@@ -11,16 +11,25 @@ export interface Extension {
   press(key: string): Promise<void>;
 }
 
-/** Starts a browser with the end-to-end build of the extension installed. */
-export async function launch(name: BrowserName): Promise<Extension> {
+/**
+ * Starts a browser with the end-to-end build of the extension installed, preferring `language`
+ * whatever the language of the system.
+ */
+export async function launch(name: BrowserName, language = "en"): Promise<Extension> {
   const path = resolve(import.meta.dirname, `../.output/${name}-mv3-e2e`);
   const browser =
     name === "chrome"
-      ? await puppeteer.launch({ browser: "chrome", pipe: true, enableExtensions: [path] })
+      ? await puppeteer.launch({
+          browser: "chrome",
+          pipe: true,
+          enableExtensions: [path],
+          args: [`--accept-lang=${language}`],
+        })
       : await puppeteer.launch({
           browser: "firefox",
           // Lets the tests run scripts in the extension's pages.
           args: ["-remote-allow-system-access"],
+          extraPrefsFirefox: { "intl.accept_languages": language },
         });
   if (name === "chrome") {
     const popup = await waitForPopup(browser);

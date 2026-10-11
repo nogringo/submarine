@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+import { resolve } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { type BrowserName, type Extension, launch } from "./extension";
 
@@ -39,3 +41,26 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     expect(JSON.parse(reply)).toEqual({ error: { code: "unknownMethod", message: "unknown" } });
   });
 });
+
+describe.each<BrowserName>(["chrome", "firefox"])("%s in French", (name) => {
+  let extension: Extension;
+
+  beforeAll(async () => {
+    extension = await launch(name, "fr");
+  });
+
+  afterAll(async () => {
+    await extension?.browser.close();
+  });
+
+  it("speaks the language the browser prefers", async () => {
+    const french = JSON.parse(await readFile(appArb("fr"), "utf8"));
+    const tagline = await extension.popup.waitForSelector(".tagline");
+    expect(await tagline?.evaluate((p) => p.textContent)).toBe(french.welcomeTagline);
+    expect(await extension.popup.evaluate(() => document.documentElement.lang)).toBe("fr");
+  });
+});
+
+function appArb(locale: string) {
+  return resolve(import.meta.dirname, `../../app/lib/l10n/app_${locale}.arb`);
+}

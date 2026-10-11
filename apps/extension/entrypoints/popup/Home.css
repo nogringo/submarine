@@ -19,6 +19,10 @@
   cursor: pointer;
 }
 
+.home-heading {
+  min-width: 0;
+}
+
 .home-title {
   overflow: hidden;
   font-size: 22px;

@@ -66,6 +66,14 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     expect(await title?.evaluate((h1) => h1.textContent)).toBe("All vaults");
   });
 
+  it("syncs the vault from its relays while the popup is open", async () => {
+    await extension.popup.waitForFunction(
+      (synced) => document.querySelector(".sync-status")?.textContent === synced,
+      { timeout: 20_000 },
+      english.syncedJustNow,
+    );
+  });
+
   it("lists the vault in the drawer, and shows it once chosen", async () => {
     const { popup } = extension;
     await extension.click("button[aria-label=Vaults]");

@@ -35,7 +35,8 @@ Future<void> main() async {
   );
   // Keeps what the signer opened from one start to the next, encrypted under
   // a key the app keeps as safely as the vault key.
-  final store = JsonFileVersionStore(File('versions.json'));
+  final database = await databaseFactoryIo.openDatabase('submarine.db');
+  final store = SembastVersionStore(database, signer.getPublicKey());
   final cacheKey = newCacheKey();
   final vault = Vault(
     ndk: ndk,
@@ -101,7 +102,7 @@ Future<void> main() async {
 
   final engine = SyncEngine(
     ndk,
-    store: SembastSyncStore(await databaseFactoryIo.openDatabase('sync.db')),
+    store: SembastSyncStore(database),
   );
   final handle = await vault.sync(engine);
   engine.start();
@@ -284,28 +285,5 @@ Future<void> main() async {
   await vault.forget(engine);
   await engine.dispose();
   await ndk.destroy();
-}
-
-/// The entries of a VersionCache in a JSON file. An app would rather keep them
-/// in its database.
-class JsonFileVersionStore implements VersionStore {
-  JsonFileVersionStore(this.file);
-
-  final File file;
-
-  @override
-  Future<Map<String, String>> read() async => file.existsSync()
-      ? (jsonDecode(await file.readAsString()) as Map).cast<String, String>()
-      : {};
-
-  @override
-  Future<void> write(Map<String, String> entries) async =>
-      _save({...await read(), ...entries});
-
-  @override
-  Future<void> remove(Iterable<String> wrapIds) async =>
-      _save({...await read()}..removeWhere((id, _) => wrapIds.contains(id)));
-
-  Future<void> _save(Map<String, String> entries) =>
-      file.writeAsString(jsonEncode(entries));
+  await database.close();
 }

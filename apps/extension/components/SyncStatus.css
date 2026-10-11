@@ -1,0 +1,11 @@
+.sync-status {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sync-status[data-failed] {
+  color: var(--danger);
+}

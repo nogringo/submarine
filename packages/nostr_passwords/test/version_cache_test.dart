@@ -1,5 +1,6 @@
 import 'package:ndk/ndk.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
+import 'package:sembast/sembast_memory.dart';
 import 'package:test/test.dart';
 
 import 'mocks/memory_version_store.dart';
@@ -248,6 +249,31 @@ void main() {
       await restarted.cache!.unlock();
       expect(names(await restarted.items()), ['GitHub', 'Wi-Fi']);
       expect(signer.decryptions, 4);
+    });
+  });
+
+  group('SembastVersionStore', () {
+    late Database database;
+
+    setUp(() async {
+      database = await newDatabaseFactoryMemory().openDatabase('versions');
+    });
+
+    test('keeps the entries of each vault apart', () async {
+      final alice = SembastVersionStore(database, 'alice');
+      await alice.write({'wrap1': 'one', 'wrap2': 'two'});
+      await SembastVersionStore(database, 'bob').write({'wrap3': 'three'});
+
+      expect(await SembastVersionStore(database, 'alice').read(), {
+        'wrap1': 'one',
+        'wrap2': 'two',
+      });
+
+      await alice.remove(['wrap1']);
+      expect(await alice.read(), {'wrap2': 'two'});
+      expect(await SembastVersionStore(database, 'bob').read(), {
+        'wrap3': 'three',
+      });
     });
   });
 }

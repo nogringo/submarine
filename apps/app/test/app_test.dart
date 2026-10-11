@@ -30,7 +30,6 @@ import 'package:submarine/src/storage_error_app.dart';
 import 'package:submarine/src/theme/appearance.dart';
 import 'package:submarine/src/vaults/vault_storage.dart';
 import 'package:submarine/src/vaults/vaults.dart';
-import 'package:submarine/src/vaults/version_store.dart';
 import 'package:submarine/src/widgets/copy_button.dart';
 import 'package:submarine/src/widgets/settings_tile.dart';
 import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';

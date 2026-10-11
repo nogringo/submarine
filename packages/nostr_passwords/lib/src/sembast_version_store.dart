@@ -1,8 +1,9 @@
-import 'package:nostr_passwords/nostr_passwords.dart';
 import 'package:sembast/sembast.dart';
 
+import 'version_cache.dart';
+
 /// The versions a vault opened, as its [VersionCache] encrypts them, in a
-/// store of their own.
+/// sembast store of their own.
 class SembastVersionStore implements VersionStore {
   SembastVersionStore(this._database, String pubkey)
     : _store = StoreRef('versions_$pubkey');

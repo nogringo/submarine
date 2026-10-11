@@ -24,6 +24,21 @@ export interface Vault {
   color: number;
 }
 
+/** Where the sync of a vault stands. */
+export interface SyncState {
+  pubkey: string;
+  /** Failed once every relay did. */
+  phase: "idle" | "syncing" | "synced" | "failed";
+  /** In ISO 8601, null until the vault reached a relay once. */
+  lastSync: string | null;
+}
+
+/** The port a popup holds open for the vaults to sync, where the core tells what changed. */
+export const syncPort = "sync";
+
+/** What the core tells the popups through {@link syncPort}: the sync or the items of a vault moved. */
+export type CoreEvent = "vaultsChanged";
+
 /** The core's methods: their arguments and their result. */
 export interface CoreMethods {
   vaults: { args: Record<string, never>; result: Vault[] };
@@ -32,6 +47,8 @@ export interface CoreMethods {
     args: { key: string; password?: string; name: string; color: number };
     result: Vault;
   };
+  /** Of the vaults syncing, while a popup holds {@link syncPort} open. */
+  syncStates: { args: Record<string, never>; result: SyncState[] };
 }
 
 /** Calls a method of the Dart core, which runs in the background. */

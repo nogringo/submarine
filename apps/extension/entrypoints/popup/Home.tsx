@@ -10,14 +10,23 @@ import {
   ModalOverlay,
 } from "react-aria-components";
 import { useIntl } from "react-intl";
+import { SyncStatus } from "@/components/SyncStatus";
 import { AllVaultsAvatar, OpenVaultMark, VaultAvatar } from "@/components/VaultAvatar";
-import type { Vault } from "@/lib/core";
+import type { SyncState, Vault } from "@/lib/core";
 import "./Home.css";
 
 const allVaults = "all";
 
 /** The vaults of this device, one of them or all of them shown. */
-export function Home({ vaults, onOpenVault }: { vaults: Vault[]; onOpenVault: () => void }) {
+export function Home({
+  vaults,
+  syncStates,
+  onOpenVault,
+}: {
+  vaults: Vault[];
+  syncStates: SyncState[];
+  onOpenVault: () => void;
+}) {
   const { formatMessage: t } = useIntl();
   const [selected, setSelected] = useState(allVaults);
   const vault = vaults.find((vault) => vault.pubkey === selected);
@@ -83,7 +92,13 @@ export function Home({ vaults, onOpenVault }: { vaults: Vault[]; onOpenVault: ()
             </Modal>
           </ModalOverlay>
         </DialogTrigger>
-        <h1 className="home-title">{vault?.name ?? t({ id: "allVaults" })}</h1>
+        <div className="home-heading">
+          <h1 className="home-title">{vault?.name ?? t({ id: "allVaults" })}</h1>
+          <SyncStatus
+            pubkeys={vault ? [vault.pubkey] : vaults.map((vault) => vault.pubkey)}
+            states={syncStates}
+          />
+        </div>
       </header>
     </main>
   );

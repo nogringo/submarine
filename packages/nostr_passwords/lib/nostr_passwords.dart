@@ -23,6 +23,7 @@ export 'src/mail_bridge.dart';
 export 'src/mailbox.dart';
 export 'src/relay_list.dart';
 export 'src/search.dart';
+export 'src/sembast_version_store.dart';
 export 'src/server_list.dart';
 export 'src/totp.dart';
 export 'src/vault.dart';

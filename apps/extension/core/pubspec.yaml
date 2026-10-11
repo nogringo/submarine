@@ -9,7 +9,11 @@ resolution: workspace
 dependencies:
   ndk: ^0.10.1
   nostr_passwords: ^0.1.0
+  sembast: ^3.8.11
+  sembast_web: ^2.4.6
+  sync_engine_shim_for_ndk: ^0.8.0
 
 dev_dependencies:
+  bip340: ^0.3.1
   lints: ^6.1.0
   test: ^1.25.6

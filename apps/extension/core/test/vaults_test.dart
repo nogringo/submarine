@@ -6,15 +6,7 @@ import 'package:submarine_extension_core/core.dart';
 import 'package:submarine_extension_core/vaults.dart';
 import 'package:test/test.dart';
 
-class MemoryStore implements KeyValueStore {
-  final values = <String, String>{};
-
-  @override
-  Future<String?> read(String key) async => values[key];
-
-  @override
-  Future<void> write(String key, String value) async => values[key] = value;
-}
+import 'memory_store.dart';
 
 const privateKey =
     '3501454135014541350145413501453fefb02227e449e57cf4d3a3ce05378683';

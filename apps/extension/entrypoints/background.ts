@@ -1,4 +1,4 @@
-import { answerExtensionPages, loadCore } from "@/lib/core-host";
+import { answerExtensionPages, followPopups, loadCore } from "@/lib/core-host";
 
 export default defineBackground(() => {
   if (import.meta.env.MODE === "e2e") {
@@ -8,5 +8,7 @@ export default defineBackground(() => {
     });
   }
 
-  answerExtensionPages(loadCore());
+  const core = loadCore();
+  answerExtensionPages(core);
+  browser.runtime.onConnect.addListener(followPopups(core));
 });

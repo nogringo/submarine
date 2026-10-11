@@ -14,7 +14,6 @@ import '../items/item_filter.dart';
 import 'signer_watch.dart';
 import 'vault_controller.dart';
 import 'vault_storage.dart';
-import 'version_store.dart';
 
 enum VaultColor {
   blue(Color(0xFF2F6FD0)),

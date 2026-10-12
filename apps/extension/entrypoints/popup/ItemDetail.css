@@ -11,6 +11,10 @@
   gap: 6px;
 }
 
+.item-detail .page-content > .button.filled {
+  align-self: flex-start;
+}
+
 .item-detail-section-title {
   padding: 4px 4px 8px;
   color: var(--muted);

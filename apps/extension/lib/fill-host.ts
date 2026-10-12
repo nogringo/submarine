@@ -1,4 +1,5 @@
 import type { Browser } from "wxt/browser";
+import { copySecret } from "./clipboard-host";
 import { callLoadedCore, fromExtensionPage, type SubmarineCore } from "./core-host";
 import { type FillRequest, fillCommand, isFillRequest } from "./fill";
 import { fillPage } from "./fill-page";
@@ -17,11 +18,13 @@ export function followFillRequests(core: SubmarineCore) {
 
 /**
  * Fills the login `id` of the vault `vault` into the page of the tab `tabId`, once the page's address
- * matches the login, in the page's top frame. Whether a field took it.
+ * matches the login, in the page's top frame, then copies its verification code, as Bitwarden does:
+ * the site asks for it next. Whether a field took the login.
  */
 export async function fillLogin(
   core: SubmarineCore,
   { tabId, vault, id }: FillRequest["fill"],
+  copy = copySecret,
 ): Promise<boolean> {
   try {
     const { url } = await browser.tabs.get(tabId);
@@ -35,11 +38,22 @@ export async function fillLogin(
       func: fillPage,
       args: [new URL(url).origin, login.username, login.password],
     });
-    return injection?.result === true;
+    const filled = injection?.result === true;
+    if (filled && login.totp) await copyCode(core, login.totp, copy);
+    return filled;
   } catch (error) {
     // A tab closed since, or a page the browser keeps extensions out of.
     console.warn("Filling failed", error);
     return false;
+  }
+}
+
+/** Without failing the fill it follows. */
+async function copyCode(core: SubmarineCore, key: string, copy: (secret: string) => Promise<void>) {
+  try {
+    await copy((await callLoadedCore(core, "totp", { key, at: Date.now() })).code);
+  } catch (error) {
+    console.warn("Copying the verification code failed", error);
   }
 }
 

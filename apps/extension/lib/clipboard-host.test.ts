@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fakeBrowser } from "wxt/testing/fake-browser";
-import { clearClipboardLater, emptyClipboard } from "./clipboard-host";
+import { clearClipboardLater, copyIn } from "./clipboard-host";
 
 describe("clearClipboardLater", () => {
   beforeEach(() => {
@@ -48,8 +48,8 @@ describe("clearClipboardLater", () => {
   });
 });
 
-describe("emptyClipboard", () => {
-  it("copies an empty text in place of the page's selection", () => {
+describe("copyIn", () => {
+  it("copies the text in place of the page's selection", () => {
     let listener: ((event: ClipboardEvent) => void) | undefined;
     const setData = vi.fn();
     const preventDefault = vi.fn();
@@ -62,7 +62,7 @@ describe("emptyClipboard", () => {
         return true;
       },
     } as unknown as Document;
-    emptyClipboard(page);
+    copyIn(page, "");
     expect(setData).toHaveBeenCalledWith("text/plain", "");
     expect(preventDefault).toHaveBeenCalled();
   });

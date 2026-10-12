@@ -1,3 +1,4 @@
+import { clipboardTimeouts, readClipboardTimeout } from "./clipboard";
 import { keepBackgroundAlive } from "./core-host";
 
 let pendingClear: {
@@ -23,16 +24,32 @@ export function clearClipboardLater(afterMs: number | null, clear = clearClipboa
   pendingClear = { timer, keepAlive };
 }
 
-/** The message the background sends its offscreen document, in Chrome. */
-export const emptyClipboardMessage = "emptyClipboard";
+/** Copies `secret` from the background, and empties the clipboard after the delay chosen. */
+export async function copySecret(secret: string) {
+  await writeClipboard(secret);
+  clearClipboardLater(clipboardTimeouts[await readClipboardTimeout()]);
+}
+
+function clearClipboard() {
+  return writeClipboard("");
+}
+
+/** What the background asks its offscreen document, in Chrome: to copy `offscreenCopy`. */
+export interface OffscreenCopyRequest {
+  offscreenCopy: string;
+}
+
+export function isOffscreenCopyRequest(message: unknown): message is OffscreenCopyRequest {
+  return typeof message === "object" && message !== null && "offscreenCopy" in message;
+}
 
 /**
- * Chrome's service worker has no document to copy from: an offscreen document empties the
- * clipboard. Firefox's background is a page, which does it itself.
+ * Chrome's service worker has no document to copy from: an offscreen document copies. Firefox's
+ * background is a page, which copies itself.
  */
-async function clearClipboard() {
+async function writeClipboard(text: string) {
   if (!browser.offscreen) {
-    emptyClipboard(document);
+    copyIn(document, text);
     return;
   }
   const url = browser.runtime.getURL("/offscreen.html");
@@ -44,22 +61,24 @@ async function clearClipboard() {
     await browser.offscreen.createDocument({
       url,
       reasons: ["CLIPBOARD"],
-      justification: "Empty the clipboard of a copied secret after the delay chosen.",
+      justification:
+        "Copy the verification code of a login filled into a page, and empty the clipboard of a copied secret after the delay chosen.",
     });
   }
-  await browser.runtime.sendMessage(emptyClipboardMessage);
+  const request: OffscreenCopyRequest = { offscreenCopy: text };
+  await browser.runtime.sendMessage(request);
   await browser.offscreen.closeDocument();
 }
 
 /**
- * Copies an empty text through a copy event: the Clipboard API asks for a focused page, which a
- * background has not.
+ * Copies `text` through a copy event: the Clipboard API asks for a focused page, which a background
+ * has not.
  */
-export function emptyClipboard(page: Document) {
+export function copyIn(page: Document, text: string) {
   page.addEventListener(
     "copy",
     (event) => {
-      event.clipboardData?.setData("text/plain", "");
+      event.clipboardData?.setData("text/plain", text);
       event.preventDefault();
     },
     { once: true },

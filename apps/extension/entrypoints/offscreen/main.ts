@@ -1,7 +1,7 @@
-import { emptyClipboard, emptyClipboardMessage } from "@/lib/clipboard-host";
+import { copyIn, isOffscreenCopyRequest } from "@/lib/clipboard-host";
 
 browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message !== emptyClipboardMessage) return;
-  emptyClipboard(document);
+  if (!isOffscreenCopyRequest(message)) return;
+  copyIn(document, message.offscreenCopy);
   sendResponse(true);
 });

@@ -27,7 +27,7 @@ When you ask it to fill a login, from its window or with its keyboard shortcut, 
 - It has no account and no server of its own: its developers receive no data from it.
 - It has no analytics, no tracking and no ads.
 - It reads nothing of the pages you visit, except the fields of the current page when you ask it to fill a login, to find where the username and password go. As you open it, it reads the address of the current tab to show the logins for that site first. Neither leaves your browser.
-- It writes to the clipboard only what you copy, and empties the clipboard after the delay chosen in the settings. It never reads the clipboard.
+- It writes to the clipboard only what you copy, and the verification code of a login it fills, then empties the clipboard after the delay chosen in the settings. It never reads the clipboard.
 
 ## Permissions
 
@@ -36,7 +36,7 @@ When you ask it to fill a login, from its window or with its keyboard shortcut, 
 - Alarms: locks the vaults once the lock delay has passed.
 - Active tab: gives the extension the tab you open it over or use its shortcut on, and only that one: its address, to show the logins for that site first, and its page, to fill a login when you ask.
 - Scripting: fills a login into that tab's page when you ask.
-- Offscreen documents, in Chrome only: empties the clipboard after the clipboard delay, even with the extension's window closed.
+- Offscreen documents, in Chrome only: copies the verification code of a login filled, and empties the clipboard after the clipboard delay, even with the extension's window closed.
 
 ## Changes and contact
 

@@ -43,11 +43,11 @@ Submarine is still young. For your most important passwords, we still recommend 
 
 - Single purpose: shows the user's Submarine password vaults, copies their items and fills their logins into websites.
 - `storage`: keeps the vault keys, an encrypted copy of their items and the settings in the browser.
-- `clipboardWrite`: copies a username, a password, a code or another field when the user asks.
+- `clipboardWrite`: copies a username, a password, a code or another field when the user asks, and the verification code of a login filled into a page.
 - `alarms`: locks the vaults once the lock delay chosen by the user has passed.
 - `activeTab`: the tab the popup or the keyboard shortcut acts on: its address, to show the logins for that site first, and its page, to fill a login when the user asks.
 - `scripting`: fills a login into the page of that tab, when the user asks from the popup or with the keyboard shortcut.
-- `offscreen`: empties the clipboard after the delay chosen by the user, which the background service worker cannot do.
+- `offscreen`: copies the verification code of a login filled from the keyboard shortcut or the popup, which closes once filled, and empties the clipboard after the delay chosen by the user. The background service worker can do neither.
 - Remote code: none.
 - Data collected, as declared to Firefox for the complete extension: personally identifiable information, financial and payment information, authentication information, personal communications and web history. None is sold, used for anything but the extension's purpose, or used to determine creditworthiness.
 

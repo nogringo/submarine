@@ -100,10 +100,7 @@ Future<void> main() async {
   final unsent = await vault.push();
   print('${unsent.length} change(s) left to send');
 
-  final engine = SyncEngine(
-    ndk,
-    store: SembastSyncStore(database),
-  );
+  final engine = SyncEngine(ndk, store: SembastSyncStore(database));
   final handle = await vault.sync(engine);
   engine.start();
   await engine

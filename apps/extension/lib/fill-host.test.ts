@@ -6,16 +6,20 @@ import { fillPage } from "./fill-page";
 
 const github = { vault: "v1", id: "github", type: 1, name: "GitHub", subtitle: "alice" };
 
-/** A core holding the login `github`, for https://github.com, and locked when `locked`. */
-function fakeCore({ locked = false } = {}) {
+/**
+ * A core holding the login `github`, for https://github.com, with the verification key `totp`, and
+ * locked when `locked`.
+ */
+function fakeCore({ locked = false, totp = null as string | null } = {}) {
   const replies: Record<string, (args: { url?: string }) => unknown> = {
     lockState: () => ({ hasPassword: true, locked }),
     items: ({ url }) => (url?.startsWith("https://github.com/") ? [github] : []),
     item: () => ({
       vault: "v1",
       id: "github",
-      cipher: { type: 1, login: { username: "alice", password: "hunter2" } },
+      cipher: { type: 1, login: { username: "alice", password: "hunter2", totp } },
     }),
+    totp: () => ({ code: "123456", period: 30 }),
     used: () => null,
   };
   return {
@@ -54,6 +58,27 @@ describe("fillLogin", () => {
       func: fillPage,
       args: ["https://github.com", "alice", "hunter2"],
     });
+  });
+
+  it("copies the login's verification code once filled, as the site asks for it next", async () => {
+    onTab("https://github.com/login");
+    injecting(true);
+    const copy = vi.fn(async (_secret: string) => {});
+    const core = fakeCore({ totp: "JBSWY3DPEHPK3PXP" });
+    expect(await fillLogin(core, { tabId: 7, vault: "v1", id: "github" }, copy)).toBe(true);
+    expect(copy).toHaveBeenCalledWith("123456");
+  });
+
+  it("copies no code when nothing was filled, and fills even when the copy fails", async () => {
+    onTab("https://github.com/");
+    injecting(false);
+    const copy = vi.fn(async (_secret: string) => {});
+    const core = fakeCore({ totp: "JBSWY3DPEHPK3PXP" });
+    expect(await fillLogin(core, { tabId: 7, vault: "v1", id: "github" }, copy)).toBe(false);
+    expect(copy).not.toHaveBeenCalled();
+    injecting(true);
+    copy.mockRejectedValue(new Error("No clipboard"));
+    expect(await fillLogin(core, { tabId: 7, vault: "v1", id: "github" }, copy)).toBe(true);
   });
 
   it("refuses a login for another site, which the tab may have moved to", async () => {

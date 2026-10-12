@@ -169,6 +169,8 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
       const closed = new Promise((resolve) => popup.once("close", resolve));
       await popup.locator(".item-row button::-p-text(Fill)").click();
       await closed;
+      // The verification code, which the site asks for next.
+      expect(await extension.readClipboard()).toMatch(/^\d{6}$/);
       expect(await fieldValues(page)).toEqual({
         search: "",
         login: "alice",

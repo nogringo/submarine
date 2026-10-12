@@ -1,7 +1,7 @@
 import visibility from "@material-design-icons/svg/outlined/visibility.svg";
 import visibilityOff from "@material-design-icons/svg/outlined/visibility_off.svg";
 import openInNew from "@material-design-icons/svg/round/open_in_new.svg";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { useIntl } from "react-intl";
 import { type FieldRow, websiteUrl } from "@/lib/item-fields";
 import { IconButton, IconLink } from "./Button";
@@ -46,6 +46,8 @@ function ValueTile({ row }: { row: FieldRow }) {
           </span>
         ) : row.kind === "password" ? (
           <PasswordText value={row.value} />
+        ) : row.kind === "url" ? (
+          <UrlText value={row.value} />
         ) : (
           <span className={`field-value ${row.kind}`}>{row.value}</span>
         )}
@@ -60,6 +62,22 @@ function ValueTile({ row }: { row: FieldRow }) {
       {website && <IconLink icon={openInNew} label={t({ id: "openWebsite" })} href={website} />}
       {row.kind !== "info" && <CopyButton value={row.value} sensitive={hidden} />}
     </div>
+  );
+}
+
+/** Breaks a line after a slash rather than inside a word, where the address allows it. */
+function UrlText({ value }: { value: string }) {
+  const parts = value.split(/(?<=\/)(?!\/)/);
+  return (
+    <span className="field-value url">
+      {parts.map((part, index) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: the same part comes back in an address.
+        <Fragment key={index}>
+          {index > 0 && <wbr />}
+          {part}
+        </Fragment>
+      ))}
+    </span>
   );
 }
 

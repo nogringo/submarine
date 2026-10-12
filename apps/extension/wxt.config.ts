@@ -14,6 +14,10 @@ export default defineConfig({
       "alarms",
       ...(browser === "firefox" ? [] : ["offscreen"]),
     ],
+    commands: {
+      // Bitwarden's and Proton Pass's. Firefox opens its downloads with Ctrl+Shift+Y on Linux.
+      _execute_action: { suggested_key: { default: "Ctrl+Shift+Y", linux: "Ctrl+Shift+U" } },
+    },
     // Argon2id, which protects the key of the device with the lock password, is WebAssembly.
     content_security_policy: {
       extension_pages: "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';",

@@ -16,6 +16,7 @@ It does:
 - Copy a username, a password, a verification code or any field, and clear the clipboard after the delay chosen in the settings, 30 seconds by default as in the app.
 - Lock with a password, optional as in the app. Once one is set, the extension locks after the delay chosen in the settings, 5 minutes unused by default as in the app.
 - Settings: the lock delay and the clipboard delay, with the app's choices.
+- Open with Ctrl+Shift+Y, Command+Shift+Y on macOS and Ctrl+Shift+U on Linux, as Bitwarden and Proton Pass do. Firefox opens its downloads with Ctrl+Shift+Y on Linux.
 - Speak the app's 11 languages.
 - Be as accessible as the app: usable with the keyboard alone and with a screen reader, with the contrast its tokens are made for.
 

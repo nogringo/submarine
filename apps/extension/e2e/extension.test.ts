@@ -76,6 +76,16 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     expect(JSON.parse(reply)).toEqual({ error: { code: "unknownMethod", message: "unknown" } });
   });
 
+  it("opens with a keyboard shortcut, which the browser gave it", async () => {
+    const shortcut = await extension.popup.evaluate(async () => {
+      type Api = { commands: { getAll(): Promise<{ name?: string; shortcut?: string }[]> } };
+      const globals = globalThis as unknown as { browser?: Api; chrome: Api };
+      const commands = await (globals.browser ?? globals.chrome).commands.getAll();
+      return commands.find((command) => command.name === "_execute_action")?.shortcut;
+    });
+    expect(shortcut).toBeTruthy();
+  });
+
   it("refuses what is not a vault key", async () => {
     await extension.click("button::-p-text(Open a vault)");
     await extension.fill("input[name=key]", "hello");

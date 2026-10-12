@@ -386,17 +386,24 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
 
   it("filters the items with the app's chips, the trash among them", async () => {
     const { popup } = extension;
-    expect(
-      await popup.$$eval(".filter-chip", (chips) => chips.map((chip) => chip.textContent)),
-    ).toEqual(["All", "Favorites", "Logins", "Cards", "Secure notes", "Trash"]);
-    await extension.click(".filter-chip::-p-text(Trash)");
+    // Shown once the types of the items are read.
+    await popup.waitForSelector(".filter-chips .chip");
+    expect(await popup.$$eval(".chip", (chips) => chips.map((chip) => chip.textContent))).toEqual([
+      "All",
+      "Favorites",
+      "Logins",
+      "Cards",
+      "Secure notes",
+      "Trash",
+    ]);
+    await extension.click(".chip::-p-text(Trash)");
     await rowNames("Old bank");
     expect(await violations(popup)).toEqual([]);
-    await extension.click(".filter-chip::-p-text(Cards)");
+    await extension.click(".chip::-p-text(Cards)");
     await rowNames("Visa");
-    await extension.click(".filter-chip::-p-text(Favorites)");
+    await extension.click(".chip::-p-text(Favorites)");
     await popup.waitForSelector(`::-p-text(${english.noItemsHere})`);
-    await extension.click(".filter-chip::-p-text(All)");
+    await extension.click(".chip::-p-text(All)");
     await rowNames("GitHub,Visa,wifi");
   });
 
@@ -409,9 +416,9 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     expect(await violations(popup)).toEqual([]);
     await extension.press("Escape");
     await popup.waitForSelector(".item-detail", { hidden: true });
-    await extension.click(".filter-chip::-p-text(Favorites)");
+    await extension.click(".chip::-p-text(Favorites)");
     await rowNames("wifi");
-    await extension.click(".filter-chip::-p-text(All)");
+    await extension.click(".chip::-p-text(All)");
     await rowNames("GitHub,Visa,wifi");
   });
 
@@ -426,7 +433,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     await popup.waitForSelector(".item-detail", { hidden: true });
     await rowNames("GitHub,Visa");
     await popup.waitForFunction(() => document.activeElement?.matches(".search-field-input"));
-    await extension.click(".filter-chip::-p-text(Trash)");
+    await extension.click(".chip::-p-text(Trash)");
     await rowNames("Old bank,wifi");
     await extension.click(".item-row[aria-label=wifi]");
     await extension.click("button::-p-text(Restore)");
@@ -452,7 +459,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     await extension.click("[role=alertdialog] button::-p-text(Delete)");
     await popup.waitForSelector(".item-detail", { hidden: true });
     await popup.waitForSelector(`::-p-text(${english.noItemsHere})`);
-    await extension.click(".filter-chip::-p-text(All)");
+    await extension.click(".chip::-p-text(All)");
     await rowNames("GitHub,Visa,wifi");
   });
 
@@ -555,6 +562,41 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     await popup.waitForFunction(() => document.activeElement?.textContent === "wifi");
     await extension.press("Escape");
     await rowNames("Forum,GitHub,Visa,wifi");
+  });
+
+  it("fills a new login's password and username from the generator, in a sheet", async () => {
+    const { popup } = extension;
+    const generated = async (title: string) => {
+      await popup.waitForSelector(`.sheet .sheet-title::-p-text(${title})`);
+      const value = await popup.waitForSelector(".sheet .generator-preview .field-value");
+      return value?.evaluate((value) => String(value.textContent));
+    };
+    await extension.click("button[aria-label='New item']");
+    await extension.click("[role=menuitem]::-p-text(Login)");
+    await extension.click(`button[aria-label='${english.generatePassword}']`);
+    const password = await generated(english.generator);
+    expect(password).toMatch(/^[A-Za-z0-9]{14}$/);
+    expect(await violations(popup)).toEqual([]);
+    await extension.click(`.sheet button::-p-text(${english.usePassword})`);
+    await popup.waitForSelector(".sheet", { hidden: true });
+    expect(await popup.$eval(".item-form input[name=password]", (input) => input.value)).toBe(
+      password,
+    );
+    await popup.waitForFunction(
+      (label) => document.activeElement?.getAttribute("aria-label") === label,
+      {},
+      english.generatePassword,
+    );
+    await extension.click(`button[aria-label='${english.generateUsername}']`);
+    const username = await generated(english.generateUsername);
+    await extension.click(`.sheet button::-p-text(${english.useUsername})`);
+    await popup.waitForSelector(".sheet", { hidden: true });
+    expect(await popup.$eval(".item-form input[name=username]", (input) => input.value)).toBe(
+      username,
+    );
+    await extension.click(".item-form .page-bar button::-p-text(Cancel)");
+    await extension.click(`[role=alertdialog] button::-p-text(${english.discard})`);
+    await popup.waitForSelector(".item-form", { hidden: true });
   });
 
   it.skipIf(name === "firefox")("names a new login after the page it opens over", async () => {
@@ -660,6 +702,44 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     const error = english.vaultAlreadyOpen.replace("{name}", "Family");
     await extension.popup.waitForSelector(`::-p-text(${error})`);
     await extension.click("button::-p-text(Cancel)");
+  });
+
+  it("opens the generator from the drawer, its options kept for the next time", async () => {
+    const { popup } = extension;
+    const preview = ".generator-page .generator-preview .field-value";
+    const generated = (pattern: RegExp) =>
+      popup.waitForFunction(
+        (preview, pattern) =>
+          new RegExp(pattern).test(document.querySelector(preview)?.textContent ?? ""),
+        {},
+        preview,
+        pattern.source,
+      );
+    const openGenerator = async () => {
+      await extension.click("button[aria-label=Vaults]");
+      await extension.click(`.drawer button::-p-text(${english.generator})`);
+      await popup.waitForSelector(preview);
+    };
+    await openGenerator();
+    expect(await popup.evaluate(() => document.activeElement?.textContent)).toBe(english.generator);
+    expect(await violations(popup)).toEqual([]);
+    await extension.click(`.chip[aria-label^='${english.specialCharacters}']`);
+    await generated(/^(?=.*[!@#$%^&*])[A-Za-z0-9!@#$%^&*]{14}$/);
+    // The length's Increase button.
+    await extension.click(".generator-options > .count-field:first-child button:last-child");
+    await generated(/^.{15}$/);
+    // Words of EFF's list, some of them hyphenated.
+    await extension.click(`.chip::-p-text(${english.passphrase})`);
+    await generated(/^[a-z]+(-[a-z]+){5,}$/);
+    expect(await violations(popup)).toEqual([]);
+    await extension.press("Escape");
+    await popup.waitForSelector(".generator-page", { hidden: true });
+    await openGenerator();
+    await popup.waitForSelector(`.chip[aria-checked=true]::-p-text(${english.passphrase})`);
+    await extension.click(`.chip::-p-text(${english.password})`);
+    await generated(/^(?=.*[!@#$%^&*])[A-Za-z0-9!@#$%^&*]{15}$/);
+    await extension.press("Escape");
+    await popup.waitForSelector(".generator-page", { hidden: true });
   });
 
   it("opens the settings from the drawer", async () => {

@@ -1,0 +1,42 @@
+.count-field {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 48px;
+}
+
+.count-field-label {
+  flex: 1;
+  min-width: 0;
+  font-size: 16px;
+}
+
+.count-field-group {
+  display: flex;
+  flex: none;
+  align-items: center;
+}
+
+.count-field-input {
+  width: 40px;
+  padding: 4px 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--mono-font);
+  font-size: 17px;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* Typed into once clicked too, as a text field. */
+.count-field-input[data-focused] {
+  outline: 2px solid var(--text);
+  outline-offset: 0;
+}
+
+.count-field[data-disabled] .count-field-label,
+.count-field[data-disabled] .count-field-input {
+  color: var(--muted);
+}

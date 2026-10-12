@@ -2,6 +2,7 @@ import { ToggleButton, ToggleButtonGroup } from "react-aria-components";
 import { useIntl } from "react-intl";
 import type { ItemFilter } from "@/lib/core";
 import type { FilterOption } from "@/lib/item-filters";
+import "./Chip.css";
 import "./FilterChips.css";
 
 /** The filters of the items as the app's chips, one chosen, in a row that scrolls sideways. */
@@ -35,7 +36,7 @@ export function FilterChips({
         className="filter-chips-group"
       >
         {options.map(({ filter, label }) => (
-          <ToggleButton key={filter} id={filter} className="filter-chip">
+          <ToggleButton key={filter} id={filter} className="chip">
             {t({ id: label })}
           </ToggleButton>
         ))}

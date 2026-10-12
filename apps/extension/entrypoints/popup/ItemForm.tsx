@@ -22,6 +22,7 @@ import {
   monthOptions,
 } from "@/lib/item-form";
 import { CustomFieldsEditor } from "./CustomFieldsEditor";
+import { GenerateButton } from "./Generator";
 import "./ItemForm.css";
 
 type MessageId = FormatjsIntl.Message["ids"];
@@ -140,6 +141,7 @@ export function ItemForm({
               onChange={(username) => set({ username })}
               autoComplete="off"
               floatingLabel
+              buttons={<GenerateButton username onUse={(username) => set({ username })} />}
             />
             <TextField
               name="password"
@@ -150,6 +152,7 @@ export function ItemForm({
               floatingLabel
               secret
               mono
+              buttons={<GenerateButton onUse={(password) => set({ password })} />}
             />
             <TextField
               name="totp"

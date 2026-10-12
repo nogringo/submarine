@@ -1,4 +1,5 @@
 import type { Cipher } from "./cipher";
+import type { GeneratorSettings } from "./generator";
 
 export interface CoreRequest {
   method: string;
@@ -113,6 +114,15 @@ export interface CoreMethods {
   /** Fails with `wrongLockPassword`. */
   unlock: { args: { password: string }; result: null };
   generatePassphrase: { args: Record<string, never>; result: string };
+  /**
+   * A value generated with the generator's `settings` as the app saves them, a username with
+   * `username`, and those settings as applied: the defaults in place of what they lack, the
+   * password's length raised to fit its minimums.
+   */
+  generate: {
+    args: { settings: object; username?: boolean };
+    result: { value: string; settings: GeneratorSettings };
+  };
   /** A made-up value for a login's custom field, as the app offers them. */
   generateValue: { args: { kind: MadeUpValue }; result: string };
   /** A use of the popup, which pushes the lock back. */

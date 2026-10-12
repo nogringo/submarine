@@ -12,6 +12,7 @@ import 'package:nostr_passwords/nostr_passwords.dart'
 import 'package:submarine_extension_core/auto_lock.dart';
 import 'package:submarine_extension_core/core.dart';
 import 'package:submarine_extension_core/device_key.dart';
+import 'package:submarine_extension_core/generator.dart';
 import 'package:submarine_extension_core/js_crypto.dart';
 import 'package:submarine_extension_core/js_events.dart';
 import 'package:submarine_extension_core/js_lock_alarm.dart';
@@ -109,6 +110,10 @@ void main() {
         return null;
       },
       'generatePassphrase': (_) async => generatePassphrase(),
+      'generate': (args) async => generate(
+        args['settings'] as Map<String, dynamic>? ?? const {},
+        username: args['username'] as bool? ?? false,
+      ),
       'generateValue': (args) async => switch (args['kind']) {
         'firstName' => generateFirstName(),
         'lastName' => generateLastName(),

@@ -1,3 +1,4 @@
+import casino from "@material-design-icons/svg/outlined/casino.svg";
 import lockIcon from "@material-design-icons/svg/outlined/lock.svg";
 import settings from "@material-design-icons/svg/outlined/settings.svg";
 import add from "@material-design-icons/svg/round/add.svg";
@@ -33,6 +34,7 @@ import { anySyncing } from "@/lib/sync-status";
 import { useItems, useItemTypes, usePageItems } from "@/lib/use-items";
 import { usePage } from "@/lib/use-page";
 import type { Sync } from "@/lib/use-sync";
+import { GeneratorPage } from "./Generator";
 import "./Home.css";
 import { ItemDetail } from "./ItemDetail";
 import { ItemForm } from "./ItemForm";
@@ -50,6 +52,7 @@ type Opened =
   /** A new item of `type`, in `vault` unless another is chosen, or `item` edited. */
   | { page: "form"; vault: Vault; type: number; item?: Item }
   | { page: "vaultSettings"; pubkey: string }
+  | { page: "generator" }
   | { page: "settings" };
 
 /** The vaults of this device, one of them or all of them shown. */
@@ -243,6 +246,18 @@ export function Home({
                         className="drawer-row"
                         onPress={() => {
                           close();
+                          openFromDrawer({ page: "generator" });
+                        }}
+                      >
+                        <span className="drawer-row-mark">
+                          <Icon src={casino} />
+                        </span>
+                        <span className="drawer-row-title">{t({ id: "generator" })}</span>
+                      </Button>
+                      <Button
+                        className="drawer-row"
+                        onPress={() => {
+                          close();
                           openFromDrawer({ page: "settings" });
                         }}
                       >
@@ -358,6 +373,7 @@ export function Home({
           onBack={back}
         />
       )}
+      {opened?.page === "generator" && <GeneratorPage onBack={back} />}
       {opened?.page === "settings" && <Settings hasLockPassword={hasLockPassword} onBack={back} />}
       {/* Kept in the page, empty, for a screen reader to read what it says once it does. */}
       <p role="alert" className="home-alert">

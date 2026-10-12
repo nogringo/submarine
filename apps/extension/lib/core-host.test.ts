@@ -3,6 +3,7 @@ import type { Browser } from "wxt/browser";
 import { fakeBrowser } from "wxt/testing/fake-browser";
 import {
   answer,
+  awakeKeeper,
   followLockAlarm,
   followPopups,
   loadCore,
@@ -150,12 +151,33 @@ describe("followPopups", () => {
   });
 });
 
+describe("awakeKeeper", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it("keeps the background alive from awake to asleep, once however often asked", async () => {
+    vi.useFakeTimers();
+    const ping = vi.spyOn(browser.runtime, "getPlatformInfo").mockResolvedValue({} as never);
+    const keepAwake = awakeKeeper();
+    keepAwake(true);
+    keepAwake(true);
+    await vi.advanceTimersByTimeAsync(25_000);
+    expect(ping).toHaveBeenCalledTimes(2);
+    keepAwake(false);
+    await vi.advanceTimersByTimeAsync(25_000);
+    expect(ping).toHaveBeenCalledTimes(2);
+  });
+});
+
 describe("loadCore", () => {
   it("gives the core what it needs from JavaScript", () => {
     const core = fakeCore(async () => "");
     Object.assign(globalThis, { submarineCore: core });
     expect(loadCore()).toBe(core);
     expect(globalThis).toMatchObject({ nostrCrypto, scheduleImmediate: queueMicrotask });
+    expect(globalThis).toHaveProperty("extensionKeepAwake", expect.any(Function));
     expect(globalThis).toHaveProperty("window.crypto", globalThis.crypto);
   });
 

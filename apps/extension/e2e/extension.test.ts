@@ -564,6 +564,28 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     await rowNames("Forum,GitHub,Visa,wifi");
   });
 
+  it("shows a form left unsaved again as the popup opens again, until discarded", async () => {
+    const { popup } = extension;
+    const name = ".item-form input[name=name]";
+    await extension.click(".item-row[aria-label=wifi]");
+    await extension.click(".item-detail button::-p-text(Edit)");
+    await extension.fill(name, "Home wifi");
+    await extension.reload();
+    await popup.waitForFunction(
+      (name) => document.querySelector<HTMLInputElement>(name)?.value === "Home wifi",
+      {},
+      name,
+    );
+    await extension.click(".item-form .page-bar button::-p-text(Cancel)");
+    await extension.click(`[role=alertdialog] button::-p-text(${english.discard})`);
+    await popup.waitForSelector(".item-form", { hidden: true });
+    await extension.reload();
+    await popup.waitForFunction(() => document.activeElement?.textContent === "wifi");
+    expect(await popup.$(".item-form")).toBeNull();
+    await extension.press("Escape");
+    await rowNames("Forum,GitHub,Visa,wifi");
+  });
+
   it("fills a new login's password and username from the generator, in a sheet", async () => {
     const { popup } = extension;
     const generated = async (title: string) => {

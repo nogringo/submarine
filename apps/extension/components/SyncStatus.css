@@ -6,6 +6,11 @@
   white-space: nowrap;
 }
 
+.sync-status .icon {
+  margin-inline-end: 4px;
+  vertical-align: -2px;
+}
+
 .sync-status[data-failed] {
   color: var(--danger);
 }

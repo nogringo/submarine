@@ -1,5 +1,5 @@
 import add from "@material-design-icons/svg/round/add.svg";
-import { type FormEvent, useId, useState } from "react";
+import { type FormEvent, useEffect, useId, useState } from "react";
 import { Form } from "react-aria-components";
 import { useIntl } from "react-intl";
 import { FilledButton, TextButton } from "@/components/Button";
@@ -11,6 +11,7 @@ import { TextField } from "@/components/TextField";
 import { SwitchTile } from "@/components/ToggleTile";
 import type { Cipher } from "@/lib/cipher";
 import { callCore, type Item, type Vault } from "@/lib/core";
+import { forgetItemDraft, type ItemDraft, restoredForm, saveItemDraft } from "@/lib/item-draft";
 import { cardBrandLabel } from "@/lib/item-fields";
 import {
   brandOptions,
@@ -36,7 +37,8 @@ const newItemTitles: Record<number, MessageId> = {
 /**
  * Creates an item of `type` in `vault`, or another of `vaults` chosen, or edits `item`, as the app's
  * form. A new login over the web page at `pageUrl` gets its host as name and its origin as website.
- * `onClose` once cancelled, or once the changes are discarded.
+ * `onClose` once cancelled, or once the changes are discarded. Its changes are kept as a draft until
+ * then, which the next popup shows again as `draft`.
  */
 export function ItemForm({
   vaults,
@@ -44,6 +46,7 @@ export function ItemForm({
   type,
   item,
   pageUrl,
+  draft,
   onSaved,
   onClose,
 }: {
@@ -52,6 +55,7 @@ export function ItemForm({
   type: number;
   item?: Item;
   pageUrl?: string;
+  draft?: ItemDraft;
   onSaved: (vault: Vault, id: string, cipher: Cipher) => void;
   onClose: () => void;
 }) {
@@ -59,18 +63,28 @@ export function ItemForm({
   // What Save compares with: a new login named after the page saves as it is.
   const [blank] = useState(() => formOf(item?.cipher, type));
   const [initial] = useState(() => {
+    if (draft) return draft.initial;
     const page = !item && type === 1 && pageUrl ? loginForPage(pageUrl) : undefined;
     return page ? { ...blank, name: page.name, uris: [{ source: null, uri: page.uri }] } : blank;
   });
-  const [form, setForm] = useState(initial);
-  const [vaultKey, setVaultKey] = useState(defaultVault.pubkey);
+  const [form, setForm] = useState(() => (draft ? restoredForm(draft) : initial));
+  const [vaultKey, setVaultKey] = useState(draft?.vault ?? defaultVault.pubkey);
   const vault = vaults.find((vault) => vault.pubkey === vaultKey) ?? defaultVault;
   const [errors, setErrors] = useState<{ name?: string; save?: string }>({});
   const [saving, setSaving] = useState(false);
   const [discarding, setDiscarding] = useState(false);
   const formId = useId();
   const set = (changes: Partial<ItemFormValues>) => setForm((form) => ({ ...form, ...changes }));
-  const leave = () => (formChanged(form, initial) ? setDiscarding(true) : onClose());
+  const changed = formChanged(form, initial);
+  useEffect(() => {
+    if (changed) void saveItemDraft({ vault: vaultKey, type, item, initial, form });
+    else void forgetItemDraft();
+  }, [changed, vaultKey, type, item, initial, form]);
+  const close = () => {
+    void forgetItemDraft();
+    onClose();
+  };
+  const leave = () => (changed ? setDiscarding(true) : close());
 
   async function save(event: FormEvent) {
     event.preventDefault();
@@ -85,9 +99,11 @@ export function ItemForm({
     try {
       if (item) {
         await callCore("updateItem", { vault: item.vault, base: item.base, cipher });
+        void forgetItemDraft();
         onSaved(vault, item.id, cipher);
       } else {
         const { id } = await callCore("createItem", { vault: vault.pubkey, cipher });
+        void forgetItemDraft();
         onSaved(vault, id, cipher);
       }
     } catch {
@@ -279,7 +295,7 @@ export function ItemForm({
         title={t({ id: "discardChanges" })}
         cancel={t({ id: "keepEditing" })}
         confirm={t({ id: "discard" })}
-        onConfirm={onClose}
+        onConfirm={close}
         isOpen={discarding}
         onOpenChange={setDiscarding}
       />

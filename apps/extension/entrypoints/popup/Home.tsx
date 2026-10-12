@@ -27,6 +27,7 @@ import { AllVaultsAvatar, OpenVaultMark, VaultAvatar } from "@/components/VaultA
 import type { Cipher } from "@/lib/cipher";
 import type { Item, ItemFilter, Vault } from "@/lib/core";
 import { fillLogin } from "@/lib/fill";
+import { type ItemDraft, readItemDraft } from "@/lib/item-draft";
 import { filterOptions } from "@/lib/item-filters";
 import { filterKeeps, formTypes } from "@/lib/item-form";
 import { forgetOpenedItem, readOpenedItem, saveOpenedItem } from "@/lib/opened-item";
@@ -49,8 +50,11 @@ type MessageId = FormatjsIntl.Message["ids"];
 /** What shows over the list. */
 type Opened =
   | { page: "item"; vault: Vault; id: string }
-  /** A new item of `type`, in `vault` unless another is chosen, or `item` edited. */
-  | { page: "form"; vault: Vault; type: number; item?: Item }
+  /**
+   * A new item of `type`, in `vault` unless another is chosen, or `item` edited, as `draft` left it
+   * if the last popup closed over the form.
+   */
+  | { page: "form"; vault: Vault; type: number; item?: Item; draft?: ItemDraft }
   | { page: "vaultSettings"; pubkey: string }
   | { page: "generator" }
   | { page: "settings" };
@@ -104,13 +108,19 @@ export function Home({
   const fillable = (vault: string, id: string) =>
     !!pageItems?.some((item) => item.vault === vault && item.id === id);
   const [opened, setOpened] = useState<Opened>();
-  // The item the last popup showed, shown again once read.
+  // The form or the item the last popup showed, shown again once read.
   const [restored, setRestored] = useState(false);
   // biome-ignore lint/correctness/useExhaustiveDependencies: read once, as the list shows.
   useEffect(() => {
-    void readOpenedItem().then((item) => {
+    void Promise.all([readItemDraft(), readOpenedItem()]).then(([draft, item]) => {
+      const draftVault = vaults.find((vault) => vault.pubkey === draft?.vault);
       const itemVault = vaults.find((vault) => vault.pubkey === item?.vault);
-      if (item && itemVault) setOpened({ page: "item", vault: itemVault, id: item.id });
+      if (draft && draftVault) {
+        const { type, item } = draft;
+        setOpened({ page: "form", vault: draftVault, type, item, draft });
+      } else if (item && itemVault) {
+        setOpened({ page: "item", vault: itemVault, id: item.id });
+      }
       setRestored(true);
     });
   }, []);
@@ -357,6 +367,7 @@ export function Home({
           type={opened.type}
           item={opened.item}
           pageUrl={page?.url}
+          draft={opened.draft}
           onSaved={showSaved}
           onClose={() =>
             setOpened(
@@ -368,6 +379,7 @@ export function Home({
       {settingsVault && (
         <VaultSettings
           vault={settingsVault}
+          unsent={sync.states.find((state) => state.pubkey === settingsVault.pubkey)?.unsent ?? 0}
           onChanged={onVaultChanged}
           onRemoved={onVaultRemoved}
           onBack={back}

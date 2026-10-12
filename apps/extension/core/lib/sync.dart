@@ -16,6 +16,7 @@ class VaultSync {
     required this._database,
     required this._vaults,
     required this.onChanged,
+    this.onSending = _sendsQuietly,
     this.relays = defaultVaultRelays,
     this.indexers = defaultIndexerRelays,
   }) : _engine = SyncEngine(
@@ -41,13 +42,27 @@ class VaultSync {
   /// Tells that what [states] returns, or what the vaults hold, changed.
   final void Function() onChanged;
 
+  /// Tells while changes are being sent, for the background to stay awake.
+  final void Function(bool sending) onSending;
+
+  /// How long the changes saved or pushed keep being sent once the popup
+  /// closed: ndk tries again after 5, 15 and 60 seconds. The next opening of
+  /// the popup sends what is left.
+  static const sendingTime = Duration(minutes: 2);
+
   final _synced = <String, _SyncedVault>{};
   var _running = false;
+  var _closed = false;
+  var _sending = false;
+  var _sendingUntil = DateTime(0);
+  Timer? _unsentCheck;
 
+  /// Sends the changes no relay accepted yet too.
   Future<void> start() async {
     _running = true;
     _engine.start();
     await update();
+    unawaited(_push());
   }
 
   Future<void> stop() async {
@@ -62,6 +77,9 @@ class VaultSync {
   /// opened, as locking does.
   Future<void> close() async {
     _running = false;
+    _closed = true;
+    _unsentCheck?.cancel();
+    _setSending(false);
     for (final synced in _synced.values) {
       await synced.close();
       ndk.accounts.removeAccount(pubkey: synced.pubkey);
@@ -82,12 +100,51 @@ class VaultSync {
     }
   }
 
-  /// Syncs the vault [pubkey], or every vault, at once rather than at the next
-  /// pass, as the app's sync button does.
+  /// Sends the changes of the vault [pubkey], or of every vault, and syncs it
+  /// at once rather than at the next pass, as the app's sync button does.
   Future<void> syncNow({String? pubkey}) => Future.wait([
     for (final vault in _synced.values)
       if (pubkey == null || vault.pubkey == pubkey) vault.syncNow(),
+    _push(pubkey: pubkey),
   ]);
+
+  /// Sends again the changes of the vault [pubkey], or of every vault, that no
+  /// relay accepted yet.
+  Future<void> _push({String? pubkey}) async {
+    _sendingUntil = DateTime.now().add(sendingTime);
+    _setSending(true);
+    await Future.wait([
+      for (final vault in _synced.values)
+        if (pubkey == null || vault.pubkey == pubkey) vault.push(),
+    ]);
+    await _checkUnsent();
+  }
+
+  /// Looks again every 5 seconds while changes wait, as the app does: nothing
+  /// tells when ndk sent them.
+  Future<void> _checkUnsent() async {
+    var unsent = 0;
+    for (final vault in [..._synced.values]) {
+      unsent += await vault.checkUnsent();
+    }
+    if (_closed) return;
+    _unsentCheck?.cancel();
+    final sending =
+        unsent > 0 && (_running || DateTime.now().isBefore(_sendingUntil));
+    if (sending) {
+      _unsentCheck = Timer(
+        const Duration(seconds: 5),
+        () => unawaited(_checkUnsent()),
+      );
+    }
+    _setSending(sending);
+  }
+
+  void _setSending(bool sending) {
+    if (sending == _sending) return;
+    _sending = sending;
+    onSending(sending);
+  }
 
   /// Removes the vault of [record] from this device, see [Vault.forget]: its
   /// relays keep it. Remove its record first, for nothing to open it again.
@@ -106,6 +163,7 @@ class VaultSync {
         'pubkey': vault.pubkey,
         'phase': vault.phase.name,
         'lastSync': vault.lastSync?.toIso8601String(),
+        'unsent': vault.unsent,
       },
   ];
 
@@ -260,6 +318,8 @@ class VaultSync {
     if (vaults.isEmpty) throw CoreException('vaultNotFound');
     final result = await vaults.single.write(write);
     onChanged();
+    _sendingUntil = DateTime.now().add(sendingTime);
+    unawaited(_checkUnsent());
     return result;
   }
 
@@ -300,6 +360,8 @@ class VaultSync {
   }
 }
 
+void _sendsQuietly(bool sending) {}
+
 /// What the copy button of an item's row copies, as in the app: the secret a
 /// login or a card is opened for.
 String? _rowCopy(Cipher cipher) {
@@ -324,6 +386,33 @@ class _SyncedVault {
 
   /// Null until the vault reached a relay once.
   DateTime? lastSync;
+
+  /// Changes saved on this device that no relay accepted yet, as last counted
+  /// by [checkUnsent].
+  var unsent = 0;
+
+  /// Counts the changes no relay accepted yet, and tells once their count
+  /// changed.
+  Future<int> checkUnsent() async {
+    try {
+      final count = (await vault.unsent()).length;
+      if (count != unsent && !_closed) {
+        unsent = count;
+        _onChanged();
+      }
+    } catch (error, stack) {
+      print('Counting the changes of $pubkey not sent failed: $error\n$stack');
+    }
+    return unsent;
+  }
+
+  Future<void> push() async {
+    try {
+      await vault.push();
+    } catch (error, stack) {
+      print('Sending the changes of $pubkey failed: $error\n$stack');
+    }
+  }
 
   /// Holds the relays of the moment, replaced once they change.
   Future<SyncHandle>? _handle;

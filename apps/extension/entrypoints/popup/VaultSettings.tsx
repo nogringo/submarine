@@ -11,14 +11,19 @@ import { VaultAvatar } from "@/components/VaultAvatar";
 import { callCore, type Vault } from "@/lib/core";
 import "./VaultSettings.css";
 
-/** The settings of `vault` on this device, each change saved as it is made, as in the app. */
+/**
+ * The settings of `vault` on this device, each change saved as it is made, as in the app. Removing
+ * it warns of its `unsent` changes, which go with it.
+ */
 export function VaultSettings({
   vault,
+  unsent,
   onChanged,
   onRemoved,
   onBack,
 }: {
   vault: Vault;
+  unsent: number;
   onChanged: (vault: Vault) => void;
   onRemoved: (pubkey: string) => void;
   onBack: () => void;
@@ -106,6 +111,11 @@ export function VaultSettings({
               >
                 <p>{t({ id: "removeVaultBody" })}</p>
                 <p>{t({ id: "removeVaultKeyWarning" })}</p>
+                {unsent > 0 && (
+                  <p className="vault-settings-error">
+                    {t({ id: "removeVaultUnsent" }, { count: unsent })}
+                  </p>
+                )}
               </ConfirmDialog>
             </DialogTrigger>
           </SettingsTile>

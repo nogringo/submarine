@@ -20,6 +20,7 @@ void main() {
   late Vaults vaults;
   late VaultSync sync;
   late int changes;
+  late List<bool> sending;
   late String privateKey;
   late String pubkey;
 
@@ -38,11 +39,13 @@ void main() {
     final store = MemoryStore();
     vaults = Vaults(store, signers, DeviceKey(store, MemoryStore()));
     changes = 0;
+    sending = [];
     sync = VaultSync(
       ndk: ndk,
       database: database,
       vaults: vaults,
       onChanged: () => changes++,
+      onSending: sending.add,
       relays: [relay.url],
       indexers: const [],
     );
@@ -412,6 +415,51 @@ void main() {
         [for (final event in await sentSince(before)) event.kind],
         [GiftWrap.kGiftWrapEventkind],
       );
+    });
+
+    test('counts the changes no relay accepted, and sends them again when '
+        'asked', () async {
+      relay.rejectFirstEventPublishes = 1000;
+
+      await sync.trashItem(pubkey: pubkey, id: id);
+
+      await _until(() async => sync.states().single['unsent'] == 1);
+      relay.rejectFirstEventPublishes = 0;
+      await sync.syncNow(pubkey: pubkey);
+      expect(sync.states().single, containsPair('unsent', 0));
+    });
+
+    test('sends the changes left at the next start', () async {
+      relay.rejectFirstEventPublishes = 1000;
+      await sync.trashItem(pubkey: pubkey, id: id);
+      await _until(() async => sync.states().single['unsent'] == 1);
+      await sync.stop();
+      relay.rejectFirstEventPublishes = 0;
+
+      await sync.start();
+
+      await _until(() async => sync.states().single['unsent'] == 0);
+    });
+
+    test('keeps the background awake while it sends', () async {
+      relay.rejectFirstEventPublishes = 1000;
+
+      await sync.trashItem(pubkey: pubkey, id: id);
+
+      await _until(() async => sending.lastOrNull == true);
+      relay.rejectFirstEventPublishes = 0;
+      await sync.syncNow();
+      expect(sending.last, isFalse);
+    });
+
+    test('lets the background sleep once closed', () async {
+      relay.rejectFirstEventPublishes = 1000;
+      await sync.trashItem(pubkey: pubkey, id: id);
+      await _until(() async => sending.lastOrNull == true);
+
+      await sync.close();
+
+      expect(sending.last, isFalse);
     });
 
     test('deletes it for good, and asks the relays to delete it', () async {

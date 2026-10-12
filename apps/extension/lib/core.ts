@@ -67,6 +67,8 @@ export interface SyncState {
   phase: "idle" | "syncing" | "synced" | "failed";
   /** In ISO 8601, null until the vault reached a relay once. */
   lastSync: string | null;
+  /** Changes saved on this device that no relay accepted yet. */
+  unsent: number;
 }
 
 /** The port a popup holds open for the vaults to sync, where the core tells what changed. */
@@ -139,7 +141,10 @@ export interface CoreMethods {
   editVault: { args: { vault: string; name?: string; color?: number }; result: Vault };
   /** Removes a vault from this device, its cache included, while its relays keep it. */
   removeVault: { args: { vault: string }; result: null };
-  /** Of one vault, or of all without one, at once rather than at the next pass. */
+  /**
+   * Sends the changes of one vault, or of all without one, and syncs it at once rather than at the
+   * next pass.
+   */
   syncNow: { args: { vault?: string }; result: null };
   /** Of the vaults syncing, while a popup holds {@link syncPort} open. */
   syncStates: { args: Record<string, never>; result: SyncState[] };

@@ -78,15 +78,14 @@ export function formOf(cipher: Cipher | undefined, type: number): ItemFormValues
   };
 }
 
-let fieldKeys = 0;
-
 export function editedField(
   field: Field,
   options: { madeUp?: MadeUpValue; isNew?: boolean } = {},
 ): EditedField {
   const valued = field.type !== 2 && field.type !== 3;
   return {
-    key: `field-${++fieldKeys}`,
+    // Unique across popups too, which a draft carries fields between.
+    key: crypto.randomUUID(),
     source: field,
     name: field.name ?? "",
     value: valued ? (field.value ?? "") : "",

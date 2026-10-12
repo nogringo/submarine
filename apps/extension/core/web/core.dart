@@ -15,6 +15,7 @@ import 'package:submarine_extension_core/device_key.dart';
 import 'package:submarine_extension_core/generator.dart';
 import 'package:submarine_extension_core/js_crypto.dart';
 import 'package:submarine_extension_core/js_events.dart';
+import 'package:submarine_extension_core/js_keep_awake.dart';
 import 'package:submarine_extension_core/js_lock_alarm.dart';
 import 'package:submarine_extension_core/js_storage.dart';
 import 'package:submarine_extension_core/reopenable.dart';
@@ -36,6 +37,7 @@ void main() {
   var popupOpen = false;
   Future<void> lock() async {
     await deviceKey.lock();
+    await session.remove(_itemDraftKey);
     autoLock.cancel();
     await syncs.close();
     emitVaultsChanged();
@@ -80,6 +82,7 @@ void main() {
           () => databaseFactoryWebWorker.deleteDatabase(_databaseName),
         );
         await deviceKey.forget();
+        await session.remove(_itemDraftKey);
         emitVaultsChanged();
         return null;
       },
@@ -224,6 +227,9 @@ void main() {
 
 const _databaseName = 'submarine';
 
+/// Where the popup keeps the item form it leaves unsaved, see `item-draft.ts`.
+const _itemDraftKey = 'itemDraft';
+
 Future<VaultSync> _openSync(Vaults vaults) async {
   // The ndk cache, the sync coverage and the versions opened, together: the
   // coverage must never outlive the cache it describes.
@@ -243,6 +249,7 @@ Future<VaultSync> _openSync(Vaults vaults) async {
     database: database,
     vaults: vaults,
     onChanged: emitVaultsChanged,
+    onSending: (sending) => keepAwake(sending),
   );
 }
 

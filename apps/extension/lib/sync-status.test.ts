@@ -4,8 +4,13 @@ import { anySyncing, syncStatus } from "./sync-status";
 
 const now = new Date("2026-10-11T12:00:00Z");
 
-function state(pubkey: string, phase: SyncState["phase"], lastSync: string | null): SyncState {
-  return { pubkey, phase, lastSync };
+function state(
+  pubkey: string,
+  phase: SyncState["phase"],
+  lastSync: string | null,
+  unsent = 0,
+): SyncState {
+  return { pubkey, phase, lastSync, unsent };
 }
 
 describe("syncStatus", () => {
@@ -44,6 +49,16 @@ describe("syncStatus", () => {
     ];
     expect(syncStatus(["a", "b"], states, now)).toEqual({ id: "syncFailed" });
     expect(syncStatus(["a"], states, now)).toEqual({ id: "syncedJustNow" });
+  });
+
+  it("tells the changes still to send of the vaults first, a failure included", () => {
+    const states = [
+      state("a", "failed", "2026-10-11T11:00:00Z", 2),
+      state("b", "synced", "2026-10-11T11:59:30Z", 1),
+      state("c", "synced", "2026-10-11T11:59:30Z"),
+    ];
+    expect(syncStatus(["a", "b", "c"], states, now)).toEqual({ id: "changesNotSent", count: 3 });
+    expect(syncStatus(["c"], states, now)).toEqual({ id: "syncedJustNow" });
   });
 });
 

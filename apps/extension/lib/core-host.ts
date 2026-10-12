@@ -43,6 +43,8 @@ export function loadCore(): SubmarineCore {
       schedule: (when: number) => void browser.alarms.create(lockAlarm, { when }),
       cancel: () => void browser.alarms.clear(lockAlarm),
     },
+    // While it sends changes, which a popup closed must not cut short.
+    extensionKeepAwake: awakeKeeper(),
     scheduleImmediate: queueMicrotask,
   });
   // Firefox runs the background as a page, where the manifest lists core.js first.
@@ -138,6 +140,15 @@ export function fromExtensionPage(sender: Browser.runtime.MessageSender): boolea
  */
 export function keepBackgroundAlive(): ReturnType<typeof setInterval> {
   return setInterval(() => browser.runtime.getPlatformInfo(), 10_000);
+}
+
+/** Keeps the background alive from `true` to `false`, as the core asks. */
+export function awakeKeeper(): (awake: boolean) => void {
+  let keepAlive: ReturnType<typeof setInterval> | undefined;
+  return (awake) => {
+    clearInterval(keepAlive);
+    keepAlive = awake ? keepBackgroundAlive() : undefined;
+  };
 }
 
 function isCoreRequest(message: unknown): message is CoreRequest {

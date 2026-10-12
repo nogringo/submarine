@@ -1,11 +1,16 @@
+import upload from "@material-design-icons/svg/round/upload.svg";
 import { useEffect, useState } from "react";
 import { useIntl } from "react-intl";
 import type { SyncState } from "@/lib/core";
 import { dayFormat } from "@/lib/i18n";
 import { syncStatus } from "@/lib/sync-status";
+import { Icon } from "./Icon";
 import "./SyncStatus.css";
 
-/** Where the sync of the vaults of `pubkeys` stands, in a line of muted text, a failure in red. */
+/**
+ * Where the sync of the vaults of `pubkeys` stands, in a line of muted text, the changes still to
+ * send after an arrow, a failure in red.
+ */
 export function SyncStatus({ pubkeys, states }: { pubkeys: string[]; states: SyncState[] }) {
   const { formatMessage: t, formatDate } = useIntl();
   const [now, setNow] = useState(() => new Date());
@@ -25,6 +30,9 @@ export function SyncStatus({ pubkeys, states }: { pubkeys: string[]; states: Syn
       {text}
     </p>
   ) : (
-    <p className="sync-status">{text}</p>
+    <p className="sync-status">
+      {status.id === "changesNotSent" && <Icon src={upload} size={15} />}
+      {text}
+    </p>
   );
 }

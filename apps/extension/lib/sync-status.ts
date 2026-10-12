@@ -1,17 +1,21 @@
 import type { SyncState } from "./core";
 
 export type SyncStatus =
+  | { id: "changesNotSent"; count: number }
   | { id: "syncFailed" | "syncing" | "syncedJustNow" }
   | { id: "syncedMinutesAgo"; minutes: number }
   | { id: "syncedHoursAgo"; hours: number }
   | { id: "syncedOn"; date: Date };
 
 /**
- * Where the sync of several vaults stands, as one, as the app tells it: a failure as soon as one
- * vault reaches no relay, else the oldest last sync. A vault the sync did not get to yet syncs.
+ * Where the sync of several vaults stands, as one, as the app tells it: the changes still to send,
+ * a failure as soon as one vault reaches no relay, else the oldest last sync. A vault the sync did
+ * not get to yet syncs.
  */
 export function syncStatus(pubkeys: string[], states: SyncState[], now = new Date()): SyncStatus {
   const selected = pubkeys.map((pubkey) => states.find((state) => state.pubkey === pubkey));
+  const unsent = selected.reduce((sum, state) => sum + (state?.unsent ?? 0), 0);
+  if (unsent > 0) return { id: "changesNotSent", count: unsent };
   if (selected.some((state) => state?.phase === "failed")) return { id: "syncFailed" };
   const lastSyncs = selected.map((state) => state?.lastSync);
   if (lastSyncs.length === 0 || lastSyncs.some((lastSync) => !lastSync)) return { id: "syncing" };

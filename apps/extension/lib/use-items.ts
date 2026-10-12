@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { callCore, type ItemSummary } from "./core";
+import { type CoreMethods, callCore, type ItemSummary } from "./core";
 
 /**
  * The items of the vault `vault`, or of all vaults without one, that `query` finds, read again at
@@ -12,14 +12,36 @@ export function useItems(
 ): ItemSummary[] | undefined {
   const [items, setItems] = useState<ItemSummary[]>();
   // biome-ignore lint/correctness/useExhaustiveDependencies: revision tells when to read again.
-  useEffect(() => {
-    let current = true;
-    callCore("items", vault ? { vault, query } : { query }).then((items) => {
-      if (current) setItems(items);
-    });
-    return () => {
-      current = false;
-    };
-  }, [vault, query, revision]);
+  useEffect(() => read(vault ? { vault, query } : { query }, setItems), [vault, query, revision]);
   return items;
+}
+
+/**
+ * The logins of the vault `vault`, or of all vaults without one, for the page at `url`, read again
+ * at each `revision`. Undefined until read, none without a page.
+ */
+export function usePageItems(
+  vault: string | undefined,
+  url: string | null | undefined,
+  revision: number,
+): ItemSummary[] | undefined {
+  const [items, setItems] = useState<ItemSummary[]>();
+  // biome-ignore lint/correctness/useExhaustiveDependencies: revision tells when to read again.
+  useEffect(() => {
+    if (url === null) setItems([]);
+    if (!url) return;
+    return read(vault ? { vault, url } : { url }, setItems);
+  }, [vault, url, revision]);
+  return items;
+}
+
+/** Until the returned function is called. */
+function read(args: CoreMethods["items"]["args"], then: (items: ItemSummary[]) => void) {
+  let current = true;
+  void callCore("items", args).then((items) => {
+    if (current) then(items);
+  });
+  return () => {
+    current = false;
+  };
 }

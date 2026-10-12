@@ -237,6 +237,28 @@ void main() {
     expect(await names('bank'), isEmpty);
   });
 
+  test('reads the logins for a page, as Bitwarden matches them', () async {
+    Cipher login(String name, String uri) => Cipher(
+      type: CipherType.login,
+      name: name,
+      login: Login(uris: [LoginUri(uri)]),
+    );
+    await publish('GitHub', cipher: login('GitHub', 'https://github.com'));
+    await publish('Gist', cipher: login('Gist', 'gist.github.com'));
+    await publish('GitLab', cipher: login('GitLab', 'https://gitlab.com'));
+    await publish('github.com');
+    await addVault();
+    await sync.start();
+    await _until(() async => await opened() == 4);
+
+    Future<List<Object?>> names(String url, [String query = '']) async => [
+      for (final item in await sync.items(url: url, query: query)) item['name'],
+    ];
+    expect(await names('https://github.com/login'), ['Gist', 'GitHub']);
+    expect(await names('https://github.com/login', 'gist'), ['Gist']);
+    expect(await names('https://example.com'), isEmpty);
+  });
+
   test('reads an item in full, none once in the trash', () async {
     await publish(
       'GitHub',

@@ -26,6 +26,7 @@ export 'src/search.dart';
 export 'src/sembast_version_store.dart';
 export 'src/server_list.dart';
 export 'src/totp.dart';
+export 'src/uri_match.dart';
 export 'src/vault.dart';
 export 'src/vault_key.dart';
 export 'src/version_cache.dart';

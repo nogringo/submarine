@@ -24,7 +24,7 @@ The extension only downloads: it never sends your items, and it creates, changes
 
 - It has no account and no server of its own: its developers receive no data from it.
 - It has no analytics, no tracking and no ads.
-- It does not read the pages you visit.
+- It does not read the content of the pages you visit. As you open it, it reads the address of the current tab to show the logins for that site first. The address stays in your browser.
 - It writes to the clipboard only what you copy, and empties the clipboard after the delay chosen in the settings. It never reads the clipboard.
 
 ## Permissions
@@ -32,6 +32,7 @@ The extension only downloads: it never sends your items, and it creates, changes
 - Storage: keeps your vaults and settings in your browser, as described above.
 - Clipboard write: copies a password, a code or any other field when you ask.
 - Alarms: locks the vaults once the lock delay has passed.
+- Active tab: reads the address of the tab you open the extension over, and only that one, to show the logins for that site first.
 - Offscreen documents, in Chrome only: empties the clipboard after the clipboard delay, even with the extension's window closed.
 
 ## Changes and contact

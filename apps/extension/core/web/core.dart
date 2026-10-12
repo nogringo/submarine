@@ -145,6 +145,7 @@ void main() {
       'items': (args) async => (await sync()).items(
         pubkey: args['vault'] as String?,
         query: args['query'] as String? ?? '',
+        url: args['url'] as String?,
       ),
       'totp': (args) async => totp(
         args['key'] as String,

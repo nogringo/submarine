@@ -1,7 +1,9 @@
 {
   "@@locale": "fi",
   "@@x-template": "extension_en.arb",
+  "allItems": "Kaikki kohteet",
   "back": "Takaisin",
+  "forThisSite": "Tälle sivustolle",
   "lockOnBrowserRestart": "Kun selain käynnistyy uudelleen",
   "removeLockPasswordBodyBrowser": "Laajennus ei enää kysy sitä. Holvien avaimet ovat tällä laitteella silloin vain selaimen tallennustilan varassa."
 }

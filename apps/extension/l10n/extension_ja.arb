@@ -1,7 +1,9 @@
 {
   "@@locale": "ja",
   "@@x-template": "extension_en.arb",
+  "allItems": "すべてのアイテム",
   "back": "戻る",
+  "forThisSite": "このサイト用",
   "lockOnBrowserRestart": "ブラウザの再起動時",
   "removeLockPasswordBodyBrowser": "拡張機能でパスワードを求められなくなります。このデバイス上の保管庫の鍵は、ブラウザのストレージだけで保護されるようになります。"
 }

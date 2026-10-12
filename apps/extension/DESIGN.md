@@ -92,12 +92,10 @@ Measured on 2026-10-11 with Chrome for Testing 155 and Firefox 157, headless, th
 
 ## After version 1
 
-Candidates, added one at a time, in an order to decide:
+Added one at a time, in this order, decided on 2026-10-12. Features that need the same permission ship together: Chrome disables an extension whose update asks for a permission with a warning, until the user accepts it.
 
-- The current site's items first. Matching a page with a login's URIs follows Bitwarden's match settings and belongs in `nostr_passwords`, since the app's autofill on phones will need it too.
-- Editing: create, edit, trash, restore and delete items, with the generator.
-- Filling a login on an explicit action, a button in the popup or a keyboard shortcut. The license question comes back here.
-- Offering to save a login after signing in.
-- A menu in the page's fields, rendered in an isolated iframe against clickjacking.
-- The app's filters: favorites, each type, and the trash.
-- Opening a vault with a bunker, attachments, email addresses and their inbox, a side panel, Safari, passkeys.
+1. The logins for the current site first. Done: the logins for the page the popup opens over show under For this site, above All items, while nothing is searched. A login for the page shows in both sections, as in Bitwarden. `itemsForUrl` in `nostr_passwords` matches them as Bitwarden does, by each URI's match detection, the base domain by default, read with the Public Suffix List and its private domains, for the app's autofill on phones to use too. Bitwarden's equivalent domains and its default match setting are left out for now. The popup reads the tab's address through `activeTab`, which the browser grants as the user opens the popup and which shows no warning at install.
+2. Filling a login on an explicit action, a button in the popup or a keyboard shortcut. `activeTab` and `scripting` inject the fill into the tab at that moment, still without a warning, and a simple fill needs no code of Bitwarden.
+3. Editing: create, edit, trash, restore and delete items, with the generator. The app's filters come with it: favorites, each type, and the trash.
+4. Offering to save a login after signing in, and a menu in the page's fields, rendered in an isolated iframe against clickjacking, in one version: both need a content script on every page, whose permission shows a warning. A badge counting the tab's logins comes with them. The license question comes back here.
+5. Then: opening a vault with a bunker, attachments, email addresses and their inbox, a side panel, Safari, passkeys.

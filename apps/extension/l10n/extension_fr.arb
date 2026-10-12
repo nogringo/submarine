@@ -1,7 +1,9 @@
 {
   "@@locale": "fr",
   "@@x-template": "extension_en.arb",
+  "allItems": "Tous les éléments",
   "back": "Retour",
+  "forThisSite": "Pour ce site",
   "lockOnBrowserRestart": "Au redémarrage du navigateur",
   "removeLockPasswordBodyBrowser": "L'extension ne le demande plus. Les clés des coffres de cet appareil ne reposent alors plus que sur le stockage du navigateur."
 }

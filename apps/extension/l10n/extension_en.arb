@@ -1,8 +1,16 @@
 {
   "@@locale": "en",
+  "allItems": "All items",
+  "@allItems": {
+    "description": "Heading of the list of all items, under the logins for the current page."
+  },
   "back": "Back",
   "@back": {
     "description": "Label of the button going back from an item to the list."
+  },
+  "forThisSite": "For this site",
+  "@forThisSite": {
+    "description": "Heading of the logins for the page the popup opened over, above the list of all items. The extension does not fill them in yet."
   },
   "lockOnBrowserRestart": "On browser restart",
   "@lockOnBrowserRestart": {

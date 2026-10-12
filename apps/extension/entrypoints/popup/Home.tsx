@@ -22,7 +22,8 @@ import { AllVaultsAvatar, OpenVaultMark, VaultAvatar } from "@/components/VaultA
 import type { Vault } from "@/lib/core";
 import { forgetOpenedItem, readOpenedItem, saveOpenedItem } from "@/lib/opened-item";
 import { anySyncing } from "@/lib/sync-status";
-import { useItems } from "@/lib/use-items";
+import { useItems, usePageItems } from "@/lib/use-items";
+import { usePageUrl } from "@/lib/use-page-url";
 import type { Sync } from "@/lib/use-sync";
 import "./Home.css";
 import { ItemDetail } from "./ItemDetail";
@@ -64,6 +65,8 @@ export function Home({
   const pubkeys = vault ? [vault.pubkey] : vaults.map((vault) => vault.pubkey);
   const title = vault?.name ?? t({ id: "allVaults" });
   const items = useItems(vault?.pubkey, query, sync.revision);
+  const searched = query.trim() !== "";
+  const pageItems = usePageItems(vault?.pubkey, usePageUrl(), sync.revision);
   const [opened, setOpened] = useState<Opened>();
   // The item the last popup showed, shown again once read.
   const [restored, setRestored] = useState(false);
@@ -205,11 +208,13 @@ export function Home({
         </div>
         <ItemList
           items={items}
+          // What was searched for shows alone.
+          pageItems={searched ? [] : pageItems}
           vaults={vaults}
           // A badge tells the vaults apart, which a single vault does not need.
           showVault={!vault && vaults.length > 1}
           label={title}
-          searched={query.trim() !== ""}
+          searched={searched}
           neverSynced={pubkeys.some(
             (pubkey) => !sync.states.find((state) => state.pubkey === pubkey)?.lastSync,
           )}

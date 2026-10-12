@@ -4,7 +4,7 @@ import { generateSecretKey, nip19 } from "nostr-tools";
 import * as nip49 from "nostr-tools/nip49";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { violations } from "./axe";
-import { type BrowserName, type Extension, launch } from "./extension";
+import { type BrowserName, type Extension, launch, openPopupOver } from "./extension";
 import { publishItems } from "./vault-items";
 
 const english = JSON.parse(await readFile(appArb("en"), "utf8"));
@@ -128,6 +128,24 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
       "alice",
     );
     expect(await violations(popup)).toEqual([]);
+  });
+
+  it.skipIf(name === "firefox")("lists the logins for the page it opens over first", async () => {
+    const { page, popup } = await openPopupOver(extension.browser, "https://github.com/login");
+    try {
+      await popup.waitForFunction(
+        () =>
+          [...document.querySelectorAll(".item-list-header, .item-row-name")]
+            .map((element) => element.textContent)
+            .join() === "For this site,GitHub,All items,GitHub,Visa,wifi",
+        { timeout: 20_000 },
+      );
+      expect(await violations(popup)).toEqual([]);
+    } finally {
+      await popup.close();
+      await page.close();
+      await extension.popup.bringToFront();
+    }
   });
 
   it("searches the items as the app does, from the field focused at once", async () => {

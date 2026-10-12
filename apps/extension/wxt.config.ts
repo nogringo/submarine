@@ -12,6 +12,8 @@ export default defineConfig({
       "clipboardWrite",
       // Locks the vaults once unused for the timeout, the popup closed.
       "alarms",
+      // The address of the tab the popup opens over, for its logins. No warning at install.
+      "activeTab",
       ...(browser === "firefox" ? [] : ["offscreen"]),
     ],
     commands: {

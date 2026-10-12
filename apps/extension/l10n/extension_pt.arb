@@ -1,7 +1,9 @@
 {
   "@@locale": "pt",
   "@@x-template": "extension_en.arb",
+  "allItems": "Todos os itens",
   "back": "Voltar",
+  "forThisSite": "Para este site",
   "lockOnBrowserRestart": "Ao reiniciar o navegador",
   "removeLockPasswordBodyBrowser": "A extensão deixa de a pedir. As chaves dos cofres deste dispositivo passam a depender só do armazenamento do navegador."
 }

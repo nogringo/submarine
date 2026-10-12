@@ -160,6 +160,10 @@ Future<void> main() async {
   // Ignores case and accents, and looks in usernames, hostnames and notes.
   final found = searchItems(items, 'boulanger alice');
   print('Found ${found.length} item(s) for "boulanger alice"');
+  // The logins for the page a browser shows, by the match detection of their
+  // URIs as in Bitwarden, the base domain by default.
+  final forPage = itemsForUrl(items, 'https://secure.boulanger.com/login');
+  print('${forPage.length} login(s) for this page');
 
   final boulanger = found.first;
   final totp = generateTotp(boulanger.cipher.login!.totp!);

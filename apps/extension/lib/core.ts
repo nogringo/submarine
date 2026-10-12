@@ -120,8 +120,11 @@ export interface CoreMethods {
   syncNow: { args: { vault?: string }; result: null };
   /** Of the vaults syncing, while a popup holds {@link syncPort} open. */
   syncStates: { args: Record<string, never>; result: SyncState[] };
-  /** Of one vault, or of all without one, trash left out, by name, as the app's search finds them. */
-  items: { args: { vault?: string; query?: string }; result: ItemSummary[] };
+  /**
+   * Of one vault, or of all without one, trash left out, by name, as the app's search finds them.
+   * Only the logins for the page at `url` with one, as Bitwarden matches them.
+   */
+  items: { args: { vault?: string; query?: string; url?: string }; result: ItemSummary[] };
   /** Null once in the trash or gone. */
   item: { args: { vault: string; id: string }; result: Item | null };
   /** The code of a verification key at `at`, in milliseconds, and how long a code lasts, in seconds. */

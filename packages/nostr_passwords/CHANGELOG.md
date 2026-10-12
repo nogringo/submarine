@@ -12,6 +12,7 @@
 - `Vault.currentRelayList()` gives the list to change, and `RelayList.withRelay()` and `without()` change it. `parseRelayUrl()` reads a relay address as a user types it.
 - The vault's Blossom servers (BUD-03), its private servers encrypted to the vault, kept on its relays with the rest of the vault. `Vault.currentServerList()` gives the list to change, `defaultVaultBlossomServers` while it has none, and `ServerList.withServer()` and `without()` change it. `parseServerUrl()` reads a server address as a user types it.
 - `compareItemsByName()` orders items as a list shows them.
+- `itemsForUrl()` gives the logins for a web page, and `uriMatches()` tells whether a login URI matches it, by its match detection as in Bitwarden. The base domain, the default, is read with the Public Suffix List, its private domains included.
 - Bitwarden's search, password history, TOTP codes and generator, usernames included. Made-up first names, last names and birth dates for the sites that ask for them.
 - Bitwarden JSON exports, password protected or not, read by `parseBitwardenExport()` and `decryptBitwardenExport()`, and written by `writeBitwardenExport()` and `encryptBitwardenExport()`.
 - Vault keys as an nsec, in hex, or encrypted with a password (NIP-49). A vault takes any `EventSigner`, so a NIP-46 bunker or a NIP-07 extension can hold its key. `vaultSignerPermissions` lists what to ask a bunker for.

@@ -14,6 +14,7 @@ dependencies:
   html: ^0.15.7
   ndk: ^0.10.1
   nip49: ^1.2.0
+  punycoder: ^0.3.0
   sembast: ^3.8.11
   serverpod_argon2: ^0.1.0
   sync_engine_shim_for_ndk: ^0.8.0

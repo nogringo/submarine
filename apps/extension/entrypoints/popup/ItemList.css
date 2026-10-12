@@ -51,6 +51,17 @@
   font-size: 13px;
 }
 
+/* Fills the height the layout gives a heading, its text just above the rows. */
+.item-list-header {
+  display: flex;
+  align-items: flex-end;
+  height: 100%;
+  padding: 0 10px 6px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .item-list-empty {
   margin: auto;
   padding: 24px;

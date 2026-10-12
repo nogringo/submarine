@@ -12,6 +12,7 @@ The manifest gives both: "Submarine Password Manager", and the app's tagline in 
 Submarine keeps your passwords, cards and notes safe and in sync across your devices, with no account to create. This extension brings your vaults into your browser.
 
 - Open your vaults with their key, the one the Submarine app gave you when you created them.
+- See the logins for the site you are on first.
 - Search your logins, cards, notes and identities, across all your vaults.
 - Copy a username, a password or a two-factor code in one click. Copied passwords are cleared from the clipboard after a delay.
 - Open it from the keyboard with Ctrl+Shift+Y (Command+Shift+Y on a Mac, Ctrl+Shift+U on Linux).
@@ -44,6 +45,7 @@ Submarine is still young. For your most important passwords, we still recommend 
 - `storage`: keeps the vault keys, an encrypted copy of their items and the settings in the browser.
 - `clipboardWrite`: copies a username, a password, a code or another field when the user asks.
 - `alarms`: locks the vaults once the lock delay chosen by the user has passed.
+- `activeTab`: reads the address of the tab the popup opens over, to show the logins for that site first.
 - `offscreen`: empties the clipboard after the delay chosen by the user, which the background service worker cannot do.
 - Remote code: none.
 - Data collected, as declared to Firefox for the complete extension: personally identifiable information, financial and payment information, authentication information, personal communications and web history. None is sold, used for anything but the extension's purpose, or used to determine creditworthiness.

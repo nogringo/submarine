@@ -1,4 +1,5 @@
 import casino from "@material-design-icons/svg/outlined/casino.svg";
+import closeIcon from "@material-design-icons/svg/round/close.svg";
 import refresh from "@material-design-icons/svg/round/refresh.svg";
 import { useId } from "react";
 import {
@@ -72,9 +73,12 @@ export function GenerateButton({
           <Dialog className="sheet-dialog">
             {({ close }) => (
               <>
-                <Heading slot="title" className="sheet-title">
-                  {t({ id: username ? "generateUsername" : "generator" })}
-                </Heading>
+                <div className="sheet-header">
+                  <Heading slot="title" className="sheet-title">
+                    {t({ id: username ? "generateUsername" : "generator" })}
+                  </Heading>
+                  <IconButton icon={closeIcon} label={t({ id: "close" })} onPress={close} />
+                </div>
                 <Generator
                   username={username}
                   onUse={(value) => {

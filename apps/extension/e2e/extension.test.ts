@@ -594,6 +594,13 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     expect(await popup.$eval(".item-form input[name=username]", (input) => input.value)).toBe(
       username,
     );
+    await extension.click(`button[aria-label='${english.generateUsername}']`);
+    await generated(english.generateUsername);
+    await extension.click(`.sheet button[aria-label='${english.close}']`);
+    await popup.waitForSelector(".sheet", { hidden: true });
+    expect(await popup.$eval(".item-form input[name=username]", (input) => input.value)).toBe(
+      username,
+    );
     await extension.click(".item-form .page-bar button::-p-text(Cancel)");
     await extension.click(`[role=alertdialog] button::-p-text(${english.discard})`);
     await popup.waitForSelector(".item-form", { hidden: true });

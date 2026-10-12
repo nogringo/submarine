@@ -39,8 +39,15 @@
   outline: none;
 }
 
+.sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: -12px -12px 4px 0;
+}
+
 .sheet-title {
-  margin-bottom: 16px;
   font-size: 18px;
   font-weight: 700;
 }

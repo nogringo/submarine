@@ -463,6 +463,46 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     await rowNames("GitHub,Visa,wifi");
   });
 
+  it("opens the menu of a row where it is right-clicked, and copies from it", async () => {
+    const { popup } = extension;
+    await extension.rightClick(".item-row[aria-label=GitHub]");
+    await popup.waitForSelector("[role=menu]");
+    expect(
+      await popup.$$eval("[role=menuitem]", (items) => items.map((item) => item.textContent)),
+    ).toEqual([
+      english.copyUsername,
+      english.copyPassword,
+      english.copyTotp,
+      english.addToFavorites,
+      english.edit,
+      english.moveToTrash,
+    ]);
+    expect(await violations(popup)).toEqual([]);
+    await extension.click(`[role=menuitem]::-p-text(${english.copyUsername})`);
+    await popup.waitForSelector("[role=menu]", { hidden: true });
+    await popup.waitForFunction(() =>
+      document.activeElement?.matches(".item-row[aria-label=GitHub]"),
+    );
+    // Told a screen reader once copied, as nothing shows it.
+    await popup.waitForFunction(
+      () => document.querySelector(".home-status")?.textContent === "Copied",
+    );
+    expect(await extension.readClipboard()).toBe("alice");
+  });
+
+  it("moves an item to the trash from its row's menu, and restores it", async () => {
+    const { popup } = extension;
+    await extension.rightClick(".item-row[aria-label=wifi]");
+    await extension.click(`[role=menuitem]::-p-text(${english.moveToTrash})`);
+    await rowNames("GitHub,Visa");
+    await extension.click(".chip::-p-text(Trash)");
+    await extension.rightClick(".item-row[aria-label=wifi]");
+    await extension.click(`[role=menuitem]::-p-text(${english.restore})`);
+    await popup.waitForSelector(`::-p-text(${english.noItemsHere})`);
+    await extension.click(".chip::-p-text(All)");
+    await rowNames("GitHub,Visa,wifi");
+  });
+
   /** The labels of the item's fields, then of its custom fields. */
   const fieldLabels = () =>
     extension.popup.$$eval(".item-detail .field-tile-label", (labels) =>

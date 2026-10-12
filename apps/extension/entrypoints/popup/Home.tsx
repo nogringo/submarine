@@ -40,6 +40,7 @@ import "./Home.css";
 import { ItemDetail } from "./ItemDetail";
 import { ItemForm } from "./ItemForm";
 import { ItemList } from "./ItemList";
+import { ItemMenu, type ItemMenuRequest } from "./ItemMenu";
 import { Settings } from "./Settings";
 import { VaultSettings } from "./VaultSettings";
 
@@ -108,6 +109,7 @@ export function Home({
   const fillable = (vault: string, id: string) =>
     !!pageItems?.some((item) => item.vault === vault && item.id === id);
   const [opened, setOpened] = useState<Opened>();
+  const [menu, setMenu] = useState<ItemMenuRequest & { row: HTMLElement }>();
   // The form or the item the last popup showed, shown again once read.
   const [restored, setRestored] = useState(false);
   // biome-ignore lint/correctness/useExhaustiveDependencies: read once, as the list shows.
@@ -146,6 +148,19 @@ export function Home({
   const vaultsButton = useRef<HTMLButtonElement>(null);
   const search = useRef<HTMLInputElement>(null);
   const back = useCallback(() => setOpened(undefined), []);
+  // For a screen reader alone: the copy shows nothing, as in the app.
+  const [copied, setCopied] = useState(false);
+  useEffect(() => {
+    if (!copied) return;
+    const reset = setTimeout(() => setCopied(false), 1500);
+    return () => clearTimeout(reset);
+  }, [copied]);
+  const menuDone = useCallback(() => {
+    // Gone from the list once in the trash, out of it or deleted.
+    if (!menu?.row.isConnected) search.current?.focus();
+    else if (!paged) menu.row.focus();
+    setMenu(undefined);
+  }, [menu, paged]);
   useEffect(() => {
     // An item shown again from the last popup opened from nothing here.
     if (!paged) (openedFrom.current ?? search.current)?.focus();
@@ -329,6 +344,7 @@ export function Home({
           neverSynced={pubkeys.some(
             (pubkey) => !sync.states.find((state) => state.pubkey === pubkey)?.lastSync,
           )}
+          onMenu={(item, { x, y }, row) => setMenu({ vault: item.vault, id: item.id, x, y, row })}
           onOpen={(item) => {
             const itemVault = vaults.find((vault) => vault.pubkey === item.vault);
             if (!itemVault) return;
@@ -338,6 +354,20 @@ export function Home({
           }}
         />
       </div>
+      {menu && (
+        <ItemMenu
+          request={menu}
+          onEdit={(item) => {
+            const itemVault = vaults.find((vault) => vault.pubkey === item.vault);
+            if (!itemVault) return;
+            openedFrom.current = menu.row;
+            setOpened({ page: "form", vault: itemVault, type: item.cipher.type, item });
+          }}
+          onCopied={() => setCopied(true)}
+          onFailed={() => setAlert({ message: "itemSaveFailed" })}
+          onDone={menuDone}
+        />
+      )}
       {opened?.page === "item" && (
         <ItemDetail
           vault={opened.vault}
@@ -388,6 +418,9 @@ export function Home({
       {opened?.page === "generator" && <GeneratorPage onBack={back} />}
       {opened?.page === "settings" && <Settings hasLockPassword={hasLockPassword} onBack={back} />}
       {/* Kept in the page, empty, for a screen reader to read what it says once it does. */}
+      <p role="status" className="visually-hidden home-status">
+        {copied ? t({ id: "copied" }) : ""}
+      </p>
       <p role="alert" className="home-alert">
         {alert ? t({ id: alert.message }) : ""}
       </p>

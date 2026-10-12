@@ -181,6 +181,11 @@
 }
 
 /* Flutter's snack bar, as the app shows an error. */
+.home-status {
+  /* In its place below the list, it would make the popup scroll. */
+  top: 0;
+}
+
 .home-alert {
   position: absolute;
   inset: auto 12px 12px;

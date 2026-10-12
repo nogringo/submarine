@@ -1,3 +1,4 @@
+import type { MouseEvent } from "react";
 import {
   Collection,
   GridList,
@@ -20,7 +21,7 @@ import "./ItemList.css";
  * `pageItems`, the logins for the page the
  * popup opened over, come first in a section of their own, where a row fills its login. Nothing
  * until both are read. A row opens its item, and copies the password of a login or the number of a
- * card.
+ * card. A right click, or the context menu key, asks for its menu at a point of the window.
  */
 export function ItemList({
   items,
@@ -33,6 +34,7 @@ export function ItemList({
   neverSynced,
   onOpen,
   onFill,
+  onMenu,
 }: {
   items: ItemSummary[] | undefined;
   pageItems: ItemSummary[] | undefined;
@@ -44,6 +46,7 @@ export function ItemList({
   neverSynced: boolean;
   onOpen: (item: ItemSummary) => void;
   onFill: (item: ItemSummary) => void;
+  onMenu: (item: ItemSummary, at: { x: number; y: number }, row: HTMLElement) => void;
 }) {
   const { formatMessage: t } = useIntl();
   if (!items || !pageItems) return null;
@@ -63,7 +66,15 @@ export function ItemList({
     ...pageItems.map((item) => [pageKeyOf(item), item] as const),
   ]);
   const row = (item: ItemSummary, key: string, fills = false) => (
-    <GridListItem id={key} textValue={item.name} className="item-row">
+    <GridListItem
+      id={key}
+      textValue={item.name}
+      className="item-row"
+      onContextMenu={(event: MouseEvent<HTMLElement>) => {
+        event.preventDefault();
+        onMenu(item, menuPoint(event), event.currentTarget);
+      }}
+    >
       <ItemIcon
         item={item}
         vault={showVault ? vaults.find((vault) => vault.pubkey === item.vault) : undefined}
@@ -119,6 +130,16 @@ export function ItemList({
       </GridList>
     </Virtualizer>
   );
+}
+
+/**
+ * Where the pointer clicked in the row, or below its start for the context menu key, whose event
+ * points elsewhere.
+ */
+function menuPoint({ clientX: x, clientY: y, currentTarget }: MouseEvent<HTMLElement>) {
+  const row = currentTarget.getBoundingClientRect();
+  const inRow = x >= row.left && x <= row.right && y >= row.top && y <= row.bottom;
+  return inRow ? { x, y } : { x: row.left + 16, y: row.bottom };
 }
 
 /** Unique across the vaults. */

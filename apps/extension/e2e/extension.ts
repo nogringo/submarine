@@ -9,6 +9,7 @@ export interface Extension {
   /** The popup, opened in a tab by the extension itself. */
   popup: Page;
   click(selector: string): Promise<void>;
+  rightClick(selector: string): Promise<void>;
   fill(selector: string, text: string): Promise<void>;
   press(key: string): Promise<void>;
   /** Opens the popup again, as when the user clicks the extension's icon once more. */
@@ -46,6 +47,7 @@ export async function launch(name: BrowserName, language = "en"): Promise<Extens
       browser,
       popup,
       click: (selector) => popup.locator(selector).click(),
+      rightClick: (selector) => popup.locator(selector).click({ button: "right" }),
       // Locator.fill sets a password field's value behind React's back: the text is pasted instead.
       fill: async (selector, text) => {
         const input = await popup.waitForSelector(selector);
@@ -71,6 +73,16 @@ export async function launch(name: BrowserName, language = "en"): Promise<Extens
       await popup.$eval(selector, (element) => {
         (element as HTMLElement).focus();
         (element as HTMLElement).click();
+      });
+    },
+    rightClick: async (selector) => {
+      await popup.waitForSelector(selector);
+      await popup.$eval(selector, (element) => {
+        const { left, top, width, height } = element.getBoundingClientRect();
+        const at = { clientX: left + width / 2, clientY: top + height / 2 };
+        element.dispatchEvent(
+          new MouseEvent("contextmenu", { ...at, button: 2, bubbles: true, cancelable: true }),
+        );
       });
     },
     fill: async (selector, text) => {

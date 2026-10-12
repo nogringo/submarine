@@ -12,7 +12,7 @@ The manifest gives both: "Submarine Password Manager", and the app's tagline in 
 Submarine keeps your passwords, cards and notes safe and in sync across your devices, with no account to create. This extension brings your vaults into your browser.
 
 - Open your vaults with their key, the one the Submarine app gave you when you created them.
-- See the logins for the site you are on first, and fill one into the page in one click, or with Ctrl+Shift+L, the Control key on a Mac too.
+- See the logins for the site you are on first, and fill one into the page in one click, or with Alt+Shift+L (Ctrl+Shift+L in Firefox, Control+Shift+L on a Mac).
 - Search your logins, cards, notes and identities, across all your vaults.
 - Copy a username, a password or a two-factor code in one click. Copied passwords are cleared from the clipboard after a delay.
 - Open it from the keyboard with Ctrl+Shift+Y (Command+Shift+Y on a Mac, Ctrl+Shift+U on Linux).

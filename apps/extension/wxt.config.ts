@@ -20,9 +20,12 @@ export default defineConfig({
     commands: {
       // Bitwarden's and Proton Pass's. Firefox opens its downloads with Ctrl+Shift+Y on Linux.
       _execute_action: { suggested_key: { default: "Ctrl+Shift+Y", linux: "Ctrl+Shift+U" } },
-      // Bitwarden's. Chrome keeps Command+Shift+L for itself on macOS.
+      // Bitwarden's in Firefox. Chrome keeps Ctrl+Shift+L for its vertical tabs, and Command+Shift+L on macOS.
       fill_login: {
-        suggested_key: { default: "Ctrl+Shift+L", mac: "MacCtrl+Shift+L" },
+        suggested_key: {
+          default: browser === "firefox" ? "Ctrl+Shift+L" : "Alt+Shift+L",
+          mac: "MacCtrl+Shift+L",
+        },
         description: "__MSG_commandFillLogin__",
       },
     },

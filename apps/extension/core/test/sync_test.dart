@@ -1,6 +1,8 @@
 import 'package:ndk/ndk.dart';
+import 'package:ndk/shared/nips/nip09/deletion.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
 import 'package:sembast/sembast_memory.dart';
+import 'package:submarine_extension_core/core.dart';
 import 'package:submarine_extension_core/device_key.dart';
 import 'package:submarine_extension_core/sync.dart';
 import 'package:submarine_extension_core/vaults.dart';
@@ -259,7 +261,63 @@ void main() {
     expect(await names('https://example.com'), isEmpty);
   });
 
-  test('reads an item in full, none once in the trash', () async {
+  test('reads the favorites, the items of a type, or the trash', () async {
+    await publish('wifi');
+    await publish(
+      'GitHub',
+      cipher: Cipher(type: CipherType.login, name: 'GitHub')..favorite = true,
+    );
+    await publish(
+      'Visa',
+      cipher: Cipher(type: CipherType.card, name: 'Visa', card: PaymentCard()),
+    );
+    await publish(
+      'Old bank',
+      cipher: Cipher(type: CipherType.login, name: 'Old bank')
+        ..favorite = true
+        ..deletedDate = DateTime.utc(2026, 10, 1),
+    );
+    await addVault();
+    await sync.start();
+    await _until(() async => await opened() == 4);
+
+    Future<List<Object?>> names(Object filter, [String query = '']) async => [
+      for (final item in await sync.items(filter: filter, query: query))
+        item['name'],
+    ];
+    expect(await names('all'), ['GitHub', 'Visa', 'wifi']);
+    expect(await names('favorites'), ['GitHub']);
+    expect(await names(CipherType.login.value), ['GitHub']);
+    expect(await names(CipherType.secureNote.value), ['wifi']);
+    expect(await names('trash'), ['Old bank']);
+    expect(await names('trash', 'git'), isEmpty);
+    expect(() => sync.items(filter: 'archive'), throwsA(isA<CoreException>()));
+  });
+
+  test('tells the types of the items, trash left out', () async {
+    await publish('wifi');
+    await publish('Router');
+    await publish(
+      'Visa',
+      cipher: Cipher(type: CipherType.card, name: 'Visa', card: PaymentCard()),
+    );
+    await publish(
+      'Old bank',
+      cipher: Cipher(type: CipherType.login, name: 'Old bank')
+        ..deletedDate = DateTime.utc(2026, 10, 1),
+    );
+    await addVault();
+    await sync.start();
+    await _until(() async => await opened() == 4);
+
+    expect(
+      await sync.itemTypes(),
+      unorderedEquals([CipherType.secureNote.value, CipherType.card.value]),
+    );
+    expect(await sync.itemTypes(pubkey: 'unknown'), isEmpty);
+  });
+
+  test('reads an item in full, in the trash or not, none once gone', () async {
     await publish(
       'GitHub',
       cipher: Cipher(
@@ -288,8 +346,128 @@ void main() {
         containsPair('password', 'hunter2'),
       ),
     );
-    expect(await sync.item(pubkey: pubkey, id: trashed), isNull);
+    expect(
+      (await sync.item(pubkey: pubkey, id: trashed))!['cipher'],
+      containsPair('deletedDate', isNotNull),
+    );
     expect(await sync.item(pubkey: pubkey, id: 'unknown'), isNull);
+  });
+
+  group('changes an item', () {
+    late String id;
+
+    setUp(() async {
+      id = await publish('Wifi');
+      await addVault();
+      await sync.start();
+      await _until(() async => await opened() == 1);
+    });
+
+    Future<Map<String, dynamic>> cipher() async =>
+        (await sync.item(pubkey: pubkey, id: id))!['cipher']
+            as Map<String, dynamic>;
+
+    /// The events the vault sent to its relay since [before] of them.
+    Future<List<Nip01Event>> sentSince(int before) async {
+      await _until(() async => relay.receivedEvents.length > before);
+      return relay.receivedEvents.sublist(before);
+    }
+
+    test('adds it to the favorites, takes it out, and tells', () async {
+      final before = changes;
+
+      await sync.setFavorite(pubkey: pubkey, id: id, favorite: true);
+
+      expect(await cipher(), containsPair('favorite', true));
+      expect(
+        [for (final item in await sync.items(filter: 'favorites')) item['id']],
+        [id],
+      );
+      expect(changes, greaterThan(before));
+
+      await sync.setFavorite(pubkey: pubkey, id: id, favorite: false);
+
+      expect(await cipher(), containsPair('favorite', false));
+    });
+
+    test('moves it to the trash and restores it', () async {
+      await sync.trashItem(pubkey: pubkey, id: id);
+
+      expect(await cipher(), containsPair('deletedDate', isNotNull));
+      expect(await sync.items(), isEmpty);
+      expect(await sync.itemTypes(), isEmpty);
+
+      await sync.restoreItem(pubkey: pubkey, id: id);
+
+      expect(await cipher(), containsPair('deletedDate', null));
+      expect(await sync.items(filter: 'trash'), isEmpty);
+    });
+
+    test('sends the change to the vault\'s relays', () async {
+      final before = relay.receivedEvents.length;
+
+      await sync.trashItem(pubkey: pubkey, id: id);
+
+      expect(
+        [for (final event in await sentSince(before)) event.kind],
+        [GiftWrap.kGiftWrapEventkind],
+      );
+    });
+
+    test('deletes it for good, and asks the relays to delete it', () async {
+      await sync.trashItem(pubkey: pubkey, id: id);
+
+      await sync.deleteItem(pubkey: pubkey, id: id);
+
+      expect(await sync.item(pubkey: pubkey, id: id), isNull);
+      expect(await sync.items(filter: 'trash'), isEmpty);
+      // One request for each version, the first one and the trashed one.
+      await _until(
+        () async =>
+            relay.receivedEvents
+                .where((event) => event.kind == Deletion.kKind)
+                .length ==
+            2,
+      );
+    });
+
+    test('saves two changes asked at once one after the other', () async {
+      await Future.wait([
+        sync.setFavorite(pubkey: pubkey, id: id, favorite: true),
+        sync.trashItem(pubkey: pubkey, id: id),
+      ]);
+
+      expect(
+        await cipher(),
+        allOf(
+          containsPair('favorite', true),
+          containsPair('deletedDate', isNotNull),
+        ),
+      );
+    });
+
+    test('fails for an item or a vault gone', () async {
+      expect(
+        () => sync.trashItem(pubkey: pubkey, id: 'unknown'),
+        throwsA(
+          isA<CoreException>().having(
+            (error) => error.code,
+            'code',
+            'itemNotFound',
+          ),
+        ),
+      );
+      expect(
+        () => sync.trashItem(pubkey: 'unknown', id: id),
+        throwsA(
+          isA<CoreException>().having(
+            (error) => error.code,
+            'code',
+            'vaultNotFound',
+          ),
+        ),
+      );
+    });
   });
 
   test('shows the newest version of an item edited on two devices', () async {

@@ -1,0 +1,38 @@
+.filter-chips {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+/* Room around the chips for the focus ring, which the scrolling would clip. */
+.filter-chips-group {
+  display: flex;
+  gap: 8px;
+  width: max-content;
+  padding: 6px 16px;
+}
+
+.filter-chip {
+  flex: none;
+  min-width: 48px;
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--outline);
+  border-radius: 18px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.filter-chip[data-hovered]:not([data-selected]) {
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+}
+
+.filter-chip[data-selected] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}

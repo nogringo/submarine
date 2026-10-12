@@ -6,6 +6,7 @@
   "commandFillLogin": "Täytä tämän sivuston kirjautumistieto",
   "fill": "Täytä",
   "forThisSite": "Tälle sivustolle",
+  "itemFilters": "Suodattimet",
   "lockOnBrowserRestart": "Kun selain käynnistyy uudelleen",
   "nothingToFill": "Tällä sivulla ei ole täytettävää kirjautumislomaketta.",
   "removeLockPasswordBodyBrowser": "Laajennus ei enää kysy sitä. Holvien avaimet ovat tällä laitteella silloin vain selaimen tallennustilan varassa."

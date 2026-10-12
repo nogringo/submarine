@@ -4,16 +4,21 @@ import { useIntl } from "react-intl";
 import { IconButton } from "./Button";
 import "./Page.css";
 
-/** A page over the list, its back button above `children`, until `onBack` or Escape. */
+/**
+ * A page over the list, its back button and its `actions` above `children`, until `onBack` or
+ * Escape.
+ */
 export function Page({
   className,
   onBack,
   backRef,
+  actions,
   children,
 }: {
   className: string;
   onBack: () => void;
   backRef?: Ref<HTMLButtonElement>;
+  actions?: ReactNode;
   children: ReactNode;
 }) {
   const { formatMessage: t } = useIntl();
@@ -31,6 +36,7 @@ export function Page({
     <section className={`page ${className}`}>
       <div className="page-bar">
         <IconButton ref={backRef} icon={arrowBack} label={t({ id: "back" })} onPress={onBack} />
+        {actions && <div className="page-actions">{actions}</div>}
       </div>
       {children}
     </section>

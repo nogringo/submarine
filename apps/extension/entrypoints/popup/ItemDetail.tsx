@@ -1,34 +1,46 @@
-import { useEffect, useRef } from "react";
+import deleteForever from "@material-design-icons/svg/outlined/delete_forever.svg";
+import deleteOutline from "@material-design-icons/svg/round/delete_outline.svg";
+import restoreFromTrash from "@material-design-icons/svg/round/restore_from_trash.svg";
+import star from "@material-design-icons/svg/round/star.svg";
+import starOutline from "@material-design-icons/svg/round/star_outline.svg";
+import { useEffect, useRef, useState } from "react";
 import { useIntl } from "react-intl";
-import { FilledButton } from "@/components/Button";
+import { FilledButton, IconButton, OutlinedButton } from "@/components/Button";
+import { ConfirmDialog } from "@/components/Dialog";
 import { FieldCard } from "@/components/FieldCard";
 import { Icon } from "@/components/Icon";
 import { ItemIcon, itemTypeIcon, itemTypeLabel } from "@/components/ItemIcon";
+import { MoreMenu } from "@/components/MoreMenu";
 import { Page, PageHeader } from "@/components/Page";
 import { PasswordHistoryCard } from "@/components/PasswordHistoryCard";
 import { VaultBadge } from "@/components/VaultAvatar";
 import type { Cipher } from "@/lib/cipher";
-import type { Vault } from "@/lib/core";
+import { callCore, type Item, type Vault } from "@/lib/core";
 import { dayFormat } from "@/lib/i18n";
 import { customFields, historyRows, typeFields } from "@/lib/item-fields";
 import { useItem } from "@/lib/use-item";
 import "./ItemDetail.css";
 
 /**
- * An item over the list, read again at each `revision`, until `onBack` or Escape. With `onFill`, a
- * login for the page the popup opened over, which it fills.
+ * An item over the list, read again at each `revision`, until `onBack` or Escape, or `onLeft` once
+ * moved to the trash, out of it, or deleted. With `onFill`, a login for the page the popup opened
+ * over, which it fills. `onFailed` tells that a change could not be saved.
  */
 export function ItemDetail({
   vault,
   id,
   revision,
   onBack,
+  onLeft,
+  onFailed,
   onFill,
 }: {
   vault: Vault;
   id: string;
   revision: number;
   onBack: () => void;
+  onLeft: () => void;
+  onFailed: () => void;
   onFill?: () => void;
 }) {
   const { formatMessage: t } = useIntl();
@@ -38,13 +50,102 @@ export function ItemDetail({
     if (item === null) back.current?.focus();
   }, [item]);
   return (
-    <Page className="item-detail" onBack={onBack} backRef={back}>
+    <Page
+      className="item-detail"
+      onBack={onBack}
+      backRef={back}
+      actions={item && <Actions item={item} onLeft={onLeft} onFailed={onFailed} />}
+    >
       {item === null ? (
         <p className="item-detail-missing">{t({ id: "itemNotFound" })}</p>
       ) : (
         item && <Content cipher={item.cipher} vault={vault} onFill={onFill} />
       )}
     </Page>
+  );
+}
+
+/**
+ * As in the app: the favorite, and a menu that moves the item to the trash. In the trash: Restore,
+ * and a menu that deletes the item for good, once confirmed.
+ */
+function Actions({
+  item: { vault, id, cipher },
+  onLeft,
+  onFailed,
+}: {
+  item: Item;
+  onLeft: () => void;
+  onFailed: () => void;
+}) {
+  const { formatMessage: t } = useIntl();
+  const [saving, setSaving] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const save = async (change: () => Promise<null>, leaves: boolean) => {
+    setSaving(true);
+    try {
+      await change();
+      if (leaves) onLeft();
+    } catch {
+      onFailed();
+    } finally {
+      setSaving(false);
+    }
+  };
+  if (cipher.deletedDate) {
+    return (
+      <>
+        <MoreMenu
+          label={t({ id: "moreActions" })}
+          isDisabled={saving}
+          actions={[
+            {
+              id: "delete",
+              label: t({ id: "deletePermanently" }),
+              icon: deleteForever,
+              danger: true,
+            },
+          ]}
+          onAction={() => setConfirmingDelete(true)}
+        />
+        <ConfirmDialog
+          title={t({ id: "deleteItemTitle" })}
+          cancel={t({ id: "cancel" })}
+          confirm={t({ id: "delete" })}
+          onConfirm={() => void save(() => callCore("deleteItem", { vault, id }), true)}
+          isOpen={confirmingDelete}
+          onOpenChange={setConfirmingDelete}
+        >
+          <p>{t({ id: "deleteItemBody" })}</p>
+        </ConfirmDialog>
+        <OutlinedButton
+          isDisabled={saving}
+          onPress={() => void save(() => callCore("restoreItem", { vault, id }), true)}
+        >
+          <Icon src={restoreFromTrash} size={18} />
+          {t({ id: "restore" })}
+        </OutlinedButton>
+      </>
+    );
+  }
+  return (
+    <>
+      <IconButton
+        icon={cipher.favorite ? star : starOutline}
+        className={cipher.favorite ? "item-detail-favorite" : undefined}
+        label={t({ id: cipher.favorite ? "removeFromFavorites" : "addToFavorites" })}
+        isDisabled={saving}
+        onPress={() =>
+          void save(() => callCore("setFavorite", { vault, id, favorite: !cipher.favorite }), false)
+        }
+      />
+      <MoreMenu
+        label={t({ id: "moreActions" })}
+        isDisabled={saving}
+        actions={[{ id: "trash", label: t({ id: "moveToTrash" }), icon: deleteOutline }]}
+        onAction={() => void save(() => callCore("trashItem", { vault, id }), true)}
+      />
+    </>
   );
 }
 

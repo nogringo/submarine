@@ -14,16 +14,18 @@ import {
 } from "react-aria-components";
 import { useIntl } from "react-intl";
 import { IconButton } from "@/components/Button";
+import { FilterChips } from "@/components/FilterChips";
 import { Icon } from "@/components/Icon";
 import { SearchField } from "@/components/SearchField";
 import { SyncButton } from "@/components/SyncButton";
 import { SyncStatus } from "@/components/SyncStatus";
 import { AllVaultsAvatar, OpenVaultMark, VaultAvatar } from "@/components/VaultAvatar";
-import type { Vault } from "@/lib/core";
+import type { ItemFilter, Vault } from "@/lib/core";
 import { fillLogin } from "@/lib/fill";
+import { filterOptions } from "@/lib/item-filters";
 import { forgetOpenedItem, readOpenedItem, saveOpenedItem } from "@/lib/opened-item";
 import { anySyncing } from "@/lib/sync-status";
-import { useItems, usePageItems } from "@/lib/use-items";
+import { useItems, useItemTypes, usePageItems } from "@/lib/use-items";
 import { usePage } from "@/lib/use-page";
 import type { Sync } from "@/lib/use-sync";
 import "./Home.css";
@@ -33,6 +35,8 @@ import { Settings } from "./Settings";
 import { VaultSettings } from "./VaultSettings";
 
 const allVaults = "all";
+
+type MessageId = FormatjsIntl.Message["ids"];
 
 /** What shows over the list. */
 type Opened =
@@ -62,27 +66,29 @@ export function Home({
   const [selected, setSelected] = useState(allVaults);
   // Kept from a vault to another, as in the app.
   const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState<ItemFilter>("all");
   const vault = vaults.find((vault) => vault.pubkey === selected);
   const pubkeys = vault ? [vault.pubkey] : vaults.map((vault) => vault.pubkey);
   const title = vault?.name ?? t({ id: "allVaults" });
-  const items = useItems(vault?.pubkey, query, sync.revision);
+  const items = useItems(vault?.pubkey, query, filter, sync.revision);
+  const types = useItemTypes(vault?.pubkey, sync.revision);
   const searched = query.trim() !== "";
   const page = usePage();
-  const pageItems = usePageItems(vault?.pubkey, page === null ? null : page?.url, sync.revision);
-  // Counts the failures, for each to show its message for a while.
-  const [fillFailures, setFillFailures] = useState(0);
-  const [fillFailed, setFillFailed] = useState(false);
+  // Shown above all the items, not above a filter.
+  const pageUrl = page === null || filter !== "all" ? null : page?.url;
+  const pageItems = usePageItems(vault?.pubkey, pageUrl, sync.revision);
+  // A new one at each failure, for each to show its message for a while.
+  const [alert, setAlert] = useState<{ message: MessageId }>();
   useEffect(() => {
-    if (fillFailures === 0) return;
-    setFillFailed(true);
-    const hide = setTimeout(() => setFillFailed(false), 5000);
+    if (!alert) return;
+    const hide = setTimeout(() => setAlert(undefined), 5000);
     return () => clearTimeout(hide);
-  }, [fillFailures]);
+  }, [alert]);
   const fill = async ({ vault, id }: { vault: string; id: string }) => {
     if (!page) return;
     // Done, as in Bitwarden: the page shows what was filled.
     if (await fillLogin(page.tabId, vault, id)) window.close();
-    else setFillFailures((failures) => failures + 1);
+    else setAlert({ message: "nothingToFill" });
   };
   const fillable = (vault: string, id: string) =>
     !!pageItems?.some((item) => item.vault === vault && item.id === id);
@@ -225,6 +231,13 @@ export function Home({
           {/* What the popup opens for: typing finds the item at once. */}
           <SearchField value={query} onChange={setQuery} autoFocus inputRef={search} />
         </div>
+        {types && (
+          <FilterChips
+            options={filterOptions(types, filter)}
+            selected={filter}
+            onChange={setFilter}
+          />
+        )}
         <ItemList
           items={items}
           // What was searched for shows alone.
@@ -235,6 +248,7 @@ export function Home({
           showVault={!vault && vaults.length > 1}
           label={title}
           searched={searched}
+          filtered={filter !== "all"}
           neverSynced={pubkeys.some(
             (pubkey) => !sync.states.find((state) => state.pubkey === pubkey)?.lastSync,
           )}
@@ -253,6 +267,12 @@ export function Home({
           id={opened.id}
           revision={sync.revision}
           onBack={back}
+          onLeft={() => {
+            // Its row is gone from the list.
+            openedFrom.current = null;
+            back();
+          }}
+          onFailed={() => setAlert({ message: "itemSaveFailed" })}
           onFill={
             fillable(opened.vault.pubkey, opened.id)
               ? () => fill({ vault: opened.vault.pubkey, id: opened.id })
@@ -271,7 +291,7 @@ export function Home({
       {opened?.page === "settings" && <Settings hasLockPassword={hasLockPassword} onBack={back} />}
       {/* Kept in the page, empty, for a screen reader to read what it says once it does. */}
       <p role="alert" className="home-alert">
-        {fillFailed ? t({ id: "nothingToFill" }) : ""}
+        {alert ? t({ id: alert.message }) : ""}
       </p>
     </main>
   );

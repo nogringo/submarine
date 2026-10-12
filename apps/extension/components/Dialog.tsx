@@ -30,22 +30,34 @@ export function MessageDialog({
   );
 }
 
-/** A dialog asking to confirm an action that destroys, opened by a DialogTrigger. */
+/**
+ * A dialog asking to confirm an action that destroys, opened by a DialogTrigger, or by `isOpen` from
+ * a menu.
+ */
 export function ConfirmDialog({
   title,
   cancel,
   confirm,
   onConfirm,
+  isOpen,
+  onOpenChange,
   children,
 }: {
   title: string;
   cancel: string;
   confirm: string;
   onConfirm: () => void;
+  isOpen?: boolean;
+  onOpenChange?: (isOpen: boolean) => void;
   children: ReactNode;
 }) {
   return (
-    <ModalOverlay className="dialog-overlay" isDismissable>
+    <ModalOverlay
+      className="dialog-overlay"
+      isDismissable
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
+    >
       <Modal className="dialog-modal">
         <Dialog className="dialog" role="alertdialog">
           {({ close }) => (

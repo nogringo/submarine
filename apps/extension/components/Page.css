@@ -11,6 +11,13 @@
   padding: 8px 8px 0;
 }
 
+.page-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-inline-start: auto;
+}
+
 /* Positioned, for what is absolute inside to scroll with it, not to stretch the popup. */
 .page-content {
   position: relative;

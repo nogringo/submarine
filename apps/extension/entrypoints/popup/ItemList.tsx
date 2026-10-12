@@ -16,7 +16,8 @@ import "./ItemList.css";
 
 /**
  * The items, a row each with their vault's badge when `showVault`, or why there are none: what was
- * `searched` matches none, or the vaults have none. The `pageItems`, the logins for the page the
+ * `searched` matches none, or the vaults have none, or none the filter keeps once `filtered`. The
+ * `pageItems`, the logins for the page the
  * popup opened over, come first in a section of their own, where a row fills its login. Nothing
  * until both are read. A row opens its item, and copies the password of a login or the number of a
  * card.
@@ -28,6 +29,7 @@ export function ItemList({
   showVault,
   label,
   searched,
+  filtered,
   neverSynced,
   onOpen,
   onFill,
@@ -38,6 +40,7 @@ export function ItemList({
   showVault: boolean;
   label: string;
   searched: boolean;
+  filtered: boolean;
   neverSynced: boolean;
   onOpen: (item: ItemSummary) => void;
   onFill: (item: ItemSummary) => void;
@@ -45,7 +48,13 @@ export function ItemList({
   const { formatMessage: t } = useIntl();
   if (!items || !pageItems) return null;
   if (items.length === 0) {
-    const why = searched ? "noSearchResults" : neverSynced ? "lookingForItems" : "noItems";
+    const why = searched
+      ? "noSearchResults"
+      : neverSynced
+        ? "lookingForItems"
+        : filtered
+          ? "noItemsHere"
+          : "noItems";
     return <p className="item-list-empty">{t({ id: why })}</p>;
   }
   // A login for the page shows in both sections.

@@ -6,6 +6,7 @@
   "commandFillLogin": "Preencher a credencial deste site",
   "fill": "Preencher",
   "forThisSite": "Para este site",
+  "itemFilters": "Filtros",
   "lockOnBrowserRestart": "Ao reiniciar o navegador",
   "nothingToFill": "Não há nenhum formulário de login para preencher nesta página.",
   "removeLockPasswordBodyBrowser": "A extensão deixa de pedir essa senha. As chaves dos cofres neste dispositivo passam a depender só do armazenamento do navegador."

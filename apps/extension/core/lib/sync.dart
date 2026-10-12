@@ -5,6 +5,7 @@ import 'package:nostr_passwords/nostr_passwords.dart';
 import 'package:sembast/sembast.dart';
 import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
 
+import 'core.dart';
 import 'vaults.dart';
 
 /// Keeps the vaults of this device synced from their relays, download only,
@@ -108,25 +109,31 @@ class VaultSync {
       },
   ];
 
-  /// The items of the vault [pubkey], or of every vault, trash left out, by
-  /// name, those [query] finds as the app's search does, and only the logins
-  /// for the page at [url] when given. Those opened so far: the sync opens
-  /// what comes in.
+  /// The items of the vault [pubkey], or of every vault, that [filter] keeps
+  /// as the app's filters do, by name, those [query] finds as the app's search
+  /// does, and only the logins for the page at [url] when given. Those opened
+  /// so far: the sync opens what comes in.
+  ///
+  /// [filter] is `all`, the default, `favorites`, `trash`, or a type of
+  /// Bitwarden's. Only the trash keeps the items in it.
   Future<List<Map<String, Object?>>> items({
     String? pubkey,
     String query = '',
     String? url,
+    Object filter = 'all',
   }) async {
-    final vaults = [
-      for (final record in await _vaults.records())
-        if (_open(record) case final vault
-            when pubkey == null || vault.pubkey == pubkey)
-          vault,
-    ];
+    bool keeps(Cipher cipher) => switch (filter) {
+      'trash' => cipher.isDeleted,
+      _ when cipher.isDeleted => false,
+      'all' => true,
+      'favorites' => cipher.favorite,
+      final int type => cipher.type.value == type,
+      _ => throw CoreException('unknownFilter', '$filter'),
+    };
     final vaultOf = {
-      for (final vault in vaults)
+      for (final vault in await _vaultsOf(pubkey))
         for (final item in await vault.vault.openedItems())
-          if (!item.cipher.isDeleted) item: vault.pubkey,
+          if (keeps(item.cipher)) item: vault.pubkey,
     };
     final searched = searchItems(vaultOf.keys, query);
     final found = (url == null ? searched : itemsForUrl(searched, url))
@@ -144,23 +151,76 @@ class VaultSync {
     ];
   }
 
-  /// The item [id] of the vault [pubkey], its cipher in Bitwarden's JSON, or
-  /// null once in the trash or gone.
+  /// The types of the items of the vault [pubkey], or of every vault, trash
+  /// left out: those worth a filter.
+  Future<List<int>> itemTypes({String? pubkey}) async => {
+    for (final vault in await _vaultsOf(pubkey))
+      for (final item in await vault.vault.openedItems())
+        if (!item.cipher.isDeleted) item.cipher.type.value,
+  }.toList();
+
+  /// The item [id] of the vault [pubkey], its cipher in Bitwarden's JSON,
+  /// in the trash or not, or null once gone.
   Future<Map<String, Object?>?> item({
     required String pubkey,
     required String id,
   }) async {
-    for (final record in await _vaults.records()) {
-      final vault = _open(record);
-      if (vault.pubkey != pubkey) continue;
+    for (final vault in await _vaultsOf(pubkey)) {
       for (final item in await vault.vault.openedItems()) {
-        if (item.id == id && !item.cipher.isDeleted) {
+        if (item.id == id) {
           return {'vault': pubkey, 'id': id, 'cipher': item.cipher.toJson()};
         }
       }
     }
     return null;
   }
+
+  /// Adds the item [id] of the vault [pubkey] to the favorites, or takes it
+  /// out.
+  Future<void> setFavorite({
+    required String pubkey,
+    required String id,
+    required bool favorite,
+  }) => _change(
+    pubkey,
+    id,
+    (vault, item) => vault.updateItem(
+      item,
+      Cipher.fromJson(item.current.data)..favorite = favorite,
+    ),
+  );
+
+  /// Moves the item [id] of the vault [pubkey] to the trash, where it stays
+  /// until [restoreItem] or [deleteItem].
+  Future<void> trashItem({required String pubkey, required String id}) =>
+      _change(pubkey, id, (vault, item) => vault.trashItem(item));
+
+  Future<void> restoreItem({required String pubkey, required String id}) =>
+      _change(pubkey, id, (vault, item) => vault.restoreItem(item));
+
+  /// Deletes the item [id] of the vault [pubkey] for good, see
+  /// [Vault.deleteItem].
+  Future<void> deleteItem({required String pubkey, required String id}) =>
+      _change(pubkey, id, (vault, item) => vault.deleteItem(item));
+
+  Future<void> _change(
+    String pubkey,
+    String id,
+    Future<void> Function(Vault vault, Item item) change,
+  ) async {
+    final vaults = await _vaultsOf(pubkey);
+    if (vaults.isEmpty) throw CoreException('vaultNotFound');
+    await vaults.single.change(id, change);
+    onChanged();
+  }
+
+  /// The vault [pubkey], none once removed, or every vault.
+  Future<List<_SyncedVault>> _vaultsOf(String? pubkey) async => [
+    for (final record in await _vaults.records())
+      if (_open(record) case final vault
+          when pubkey == null || vault.pubkey == pubkey)
+        vault,
+  ];
 
   _SyncedVault _open(VaultRecord record) {
     final signer = ndk.config.eventSignerFactory.create(
@@ -235,6 +295,25 @@ class _SyncedVault {
   }
 
   var _closed = false;
+
+  Future<void> _writing = Future.value();
+
+  /// Runs [change] on the item [id] once the changes asked before it are
+  /// saved: built on the same version, two changes would fork the item.
+  Future<void> change(
+    String id,
+    Future<void> Function(Vault vault, Item item) change,
+  ) {
+    final done = _writing.then((_) async {
+      final item = (await vault.openedItems())
+          .where((item) => item.id == id)
+          .firstOrNull;
+      if (item == null) throw CoreException('itemNotFound');
+      await change(vault, item);
+    });
+    _writing = done.then((_) {}, onError: (_) {});
+    return done;
+  }
 
   /// Stops for good, as the sync would fill the cache again.
   Future<void> close() async {

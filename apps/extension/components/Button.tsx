@@ -32,15 +32,21 @@ export function IconButton({
   icon,
   iconSize,
   label,
+  className,
   ...props
-}: Omit<ButtonProps, "children"> & {
+}: Omit<ButtonProps, "children" | "className"> & {
   icon: string;
   iconSize?: number;
   label: string;
+  className?: string;
   ref?: Ref<HTMLButtonElement>;
 }) {
   return (
-    <Button {...props} className="button icon-button" aria-label={label}>
+    <Button
+      {...props}
+      className={className ? `button icon-button ${className}` : "button icon-button"}
+      aria-label={label}
+    >
       <Icon src={icon} size={iconSize} />
     </Button>
   );

@@ -48,6 +48,12 @@ export interface Item {
   cipher: Cipher;
 }
 
+/**
+ * The lists of the app's filters: every item but the trash, the favorites, the items of one of
+ * Bitwarden's cipher types, or the trash. Only the trash lists the items in it.
+ */
+export type ItemFilter = "all" | "favorites" | "trash" | number;
+
 /** Where the sync of a vault stands. */
 export interface SyncState {
   pubkey: string;
@@ -121,12 +127,25 @@ export interface CoreMethods {
   /** Of the vaults syncing, while a popup holds {@link syncPort} open. */
   syncStates: { args: Record<string, never>; result: SyncState[] };
   /**
-   * Of one vault, or of all without one, trash left out, by name, as the app's search finds them.
-   * Only the logins for the page at `url` with one, as Bitwarden matches them.
+   * Of one vault, or of all without one, those `filter` keeps, every item but the trash by default,
+   * by name, as the app's search finds them. Only the logins for the page at `url` with one, as
+   * Bitwarden matches them.
    */
-  items: { args: { vault?: string; query?: string; url?: string }; result: ItemSummary[] };
-  /** Null once in the trash or gone. */
+  items: {
+    args: { vault?: string; query?: string; url?: string; filter?: ItemFilter };
+    result: ItemSummary[];
+  };
+  /** The types of the items of one vault, or of all without one, trash left out. */
+  itemTypes: { args: { vault?: string }; result: number[] };
+  /** In the trash or not. Null once gone. */
   item: { args: { vault: string; id: string }; result: Item | null };
+  /** Adds an item to the favorites, or takes it out. */
+  setFavorite: { args: { vault: string; id: string; favorite: boolean }; result: null };
+  /** Moves an item to the trash, where it stays until restored or deleted. */
+  trashItem: { args: { vault: string; id: string }; result: null };
+  restoreItem: { args: { vault: string; id: string }; result: null };
+  /** Deletes an item for good, on every device: asks its relays to delete it too. */
+  deleteItem: { args: { vault: string; id: string }; result: null };
   /** The code of a verification key at `at`, in milliseconds, and how long a code lasts, in seconds. */
   totp: { args: { key: string; at: number }; result: { code: string; period: number } };
 }

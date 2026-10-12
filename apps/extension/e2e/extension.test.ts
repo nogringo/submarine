@@ -374,6 +374,88 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     expect(await popup.$(".item-detail")).toBeNull();
   });
 
+  /** Waits for the rows of the list to name `names`, joined by commas. */
+  const rowNames = (names: string) =>
+    extension.popup.waitForFunction(
+      (names) =>
+        [...document.querySelectorAll(".item-row-name")].map((name) => name.textContent).join() ===
+        names,
+      {},
+      names,
+    );
+
+  it("filters the items with the app's chips, the trash among them", async () => {
+    const { popup } = extension;
+    expect(
+      await popup.$$eval(".filter-chip", (chips) => chips.map((chip) => chip.textContent)),
+    ).toEqual(["All", "Favorites", "Logins", "Cards", "Secure notes", "Trash"]);
+    await extension.click(".filter-chip::-p-text(Trash)");
+    await rowNames("Old bank");
+    expect(await violations(popup)).toEqual([]);
+    await extension.click(".filter-chip::-p-text(Cards)");
+    await rowNames("Visa");
+    await extension.click(".filter-chip::-p-text(Favorites)");
+    await popup.waitForSelector(`::-p-text(${english.noItemsHere})`);
+    await extension.click(".filter-chip::-p-text(All)");
+    await rowNames("GitHub,Visa,wifi");
+  });
+
+  it("adds an item to the favorites from its page", async () => {
+    const { popup } = extension;
+    await extension.click(".item-row[aria-label=wifi]");
+    await popup.waitForFunction(() => document.activeElement?.textContent === "wifi");
+    await extension.click("button[aria-label='Add to favorites']");
+    await popup.waitForSelector("button[aria-label='Remove from favorites']");
+    expect(await violations(popup)).toEqual([]);
+    await extension.press("Escape");
+    await popup.waitForSelector(".item-detail", { hidden: true });
+    await extension.click(".filter-chip::-p-text(Favorites)");
+    await rowNames("wifi");
+    await extension.click(".filter-chip::-p-text(All)");
+    await rowNames("GitHub,Visa,wifi");
+  });
+
+  it("moves an item to the trash from its menu, then out of it", async () => {
+    const { popup } = extension;
+    await extension.click(".item-row[aria-label=wifi]");
+    await popup.waitForFunction(() => document.activeElement?.textContent === "wifi");
+    await extension.click("button[aria-label='More actions']");
+    await popup.waitForSelector("[role=menu]");
+    expect(await violations(popup)).toEqual([]);
+    await extension.click("[role=menuitem]::-p-text(Move to trash)");
+    await popup.waitForSelector(".item-detail", { hidden: true });
+    await rowNames("GitHub,Visa");
+    await popup.waitForFunction(() => document.activeElement?.matches(".search-field-input"));
+    await extension.click(".filter-chip::-p-text(Trash)");
+    await rowNames("Old bank,wifi");
+    await extension.click(".item-row[aria-label=wifi]");
+    await extension.click("button::-p-text(Restore)");
+    await popup.waitForSelector(".item-detail", { hidden: true });
+    await rowNames("Old bank");
+  });
+
+  it("deletes an item in the trash for good, once confirmed", async () => {
+    const { popup } = extension;
+    const deleteFromMenu = async () => {
+      await extension.click("button[aria-label='More actions']");
+      await extension.click("[role=menuitem]::-p-text(Delete permanently)");
+      await popup.waitForSelector(`[role=alertdialog]::-p-text(${english.deleteItemTitle})`);
+    };
+    await extension.click(".item-row[aria-label='Old bank']");
+    await popup.waitForFunction(() => document.activeElement?.textContent === "Old bank");
+    await deleteFromMenu();
+    expect(await violations(popup)).toEqual([]);
+    await extension.press("Escape");
+    await popup.waitForSelector("[role=alertdialog]", { hidden: true });
+    expect(await popup.$(".item-detail")).not.toBeNull();
+    await deleteFromMenu();
+    await extension.click("[role=alertdialog] button::-p-text(Delete)");
+    await popup.waitForSelector(".item-detail", { hidden: true });
+    await popup.waitForSelector(`::-p-text(${english.noItemsHere})`);
+    await extension.click(".filter-chip::-p-text(All)");
+    await rowNames("GitHub,Visa,wifi");
+  });
+
   it("syncs again at once from the sync button, which waits meanwhile", async () => {
     const { popup } = extension;
     const button = "button[aria-label='Sync now']";

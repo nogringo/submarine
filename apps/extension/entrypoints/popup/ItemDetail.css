@@ -11,6 +11,10 @@
   gap: 6px;
 }
 
+.button.icon-button.item-detail-favorite {
+  color: var(--signal);
+}
+
 .item-detail .page-content > .button.filled {
   align-self: flex-start;
 }

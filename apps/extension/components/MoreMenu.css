@@ -1,0 +1,44 @@
+.more-menu-popover {
+  min-width: 112px;
+  overflow: auto;
+  border-radius: 12px;
+  background: var(--raised);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.24);
+}
+
+.more-menu {
+  padding: 8px 0;
+  outline: none;
+}
+
+.more-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 48px;
+  padding: 0 16px;
+  color: var(--text);
+  font-size: 15px;
+  white-space: nowrap;
+  cursor: pointer;
+  outline: none;
+}
+
+.more-menu-item .icon {
+  color: var(--muted);
+}
+
+.more-menu-item.danger,
+.more-menu-item.danger .icon {
+  color: var(--danger);
+}
+
+.more-menu-item[data-hovered],
+.more-menu-item[data-focused] {
+  background: color-mix(in srgb, var(--text) 5%, transparent);
+}
+
+.more-menu-item[data-focus-visible] {
+  outline: 2px solid var(--text);
+  outline-offset: -2px;
+}

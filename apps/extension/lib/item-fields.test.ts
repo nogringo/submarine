@@ -24,8 +24,10 @@ function cipher(parts: Partial<Cipher>): Cipher {
     driversLicense: null,
     passport: null,
     passwordHistory: [],
+    favorite: false,
     creationDate: null,
     revisionDate: null,
+    deletedDate: null,
     ...parts,
   };
 }

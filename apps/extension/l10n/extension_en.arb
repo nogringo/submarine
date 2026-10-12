@@ -20,6 +20,10 @@
   "@forThisSite": {
     "description": "Heading of the logins for the page the popup opened over, above the list of all items. The extension does not fill them in yet."
   },
+  "itemFilters": "Filters",
+  "@itemFilters": {
+    "description": "Name read by a screen reader of the row of chips filtering the items: all, favorites, each type, trash."
+  },
   "lockOnBrowserRestart": "On browser restart",
   "@lockOnBrowserRestart": {
     "description": "Lock delay: the vaults lock only once the browser closes and starts again. Stands for the app's \"On app restart\"."

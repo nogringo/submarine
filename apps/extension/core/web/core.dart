@@ -146,7 +146,39 @@ void main() {
         pubkey: args['vault'] as String?,
         query: args['query'] as String? ?? '',
         url: args['url'] as String?,
+        filter: args['filter'] ?? 'all',
       ),
+      'itemTypes': (args) async =>
+          (await sync()).itemTypes(pubkey: args['vault'] as String?),
+      'setFavorite': (args) async {
+        await (await sync()).setFavorite(
+          pubkey: args['vault'] as String,
+          id: args['id'] as String,
+          favorite: args['favorite'] as bool,
+        );
+        return null;
+      },
+      'trashItem': (args) async {
+        await (await sync()).trashItem(
+          pubkey: args['vault'] as String,
+          id: args['id'] as String,
+        );
+        return null;
+      },
+      'restoreItem': (args) async {
+        await (await sync()).restoreItem(
+          pubkey: args['vault'] as String,
+          id: args['id'] as String,
+        );
+        return null;
+      },
+      'deleteItem': (args) async {
+        await (await sync()).deleteItem(
+          pubkey: args['vault'] as String,
+          id: args['id'] as String,
+        );
+        return null;
+      },
       'totp': (args) async => totp(
         args['key'] as String,
         DateTime.fromMillisecondsSinceEpoch(args['at'] as int),

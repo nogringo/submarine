@@ -13,9 +13,12 @@ export interface Cipher {
   driversLicense: DriversLicense | null;
   passport: Passport | null;
   passwordHistory: PasswordHistory[];
+  favorite: boolean;
   /** In ISO 8601. */
   creationDate: string | null;
   revisionDate: string | null;
+  /** Set while in the trash. */
+  deletedDate: string | null;
 }
 
 export interface Login {

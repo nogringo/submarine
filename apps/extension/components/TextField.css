@@ -89,6 +89,11 @@
   border-color: var(--text);
 }
 
+/* Its focused outline is the indicator, as the app's fields. */
+.text-field-box[data-focus-visible] {
+  outline: none;
+}
+
 .text-field[data-invalid] .text-field-outline {
   border-color: var(--danger);
 }

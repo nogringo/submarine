@@ -20,6 +20,7 @@
     "test": "vitest run --project unit",
     "test:e2e": "pnpm core && wxt build --mode e2e && wxt build -b firefox --mode e2e && vitest run --project e2e",
     "e2e:browsers": "puppeteer browsers install chrome && puppeteer browsers install firefox",
+    "screenshots": "pnpm core && wxt build --mode e2e && node e2e/screenshots.ts",
     "postinstall": "wxt prepare"
   },
   "dependencies": {

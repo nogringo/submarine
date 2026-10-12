@@ -28,8 +28,11 @@ jobs:
   cli:
     uses: ./.github/workflows/cli.yml
 
+  extension:
+    uses: ./.github/workflows/extension.yml
+
   release:
-    needs: [ci, linux, windows, macos, android, cli]
+    needs: [ci, linux, windows, macos, android, cli, extension]
     runs-on: ubuntu-latest
     permissions:
       contents: write

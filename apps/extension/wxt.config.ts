@@ -55,6 +55,7 @@ export default defineConfig({
     ],
     excludeSources: [
       "apps/extension/e2e/**",
+      "apps/extension/store/**",
       "apps/extension/core/test/**",
       "apps/extension/public/core.js*",
     ],

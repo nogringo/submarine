@@ -3,7 +3,10 @@
   "@@x-template": "extension_en.arb",
   "allItems": "Alle Einträge",
   "back": "Zurück",
+  "commandFillLogin": "Zugangsdaten für diese Website ausfüllen",
+  "fill": "Ausfüllen",
   "forThisSite": "Für diese Website",
   "lockOnBrowserRestart": "Beim Neustart des Browsers",
+  "nothingToFill": "Auf dieser Seite gibt es kein Anmeldeformular zum Ausfüllen.",
   "removeLockPasswordBodyBrowser": "Die Erweiterung fragt nicht mehr danach. Die Tresorschlüssel auf diesem Gerät sind dann nur noch durch den Speicher des Browsers geschützt."
 }

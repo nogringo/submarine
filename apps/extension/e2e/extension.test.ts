@@ -2,7 +2,9 @@ import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { generateSecretKey, nip19 } from "nostr-tools";
 import * as nip49 from "nostr-tools/nip49";
+import type { Page } from "puppeteer";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { fillPage } from "../lib/fill-page";
 import { violations } from "./axe";
 import { type BrowserName, type Extension, launch, openPopupOver } from "./extension";
 import { publishItems } from "./vault-items";
@@ -76,14 +78,16 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     expect(JSON.parse(reply)).toEqual({ error: { code: "unknownMethod", message: "unknown" } });
   });
 
-  it("opens with a keyboard shortcut, which the browser gave it", async () => {
-    const shortcut = await extension.popup.evaluate(async () => {
+  it("opens and fills with keyboard shortcuts, which the browser gave it", async () => {
+    const shortcuts = await extension.popup.evaluate(async () => {
       type Api = { commands: { getAll(): Promise<{ name?: string; shortcut?: string }[]> } };
       const globals = globalThis as unknown as { browser?: Api; chrome: Api };
       const commands = await (globals.browser ?? globals.chrome).commands.getAll();
-      return commands.find((command) => command.name === "_execute_action")?.shortcut;
+      return ["_execute_action", "fill_login"].map(
+        (name) => commands.find((command) => command.name === name)?.shortcut,
+      );
     });
-    expect(shortcut).toBeTruthy();
+    expect(shortcuts).toEqual([expect.stringMatching(/Y|U/), expect.stringContaining("L")]);
   });
 
   it("refuses what is not a vault key", async () => {
@@ -141,10 +145,75 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
         { timeout: 20_000 },
       );
       expect(await violations(popup)).toEqual([]);
+      // The page has no form.
+      await popup.locator(".item-row button::-p-text(Fill)").click();
+      const alert = await popup.waitForSelector("[role=alert]:not(:empty)");
+      expect(await alert?.evaluate((alert) => alert.textContent)).toBe(
+        "No sign-in form to fill on this page.",
+      );
+      expect(await violations(popup)).toEqual([]);
     } finally {
-      await popup.close();
+      if (!popup.isClosed()) await popup.close();
       await page.close();
       await extension.popup.bringToFront();
+    }
+  });
+
+  it.skipIf(name === "firefox")("fills the login into the page, then closes", async () => {
+    const { page, popup } = await openPopupOver(
+      extension.browser,
+      "https://github.com/login",
+      signInForm,
+    );
+    try {
+      const closed = new Promise((resolve) => popup.once("close", resolve));
+      await popup.locator(".item-row button::-p-text(Fill)").click();
+      await closed;
+      expect(await fieldValues(page)).toEqual({
+        search: "",
+        login: "alice",
+        decoy: "",
+        password: "hunter2",
+      });
+    } finally {
+      if (!popup.isClosed()) await popup.close();
+      await page.close();
+      await extension.popup.bringToFront();
+    }
+  });
+
+  it("fills the fields a person sees, of the sign-in form", async () => {
+    const page = await extension.browser.newPage();
+    try {
+      const fill = async (html: string, username = "alice") => {
+        await page.setContent(html);
+        const origin = await page.evaluate(() => location.origin);
+        const filled = await page.evaluate(fillPage, origin, username, "hunter2");
+        return { filled, ...(await fieldValues(page)) };
+      };
+      expect(await fill(signInForm)).toEqual({
+        filled: true,
+        search: "",
+        login: "alice",
+        decoy: "",
+        password: "hunter2",
+      });
+      // A sign-in that asks for the username first.
+      expect(
+        await fill(
+          '<input name="search"><form><input name="login" autocomplete="username"></form>',
+        ),
+      ).toEqual({ filled: true, search: "", login: "alice" });
+      expect(await fill('<input name="search">')).toEqual({ filled: false, search: "" });
+      await page.setContent(signInForm);
+      expect(await page.evaluate(fillPage, "https://other.example", "alice", "hunter2")).toBe(
+        false,
+      );
+      expect(await fieldValues(page)).toEqual({ search: "", login: "", decoy: "", password: "" });
+    } finally {
+      await page.close();
+      // Firefox shows the popup's tab again by itself, and refuses to bring an extension page front.
+      if (name === "chrome") await extension.popup.bringToFront();
     }
   });
 
@@ -671,6 +740,22 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s in French", (name) => {
     expect(await extension.popup.evaluate(() => document.documentElement.lang)).toBe("fr");
   });
 });
+
+/** A search field above a sign-in form, with a field hidden from people before its password. */
+const signInForm = `
+  <input name="search" placeholder="Search">
+  <form>
+    <input name="login" type="email">
+    <input name="decoy" style="display: none">
+    <input name="password" type="password">
+  </form>`;
+
+/** The values of the page's fields, by name. */
+function fieldValues(page: Page): Promise<Record<string, string>> {
+  return page.$$eval("input", (inputs) =>
+    Object.fromEntries(inputs.map((input) => [input.name, input.value])),
+  );
+}
 
 function appArb(locale: string) {
   return resolve(import.meta.dirname, `../../app/lib/l10n/app_${locale}.arb`);

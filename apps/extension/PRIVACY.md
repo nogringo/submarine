@@ -2,7 +2,7 @@
 
 Last updated: October 12, 2026.
 
-Submarine is a password manager. Its browser extension shows the passwords, cards and notes of your vaults, and copies them for you. This policy explains what the extension does with your data. In short: there is no Submarine server, and the extension sends nothing to its developers.
+Submarine is a password manager. Its browser extension shows the passwords, cards and notes of your vaults, copies them for you, and fills your logins into websites. This policy explains what the extension does with your data. In short: there is no Submarine server, and the extension sends nothing to its developers.
 
 ## What stays in your browser
 
@@ -20,11 +20,13 @@ To download your vaults, the extension connects to their relays: the relays each
 
 The extension only downloads: it never sends your items, and it creates, changes or deletes nothing on the relays.
 
+When you ask it to fill a login, from its window or with its keyboard shortcut, the extension writes the username and password into the sign-in form of the current page, and only if the page's address matches the login. The website receives them once you sign in, as when you type them.
+
 ## What the extension does not do
 
 - It has no account and no server of its own: its developers receive no data from it.
 - It has no analytics, no tracking and no ads.
-- It does not read the content of the pages you visit. As you open it, it reads the address of the current tab to show the logins for that site first. The address stays in your browser.
+- It reads nothing of the pages you visit, except the fields of the current page when you ask it to fill a login, to find where the username and password go. As you open it, it reads the address of the current tab to show the logins for that site first. Neither leaves your browser.
 - It writes to the clipboard only what you copy, and empties the clipboard after the delay chosen in the settings. It never reads the clipboard.
 
 ## Permissions
@@ -32,7 +34,8 @@ The extension only downloads: it never sends your items, and it creates, changes
 - Storage: keeps your vaults and settings in your browser, as described above.
 - Clipboard write: copies a password, a code or any other field when you ask.
 - Alarms: locks the vaults once the lock delay has passed.
-- Active tab: reads the address of the tab you open the extension over, and only that one, to show the logins for that site first.
+- Active tab: gives the extension the tab you open it over or use its shortcut on, and only that one: its address, to show the logins for that site first, and its page, to fill a login when you ask.
+- Scripting: fills a login into that tab's page when you ask.
 - Offscreen documents, in Chrome only: empties the clipboard after the clipboard delay, even with the extension's window closed.
 
 ## Changes and contact

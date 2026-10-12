@@ -133,16 +133,17 @@ function chromeClipboardReader(browser: Browser, popup: Page): () => Promise<str
 }
 
 /**
- * Opens a tab on `url`, an empty page whatever its host, then the popup over it as from the
+ * Opens a tab on `url`, the page `body` whatever its host, then the popup over it as from the
  * extension's icon. Chrome only: WebDriver BiDi cannot trigger an extension's action.
  */
 export async function openPopupOver(
   browser: Browser,
   url: string,
+  body = "",
 ): Promise<{ page: Page; popup: Page }> {
   const page = await browser.newPage();
   await page.setRequestInterception(true);
-  page.on("request", (request) => void request.respond({ contentType: "text/html", body: "" }));
+  page.on("request", (request) => void request.respond({ contentType: "text/html", body }));
   await page.goto(url);
   const [extension] = (await browser.extensions()).values();
   if (!extension) throw new Error("The extension is not installed");

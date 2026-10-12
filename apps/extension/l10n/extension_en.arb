@@ -8,6 +8,14 @@
   "@back": {
     "description": "Label of the button going back from an item to the list."
   },
+  "commandFillLogin": "Fill the login for this site",
+  "@commandFillLogin": {
+    "description": "Name of the keyboard shortcut, in the browser's settings, that fills the first login for the current site into its page."
+  },
+  "fill": "Fill",
+  "@fill": {
+    "description": "Button filling a login into the sign-in form of the page the popup opened over."
+  },
   "forThisSite": "For this site",
   "@forThisSite": {
     "description": "Heading of the logins for the page the popup opened over, above the list of all items. The extension does not fill them in yet."
@@ -15,6 +23,10 @@
   "lockOnBrowserRestart": "On browser restart",
   "@lockOnBrowserRestart": {
     "description": "Lock delay: the vaults lock only once the browser closes and starts again. Stands for the app's \"On app restart\"."
+  },
+  "nothingToFill": "No sign-in form to fill on this page.",
+  "@nothingToFill": {
+    "description": "Shown when filling a login found no field to fill on the page, such as a page that is not the sign-in page."
   },
   "removeLockPasswordBodyBrowser": "The extension no longer asks for it. The vault keys on this device then rest on the browser's storage only.",
   "@removeLockPasswordBodyBrowser": {

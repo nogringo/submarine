@@ -3,7 +3,10 @@
   "@@x-template": "extension_en.arb",
   "allItems": "Tutti gli elementi",
   "back": "Indietro",
+  "commandFillLogin": "Compila il login di questo sito",
+  "fill": "Compila",
   "forThisSite": "Per questo sito",
   "lockOnBrowserRestart": "Al riavvio del browser",
+  "nothingToFill": "Nessun modulo di accesso da compilare in questa pagina.",
   "removeLockPasswordBodyBrowser": "L'estensione non la chiederà più. Le chiavi delle casseforti su questo dispositivo saranno protette solo dall'archivio del browser."
 }

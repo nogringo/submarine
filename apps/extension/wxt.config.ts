@@ -12,13 +12,19 @@ export default defineConfig({
       "clipboardWrite",
       // Locks the vaults once unused for the timeout, the popup closed.
       "alarms",
-      // The address of the tab the popup opens over, for its logins. No warning at install.
+      // The tab the popup or the shortcut acts on: its address, and filling its page. No warning at install.
       "activeTab",
+      "scripting",
       ...(browser === "firefox" ? [] : ["offscreen"]),
     ],
     commands: {
       // Bitwarden's and Proton Pass's. Firefox opens its downloads with Ctrl+Shift+Y on Linux.
       _execute_action: { suggested_key: { default: "Ctrl+Shift+Y", linux: "Ctrl+Shift+U" } },
+      // Bitwarden's. Chrome keeps Command+Shift+L for itself on macOS.
+      fill_login: {
+        suggested_key: { default: "Ctrl+Shift+L", mac: "MacCtrl+Shift+L" },
+        description: "__MSG_commandFillLogin__",
+      },
     },
     // Argon2id, which protects the key of the device with the lock password, is WebAssembly.
     content_security_policy: {

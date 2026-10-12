@@ -137,7 +137,12 @@ export async function callCore<M extends keyof CoreMethods>(
   args: CoreMethods[M]["args"],
 ): Promise<CoreMethods[M]["result"]> {
   const request: CoreRequest = { method, args };
-  const reply: CoreReply = JSON.parse(await browser.runtime.sendMessage(request));
-  if ("error" in reply) throw new CoreError(reply.error.code, reply.error.message);
-  return reply.result as CoreMethods[M]["result"];
+  return resultOf<M>(await browser.runtime.sendMessage(request));
+}
+
+/** The result of a reply of the core, or its error thrown. */
+export function resultOf<M extends keyof CoreMethods>(reply: string): CoreMethods[M]["result"] {
+  const parsed: CoreReply = JSON.parse(reply);
+  if ("error" in parsed) throw new CoreError(parsed.error.code, parsed.error.message);
+  return parsed.result as CoreMethods[M]["result"];
 }

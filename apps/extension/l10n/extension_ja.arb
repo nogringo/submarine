@@ -3,7 +3,10 @@
   "@@x-template": "extension_en.arb",
   "allItems": "すべてのアイテム",
   "back": "戻る",
+  "commandFillLogin": "このサイトのログインを入力",
+  "fill": "入力",
   "forThisSite": "このサイト用",
   "lockOnBrowserRestart": "ブラウザの再起動時",
+  "nothingToFill": "このページには入力できるログインフォームがありません。",
   "removeLockPasswordBodyBrowser": "拡張機能でパスワードを求められなくなります。このデバイス上の保管庫の鍵は、ブラウザのストレージだけで保護されるようになります。"
 }

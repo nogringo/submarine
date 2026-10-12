@@ -1,5 +1,5 @@
 import type { Browser } from "wxt/browser";
-import { type CoreReply, type CoreRequest, syncPort } from "./core";
+import { type CoreMethods, type CoreReply, type CoreRequest, resultOf, syncPort } from "./core";
 import { nostrCrypto } from "./nostr-crypto";
 
 export interface SubmarineCore {
@@ -49,6 +49,15 @@ export function loadCore(): SubmarineCore {
   globals.importScripts?.("/core.js");
   if (!globals.submarineCore) throw new Error("The Dart core did not load");
   return globals.submarineCore;
+}
+
+/** Calls a method of the core from the background, where it runs. */
+export async function callLoadedCore<M extends keyof CoreMethods>(
+  core: SubmarineCore,
+  method: M,
+  args: CoreMethods[M]["args"],
+): Promise<CoreMethods[M]["result"]> {
+  return resultOf<M>(await core.call(method, JSON.stringify(args)));
 }
 
 /**

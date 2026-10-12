@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useIntl } from "react-intl";
+import { FilledButton } from "@/components/Button";
 import { FieldCard } from "@/components/FieldCard";
 import { Icon } from "@/components/Icon";
 import { ItemIcon, itemTypeIcon, itemTypeLabel } from "@/components/ItemIcon";
@@ -13,17 +14,22 @@ import { customFields, historyRows, typeFields } from "@/lib/item-fields";
 import { useItem } from "@/lib/use-item";
 import "./ItemDetail.css";
 
-/** An item over the list, read again at each `revision`, until `onBack` or Escape. */
+/**
+ * An item over the list, read again at each `revision`, until `onBack` or Escape. With `onFill`, a
+ * login for the page the popup opened over, which it fills.
+ */
 export function ItemDetail({
   vault,
   id,
   revision,
   onBack,
+  onFill,
 }: {
   vault: Vault;
   id: string;
   revision: number;
   onBack: () => void;
+  onFill?: () => void;
 }) {
   const { formatMessage: t } = useIntl();
   const item = useItem(vault.pubkey, id, revision);
@@ -36,13 +42,13 @@ export function ItemDetail({
       {item === null ? (
         <p className="item-detail-missing">{t({ id: "itemNotFound" })}</p>
       ) : (
-        item && <Content cipher={item.cipher} vault={vault} />
+        item && <Content cipher={item.cipher} vault={vault} onFill={onFill} />
       )}
     </Page>
   );
 }
 
-function Content({ cipher, vault }: { cipher: Cipher; vault: Vault }) {
+function Content({ cipher, vault, onFill }: { cipher: Cipher; vault: Vault; onFill?: () => void }) {
   const intl = useIntl();
   const { formatMessage: t, formatDate } = intl;
   const fields = typeFields(cipher, intl);
@@ -64,6 +70,7 @@ function Content({ cipher, vault }: { cipher: Cipher; vault: Vault }) {
           </span>
         </div>
       </PageHeader>
+      {onFill && <FilledButton onPress={onFill}>{t({ id: "fill" })}</FilledButton>}
       {fields.length > 0 && <FieldCard rows={fields} />}
       {notes && <FieldCard rows={[{ label: t({ id: "notes" }), value: notes, kind: "text" }]} />}
       {custom.length > 0 && (

@@ -8,6 +8,7 @@ import {
   Virtualizer,
 } from "react-aria-components";
 import { useIntl } from "react-intl";
+import { TextButton } from "@/components/Button";
 import { CopyButton } from "@/components/CopyButton";
 import { ItemIcon } from "@/components/ItemIcon";
 import { callCore, type ItemSummary, type Vault } from "@/lib/core";
@@ -16,8 +17,9 @@ import "./ItemList.css";
 /**
  * The items, a row each with their vault's badge when `showVault`, or why there are none: what was
  * `searched` matches none, or the vaults have none. The `pageItems`, the logins for the page the
- * popup opened over, come first in a section of their own. Nothing until both are read. A row opens
- * its item, and copies the password of a login or the number of a card.
+ * popup opened over, come first in a section of their own, where a row fills its login. Nothing
+ * until both are read. A row opens its item, and copies the password of a login or the number of a
+ * card.
  */
 export function ItemList({
   items,
@@ -28,6 +30,7 @@ export function ItemList({
   searched,
   neverSynced,
   onOpen,
+  onFill,
 }: {
   items: ItemSummary[] | undefined;
   pageItems: ItemSummary[] | undefined;
@@ -37,6 +40,7 @@ export function ItemList({
   searched: boolean;
   neverSynced: boolean;
   onOpen: (item: ItemSummary) => void;
+  onFill: (item: ItemSummary) => void;
 }) {
   const { formatMessage: t } = useIntl();
   if (!items || !pageItems) return null;
@@ -49,7 +53,7 @@ export function ItemList({
     ...items.map((item) => [keyOf(item), item] as const),
     ...pageItems.map((item) => [pageKeyOf(item), item] as const),
   ]);
-  const row = (item: ItemSummary, key: string) => (
+  const row = (item: ItemSummary, key: string, fills = false) => (
     <GridListItem id={key} textValue={item.name} className="item-row">
       <ItemIcon
         item={item}
@@ -59,6 +63,7 @@ export function ItemList({
         <span className="item-row-name">{item.name}</span>
         {item.subtitle && <span className="item-row-subtitle">{item.subtitle}</span>}
       </span>
+      {fills && <TextButton onPress={() => onFill(item)}>{t({ id: "fill" })}</TextButton>}
       {item.copies && (
         <CopyButton
           // Read when pressed: the list holds no secret.
@@ -92,7 +97,9 @@ export function ItemList({
               <GridListHeader className="item-list-header">
                 {t({ id: "forThisSite" })}
               </GridListHeader>
-              <Collection items={pageItems}>{(item) => row(item, pageKeyOf(item))}</Collection>
+              <Collection items={pageItems}>
+                {(item) => row(item, pageKeyOf(item), true)}
+              </Collection>
             </GridListSection>
             <GridListSection>
               <GridListHeader className="item-list-header">{t({ id: "allItems" })}</GridListHeader>

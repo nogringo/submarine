@@ -20,10 +20,11 @@ import { SyncButton } from "@/components/SyncButton";
 import { SyncStatus } from "@/components/SyncStatus";
 import { AllVaultsAvatar, OpenVaultMark, VaultAvatar } from "@/components/VaultAvatar";
 import type { Vault } from "@/lib/core";
+import { fillLogin } from "@/lib/fill";
 import { forgetOpenedItem, readOpenedItem, saveOpenedItem } from "@/lib/opened-item";
 import { anySyncing } from "@/lib/sync-status";
 import { useItems, usePageItems } from "@/lib/use-items";
-import { usePageUrl } from "@/lib/use-page-url";
+import { usePage } from "@/lib/use-page";
 import type { Sync } from "@/lib/use-sync";
 import "./Home.css";
 import { ItemDetail } from "./ItemDetail";
@@ -66,7 +67,25 @@ export function Home({
   const title = vault?.name ?? t({ id: "allVaults" });
   const items = useItems(vault?.pubkey, query, sync.revision);
   const searched = query.trim() !== "";
-  const pageItems = usePageItems(vault?.pubkey, usePageUrl(), sync.revision);
+  const page = usePage();
+  const pageItems = usePageItems(vault?.pubkey, page === null ? null : page?.url, sync.revision);
+  // Counts the failures, for each to show its message for a while.
+  const [fillFailures, setFillFailures] = useState(0);
+  const [fillFailed, setFillFailed] = useState(false);
+  useEffect(() => {
+    if (fillFailures === 0) return;
+    setFillFailed(true);
+    const hide = setTimeout(() => setFillFailed(false), 5000);
+    return () => clearTimeout(hide);
+  }, [fillFailures]);
+  const fill = async ({ vault, id }: { vault: string; id: string }) => {
+    if (!page) return;
+    // Done, as in Bitwarden: the page shows what was filled.
+    if (await fillLogin(page.tabId, vault, id)) window.close();
+    else setFillFailures((failures) => failures + 1);
+  };
+  const fillable = (vault: string, id: string) =>
+    !!pageItems?.some((item) => item.vault === vault && item.id === id);
   const [opened, setOpened] = useState<Opened>();
   // The item the last popup showed, shown again once read.
   const [restored, setRestored] = useState(false);
@@ -210,6 +229,7 @@ export function Home({
           items={items}
           // What was searched for shows alone.
           pageItems={searched ? [] : pageItems}
+          onFill={fill}
           vaults={vaults}
           // A badge tells the vaults apart, which a single vault does not need.
           showVault={!vault && vaults.length > 1}
@@ -228,7 +248,17 @@ export function Home({
         />
       </div>
       {opened?.page === "item" && (
-        <ItemDetail vault={opened.vault} id={opened.id} revision={sync.revision} onBack={back} />
+        <ItemDetail
+          vault={opened.vault}
+          id={opened.id}
+          revision={sync.revision}
+          onBack={back}
+          onFill={
+            fillable(opened.vault.pubkey, opened.id)
+              ? () => fill({ vault: opened.vault.pubkey, id: opened.id })
+              : undefined
+          }
+        />
       )}
       {settingsVault && (
         <VaultSettings
@@ -239,6 +269,10 @@ export function Home({
         />
       )}
       {opened?.page === "settings" && <Settings hasLockPassword={hasLockPassword} onBack={back} />}
+      {/* Kept in the page, empty, for a screen reader to read what it says once it does. */}
+      <p role="alert" className="home-alert">
+        {fillFailed ? t({ id: "nothingToFill" }) : ""}
+      </p>
     </main>
   );
 }

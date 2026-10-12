@@ -162,3 +162,19 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* Flutter's snack bar, as the app shows an error. */
+.home-alert {
+  position: absolute;
+  inset: auto 12px 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--text);
+  color: var(--background);
+  font-size: 14px;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.24);
+}
+
+.home-alert:empty {
+  display: none;
+}

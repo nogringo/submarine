@@ -7,6 +7,7 @@ import {
   fromExtensionPage,
   loadCore,
 } from "@/lib/core-host";
+import { followFillRequests } from "@/lib/fill-host";
 
 export default defineBackground(() => {
   if (import.meta.env.MODE === "e2e") {
@@ -20,6 +21,7 @@ export default defineBackground(() => {
   answerExtensionPages(core);
   browser.runtime.onConnect.addListener(followPopups(core));
   followLockAlarm(core);
+  followFillRequests(core);
   browser.runtime.onMessage.addListener((message, sender) => {
     if (fromExtensionPage(sender) && isClipboardRequest(message)) {
       clearClipboardLater(message.clearClipboardAfter);

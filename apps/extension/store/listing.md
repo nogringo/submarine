@@ -13,7 +13,9 @@ Submarine keeps your passwords, cards and notes safe and in sync across your dev
 
 - Open your vaults with their key, the one the Submarine app gave you when you created them.
 - See the logins for the site you are on first, and fill one into the page in one click, or with Alt+Shift+L (Ctrl+Shift+L in Firefox, Control+Shift+L on a Mac).
-- Search your logins, cards, notes and identities, across all your vaults.
+- Search your logins, cards, notes and identities, across all your vaults, or filter them: favorites, each type, the trash.
+- Create and edit your logins, cards and notes, with custom fields. Generate strong passwords, passphrases and usernames as you fill them in.
+- Mark your favorites, move items to the trash and restore them, from an item or with a right click on it.
 - Copy a username, a password or a two-factor code in one click. Copied passwords are cleared from the clipboard after a delay.
 - Open it from the keyboard with Ctrl+Shift+Y (Command+Shift+Y on a Mac, Ctrl+Shift+U on Linux).
 - Lock the extension with a password, by itself after the delay you choose.
@@ -21,7 +23,7 @@ Submarine keeps your passwords, cards and notes safe and in sync across your dev
 
 Everything is encrypted before it is synced, so nobody but you can read it, not even us. Your vaults live on Nostr relays: open servers that anyone can run, and that only see encrypted data.
 
-Create and edit your items in the Submarine app, at https://github.com/nogringo/submarine.
+Create your vaults in the Submarine app, at https://github.com/nogringo/submarine.
 
 Free and open source. No ads, no tracking.
 
@@ -41,8 +43,8 @@ Submarine is still young. For your most important passwords, we still recommend 
 
 ## Chrome Web Store privacy
 
-- Single purpose: shows the user's Submarine password vaults, copies their items and fills their logins into websites.
-- `storage`: keeps the vault keys, an encrypted copy of their items and the settings in the browser.
+- Single purpose: shows and edits the user's Submarine password vaults, copies their items and fills their logins into websites.
+- `storage`: keeps the vault keys, an encrypted copy of their items, the settings, and an item form left unsaved until the extension locks, in the browser.
 - `clipboardWrite`: copies a username, a password, a code or another field when the user asks, and the verification code of a login filled into a page.
 - `alarms`: locks the vaults once the lock delay chosen by the user has passed.
 - `activeTab`: the tab the popup or the keyboard shortcut acts on: its address, to show the logins for that site first, and its page, to fill a login when the user asks.

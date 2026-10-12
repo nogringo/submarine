@@ -2,13 +2,14 @@
 
 Last updated: October 12, 2026.
 
-Submarine is a password manager. Its browser extension shows the passwords, cards and notes of your vaults, copies them for you, and fills your logins into websites. This policy explains what the extension does with your data. In short: there is no Submarine server, and the extension sends nothing to its developers.
+Submarine is a password manager. Its browser extension shows the passwords, cards and notes of your vaults, lets you create and edit them, copies them for you, and fills your logins into websites. This policy explains what the extension does with your data. In short: there is no Submarine server, and the extension sends nothing to its developers.
 
 ## What stays in your browser
 
 - The key of each vault you open, with the name and color you give it. They are encrypted with a key of this browser, itself protected by your lock password once you set one.
 - A copy of your vaults' contents, so that they open without waiting for the network. It is encrypted too.
-- Your settings: the lock delay and the clipboard delay.
+- Your settings: the lock delay, the clipboard delay and the options of the password generator.
+- A form you leave unsaved, so that it shows again when you reopen the extension. It stays in the browser's memory, never on disk, and goes once you save it, discard it, lock the extension or close the browser.
 
 Removing a vault from the extension deletes its key and its copy from your browser. Uninstalling the extension deletes everything it stored.
 
@@ -18,7 +19,9 @@ Your vaults live on Nostr relays: servers run by independent operators, which st
 
 To download your vaults, the extension connects to their relays: the relays each vault lists, or else Submarine's [default relays](https://github.com/nogringo/submarine/blob/main/packages/nostr_passwords/lib/src/defaults.dart), and three directory relays where a vault's list of relays is published. Each relay sees your IP address, as any website you visit does, and the public key of each vault you open, with which the extension signs in and asks for that vault's data.
 
-The extension only downloads: it never sends your items, and it creates, changes or deletes nothing on the relays.
+When you create, edit, favorite, trash or restore an item, the extension encrypts its new version on your device and sends it to the relays of its vault. When you delete an item for good, it asks those relays to delete each of its versions. A change that no relay accepted yet waits in the encrypted copy in your browser, and is sent again the next time you open the extension or press its sync button.
+
+The password generator works in your browser: what it generates leaves it only inside an item you save.
 
 When you ask it to fill a login, from its window or with its keyboard shortcut, the extension writes the username and password into the sign-in form of the current page, and only if the page's address matches the login. The website receives them once you sign in, as when you type them.
 

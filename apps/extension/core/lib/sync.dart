@@ -8,8 +8,9 @@ import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
 import 'core.dart';
 import 'vaults.dart';
 
-/// Keeps the vaults of this device synced from their relays, download only,
-/// from [start] to [stop]: while the popup is open. Reads their items any time.
+/// Keeps the vaults of this device synced from their relays from [start] to
+/// [stop]: while the popup is open. Reads and changes their items any time,
+/// and sends the changes no relay accepted yet at each [start] and [syncNow].
 class VaultSync {
   VaultSync({
     required this.ndk,

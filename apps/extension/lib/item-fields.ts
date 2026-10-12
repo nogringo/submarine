@@ -147,7 +147,7 @@ export function typeFields(
 }
 
 /** How Bitwarden's card brand shows. */
-function cardBrandLabel(brand: string, other: string): string {
+export function cardBrandLabel(brand: string, other: string): string {
   if (brand === "Amex") return "American Express";
   if (brand === "Other") return other;
   return brand;
@@ -178,8 +178,7 @@ export function customFields(cipher: Cipher, { formatMessage: t }: IntlShape): F
       case 2:
         return { label, value: t({ id: value === "true" ? "yes" : "no" }), kind: "info" };
       case 3: {
-        const linked = linkedId === null ? undefined : linkedLabels[linkedId];
-        const field = linked ? t({ id: linked }) : "?";
+        const field = linkedId === null ? "?" : linkedFieldLabel(linkedId, t);
         return { label, value: t({ id: "linkedTo" }, { field }), kind: "info" };
       }
       default:
@@ -207,6 +206,12 @@ export function websiteUrl(value: string): string | undefined {
   } catch {
     return;
   }
+}
+
+/** What a linked field stands for, by Bitwarden's LinkedIdType, "?" for one unknown. */
+export function linkedFieldLabel(linkedId: number, t: IntlShape["formatMessage"]): string {
+  const label = linkedLabels[linkedId];
+  return label ? t({ id: label }) : "?";
 }
 
 /** By Bitwarden's LinkedIdType. */

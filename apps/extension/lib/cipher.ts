@@ -6,6 +6,7 @@ export interface Cipher {
   notes: string | null;
   fields: Field[];
   login: Login | null;
+  secureNote: { type: number } | null;
   card: Card | null;
   identity: Identity | null;
   sshKey: SshKey | null;

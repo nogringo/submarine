@@ -4,10 +4,12 @@
   "allItems": "Tutti gli elementi",
   "back": "Indietro",
   "commandFillLogin": "Compila il login di questo sito",
+  "fieldPosition": "{field}: posizione {position} di {count}",
   "fill": "Compila",
   "forThisSite": "Per questo sito",
   "itemFilters": "Filtri",
   "lockOnBrowserRestart": "Al riavvio del browser",
   "nothingToFill": "Nessun modulo di accesso da compilare in questa pagina.",
-  "removeLockPasswordBodyBrowser": "L'estensione non la chiederà più. Le chiavi delle casseforti su questo dispositivo saranno protette solo dall'archivio del browser."
+  "removeLockPasswordBodyBrowser": "L'estensione non la chiederà più. Le chiavi delle casseforti su questo dispositivo saranno protette solo dall'archivio del browser.",
+  "reorderFieldHelp": "Spostalo con le frecce su e giù."
 }

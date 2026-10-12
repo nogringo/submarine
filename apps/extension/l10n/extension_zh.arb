@@ -4,10 +4,12 @@
   "allItems": "所有项目",
   "back": "返回",
   "commandFillLogin": "填充此网站的登录信息",
+  "fieldPosition": "{field}：第 {position} 个，共 {count} 个",
   "fill": "填充",
   "forThisSite": "适用于此网站",
   "itemFilters": "筛选",
   "lockOnBrowserRestart": "浏览器重启时",
   "nothingToFill": "此页面上没有可填充的登录表单。",
-  "removeLockPasswordBodyBrowser": "扩展程序将不再要求输入此密码。此设备上的密码库密钥将仅受浏览器存储的保护。"
+  "removeLockPasswordBodyBrowser": "扩展程序将不再要求输入此密码。此设备上的密码库密钥将仅受浏览器存储的保护。",
+  "reorderFieldHelp": "使用上下方向键移动。"
 }

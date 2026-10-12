@@ -33,7 +33,7 @@
     color 150ms;
 }
 
-/* Clear of the button showing a secret. */
+/* Clear of the buttons at its end. */
 .text-field-box:has(.icon-button) .text-field-label {
   max-width: calc(100% - 64px);
 }
@@ -132,6 +132,19 @@
   font-family: var(--mono-font);
 }
 
+/* Grows with its text, as the app's notes do, up to a scroll. */
+textarea.text-field-input {
+  max-height: calc(12lh + 28px);
+  resize: none;
+  field-sizing: content;
+  scrollbar-color: var(--outline) transparent;
+  scrollbar-width: thin;
+}
+
+.text-field.multiline .text-field-box {
+  align-items: flex-start;
+}
+
 .text-field-description {
   color: var(--muted);
   font-size: 12px;
@@ -140,4 +153,11 @@
 .text-field-error {
   color: var(--danger);
   font-size: 12px;
+}
+
+/* On its first line until it floats. */
+.text-field.multiline:not([data-filled])
+  .text-field-box:not([data-focus-within])
+  .text-field-label {
+  top: 26px;
 }

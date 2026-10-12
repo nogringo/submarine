@@ -4,10 +4,12 @@
   "allItems": "Kaikki kohteet",
   "back": "Takaisin",
   "commandFillLogin": "Täytä tämän sivuston kirjautumistieto",
+  "fieldPosition": "{field}: sijainti {position}/{count}",
   "fill": "Täytä",
   "forThisSite": "Tälle sivustolle",
   "itemFilters": "Suodattimet",
   "lockOnBrowserRestart": "Kun selain käynnistyy uudelleen",
   "nothingToFill": "Tällä sivulla ei ole täytettävää kirjautumislomaketta.",
-  "removeLockPasswordBodyBrowser": "Laajennus ei enää kysy sitä. Holvien avaimet ovat tällä laitteella silloin vain selaimen tallennustilan varassa."
+  "removeLockPasswordBodyBrowser": "Laajennus ei enää kysy sitä. Holvien avaimet ovat tällä laitteella silloin vain selaimen tallennustilan varassa.",
+  "reorderFieldHelp": "Siirrä sitä ylä- ja alanuolinäppäimillä."
 }

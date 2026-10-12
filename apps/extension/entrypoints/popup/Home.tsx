@@ -1,5 +1,6 @@
 import lockIcon from "@material-design-icons/svg/outlined/lock.svg";
 import settings from "@material-design-icons/svg/outlined/settings.svg";
+import add from "@material-design-icons/svg/round/add.svg";
 import tune from "@material-design-icons/svg/round/tune.svg";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -16,13 +17,17 @@ import { useIntl } from "react-intl";
 import { IconButton } from "@/components/Button";
 import { FilterChips } from "@/components/FilterChips";
 import { Icon } from "@/components/Icon";
+import { itemTypeIcon, itemTypeLabel } from "@/components/ItemIcon";
+import { ActionMenu } from "@/components/MoreMenu";
 import { SearchField } from "@/components/SearchField";
 import { SyncButton } from "@/components/SyncButton";
 import { SyncStatus } from "@/components/SyncStatus";
 import { AllVaultsAvatar, OpenVaultMark, VaultAvatar } from "@/components/VaultAvatar";
-import type { ItemFilter, Vault } from "@/lib/core";
+import type { Cipher } from "@/lib/cipher";
+import type { Item, ItemFilter, Vault } from "@/lib/core";
 import { fillLogin } from "@/lib/fill";
 import { filterOptions } from "@/lib/item-filters";
+import { filterKeeps, formTypes } from "@/lib/item-form";
 import { forgetOpenedItem, readOpenedItem, saveOpenedItem } from "@/lib/opened-item";
 import { anySyncing } from "@/lib/sync-status";
 import { useItems, useItemTypes, usePageItems } from "@/lib/use-items";
@@ -30,6 +35,7 @@ import { usePage } from "@/lib/use-page";
 import type { Sync } from "@/lib/use-sync";
 import "./Home.css";
 import { ItemDetail } from "./ItemDetail";
+import { ItemForm } from "./ItemForm";
 import { ItemList } from "./ItemList";
 import { Settings } from "./Settings";
 import { VaultSettings } from "./VaultSettings";
@@ -41,6 +47,8 @@ type MessageId = FormatjsIntl.Message["ids"];
 /** What shows over the list. */
 type Opened =
   | { page: "item"; vault: Vault; id: string }
+  /** A new item of `type`, in `vault` unless another is chosen, or `item` edited. */
+  | { page: "form"; vault: Vault; type: number; item?: Item }
   | { page: "vaultSettings"; pubkey: string }
   | { page: "settings" };
 
@@ -105,7 +113,13 @@ export function Home({
   }, []);
   useEffect(() => {
     if (!restored) return;
-    if (opened?.page === "item") void saveOpenedItem({ vault: opened.vault.pubkey, id: opened.id });
+    const item =
+      opened?.page === "item"
+        ? { vault: opened.vault.pubkey, id: opened.id }
+        : opened?.page === "form" && opened.item
+          ? { vault: opened.item.vault, id: opened.item.id }
+          : undefined;
+    if (item) void saveOpenedItem(item);
     else void forgetOpenedItem();
   }, [opened, restored]);
   const settingsVault =
@@ -127,6 +141,31 @@ export function Home({
   const openFromDrawer = (page: Opened) => {
     openedFrom.current = vaultsButton.current;
     setOpened(page);
+  };
+  const newItemButton = useRef<HTMLButtonElement>(null);
+  const newItem = (type: number) => {
+    const target = vault ?? vaults[0];
+    if (!target) return;
+    openedFrom.current = newItemButton.current;
+    setOpened({ page: "form", vault: target, type });
+  };
+  // As in the app: a filter of a type the form creates creates one of that type at once.
+  const filteredType = typeof filter === "number" && formTypes.includes(filter) ? filter : null;
+  const newItemTrigger = (
+    <Button
+      ref={newItemButton}
+      className="button new-item-button"
+      aria-label={t({ id: "newItem" })}
+      onPress={filteredType === null ? undefined : () => newItem(filteredType)}
+    >
+      <Icon src={add} size={22} />
+    </Button>
+  );
+  /** Shows the item saved, in the list of the vault it went to, under a filter that keeps it. */
+  const showSaved = (savedVault: Vault, id: string, cipher: Cipher) => {
+    if (!filterKeeps(filter, cipher)) setFilter("all");
+    if (vault && vault.pubkey !== savedVault.pubkey) setSelected(savedVault.pubkey);
+    setOpened({ page: "item", vault: savedVault, id });
   };
   if (!restored) return null;
   return (
@@ -226,6 +265,19 @@ export function Home({
           {hasLockPassword && (
             <IconButton icon={lockIcon} label={t({ id: "lock" })} onPress={onLock} />
           )}
+          {filteredType === null ? (
+            <ActionMenu
+              trigger={newItemTrigger}
+              actions={formTypes.map((type) => ({
+                id: String(type),
+                label: t({ id: itemTypeLabel(type) }),
+                icon: itemTypeIcon(type),
+              }))}
+              onAction={(type) => newItem(Number(type))}
+            />
+          ) : (
+            newItemTrigger
+          )}
         </header>
         <div className="home-search">
           {/* What the popup opens for: typing finds the item at once. */}
@@ -272,11 +324,29 @@ export function Home({
             openedFrom.current = null;
             back();
           }}
+          onEdit={(item) =>
+            setOpened({ page: "form", vault: opened.vault, type: item.cipher.type, item })
+          }
           onFailed={() => setAlert({ message: "itemSaveFailed" })}
           onFill={
             fillable(opened.vault.pubkey, opened.id)
               ? () => fill({ vault: opened.vault.pubkey, id: opened.id })
               : undefined
+          }
+        />
+      )}
+      {opened?.page === "form" && (
+        <ItemForm
+          vaults={vaults}
+          vault={opened.vault}
+          type={opened.type}
+          item={opened.item}
+          pageUrl={page?.url}
+          onSaved={showSaved}
+          onClose={() =>
+            setOpened(
+              opened.item ? { page: "item", vault: opened.vault, id: opened.item.id } : undefined,
+            )
           }
         />
       )}

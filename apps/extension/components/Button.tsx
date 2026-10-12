@@ -3,7 +3,10 @@ import { Button, type ButtonProps, Link } from "react-aria-components";
 import "./Button.css";
 import { Icon } from "./Icon";
 
-export function TextButton({ muted, ...props }: ButtonProps & { muted?: boolean }) {
+export function TextButton({
+  muted,
+  ...props
+}: ButtonProps & { muted?: boolean; ref?: Ref<HTMLButtonElement> }) {
   return <Button {...props} className={muted ? "button text muted" : "button text"} />;
 }
 

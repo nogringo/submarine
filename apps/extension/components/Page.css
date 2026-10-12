@@ -11,6 +11,22 @@
   padding: 8px 8px 0;
 }
 
+.page-bar-title {
+  flex: 1;
+  min-width: 0;
+  align-self: center;
+  margin-left: 8px;
+  overflow: hidden;
+  font-size: 18px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.page-bar-title:focus {
+  outline: none;
+}
+
 .page-actions {
   display: flex;
   align-items: center;

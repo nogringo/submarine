@@ -4,10 +4,12 @@
   "allItems": "すべてのアイテム",
   "back": "戻る",
   "commandFillLogin": "このサイトのログインを入力",
+  "fieldPosition": "{field}: {count} 件中 {position} 番目",
   "fill": "入力",
   "forThisSite": "このサイト用",
   "itemFilters": "フィルター",
   "lockOnBrowserRestart": "ブラウザの再起動時",
   "nothingToFill": "このページには入力できるログインフォームがありません。",
-  "removeLockPasswordBodyBrowser": "拡張機能でパスワードを求められなくなります。このデバイス上の保管庫の鍵は、ブラウザのストレージだけで保護されるようになります。"
+  "removeLockPasswordBodyBrowser": "拡張機能でパスワードを求められなくなります。このデバイス上の保管庫の鍵は、ブラウザのストレージだけで保護されるようになります。",
+  "reorderFieldHelp": "上下の矢印キーで移動します。"
 }

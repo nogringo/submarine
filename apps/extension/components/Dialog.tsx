@@ -49,7 +49,7 @@ export function ConfirmDialog({
   onConfirm: () => void;
   isOpen?: boolean;
   onOpenChange?: (isOpen: boolean) => void;
-  children: ReactNode;
+  children?: ReactNode;
 }) {
   return (
     <ModalOverlay
@@ -65,7 +65,7 @@ export function ConfirmDialog({
               <Heading slot="title" className="dialog-title">
                 {title}
               </Heading>
-              <div className="dialog-content">{children}</div>
+              {children && <div className="dialog-content">{children}</div>}
               <div className="dialog-actions">
                 <TextButton slot="close">{cancel}</TextButton>
                 <FilledButton

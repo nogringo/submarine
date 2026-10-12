@@ -17,6 +17,7 @@ function cipher(parts: Partial<Cipher>): Cipher {
     notes: null,
     fields: [],
     login: null,
+    secureNote: null,
     card: null,
     identity: null,
     sshKey: null,

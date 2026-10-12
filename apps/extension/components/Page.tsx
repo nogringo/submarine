@@ -1,23 +1,28 @@
 import arrowBack from "@material-design-icons/svg/round/arrow_back.svg";
 import { type ReactNode, type Ref, useEffect, useRef } from "react";
 import { useIntl } from "react-intl";
-import { IconButton } from "./Button";
+import { IconButton, TextButton } from "./Button";
 import "./Page.css";
 
 /**
  * A page over the list, its back button and its `actions` above `children`, until `onBack` or
- * Escape.
+ * Escape. A form's page, as the app's, has a `cancel` button in place of the back one, and its
+ * `title` between the two, which a screen reader reads first unless something else takes the focus.
  */
 export function Page({
   className,
   onBack,
   backRef,
+  cancel,
+  title,
   actions,
   children,
 }: {
   className: string;
   onBack: () => void;
   backRef?: Ref<HTMLButtonElement>;
+  cancel?: string;
+  title?: string;
   actions?: ReactNode;
   children: ReactNode;
 }) {
@@ -35,11 +40,30 @@ export function Page({
   return (
     <section className={`page ${className}`}>
       <div className="page-bar">
-        <IconButton ref={backRef} icon={arrowBack} label={t({ id: "back" })} onPress={onBack} />
+        {cancel ? (
+          <TextButton ref={backRef} onPress={onBack}>
+            {cancel}
+          </TextButton>
+        ) : (
+          <IconButton ref={backRef} icon={arrowBack} label={t({ id: "back" })} onPress={onBack} />
+        )}
+        {title && <BarTitle title={title} />}
         {actions && <div className="page-actions">{actions}</div>}
       </div>
       {children}
     </section>
+  );
+}
+
+function BarTitle({ title }: { title: string }) {
+  const heading = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    if (document.activeElement === document.body) heading.current?.focus();
+  }, []);
+  return (
+    <h1 ref={heading} tabIndex={-1} className="page-bar-title">
+      {title}
+    </h1>
   );
 }
 

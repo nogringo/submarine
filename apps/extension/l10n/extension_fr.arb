@@ -4,10 +4,12 @@
   "allItems": "Tous les éléments",
   "back": "Retour",
   "commandFillLogin": "Remplir l'identifiant de ce site",
+  "fieldPosition": "{field} : position {position} sur {count}",
   "fill": "Remplir",
   "forThisSite": "Pour ce site",
   "itemFilters": "Filtres",
   "lockOnBrowserRestart": "Au redémarrage du navigateur",
   "nothingToFill": "Aucun formulaire de connexion à remplir sur cette page.",
-  "removeLockPasswordBodyBrowser": "L'extension ne le demande plus. Les clés des coffres de cet appareil ne reposent alors plus que sur le stockage du navigateur."
+  "removeLockPasswordBodyBrowser": "L'extension ne le demande plus. Les clés des coffres de cet appareil ne reposent alors plus que sur le stockage du navigateur.",
+  "reorderFieldHelp": "Déplacez-le avec les flèches haut et bas."
 }

@@ -1,5 +1,6 @@
 import deleteForever from "@material-design-icons/svg/outlined/delete_forever.svg";
 import deleteOutline from "@material-design-icons/svg/round/delete_outline.svg";
+import editIcon from "@material-design-icons/svg/round/edit.svg";
 import restoreFromTrash from "@material-design-icons/svg/round/restore_from_trash.svg";
 import star from "@material-design-icons/svg/round/star.svg";
 import starOutline from "@material-design-icons/svg/round/star_outline.svg";
@@ -18,13 +19,15 @@ import type { Cipher } from "@/lib/cipher";
 import { callCore, type Item, type Vault } from "@/lib/core";
 import { dayFormat } from "@/lib/i18n";
 import { customFields, historyRows, typeFields } from "@/lib/item-fields";
+import { formTypes } from "@/lib/item-form";
 import { useItem } from "@/lib/use-item";
 import "./ItemDetail.css";
 
 /**
  * An item over the list, read again at each `revision`, until `onBack` or Escape, or `onLeft` once
  * moved to the trash, out of it, or deleted. With `onFill`, a login for the page the popup opened
- * over, which it fills. `onFailed` tells that a change could not be saved.
+ * over, which it fills. `onEdit` opens the form of a login, a card or a secure note. `onFailed`
+ * tells that a change could not be saved.
  */
 export function ItemDetail({
   vault,
@@ -32,6 +35,7 @@ export function ItemDetail({
   revision,
   onBack,
   onLeft,
+  onEdit,
   onFailed,
   onFill,
 }: {
@@ -40,6 +44,7 @@ export function ItemDetail({
   revision: number;
   onBack: () => void;
   onLeft: () => void;
+  onEdit: (item: Item) => void;
   onFailed: () => void;
   onFill?: () => void;
 }) {
@@ -54,7 +59,7 @@ export function ItemDetail({
       className="item-detail"
       onBack={onBack}
       backRef={back}
-      actions={item && <Actions item={item} onLeft={onLeft} onFailed={onFailed} />}
+      actions={item && <Actions item={item} onLeft={onLeft} onEdit={onEdit} onFailed={onFailed} />}
     >
       {item === null ? (
         <p className="item-detail-missing">{t({ id: "itemNotFound" })}</p>
@@ -66,18 +71,21 @@ export function ItemDetail({
 }
 
 /**
- * As in the app: the favorite, and a menu that moves the item to the trash. In the trash: Restore,
- * and a menu that deletes the item for good, once confirmed.
+ * As in the app: the favorite, a menu that moves the item to the trash, and Edit for the types the
+ * form edits. In the trash: Restore, and a menu that deletes the item for good, once confirmed.
  */
 function Actions({
-  item: { vault, id, cipher },
+  item,
   onLeft,
+  onEdit,
   onFailed,
 }: {
   item: Item;
   onLeft: () => void;
+  onEdit: (item: Item) => void;
   onFailed: () => void;
 }) {
+  const { vault, id, cipher } = item;
   const { formatMessage: t } = useIntl();
   const [saving, setSaving] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -145,6 +153,12 @@ function Actions({
         actions={[{ id: "trash", label: t({ id: "moveToTrash" }), icon: deleteOutline }]}
         onAction={() => void save(() => callCore("trashItem", { vault, id }), true)}
       />
+      {formTypes.includes(cipher.type) && (
+        <OutlinedButton isDisabled={saving} onPress={() => onEdit(item)}>
+          <Icon src={editIcon} size={18} />
+          {t({ id: "edit" })}
+        </OutlinedButton>
+      )}
     </>
   );
 }

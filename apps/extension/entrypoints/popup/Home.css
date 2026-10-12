@@ -31,6 +31,23 @@
 }
 
 /* The list adds 8 above its first row. */
+/* The app's New item button: a square filled with the accent. */
+.button.new-item-button {
+  width: 40px;
+  min-height: 40px;
+  padding: 0;
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.button.new-item-button[data-hovered] {
+  background: color-mix(in srgb, var(--accent), var(--on-accent) 8%);
+}
+
+.button.new-item-button[data-pressed] {
+  background: color-mix(in srgb, var(--accent), var(--on-accent) 12%);
+}
+
 .home-search {
   padding: 0 16px 4px;
 }

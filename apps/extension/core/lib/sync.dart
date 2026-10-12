@@ -160,7 +160,8 @@ class VaultSync {
   }.toList();
 
   /// The item [id] of the vault [pubkey], its cipher in Bitwarden's JSON,
-  /// in the trash or not, or null once gone.
+  /// in the trash or not, or null once gone. Its `base`, the versions it was
+  /// read from, is what [updateItem] builds on.
   Future<Map<String, Object?>?> item({
     required String pubkey,
     required String id,
@@ -168,12 +169,48 @@ class VaultSync {
     for (final vault in await _vaultsOf(pubkey)) {
       for (final item in await vault.vault.openedItems()) {
         if (item.id == id) {
-          return {'vault': pubkey, 'id': id, 'cipher': item.cipher.toJson()};
+          return {
+            'vault': pubkey,
+            'id': id,
+            'cipher': item.cipher.toJson(),
+            'base': [for (final head in item.heads) head.toJson()],
+          };
         }
       }
     }
     return null;
   }
+
+  /// Saves [cipher], in Bitwarden's JSON, as a new item of the vault
+  /// [pubkey]. Returns its id.
+  Future<String> createItem({
+    required String pubkey,
+    required Map<String, dynamic> cipher,
+  }) => _write(pubkey, (vault) async {
+    final now = DateTime.now().toUtc();
+    final created = Cipher.fromJson(cipher)
+      ..creationDate ??= now
+      ..revisionDate ??= now;
+    return (await vault.createItem(created)).id;
+  });
+
+  /// Saves [cipher] as the next version of the [base] an [item] read gave,
+  /// rather than of the versions synced since: as in the app, saving over
+  /// another device's change keeps both, as a conflict, instead of losing it.
+  Future<void> updateItem({
+    required String pubkey,
+    required List<Object?> base,
+    required Map<String, dynamic> cipher,
+  }) => _write(
+    pubkey,
+    (vault) => vault.updateItem(
+      Item([
+        for (final head in base)
+          Envelope.fromJson(head as Map<String, dynamic>),
+      ]),
+      Cipher.fromJson(cipher),
+    ),
+  );
 
   /// Adds the item [id] of the vault [pubkey] to the favorites, or takes it
   /// out.
@@ -207,11 +244,23 @@ class VaultSync {
     String pubkey,
     String id,
     Future<void> Function(Vault vault, Item item) change,
+  ) => _write(pubkey, (vault) async {
+    final item = (await vault.openedItems())
+        .where((item) => item.id == id)
+        .firstOrNull;
+    if (item == null) throw CoreException('itemNotFound');
+    await change(vault, item);
+  });
+
+  Future<T> _write<T>(
+    String pubkey,
+    Future<T> Function(Vault vault) write,
   ) async {
     final vaults = await _vaultsOf(pubkey);
     if (vaults.isEmpty) throw CoreException('vaultNotFound');
-    await vaults.single.change(id, change);
+    final result = await vaults.single.write(write);
     onChanged();
+    return result;
   }
 
   /// The vault [pubkey], none once removed, or every vault.
@@ -298,19 +347,10 @@ class _SyncedVault {
 
   Future<void> _writing = Future.value();
 
-  /// Runs [change] on the item [id] once the changes asked before it are
-  /// saved: built on the same version, two changes would fork the item.
-  Future<void> change(
-    String id,
-    Future<void> Function(Vault vault, Item item) change,
-  ) {
-    final done = _writing.then((_) async {
-      final item = (await vault.openedItems())
-          .where((item) => item.id == id)
-          .firstOrNull;
-      if (item == null) throw CoreException('itemNotFound');
-      await change(vault, item);
-    });
+  /// Runs [write] once the writes asked before it are saved: built on the
+  /// same version, two changes would fork an item.
+  Future<T> write<T>(Future<T> Function(Vault vault) write) {
+    final done = _writing.then((_) => write(vault));
     _writing = done.then((_) {}, onError: (_) {});
     return done;
   }

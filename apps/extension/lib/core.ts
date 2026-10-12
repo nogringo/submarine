@@ -46,6 +46,8 @@ export interface Item {
   vault: string;
   id: string;
   cipher: Cipher;
+  /** The versions it was read from, which a change saved with `updateItem` builds on. */
+  base: unknown[];
 }
 
 /**
@@ -53,6 +55,9 @@ export interface Item {
  * Bitwarden's cipher types, or the trash. Only the trash lists the items in it.
  */
 export type ItemFilter = "all" | "favorites" | "trash" | number;
+
+/** The made-up values a login's custom field can hold, as in the app. */
+export type MadeUpValue = "firstName" | "lastName" | "birthDate";
 
 /** Where the sync of a vault stands. */
 export interface SyncState {
@@ -108,6 +113,8 @@ export interface CoreMethods {
   /** Fails with `wrongLockPassword`. */
   unlock: { args: { password: string }; result: null };
   generatePassphrase: { args: Record<string, never>; result: string };
+  /** A made-up value for a login's custom field, as the app offers them. */
+  generateValue: { args: { kind: MadeUpValue }; result: string };
   /** A use of the popup, which pushes the lock back. */
   used: { args: Record<string, never>; result: null };
   lockTimeout: { args: Record<string, never>; result: LockTimeout };
@@ -139,6 +146,13 @@ export interface CoreMethods {
   itemTypes: { args: { vault?: string }; result: number[] };
   /** In the trash or not. Null once gone. */
   item: { args: { vault: string; id: string }; result: Item | null };
+  /** Saves a cipher as a new item of the vault. */
+  createItem: { args: { vault: string; cipher: Cipher }; result: { id: string } };
+  /**
+   * Saves a cipher as the next version of the `base` the item was read from. Saving over a change
+   * synced since keeps both, as a conflict, rather than losing it.
+   */
+  updateItem: { args: { vault: string; base: unknown[]; cipher: Cipher }; result: null };
   /** Adds an item to the favorites, or takes it out. */
   setFavorite: { args: { vault: string; id: string; favorite: boolean }; result: null };
   /** Moves an item to the trash, where it stays until restored or deleted. */

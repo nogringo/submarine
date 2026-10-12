@@ -42,3 +42,10 @@
   outline: 2px solid var(--text);
   outline-offset: -2px;
 }
+
+.more-menu-separator {
+  height: 1px;
+  margin: 8px 0;
+  border: none;
+  background: var(--line);
+}

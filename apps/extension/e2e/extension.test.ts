@@ -456,6 +456,126 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     await rowNames("GitHub,Visa,wifi");
   });
 
+  /** The labels of the item's fields, then of its custom fields. */
+  const fieldLabels = () =>
+    extension.popup.$$eval(".item-detail .field-tile-label", (labels) =>
+      labels.map((label) => label.textContent),
+    );
+  const save = ".item-form .page-bar button[type=submit]";
+
+  it("creates a login from the New item menu, and shows it once saved", async () => {
+    const { popup } = extension;
+    await extension.click("button[aria-label='New item']");
+    await extension.click("[role=menuitem]::-p-text(Login)");
+    await popup.waitForSelector(`.item-form .page-bar-title::-p-text(${english.newLogin})`);
+    await popup.waitForSelector(`${save}[disabled]`);
+    expect(await violations(popup)).toEqual([]);
+    await extension.fill(".item-form input[name=name]", "Forum");
+    await extension.fill(".item-form input[name=username]", "bob");
+    await extension.fill(".item-form input[name=password]", "correct horse");
+    await extension.click("button::-p-text(Add a field)");
+    await extension.click("[role=menuitem]::-p-text(Custom field)");
+    await popup.waitForSelector(`[role=dialog]::-p-text(${english.addField})`);
+    expect(await violations(popup)).toEqual([]);
+    await extension.fill("[role=dialog] input[type=text]", "PIN");
+    await extension.click("[role=dialog] button[type=submit]");
+    await popup.waitForSelector("[role=dialog]", { hidden: true });
+    await extension.fill(".custom-field input", "0000");
+    await extension.click("button::-p-text(Add a field)");
+    await extension.click("[role=menuitem]::-p-text(First name)");
+    await popup.waitForFunction(() => document.querySelectorAll(".custom-field").length === 2);
+    await popup.$eval(".custom-field:nth-child(2) .custom-field-handle", (handle) =>
+      (handle as HTMLElement).focus(),
+    );
+    await extension.press("ArrowUp");
+    await popup.waitForFunction(
+      () =>
+        document.querySelector(".custom-fields [role=status]")?.textContent ===
+        "First name: position 1 of 2",
+    );
+    expect(await popup.evaluate(() => document.activeElement?.getAttribute("aria-label"))).toBe(
+      "Move First name",
+    );
+    expect(await violations(popup)).toEqual([]);
+    await extension.click(save);
+    await popup.waitForSelector(".item-form", { hidden: true });
+    await popup.waitForFunction(() => document.activeElement?.textContent === "Forum");
+    expect(await fieldLabels()).toEqual(["Username", "Password", "First name", "PIN"]);
+    await extension.press("Escape");
+    await rowNames("Forum,GitHub,Visa,wifi");
+  });
+
+  it("edits a login, what the form leaves out kept", async () => {
+    const { popup } = extension;
+    await extension.click(".item-row[aria-label=GitHub]");
+    await extension.click(".item-detail button::-p-text(Edit)");
+    await popup.waitForSelector(`.item-form .page-bar-title::-p-text(${english.editItem})`);
+    expect(await popup.$eval(".item-form input[name=username]", (input) => input.value)).toBe(
+      "alice",
+    );
+    await extension.fill(".item-form input[name=username]", "alice@example.com");
+    await extension.click(save);
+    await popup.waitForSelector(".item-form", { hidden: true });
+    await popup.waitForFunction(() =>
+      [...document.querySelectorAll(".item-detail .field-value")].some(
+        (value) => value.textContent === "alice@example.com",
+      ),
+    );
+    expect(await fieldLabels()).toEqual([
+      "Username",
+      "Password",
+      "Verification code",
+      "Website",
+      "Notes",
+      "PIN",
+    ]);
+    expect(await popup.$eval("h2 > button[aria-expanded]", (button) => button.textContent)).toBe(
+      "Password history 1",
+    );
+    await extension.press("Escape");
+    await popup.waitForSelector(".item-detail", { hidden: true });
+  });
+
+  it("asks before leaving a form changed, and keeps editing on Escape", async () => {
+    const { popup } = extension;
+    await extension.click(".item-row[aria-label=wifi]");
+    await extension.click(".item-detail button::-p-text(Edit)");
+    await extension.fill(".item-form input[name=name]", "Home wifi");
+    await extension.press("Escape");
+    await popup.waitForSelector(`[role=alertdialog]::-p-text(${english.discardChanges})`);
+    expect(await violations(popup)).toEqual([]);
+    await extension.press("Escape");
+    await popup.waitForSelector("[role=alertdialog]", { hidden: true });
+    expect(await popup.$eval(".item-form input[name=name]", (input) => input.value)).toBe(
+      "Home wifi",
+    );
+    await extension.click(".item-form .page-bar button::-p-text(Cancel)");
+    await extension.click(`[role=alertdialog] button::-p-text(${english.discard})`);
+    await popup.waitForSelector(".item-form", { hidden: true });
+    await popup.waitForFunction(() => document.activeElement?.textContent === "wifi");
+    await extension.press("Escape");
+    await rowNames("Forum,GitHub,Visa,wifi");
+  });
+
+  it.skipIf(name === "firefox")("names a new login after the page it opens over", async () => {
+    const { page, popup } = await openPopupOver(extension.browser, "https://www.example.com/a?b");
+    try {
+      await popup.locator("button[aria-label='New item']").click();
+      await popup.locator("[role=menuitem]::-p-text(Login)").click();
+      await popup.waitForSelector(".item-form");
+      expect(
+        await popup.$$eval(".item-form input[type=text]", (inputs) =>
+          inputs.map((input) => input.value).filter((value) => value),
+        ),
+      ).toEqual(["example.com", "https://www.example.com"]);
+      expect(await popup.$(`${save}[disabled]`)).toBeNull();
+    } finally {
+      if (!popup.isClosed()) await popup.close();
+      await page.close();
+      await extension.popup.bringToFront();
+    }
+  });
+
   it("syncs again at once from the sync button, which waits meanwhile", async () => {
     const { popup } = extension;
     const button = "button[aria-label='Sync now']";
@@ -571,9 +691,11 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     );
     await extension.press("Escape");
     await popup.waitForSelector(".settings", { hidden: true });
-    await extension.click(".item-row button[aria-label='Copy password']");
+    await extension.click(".item-row[aria-label=GitHub] button[aria-label='Copy password']");
     await popup.waitForFunction(
-      () => document.querySelector(".item-row [role=status]")?.textContent === "Copied",
+      () =>
+        document.querySelector(".item-row[aria-label=GitHub] [role=status]")?.textContent ===
+        "Copied",
     );
     const copied = Date.now();
     expect(await extension.readClipboard()).toBe("hunter2");

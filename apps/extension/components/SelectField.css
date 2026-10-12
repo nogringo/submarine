@@ -1,0 +1,44 @@
+.select-field-button {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 14px 4px 14px 16px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 16px;
+  text-align: start;
+  cursor: pointer;
+  outline: none;
+}
+
+.select-field-button .icon {
+  color: var(--muted);
+}
+
+.select-field-value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.select-field-none {
+  color: var(--muted);
+}
+
+/* The focused outline is the indicator, as the text fields'. */
+.select-field .text-field-box:has([data-focus-visible], [data-pressed]) .text-field-outline {
+  border-width: 1.5px;
+  border-color: var(--text);
+}
+
+.select-field-popover {
+  min-width: var(--trigger-width);
+  max-height: 320px;
+}

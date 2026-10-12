@@ -12,6 +12,21 @@
   "@commandFillLogin": {
     "description": "Name of the keyboard shortcut, in the browser's settings, that fills the first login for the current site into its page."
   },
+  "fieldPosition": "{field}: position {position} of {count}",
+  "@fieldPosition": {
+    "description": "Read by a screen reader once a custom field of the item form moved, with the up and down arrow keys or the pointer.",
+    "placeholders": {
+      "field": {
+        "type": "String"
+      },
+      "position": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "fill": "Fill",
   "@fill": {
     "description": "Button filling a login into the sign-in form of the page the popup opened over."
@@ -35,5 +50,9 @@
   "removeLockPasswordBodyBrowser": "The extension no longer asks for it. The vault keys on this device then rest on the browser's storage only.",
   "@removeLockPasswordBodyBrowser": {
     "description": "Body of the dialog removing the lock password. Stands for the app's, whose keys rest on the secure storage of the device: the extension keeps them in the browser's storage."
+  },
+  "reorderFieldHelp": "Move it with the up and down arrow keys.",
+  "@reorderFieldHelp": {
+    "description": "Read by a screen reader on the button that moves a custom field of the item form, after its name (\"Move {field}\")."
   }
 }

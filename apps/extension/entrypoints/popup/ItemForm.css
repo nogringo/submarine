@@ -1,0 +1,29 @@
+/* As the app's form header, above a line. */
+.item-form .page-bar {
+  align-items: center;
+  padding: 8px 12px 8px 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.item-form .page-bar .button.filled {
+  min-height: 44px;
+}
+
+.item-form-fields {
+  gap: 20px;
+  padding-top: 24px;
+}
+
+.item-form-websites {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.item-form-websites > .button.text {
+  align-self: flex-start;
+}
+
+.item-form-error {
+  color: var(--danger);
+}

@@ -86,3 +86,7 @@
   border-radius: 50%;
   color: var(--muted);
 }
+
+.button.icon-button.danger {
+  color: var(--danger);
+}

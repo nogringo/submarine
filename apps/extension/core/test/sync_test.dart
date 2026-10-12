@@ -431,6 +431,74 @@ void main() {
       );
     });
 
+    test('creates one from Bitwarden\'s JSON, dated now, and tells', () async {
+      final before = changes;
+
+      final created = await sync.createItem(
+        pubkey: pubkey,
+        cipher: {
+          'type': 1,
+          'name': 'GitHub',
+          'login': {'username': 'alice', 'password': 'hunter2'},
+          'reprompt': 0,
+          'unknownKey': 'kept',
+        },
+      );
+
+      final item = (await sync.item(pubkey: pubkey, id: created))!;
+      expect(
+        item['cipher'],
+        allOf(
+          containsPair('name', 'GitHub'),
+          containsPair('login', containsPair('username', 'alice')),
+          containsPair('unknownKey', 'kept'),
+          containsPair('creationDate', isNotNull),
+        ),
+      );
+      expect(changes, greaterThan(before));
+    });
+
+    test('saves a new version of it, its other keys kept', () async {
+      final read = (await sync.item(pubkey: pubkey, id: id))!;
+
+      await sync.updateItem(
+        pubkey: pubkey,
+        base: read['base'] as List<Object?>,
+        cipher: {
+          ...read['cipher'] as Map<String, dynamic>,
+          'name': 'Home wifi',
+          'notes': 'In the hall',
+        },
+      );
+
+      expect(
+        await cipher(),
+        allOf(
+          containsPair('name', 'Home wifi'),
+          containsPair('notes', 'In the hall'),
+          containsPair('type', CipherType.secureNote.value),
+        ),
+      );
+      expect((await sync.item(pubkey: pubkey, id: id))!['base'], hasLength(1));
+    });
+
+    test('keeps a change saved since it was read, as a conflict', () async {
+      final read = (await sync.item(pubkey: pubkey, id: id))!;
+      await sync.setFavorite(pubkey: pubkey, id: id, favorite: true);
+      // Versions are dated to the millisecond, the same one would be a draw.
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+
+      await sync.updateItem(
+        pubkey: pubkey,
+        base: read['base'] as List<Object?>,
+        cipher: {...read['cipher'] as Map<String, dynamic>, 'name': 'Renamed'},
+      );
+
+      final item = (await sync.item(pubkey: pubkey, id: id))!;
+      expect(item['base'], hasLength(2));
+      expect(item['cipher'], containsPair('name', 'Renamed'));
+    });
+
     test('saves two changes asked at once one after the other', () async {
       await Future.wait([
         sync.setFavorite(pubkey: pubkey, id: id, favorite: true),

@@ -1,0 +1,66 @@
+.custom-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.custom-fields > .button.text {
+  align-self: flex-start;
+}
+
+.custom-fields-title {
+  padding: 4px 4px 0;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.custom-fields-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.custom-field {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 12px;
+}
+
+.custom-fields-rows:has([data-dragging]) {
+  user-select: none;
+}
+
+.custom-field[data-dragging] {
+  background: var(--raised);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.24);
+}
+
+.custom-field-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.custom-field-handle {
+  cursor: grab;
+  touch-action: none;
+}
+
+.custom-field[data-dragging] .custom-field-handle {
+  cursor: grabbing;
+}
+
+.custom-field-handle:hover {
+  background: color-mix(in srgb, currentColor 8%, transparent);
+}
+
+.custom-field-handle:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+/* The delete button on its own, at the start. */
+.custom-field-dialog-actions > .icon-button {
+  margin-inline-end: auto;
+}

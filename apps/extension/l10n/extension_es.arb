@@ -4,10 +4,12 @@
   "allItems": "Todos los elementos",
   "back": "Atrás",
   "commandFillLogin": "Rellenar el inicio de sesión de este sitio",
+  "fieldPosition": "{field}: posición {position} de {count}",
   "fill": "Rellenar",
   "forThisSite": "Para este sitio",
   "itemFilters": "Filtros",
   "lockOnBrowserRestart": "Al reiniciar el navegador",
   "nothingToFill": "No hay ningún formulario de inicio de sesión que rellenar en esta página.",
-  "removeLockPasswordBodyBrowser": "La extensión dejará de pedirla. Las claves de las cajas fuertes de este dispositivo quedarán protegidas solo por el almacenamiento del navegador."
+  "removeLockPasswordBodyBrowser": "La extensión dejará de pedirla. Las claves de las cajas fuertes de este dispositivo quedarán protegidas solo por el almacenamiento del navegador.",
+  "reorderFieldHelp": "Muévelo con las flechas arriba y abajo."
 }

@@ -3,7 +3,12 @@ import 'dart:js_interop_unsafe';
 
 import 'package:ndk/ndk.dart';
 import 'package:sembast_web/sembast_web.dart';
-import 'package:nostr_passwords/nostr_passwords.dart' show generatePassphrase;
+import 'package:nostr_passwords/nostr_passwords.dart'
+    show
+        generateBirthDate,
+        generateFirstName,
+        generateLastName,
+        generatePassphrase;
 import 'package:submarine_extension_core/auto_lock.dart';
 import 'package:submarine_extension_core/core.dart';
 import 'package:submarine_extension_core/device_key.dart';
@@ -104,6 +109,12 @@ void main() {
         return null;
       },
       'generatePassphrase': (_) async => generatePassphrase(),
+      'generateValue': (args) async => switch (args['kind']) {
+        'firstName' => generateFirstName(),
+        'lastName' => generateLastName(),
+        'birthDate' => generateBirthDate(),
+        final kind => throw CoreException('unknownKind', '$kind'),
+      },
       'vaults': (_) => vaults.list(),
       'addVault': (args) async {
         final vault = await vaults.add(
@@ -150,6 +161,20 @@ void main() {
       ),
       'itemTypes': (args) async =>
           (await sync()).itemTypes(pubkey: args['vault'] as String?),
+      'createItem': (args) async => {
+        'id': await (await sync()).createItem(
+          pubkey: args['vault'] as String,
+          cipher: args['cipher'] as Map<String, dynamic>,
+        ),
+      },
+      'updateItem': (args) async {
+        await (await sync()).updateItem(
+          pubkey: args['vault'] as String,
+          base: args['base'] as List<Object?>,
+          cipher: args['cipher'] as Map<String, dynamic>,
+        );
+        return null;
+      },
       'setFavorite': (args) async {
         await (await sync()).setFavorite(
           pubkey: args['vault'] as String,

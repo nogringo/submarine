@@ -71,7 +71,10 @@ const phones = [
   <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(app)} />
   <section class="hero container" aria-labelledby="title">
     <Sonar size="min(14rem, 60vw)" />
-    <h1 id="title">Submarine</h1>
+    <h1 id="title">
+      <span class="name">Submarine</span>{" "}
+      <span class="kind">{t("passwordManager")}</span>
+    </h1>
     <p class="tagline">{t("welcomeTagline")}</p>
     <p class="intro">{t("heroIntro")}</p>
     <div class="actions">
@@ -176,11 +179,25 @@ const phones = [
   }
 
   h1 {
-    margin: 1.5rem 0 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 1.5rem 0 1rem;
+  }
+
+  .name {
     font-family: var(--wordmark-font);
     font-size: clamp(2.5rem, 8vw, 4rem);
     font-weight: 400;
     letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .kind {
+    color: var(--muted);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
   }
 

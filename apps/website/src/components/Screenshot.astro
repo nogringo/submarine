@@ -1,0 +1,72 @@
+---
+import { getImage } from "astro:assets";
+import type { ImageMetadata } from "astro";
+
+/**
+ * A screenshot of the app in the visitor's theme, light or dark, raised off the page so its controls
+ * do not read as the site's: a window, or a phone in its shell.
+ */
+interface Props {
+  frame: "window" | "phone";
+  light: ImageMetadata;
+  dark: ImageMetadata;
+  alt: string;
+  widths: number[];
+  sizes: string;
+  eager?: boolean;
+}
+
+const { frame, light, dark, alt, widths, sizes, eager = false } = Astro.props;
+
+async function srcsetOf(image: ImageMetadata) {
+  const versions = await Promise.all(
+    widths.map((width) => getImage({ src: image, width, format: "webp" })),
+  );
+  return versions.map((version, i) => `${version.src} ${widths[i]}w`).join(", ");
+}
+
+const [lightSet, darkSet] = await Promise.all([srcsetOf(light), srcsetOf(dark)]);
+const fallback = await getImage({ src: light, width: Math.max(...widths), format: "webp" });
+---
+
+<picture class={frame}>
+  <source media="(prefers-color-scheme: dark)" srcset={darkSet} sizes={sizes} />
+  <img
+    src={fallback.src}
+    srcset={lightSet}
+    sizes={sizes}
+    alt={alt}
+    width={light.width}
+    height={light.height}
+    loading={eager ? "eager" : "lazy"}
+    decoding="async"
+  />
+</picture>
+
+<style>
+  picture {
+    display: block;
+    border: 1px solid var(--outline);
+    box-shadow: 0 1.25rem 2.5rem -1rem rgb(0 0 0 / 0.35);
+  }
+
+  img {
+    display: block;
+    width: 100%;
+  }
+
+  .window,
+  .window img {
+    border-radius: 0.75rem;
+  }
+
+  .phone {
+    padding: 0.35rem;
+    border-radius: 1.5rem;
+    background: #050f17;
+  }
+
+  .phone img {
+    border-radius: 1.15rem;
+  }
+</style>

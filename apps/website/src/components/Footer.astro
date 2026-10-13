@@ -1,0 +1,52 @@
+---
+import { message, pathOf } from "../i18n";
+import { nostrProfile, repository } from "../links";
+
+interface Props {
+  locale: string;
+}
+
+const { locale } = Astro.props;
+---
+
+<footer>
+  <div class="container">
+    <ul>
+      <li><a href={pathOf(locale, "download")}>{message(locale, "navDownload")}</a></li>
+      <li><a href={pathOf(locale, "privacy")}>{message(locale, "privacyTitle")}</a></li>
+      <li><a href={repository}>{message(locale, "footerSourceCode")}</a></li>
+      <li><a href={`${repository}/issues`}>{message(locale, "footerReportProblem")}</a></li>
+      <li><a href={nostrProfile}>{message(locale, "footerContact")}</a></li>
+    </ul>
+    <p>{message(locale, "footerLicense")}</p>
+  </div>
+</footer>
+
+<style>
+  footer {
+    padding-block: 2rem;
+    border-top: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--muted);
+  }
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.5rem;
+    margin: 0 0 1rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    color: var(--text);
+  }
+
+  p {
+    margin: 0;
+  }
+</style>

@@ -1,0 +1,128 @@
+---
+/** The app's sonar: rings around a signal, with a ping travelling outwards unless still. */
+interface Props {
+  size: string;
+  still?: boolean;
+}
+
+const { size, still = false } = Astro.props;
+---
+
+<svg
+  class="sonar"
+  style={`--size: ${size}`}
+  viewBox="-100 -100 200 200"
+  aria-hidden="true"
+  focusable="false"
+>
+  {
+    still ? (
+      <Fragment>
+        <g class="rings still" fill="none" stroke-width="9">
+        <circle r="43" />
+        <circle r="86" />
+      </g>
+      <circle class="signal" r="15" />
+        <circle class="signal" cx="39" cy="-51" r="10" />
+      </Fragment>
+    ) : (
+      <Fragment>
+        <g class="rings" fill="none" stroke-width="1.5">
+        <circle r="24" />
+        <circle r="49" />
+        <circle r="74" />
+        <circle r="99" />
+        <path d="M-100 0H100M0-100V100" />
+      </g>
+      <circle class="ping" r="99" fill="none" />
+      <circle class="signal" r="6" />
+        <circle class="signal blip" cx="35" cy="-46" r="3.5" />
+      </Fragment>
+    )
+  }
+</svg>
+
+<style>
+  .sonar {
+    flex: none;
+    width: var(--size);
+    height: var(--size);
+  }
+
+  .rings {
+    stroke: var(--line);
+  }
+
+  .rings.still {
+    stroke: var(--outline);
+  }
+
+  /* Strokes in screen pixels, as the app paints them, and the ping's kept as it grows. */
+  .rings:not(.still) > *,
+  .ping {
+    vector-effect: non-scaling-stroke;
+  }
+
+  .signal {
+    fill: var(--accent);
+  }
+
+  .ping {
+    stroke: var(--accent);
+    stroke-width: 3;
+    opacity: 0;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* As the app: the radius eases out, the fades are linear. */
+    .ping {
+      animation:
+        grow 3.2s ease-out infinite,
+        fade 3.2s linear infinite;
+    }
+
+    .blip {
+      animation: blip 3.2s linear infinite;
+    }
+  }
+
+  @keyframes grow {
+    from {
+      transform: scale(0);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+
+  @keyframes fade {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes blip {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0.35;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .rings,
+    .ping {
+      stroke: CanvasText;
+    }
+
+    .signal {
+      fill: CanvasText;
+    }
+  }
+</style>

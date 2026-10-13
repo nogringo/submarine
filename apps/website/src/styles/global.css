@@ -1,0 +1,135 @@
+@import "@fontsource-variable/atkinson-hyperlegible-next";
+@import "@fontsource/saira-stencil-one";
+
+/*
+ * Submarine's tokens, as in the app's Palette. --accent is a fill, for the main action;
+ * --signal is the accent as readable text. --outline edges a control at 3:1 (WCAG 1.4.11),
+ * where --line only divides.
+ */
+:root {
+  color-scheme: light dark;
+  --background: light-dark(#e4ebef, #0b1e2d);
+  --surface: light-dark(#f3f6f8, #10283b);
+  --raised: light-dark(#ffffff, #183652);
+  --selected: light-dark(#d2dee6, #1e4163);
+  --line: light-dark(#c3d0d9, #284b6b);
+  --outline: light-dark(#6e8391, #648098);
+  --text: light-dark(#0b1e2d, #eaf0f4);
+  --muted: light-dark(#4b6374, #a0b5c5);
+  --accent: #ffd23f;
+  --on-accent: #0b1e2d;
+  --signal: light-dark(#8a5300, #ffd23f);
+  --link: light-dark(#1f5fa8, #8cc8ff);
+
+  --text-font: "Atkinson Hyperlegible Next Variable", system-ui, sans-serif;
+  --wordmark-font: "Saira Stencil One", var(--text-font);
+  --width: 68rem;
+  --gutter: 1rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--text);
+  font-family: var(--text-font);
+  font-size: 1.125rem;
+  line-height: 1.6;
+  overflow-wrap: break-word;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+/* Breaks Japanese between phrases, not inside a word. */
+:lang(ja) {
+  word-break: auto-phrase;
+}
+
+p,
+li {
+  text-wrap: pretty;
+}
+
+a {
+  color: var(--link);
+  text-underline-offset: 0.15em;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+:focus-visible {
+  outline: 3px solid var(--text);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+.container {
+  width: min(100% - 2 * var(--gutter), var(--width));
+  margin-inline: auto;
+}
+
+/* Read by a screen reader, out of sight. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+  padding: 0.6rem 1.4rem;
+  border: 2px solid var(--outline);
+  border-radius: 999px;
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.button:hover {
+  background: var(--surface);
+}
+
+.button.primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.button.primary:hover {
+  border-color: var(--text);
+}
+
+/* Windows high contrast and forced colors keep a visible edge on buttons. */
+@media (forced-colors: active) {
+  .button {
+    border-color: ButtonText;
+  }
+}

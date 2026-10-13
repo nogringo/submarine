@@ -91,6 +91,8 @@ class _StorageErrorScreenState extends State<StorageErrorScreen> {
                     style: TextStyle(fontSize: 16, color: palette.danger),
                   ),
                   const SizedBox(height: 16),
+                  // TODO: on Linux, say the app needs a keyring service, such
+                  // as GNOME Keyring or KWallet, the usual cause there.
                   Text(
                     l10n.storageReadFailedBody,
                     textAlign: TextAlign.center,

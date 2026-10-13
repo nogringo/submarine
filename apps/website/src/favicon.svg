@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-100 -100 200 200">
+  <title>Submarine</title>
+  <style>
+    .rings { stroke: #4b6374; }
+    .signal { fill: #e6a800; }
+    @media (prefers-color-scheme: dark) {
+      .rings { stroke: #a0b5c5; }
+      .signal { fill: #ffd23f; }
+    }
+  </style>
+  <g class="rings" fill="none" stroke-width="15">
+    <circle r="32"/>
+    <circle r="86"/>
+  </g>
+  <circle class="signal" r="18"/>
+  <circle class="signal" cx="34" cy="-49" r="11"/>
+</svg>

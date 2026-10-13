@@ -1,0 +1,71 @@
+---
+import { defaultLocale, locales, message, pathOf, segmentOf } from "../i18n";
+import Page from "../layouts/Page.astro";
+
+/**
+ * Firebase Hosting serves this one page for every unknown address. Its text follows the language
+ * of the address: /fr/anything reads in French once the script ran.
+ */
+const texts = Object.fromEntries(
+  locales
+    .filter((locale) => locale !== defaultLocale)
+    .map((locale) => [
+      segmentOf(locale),
+      {
+        locale,
+        title: message(locale, "notFoundTitle"),
+        body: message(locale, "notFoundBody"),
+        home: message(locale, "goHome"),
+        href: pathOf(locale, ""),
+      },
+    ]),
+);
+const t = (id: string) => message(defaultLocale, id);
+---
+
+<Page
+  locale={defaultLocale}
+  page=""
+  title={t("notFoundTitle")}
+  description={t("notFoundBody")}
+  indexed={false}
+>
+  <div class="container not-found">
+    <h1>{t("notFoundTitle")}</h1>
+    <p>{t("notFoundBody")}</p>
+    <p><a href="/">{t("goHome")}</a></p>
+  </div>
+</Page>
+
+<script is:inline type="application/json" id="not-found-texts" set:html={JSON.stringify(texts)} />
+
+<script>
+  type Text = { locale: string; title: string; body: string; home: string; href: string };
+
+  const texts: Record<string, Text> = JSON.parse(
+    document.getElementById("not-found-texts")?.textContent ?? "{}",
+  );
+  const text = texts[location.pathname.split("/")[1] ?? ""];
+  const box = document.querySelector<HTMLElement>(".not-found");
+  const [title, body, home] = box?.querySelectorAll("h1, p") ?? [];
+  const link = home?.querySelector("a");
+  if (text && box && title && body && link) {
+    box.lang = text.locale;
+    title.textContent = text.title;
+    body.textContent = text.body;
+    link.textContent = text.home;
+    link.href = text.href;
+    document.title = text.title;
+  }
+</script>
+
+<style>
+  .not-found {
+    padding-block: 2rem;
+  }
+
+  h1 {
+    margin: 0 0 1rem;
+    font-size: 2.25rem;
+  }
+</style>

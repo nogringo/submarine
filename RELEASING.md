@@ -11,7 +11,7 @@ git tag -a v0.1.0 -m "Submarine 0.1.0"
 git push origin v0.1.0
 ```
 
-The tag runs the [release workflow](.github/workflows/release.yml), which builds the app for Linux, Windows, macOS and Android, the CLI and the browser extension, then publishes them in a GitHub release. The macOS package is signed with Developer ID and notarized, from these repository secrets:
+The tag runs the [release workflow](.github/workflows/release.yml), which builds the app for Linux, Windows, macOS and Android, the CLI and the browser extension, then publishes them in a GitHub release, and deploys the [website](apps/website) again so that its download page links them. The macOS package is signed with Developer ID and notarized, from these repository secrets:
 
 - `APPLE_DEVELOPER_ID_APPLICATION_CERTIFICATE_BASE64`: the Developer ID Application certificate with its private key, exported as `.p12`, in base64.
 - `APPLE_DEVELOPER_ID_APPLICATION_CERTIFICATE_PASSWORD`: the password of that `.p12`.

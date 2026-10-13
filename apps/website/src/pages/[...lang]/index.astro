@@ -1,0 +1,231 @@
+---
+import desktopDark from "../../../../app/screenshots/desktop-dark.png";
+import desktopLight from "../../../../app/screenshots/desktop-light.png";
+import generatorDark from "../../../../app/screenshots/phone-generator-dark.png";
+import generatorLight from "../../../../app/screenshots/phone-generator-light.png";
+import listDark from "../../../../app/screenshots/phone-list-dark.png";
+import listLight from "../../../../app/screenshots/phone-list-light.png";
+import welcomeDark from "../../../../app/screenshots/phone-welcome-dark.png";
+import welcomeLight from "../../../../app/screenshots/phone-welcome-light.png";
+import Screenshot from "../../components/Screenshot.astro";
+import Sonar from "../../components/Sonar.astro";
+import { localePaths, message, pathOf } from "../../i18n";
+import Page from "../../layouts/Page.astro";
+import { protocol, repository, webApp } from "../../links";
+
+export const getStaticPaths = localePaths;
+
+const { locale } = Astro.props;
+const t = (id: string) => message(locale, id);
+
+const steps = [
+  ["howEncryptedTitle", "howEncryptedBody"],
+  ["howKeyTitle", "howKeyBody"],
+  ["howRelaysTitle", "howRelaysBody"],
+];
+const features = [
+  "featureItems",
+  "featureCodes",
+  "featureGenerator",
+  "featureBitwarden",
+  "featureVaults",
+  "featureOffline",
+  "featureLock",
+  "featureClipboard",
+  "featureScreenshots",
+  "featureAccessibility",
+  "featureLanguages",
+];
+const phones = [
+  { light: welcomeLight, dark: welcomeDark, alt: "phoneWelcomeScreenshot" },
+  { light: listLight, dark: listDark, alt: "phoneListScreenshot" },
+  { light: generatorLight, dark: generatorDark, alt: "phoneGeneratorScreenshot" },
+];
+---
+
+<Page locale={locale} page="" title={t("homeTitle")} description={t("homeDescription")}>
+  <section class="hero container" aria-labelledby="title">
+    <Sonar size="min(14rem, 60vw)" />
+    <h1 id="title">Submarine</h1>
+    <p class="tagline">{t("welcomeTagline")}</p>
+    <p class="intro">{t("heroIntro")}</p>
+    <div class="actions">
+      <a class="button primary" href={pathOf(locale, "download")}>{t("downloadApp")}</a>
+      <a class="button" href={webApp}>{t("openWebApp")}</a>
+    </div>
+  </section>
+
+  <div class="container">
+    <Screenshot
+      frame="window"
+      light={desktopLight}
+      dark={desktopDark}
+      alt={t("desktopScreenshot")}
+      widths={[640, 1280, 2560]}
+      sizes="(min-width: 70rem) 68rem, calc(100vw - 2rem)"
+      eager
+    />
+  </div>
+
+  <section class="container" aria-labelledby="how">
+    <h2 id="how">{t("howTitle")}</h2>
+    <ul class="steps">
+      {
+        steps.map(([title, body]) => (
+          <li>
+            <h3>{t(title)}</h3>
+            <p>{t(body)}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="container features" aria-labelledby="features">
+    <div>
+      <h2 id="features">{t("featuresTitle")}</h2>
+      <ul>{features.map((feature) => <li>{t(feature)}</li>)}</ul>
+    </div>
+    <ul class="phones">
+      {
+        phones.map((phone) => (
+          <li>
+            <Screenshot
+              frame="phone"
+              light={phone.light}
+              dark={phone.dark}
+              alt={t(phone.alt)}
+              widths={[260, 520, 780]}
+              sizes="(min-width: 60rem) 13rem, 30vw"
+            />
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="container" aria-labelledby="devices">
+    <h2 id="devices">{t("devicesTitle")}</h2>
+    <p>{t("devicesBody")}</p>
+    <p><a href={pathOf(locale, "download")}>{t("downloadTitle")}</a></p>
+  </section>
+
+  <section class="container" aria-labelledby="open-source">
+    <h2 id="open-source">{t("openSourceTitle")}</h2>
+    <p>{t("openSourceBody")}</p>
+    <p><a href={repository}>{t("seeSourceCode")}</a></p>
+  </section>
+
+  <section class="container" aria-labelledby="young">
+    <h2 id="young">{t("youngTitle")}</h2>
+    <p>{t("youngBody")}</p>
+  </section>
+
+  <p class="container nostr">
+    {t("nostrNote")}{" "}
+    <a href={protocol}>{t("readProtocol")}</a>
+  </p>
+</Page>
+
+<style>
+  .hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-block: 1rem 2.5rem;
+    text-align: center;
+  }
+
+  h1 {
+    margin: 1.5rem 0 0.5rem;
+    font-family: var(--wordmark-font);
+    font-size: clamp(2.5rem, 8vw, 4rem);
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .tagline {
+    margin: 0;
+    font-size: 1.375rem;
+    font-weight: 600;
+  }
+
+  .intro {
+    max-width: 36rem;
+    margin: 1rem 0 2rem;
+    color: var(--muted);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+  }
+
+
+  section:not(.hero) {
+    padding-block: 2.5rem 0;
+  }
+
+  h2 {
+    margin: 0 0 1rem;
+    font-size: 1.75rem;
+  }
+
+  h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.25rem;
+  }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .steps li {
+    padding: 1.25rem;
+    border: 1px solid var(--line);
+    border-radius: 0.75rem;
+    background: var(--surface);
+  }
+
+  .steps p {
+    margin: 0;
+  }
+
+  .features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr));
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .features > div > ul {
+    padding-inline-start: 1.25rem;
+  }
+
+  .features > div li + li {
+    margin-top: 0.4rem;
+  }
+
+  .phones {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+
+  .nostr {
+    margin-block: 3rem 0;
+    color: var(--muted);
+  }
+</style>

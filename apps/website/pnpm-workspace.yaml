@@ -1,0 +1,3 @@
+allowBuilds:
+  # pnpm a11y:browser downloads the browser of the accessibility check.
+  puppeteer: false

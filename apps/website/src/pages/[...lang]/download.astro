@@ -1,0 +1,159 @@
+---
+import { localePaths, message } from "../../i18n";
+import Page from "../../layouts/Page.astro";
+import { latestReleasePage, webApp, zapstore } from "../../links";
+import { latestRelease } from "../../release";
+
+export const getStaticPaths = localePaths;
+
+const { locale } = Astro.props;
+const t = (id: string, values?: Record<string, string>) => message(locale, id, values);
+const release = await latestRelease();
+
+type Link = { label: string; kind?: string; href?: string; hint?: string };
+type Platform = { name: string; links: Link[]; hint?: string };
+
+const platforms: Platform[] = [
+  {
+    name: t("android"),
+    links: [
+      { label: t("getOnZapstore"), href: zapstore, hint: t("zapstoreHint") },
+      { label: t("downloadApk"), kind: "android.apk", hint: t("apkHint") },
+    ],
+  },
+  {
+    name: t("windows"),
+    links: [
+      { label: t("downloadInstaller"), kind: "windows-setup.exe" },
+      { label: t("portableZip"), kind: "windows.zip" },
+    ],
+  },
+  { name: t("macos"), links: [{ label: t("downloadForMac"), kind: "macos.dmg" }] },
+  {
+    name: t("linux"),
+    links: [
+      { label: t("linuxDeb"), kind: "linux.deb" },
+      { label: t("linuxAppImage"), kind: "linux.AppImage" },
+      { label: t("linuxZip"), kind: "linux.zip" },
+    ],
+  },
+  { name: t("web"), links: [{ label: t("openWebApp"), href: webApp }] },
+  { name: t("iphone"), links: [], hint: t("iphoneHint") },
+  {
+    name: t("commandLine"),
+    links: [
+      { label: "Linux x64", kind: "cli-linux-x64.tar.gz" },
+      { label: "macOS arm64", kind: "cli-macos-arm64.tar.gz" },
+      { label: "Windows x64", kind: "cli-windows-x64.zip" },
+    ],
+    hint: t("commandLineHint"),
+  },
+];
+
+function hrefOf(link: Link): string {
+  const download = link.kind ? release?.downloads.get(link.kind) : undefined;
+  return link.href ?? download ?? latestReleasePage;
+}
+---
+
+<Page
+  locale={locale}
+  page="download"
+  title={t("downloadTitle")}
+  description={t("downloadDescription")}
+>
+  <div class="container">
+    <h1>{t("downloadTitle")}</h1>
+    <p class="intro">{t("downloadIntro")}</p>
+    {
+      release && (
+        <p>
+          {t("latestVersion", {
+            version: release.version,
+            date: release.publishedAt.toLocaleDateString(locale, { dateStyle: "long" }),
+          })}{" "}
+          <a href={release.page}>{t("whatsNew")}</a>
+        </p>
+      )
+    }
+
+    <ul class="platforms">
+      {
+        platforms.map((platform) => (
+          <li>
+            <h2>{platform.name}</h2>
+            {platform.links.length > 0 && (
+              <ul class="links">
+                {platform.links.map((link) => (
+                  <li>
+                    <a href={hrefOf(link)}>{link.label}</a>
+                    {link.hint && <p class="hint">{link.hint}</p>}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {platform.hint && <p class="hint">{platform.hint}</p>}
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</Page>
+
+<style>
+  h1 {
+    margin: 0 0 1rem;
+    font-size: clamp(2rem, 6vw, 2.75rem);
+  }
+
+  .intro {
+    max-width: 40rem;
+    font-size: 1.25rem;
+  }
+
+  .platforms {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+    gap: 1rem;
+    margin: 2rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .platforms > li {
+    padding: 1.25rem;
+    border: 1px solid var(--line);
+    border-radius: 0.75rem;
+    background: var(--surface);
+  }
+
+  h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1.375rem;
+  }
+
+  .links {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .links li + li {
+    margin-top: 0.75rem;
+  }
+
+  .links a {
+    font-weight: 600;
+  }
+
+
+  .hint {
+    margin: 0.25rem 0 0;
+    color: var(--muted);
+    font-size: 1rem;
+  }
+
+  .platforms > li > .hint {
+    margin-top: 0.75rem;
+  }
+</style>

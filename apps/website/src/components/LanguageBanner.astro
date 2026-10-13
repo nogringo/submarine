@@ -1,0 +1,77 @@
+---
+import { defaultLocale, locales, message, type Page, pathOf } from "../i18n";
+
+/** Offers an English page in the visitor's language, in that language, until dismissed. */
+interface Props {
+  page: Page;
+}
+
+const { page } = Astro.props;
+const others = locales.filter((locale) => locale !== defaultLocale);
+---
+
+{
+  others.map((locale) => (
+    <aside class="language-banner" lang={locale} aria-label={message(locale, "language")} hidden>
+      <div class="container">
+        <a href={pathOf(locale, page)} hreflang={locale} data-language-choice>
+          {message(locale, "readInLanguage")}
+        </a>
+        <button type="button">{message(locale, "close")}</button>
+      </div>
+    </aside>
+  ))
+}
+
+<script>
+  import { hasChosenLanguage, rememberLanguageChoice } from "../language-choice";
+  import { pickLocale } from "../pick-locale";
+
+  const banners = [...document.querySelectorAll<HTMLElement>(".language-banner")];
+  const locale = pickLocale(navigator.languages, ["en", ...banners.map((banner) => banner.lang)]);
+  const banner = banners.find((banner) => banner.lang === locale);
+  if (banner && !hasChosenLanguage()) {
+    banner.querySelector("a")?.addEventListener("click", rememberLanguageChoice);
+    banner.querySelector("button")?.addEventListener("click", () => {
+      rememberLanguageChoice();
+      banner.hidden = true;
+      document.getElementById("content")?.focus();
+    });
+    banner.hidden = false;
+  }
+</script>
+
+<style>
+  .language-banner {
+    border-bottom: 1px solid var(--line);
+    background: var(--raised);
+  }
+
+  .container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    padding-block: 0.5rem;
+  }
+
+  a {
+    font-weight: 600;
+  }
+
+  button {
+    min-height: 2.75rem;
+    padding: 0.4rem 1rem;
+    border: 2px solid var(--outline);
+    border-radius: 999px;
+    background: none;
+    color: var(--text);
+    font: inherit;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: var(--surface);
+  }
+</style>

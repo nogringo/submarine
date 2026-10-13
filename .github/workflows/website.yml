@@ -1,0 +1,69 @@
+name: Deploy website to Firebase Hosting
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - apps/website/**
+      - apps/app/lib/l10n/*.arb
+      - apps/app/screenshots/**
+      - apps/app/icon/**
+      - apps/app/web/icons/**
+      - apps/extension/PRIVACY.md
+      - firebase.json
+      - .firebaserc
+      - .github/workflows/website.yml
+  # Called by release.yml, to link the new version's downloads.
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: website
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: apps/website
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          package_json_file: apps/website/package.json
+          cache: true
+          cache_dependency_path: apps/website/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check
+        run: pnpm check
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: pnpm build
+
+      - name: Deploy
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SUBMARINE_15385 }}
+          channelId: live
+          target: website

@@ -1,0 +1,81 @@
+---
+import { message, type Page, pathOf } from "../i18n";
+import LanguageMenu from "./LanguageMenu.astro";
+import Sonar from "./Sonar.astro";
+
+interface Props {
+  locale: string;
+  page: Page;
+}
+
+const { locale, page } = Astro.props;
+const current = (target: Page) => (target === page ? "page" : undefined);
+---
+
+<header>
+  <div class="container bar">
+    <a class="wordmark" href={pathOf(locale, "")} aria-current={current("")}>
+      <Sonar size="2rem" still />
+      <span aria-hidden="true">Submarine</span>
+      <span class="visually-hidden">{message(locale, "home")}</span>
+    </a>
+    <nav aria-label={message(locale, "mainNavigation")}>
+      <a href={pathOf(locale, "download")} aria-current={current("download")}>
+        {message(locale, "navDownload")}
+      </a>
+      <LanguageMenu locale={locale} page={page} />
+    </nav>
+  </div>
+</header>
+
+<style>
+  header {
+    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+  }
+
+  .bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1.5rem;
+    min-height: 4rem;
+    padding-block: 0.5rem;
+  }
+
+  .wordmark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--text);
+    font-family: var(--wordmark-font);
+    font-size: 1.5rem;
+    letter-spacing: 0.1em;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1.25rem;
+  }
+
+  nav > a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  nav > a:not([aria-current]) {
+    text-decoration: none;
+  }
+
+  nav > a:hover {
+    text-decoration: underline;
+  }
+</style>

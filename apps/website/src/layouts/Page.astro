@@ -1,0 +1,84 @@
+---
+import "../styles/global.css";
+import touchIcon from "../../../app/web/icons/Icon-192.png";
+import Footer from "../components/Footer.astro";
+import Header from "../components/Header.astro";
+import LanguageBanner from "../components/LanguageBanner.astro";
+import favicon from "../favicon.svg?url";
+import { defaultLocale, locales, message, type Page, pathOf } from "../i18n";
+
+interface Props {
+  locale: string;
+  page: Page;
+  title: string;
+  description: string;
+  /** False for a page search engines leave out, such as the 404. */
+  indexed?: boolean;
+}
+
+const { locale, page, title, description, indexed = true } = Astro.props;
+const url = (locale: string) => new URL(pathOf(locale, page), Astro.site).href;
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {
+      indexed ? (
+        <Fragment>
+          <link rel="canonical" href={url(locale)} />
+          {locales.map((other) => <link rel="alternate" hreflang={other} href={url(other)} />)}
+          <link rel="alternate" hreflang="x-default" href={url(defaultLocale)} />
+        </Fragment>
+      ) : (
+        <meta name="robots" content="noindex" />
+      )
+    }
+    <link rel="icon" href={favicon} type="image/svg+xml" />
+    <link rel="apple-touch-icon" href={touchIcon.src} />
+    <meta name="theme-color" content="#e4ebef" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b1e2d" media="(prefers-color-scheme: dark)" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Submarine" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={url(locale)} />
+    <meta property="og:locale" content={locale.replace("-", "_")} />
+  </head>
+  <body>
+    <a class="skip visually-hidden" href="#content">{message(locale, "skipToContent")}</a>
+    {locale === defaultLocale && <LanguageBanner page={page} />}
+    <Header locale={locale} page={page} />
+    <main id="content" tabindex="-1">
+      <slot />
+    </main>
+    <Footer locale={locale} />
+  </body>
+</html>
+
+<style>
+  .skip:focus {
+    position: fixed;
+    top: 0.5rem;
+    left: 0.5rem;
+    z-index: 1;
+    width: auto;
+    height: auto;
+    padding: 0.75rem 1rem;
+    clip-path: none;
+    background: var(--raised);
+    color: var(--text);
+  }
+
+  main {
+    padding-block: 2rem 4rem;
+  }
+
+  main:focus {
+    outline: none;
+  }
+</style>

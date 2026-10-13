@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "submarine-15385"
+  },
+  "targets": {
+    "submarine-15385": {
+      "hosting": {
+        "website": [
+          "submarine-15385"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

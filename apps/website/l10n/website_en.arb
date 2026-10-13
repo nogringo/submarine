@@ -1,0 +1,311 @@
+{
+  "@@locale": "en",
+  "android": "Android",
+  "@android": {
+    "description": "Name of the platform, heading on the download page."
+  },
+  "apkHint": "To install it yourself, and update it by hand.",
+  "@apkHint": {
+    "description": "Hint next to the APK link."
+  },
+  "commandLine": "Command line",
+  "@commandLine": {
+    "description": "Heading of the command-line client on the download page."
+  },
+  "commandLineHint": "For developers: a terminal client that works like the Bitwarden CLI.",
+  "@commandLineHint": {
+    "description": "Hint under the command-line downloads."
+  },
+  "desktopScreenshot": "Submarine on a computer: three vaults, the items of all of them, and a login with its verification code",
+  "@desktopScreenshot": {
+    "description": "Text alternative of the computer screenshot."
+  },
+  "devicesBody": "Android, Windows, macOS and Linux, and the web for every other device. The same key opens your vault on each of them.",
+  "@devicesBody": {
+    "description": "Body of the platforms section of the home page."
+  },
+  "devicesTitle": "On all your devices",
+  "@devicesTitle": {
+    "description": "Heading of the home page section listing the platforms."
+  },
+  "downloadApk": "Download the APK",
+  "@downloadApk": {
+    "description": "Link to the Android installation file."
+  },
+  "downloadApp": "Download the app",
+  "@downloadApp": {
+    "description": "Main button of the home page, to the download page."
+  },
+  "downloadDescription": "Submarine for Android, Windows, macOS, Linux and the web, free.",
+  "@downloadDescription": {
+    "description": "Description of the download page for search engines and link previews."
+  },
+  "downloadForMac": "Download for Mac",
+  "@downloadForMac": {
+    "description": "Link to the macOS disk image."
+  },
+  "downloadInstaller": "Download the installer",
+  "@downloadInstaller": {
+    "description": "Link to the Windows installer."
+  },
+  "downloadIntro": "Submarine is free on every platform, and the same key opens your vault on each of them.",
+  "@downloadIntro": {
+    "description": "Paragraph under the heading of the download page."
+  },
+  "downloadTitle": "Download Submarine",
+  "@downloadTitle": {
+    "description": "Title and heading of the download page."
+  },
+  "featureAccessibility": "Usable with a screen reader, and with text twice as large.",
+  "@featureAccessibility": {
+    "description": "Feature list entry."
+  },
+  "featureBitwarden": "Import your passwords from Bitwarden, and export them at any time.",
+  "@featureBitwarden": {
+    "description": "Feature list entry. Bitwarden is a product name."
+  },
+  "featureClipboard": "Copied passwords cleared from the clipboard after a delay.",
+  "@featureClipboard": {
+    "description": "Feature list entry."
+  },
+  "featureCodes": "Two-factor authentication codes next to your logins.",
+  "@featureCodes": {
+    "description": "Feature list entry."
+  },
+  "featureGenerator": "A generator of strong passwords, passphrases and usernames.",
+  "@featureGenerator": {
+    "description": "Feature list entry."
+  },
+  "featureItems": "Logins, cards and secure notes, with your own custom fields.",
+  "@featureItems": {
+    "description": "Feature list entry."
+  },
+  "featureLanguages": "In 11 languages.",
+  "@featureLanguages": {
+    "description": "Feature list entry."
+  },
+  "featureLock": "A lock password, with your fingerprint, face or screen lock as a shortcut.",
+  "@featureLock": {
+    "description": "Feature list entry."
+  },
+  "featureOffline": "Changes saved on your device first, and synced once you are online.",
+  "@featureOffline": {
+    "description": "Feature list entry."
+  },
+  "featureScreenshots": "Screenshots blocked on Android unless you allow them.",
+  "@featureScreenshots": {
+    "description": "Feature list entry."
+  },
+  "featureVaults": "Several vaults side by side, each opened on as many devices as you like.",
+  "@featureVaults": {
+    "description": "Feature list entry."
+  },
+  "featuresTitle": "What it does",
+  "@featuresTitle": {
+    "description": "Heading of the list of features on the home page."
+  },
+  "footerContact": "Contact us on Nostr",
+  "@footerContact": {
+    "description": "Footer link to Submarine's Nostr profile, the way to reach its developers. Nostr is a protocol name, not translated."
+  },
+  "footerLicense": "Free and open source, under the MIT license.",
+  "@footerLicense": {
+    "description": "Line at the bottom of every page."
+  },
+  "footerReportProblem": "Report a problem",
+  "@footerReportProblem": {
+    "description": "Footer link to the GitHub issues."
+  },
+  "footerSourceCode": "Source code",
+  "@footerSourceCode": {
+    "description": "Footer link to the GitHub repository."
+  },
+  "getOnZapstore": "Get it on Zapstore",
+  "@getOnZapstore": {
+    "description": "Link to Submarine on Zapstore. Zapstore is a product name."
+  },
+  "goHome": "Go to the home page",
+  "@goHome": {
+    "description": "Link of the page shown for an unknown address."
+  },
+  "heroIntro": "Submarine keeps your passwords, cards and notes in sync across your devices, with no account to create.",
+  "@heroIntro": {
+    "description": "Paragraph under the tagline at the top of the home page."
+  },
+  "home": "Submarine, home",
+  "@home": {
+    "description": "Accessible name of the Submarine wordmark in the header, a link to the home page."
+  },
+  "homeDescription": "Submarine keeps your passwords, cards and notes in sync across your devices, encrypted, with no account to create. Free and open source.",
+  "@homeDescription": {
+    "description": "Description of the home page for search engines and link previews."
+  },
+  "homeTitle": "Submarine, the password manager with no account",
+  "@homeTitle": {
+    "description": "Title of the home page, in the browser tab and search results."
+  },
+  "howEncryptedBody": "Everything is encrypted before it leaves your device, so nobody but you can read it, not even us.",
+  "@howEncryptedBody": {
+    "description": "Body of the first point of How it works."
+  },
+  "howEncryptedTitle": "Encrypted on your devices",
+  "@howEncryptedTitle": {
+    "description": "Heading of the first point of How it works."
+  },
+  "howKeyBody": "When you create a vault, Submarine gives you its key. That key opens your vault on your other devices. Keep it somewhere safe: if you lose it, nobody can recover your vault.",
+  "@howKeyBody": {
+    "description": "Body of the second point of How it works."
+  },
+  "howKeyTitle": "No account, just a key",
+  "@howKeyTitle": {
+    "description": "Heading of the second point of How it works."
+  },
+  "howRelaysBody": "Your vaults live on Nostr relays: open servers that anyone can run, and that only see encrypted data. There is no Submarine server to trust.",
+  "@howRelaysBody": {
+    "description": "Body of the third point of How it works. Nostr is a protocol name, not translated."
+  },
+  "howRelaysTitle": "Synced through open servers",
+  "@howRelaysTitle": {
+    "description": "Heading of the third point of How it works."
+  },
+  "howTitle": "How it works",
+  "@howTitle": {
+    "description": "Heading of the home page section explaining how Submarine keeps passwords."
+  },
+  "iphone": "iPhone and iPad",
+  "@iphone": {
+    "description": "Name of the platforms, heading on the download page."
+  },
+  "iphoneHint": "Not on the App Store yet. Meanwhile, use the web version in your browser.",
+  "@iphoneHint": {
+    "description": "Text under iPhone and iPad on the download page."
+  },
+  "latestVersion": "Version {version}, released on {date}.",
+  "@latestVersion": {
+    "description": "Line under the download page's intro. {date} is formatted for the language, such as 'October 12, 2026'.",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "linux": "Linux",
+  "@linux": {
+    "description": "Name of the platform, heading on the download page."
+  },
+  "linuxAppImage": "Any distribution (AppImage)",
+  "@linuxAppImage": {
+    "description": "Link to the Linux AppImage."
+  },
+  "linuxDeb": "Debian and Ubuntu (.deb)",
+  "@linuxDeb": {
+    "description": "Link to the Linux .deb package."
+  },
+  "linuxZip": "Archive (zip)",
+  "@linuxZip": {
+    "description": "Link to the Linux zip."
+  },
+  "macos": "macOS",
+  "@macos": {
+    "description": "Name of the platform, heading on the download page."
+  },
+  "mainNavigation": "Main",
+  "@mainNavigation": {
+    "description": "Accessible name of the site's main navigation, read by screen readers as 'Main navigation'."
+  },
+  "navDownload": "Download",
+  "@navDownload": {
+    "description": "Link to the download page, in the header and the footer."
+  },
+  "nostrNote": "Already using Nostr? A signer app such as Amber can hold your vault keys.",
+  "@nostrNote": {
+    "description": "Closing line of the home page, for people who know Nostr. Amber is an app name."
+  },
+  "notFoundBody": "This page does not exist, or no longer does.",
+  "@notFoundBody": {
+    "description": "Text of the page shown for an unknown address."
+  },
+  "notFoundTitle": "Page not found",
+  "@notFoundTitle": {
+    "description": "Title and heading of the page shown for an unknown address."
+  },
+  "openSourceBody": "No ads, no tracking, nothing to pay. The code is public, so anyone can check what Submarine does with your data.",
+  "@openSourceBody": {
+    "description": "Body of the open source section of the home page."
+  },
+  "openSourceTitle": "Free and open source",
+  "@openSourceTitle": {
+    "description": "Heading of the home page section about the license."
+  },
+  "openWebApp": "Open in your browser",
+  "@openWebApp": {
+    "description": "Button to the web version of the app, which needs no installation."
+  },
+  "phoneGeneratorScreenshot": "The password generator on a phone",
+  "@phoneGeneratorScreenshot": {
+    "description": "Text alternative of a phone screenshot."
+  },
+  "phoneListScreenshot": "The items of every vault on a phone",
+  "@phoneListScreenshot": {
+    "description": "Text alternative of a phone screenshot."
+  },
+  "phoneWelcomeScreenshot": "The welcome screen on a phone",
+  "@phoneWelcomeScreenshot": {
+    "description": "Text alternative of a phone screenshot."
+  },
+  "portableZip": "Portable version (zip)",
+  "@portableZip": {
+    "description": "Link to the Windows zip, which runs without installing."
+  },
+  "privacyDescription": "What the Submarine browser extension does with your data.",
+  "@privacyDescription": {
+    "description": "Description of the privacy policy page for search engines."
+  },
+  "privacyTitle": "Privacy policy",
+  "@privacyTitle": {
+    "description": "Title of the privacy policy page, and its link in the footer."
+  },
+  "readInLanguage": "Read this site in English",
+  "@readInLanguage": {
+    "description": "Link of the banner that the English pages show to a visitor whose browser prefers this language. Written in this language, naming it."
+  },
+  "readProtocol": "Read the protocol",
+  "@readProtocol": {
+    "description": "Link after the Nostr line, to the specification of Submarine's protocol."
+  },
+  "seeSourceCode": "See the source code",
+  "@seeSourceCode": {
+    "description": "Link to the GitHub repository, in the open source section."
+  },
+  "skipToContent": "Skip to content",
+  "@skipToContent": {
+    "description": "Link that jumps over the header to the page's content, shown when it gets the keyboard focus."
+  },
+  "web": "Web",
+  "@web": {
+    "description": "Name of the platform, heading on the download page."
+  },
+  "whatsNew": "What's new, and every file of this version",
+  "@whatsNew": {
+    "description": "Link to the GitHub release of the latest version."
+  },
+  "windows": "Windows",
+  "@windows": {
+    "description": "Name of the platform, heading on the download page."
+  },
+  "youngBody": "Submarine is still young. For your most important passwords, we still recommend a proven password manager.",
+  "@youngBody": {
+    "description": "Body of the section warning that Submarine is new."
+  },
+  "youngTitle": "Still young",
+  "@youngTitle": {
+    "description": "Heading of the home page section warning that Submarine is new."
+  },
+  "zapstoreHint": "Zapstore is an app store that keeps Submarine up to date.",
+  "@zapstoreHint": {
+    "description": "Hint next to the Zapstore link."
+  }
+}

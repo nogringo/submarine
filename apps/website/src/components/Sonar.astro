@@ -70,7 +70,7 @@ const { size, still = false } = Astro.props;
   .ping {
     stroke: var(--accent);
     stroke-width: 3;
-    opacity: 0;
+    stroke-opacity: 0;
     transform-box: fill-box;
     transform-origin: center;
   }
@@ -97,12 +97,13 @@ const { size, still = false } = Astro.props;
     }
   }
 
+  /* Not opacity: Chrome runs it on the compositor, a frame ahead of the transform at each loop. */
   @keyframes fade {
     from {
-      opacity: 1;
+      stroke-opacity: 1;
     }
     to {
-      opacity: 0;
+      stroke-opacity: 0;
     }
   }
 

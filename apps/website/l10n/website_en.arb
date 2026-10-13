@@ -136,7 +136,7 @@
   "@home": {
     "description": "Accessible name of the Submarine wordmark in the header, a link to the home page."
   },
-  "homeDescription": "Submarine syncs your passwords, cards and notes across your devices, encrypted, through open servers that anyone can run. No company holds your vault, and there is no account to create. Free and open source.",
+  "homeDescription": "Your passwords, cards and notes, encrypted and synced across your devices through open servers. No account, no company. Free and open source.",
   "@homeDescription": {
     "description": "Description of the home page for search engines and link previews."
   },

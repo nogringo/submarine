@@ -1,11 +1,11 @@
 ---
 import "../styles/global.css";
+import favicon from "../../../app/web/favicon.svg?url";
 import touchIcon from "../../../app/web/icons/Icon-192.png";
 import Footer from "../components/Footer.astro";
 import Header from "../components/Header.astro";
 import LanguageBanner from "../components/LanguageBanner.astro";
-import favicon from "../../../app/web/favicon.svg?url";
-import { defaultLocale, locales, message, type Page, pathOf } from "../i18n";
+import { defaultLocale, locales, message, openGraphLocaleOf, type Page, pathOf } from "../i18n";
 import { height as imageHeight, width as imageWidth } from "../pages/og.png";
 
 interface Props {
@@ -49,7 +49,7 @@ const image = new URL("/og.png", Astro.site).href;
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={url(locale)} />
-    <meta property="og:locale" content={locale.replace("-", "_")} />
+    <meta property="og:locale" content={openGraphLocaleOf(locale)} />
     <meta property="og:image" content={image} />
     <meta property="og:image:width" content={String(imageWidth)} />
     <meta property="og:image:height" content={String(imageHeight)} />

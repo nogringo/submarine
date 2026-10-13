@@ -1,6 +1,6 @@
 import { readdir, readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
-import { languageName, locales, message, pathOf, websiteCatalogs } from "./i18n";
+import { languageName, locales, message, openGraphLocaleOf, pathOf, websiteCatalogs } from "./i18n";
 import { pickLocale } from "./pick-locale";
 
 const read = (path: string) => readFile(new URL(path, import.meta.url), "utf8");
@@ -32,6 +32,19 @@ describe("pathOf", () => {
     ["pt-BR", "privacy", "/pt-br/privacy"],
   ] as const)("gives %s %j at %s", (locale, page, path) => {
     expect(pathOf(locale, page)).toBe(path);
+  });
+});
+
+describe("openGraphLocaleOf", () => {
+  it.each([
+    ["en", "en_US"],
+    ["fr", "fr_FR"],
+    ["pt", "pt_PT"],
+    ["pt-BR", "pt_BR"],
+    ["zh", "zh_CN"],
+    ["ja", "ja_JP"],
+  ])("gives %s as %s", (locale, openGraphLocale) => {
+    expect(openGraphLocaleOf(locale)).toBe(openGraphLocale);
   });
 });
 

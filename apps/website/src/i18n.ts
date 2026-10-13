@@ -51,6 +51,13 @@ export function message(locale: string, id: string, values: Record<string, strin
   });
 }
 
+/** The language_TERRITORY form Open Graph wants: fr_FR for fr. */
+export function openGraphLocaleOf(locale: string): string {
+  const { language, region } = new Intl.Locale(locale).maximize();
+  // Likely subtags give Brazil for pt, the site's pt is Portugal's.
+  return `${language}_${locale === "pt" ? "PT" : region}`;
+}
+
 /** The first segment of a page's address: none for English, "pt-br" for pt-BR. */
 export function segmentOf(locale: string): string | undefined {
   return locale === defaultLocale ? undefined : locale.toLowerCase();

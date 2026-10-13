@@ -42,6 +42,10 @@
               "value": "no-cache"
             },
             {
+              "key": "X-Robots-Tag",
+              "value": "noindex"
+            },
+            {
               "key": "X-Content-Type-Options",
               "value": "nosniff"
             },

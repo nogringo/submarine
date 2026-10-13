@@ -46,7 +46,7 @@ On Android, the vault keys stay out of backups and device transfers, as another 
 
 On Linux, the app needs libsecret and a keyring service, such as GNOME Keyring or KWallet.
 
-On the web, the app only works over HTTPS or on localhost.
+On the web, the app only works over HTTPS or on localhost. It is served at [app.submarine.li](https://app.submarine.li) by Firebase Hosting, as the `app` target of the repository's [`firebase.json`](../../firebase.json), and the [web workflow](../../.github/workflows/web.yml) deploys it on each push to `main`.
 
 ## Development
 

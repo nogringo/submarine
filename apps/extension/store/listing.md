@@ -58,5 +58,5 @@ Submarine is still young. For your most important passwords, we still recommend 
 ```text
 The background runs a core written in Dart, compiled to JavaScript (core.js). The sources archive holds it, and SOURCE_CODE_REVIEW.md at its root explains how to rebuild the extension identically.
 
-To try the extension, create a vault in the Submarine web app, https://nogringo.github.io/submarine/, copy its key from the vault's settings, then open it in the extension.
+To try the extension, create a vault in the Submarine web app, https://app.submarine.li, copy its key from the vault's settings, then open it in the extension.
 ```

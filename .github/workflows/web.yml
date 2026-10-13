@@ -1,4 +1,4 @@
-name: Deploy web app to GitHub Pages
+name: Deploy web app to Firebase Hosting
 
 on:
   push:
@@ -7,18 +7,16 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
+  group: web
   cancel-in-progress: false
 
 jobs:
   ci:
     uses: ./.github/workflows/ci.yml
 
-  build:
+  deploy:
     needs: ci
     runs-on: ubuntu-latest
     steps:
@@ -36,20 +34,11 @@ jobs:
 
       - name: Build web app
         working-directory: apps/app
-        run: flutter build web --release --base-href "/${GITHUB_REPOSITORY#*/}/"
+        run: flutter build web --release
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v5
+      - name: Deploy
+        uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          path: apps/app/build/web
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v5
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SUBMARINE_15385 }}
+          channelId: live
+          target: app

@@ -4,7 +4,7 @@
 
 Submarine keeps your passwords, cards and notes in sync across your devices. Everything is encrypted before it leaves them, then stored on [Nostr](https://nostr.how/) relays: open servers that anyone can run, and that only ever see encrypted data. Free and open source, no ads, no tracking.
 
-[Download](https://github.com/nogringo/submarine/releases/latest) | [Open in your browser](https://nogringo.github.io/submarine/) | [Get it on Zapstore](https://zapstore.dev/apps/ovh.uid.submarine)
+[Download](https://github.com/nogringo/submarine/releases/latest) | [Open in your browser](https://app.submarine.li) | [Get it on Zapstore](https://zapstore.dev/apps/ovh.uid.submarine)
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="apps/app/screenshots/desktop-dark.png">
@@ -48,7 +48,7 @@ Submarine keeps your passwords, cards and notes in sync across your devices. Eve
 | Windows | Installer or zip of the [latest release](https://github.com/nogringo/submarine/releases/latest) |
 | macOS | Signed and notarized `.dmg` of the [latest release](https://github.com/nogringo/submarine/releases/latest) |
 | Linux | AppImage, `.deb` or zip of the [latest release](https://github.com/nogringo/submarine/releases/latest) |
-| Web | [nogringo.github.io/submarine](https://nogringo.github.io/submarine/) |
+| Web | [app.submarine.li](https://app.submarine.li) |
 | iOS | Build from source for now |
 | CLI | Linux x64, macOS arm64 and Windows x64 archives of the [latest release](https://github.com/nogringo/submarine/releases/latest) |
 

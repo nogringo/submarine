@@ -7,6 +7,9 @@
       "hosting": {
         "website": [
           "submarine-15385"
+        ],
+        "app": [
+          "submarine-app"
         ]
       }
     }

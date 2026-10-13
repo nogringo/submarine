@@ -1,6 +1,6 @@
 name: CI
 
-# Pushes to main run it through pages.yml, before the deploy.
+# Pushes to main run it through web.yml, before the deploy.
 on:
   pull_request:
   workflow_call:

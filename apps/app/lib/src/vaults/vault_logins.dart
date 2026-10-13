@@ -16,8 +16,8 @@ const nostrConnectRelays = [
 
 const bunkerClient = Nip46ClientMetadata(
   name: 'Submarine',
-  url: 'https://nogringo.github.io/submarine/',
-  image: 'https://nogringo.github.io/submarine/icons/Icon-192.png',
+  url: 'https://app.submarine.li',
+  image: 'https://app.submarine.li/icons/Icon-192.png',
   perms: vaultSignerPermissions,
 );
 

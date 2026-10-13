@@ -121,12 +121,14 @@ const phones = [
         ))
       }
     </ul>
+    <p class="more"><a href={pathOf(locale, "security")}>{t("securityLink")}</a></p>
   </section>
 
   <section class="container features" aria-labelledby="features">
     <div>
       <h2 id="features">{t("featuresTitle")}</h2>
       <ul>{features.map((feature) => <li>{t(feature)}</li>)}</ul>
+      <p><a href={pathOf(locale, "import-bitwarden")}>{t("importGuideLink")}</a></p>
     </div>
     <ul class="phones">
       {
@@ -260,6 +262,10 @@ const phones = [
   .reasons p,
   .steps p {
     margin: 0;
+  }
+
+  .more {
+    margin: 1rem 0 0;
   }
 
   .features {

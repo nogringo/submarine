@@ -63,7 +63,9 @@ export function segmentOf(locale: string): string | undefined {
   return locale === defaultLocale ? undefined : locale.toLowerCase();
 }
 
-export type Page = "" | "download" | "privacy";
+export const articles = ["security", "import-bitwarden", "faq"] as const;
+
+export type Page = "" | "download" | "privacy" | (typeof articles)[number];
 
 export function pathOf(locale: string, page: Page): string {
   const path = [segmentOf(locale), page].filter(Boolean).join("/");

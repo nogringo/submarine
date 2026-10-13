@@ -9,7 +9,7 @@ pnpm dev
 
 ## Languages
 
-The site speaks the app's languages: English at `/`, the others under their code, such as `/fr` or `/pt-br`. Its strings are in [`l10n`](l10n): `website_en.arb` is the template, with a description of each string, and the other `website_<code>.arb` files its translations. Strings the app already has, such as its tagline and the names of the languages, come from the app's own ARB files. The privacy policy is the extension's [`PRIVACY.md`](../extension/PRIVACY.md), translated in [`src/privacy`](src/privacy): change the translations with it.
+The site speaks the app's languages: English at `/`, the others under their code, such as `/fr` or `/pt-br`. Its strings are in [`l10n`](l10n): `website_en.arb` is the template, with a description of each string, and the other `website_<code>.arb` files its translations. Strings the app already has, such as its tagline and the names of the languages, come from the app's own ARB files. The privacy policy is the extension's [`PRIVACY.md`](../extension/PRIVACY.md), translated in [`src/privacy`](src/privacy): change the translations with it. The longer pages (security, Bitwarden import, questions and answers) are in [`src/articles`](src/articles), one markdown file per language, English in `en.md`: a change to one changes them all. Links to the site's own pages carry the locale, such as `/fr/security`.
 
 An English page offers a visitor whose browser prefers another language to read it in that language, until they pick one or close the offer.
 

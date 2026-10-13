@@ -116,6 +116,10 @@
   "@footerContact": {
     "description": "Footer link to Submarine's Nostr profile, the way to reach its developers. Nostr is a protocol name, not translated."
   },
+  "footerFaq": "Questions and answers",
+  "@footerFaq": {
+    "description": "Footer link to the questions and answers page."
+  },
   "footerLicense": "Free and open source, under the MIT license.",
   "@footerLicense": {
     "description": "Line at the bottom of every page."
@@ -123,6 +127,10 @@
   "footerReportProblem": "Report a problem",
   "@footerReportProblem": {
     "description": "Footer link to the GitHub issues."
+  },
+  "footerSecurity": "Security",
+  "@footerSecurity": {
+    "description": "Footer link to the page explaining how Submarine protects passwords."
   },
   "footerSourceCode": "Source code",
   "@footerSourceCode": {
@@ -179,6 +187,10 @@
   "howTitle": "How it works",
   "@howTitle": {
     "description": "Heading of the home page section explaining how Submarine keeps passwords."
+  },
+  "importGuideLink": "How to import from Bitwarden",
+  "@importGuideLink": {
+    "description": "Link under the features of the home page, to the guide importing passwords from Bitwarden."
   },
   "iphone": "iPhone and iPad",
   "@iphone": {
@@ -287,6 +299,10 @@
   "readProtocol": "Read the protocol",
   "@readProtocol": {
     "description": "Link after the Nostr line, to the specification of Submarine's protocol."
+  },
+  "securityLink": "How Submarine protects your passwords",
+  "@securityLink": {
+    "description": "Link under How it works on the home page, to the security page."
   },
   "seeSourceCode": "See the source code",
   "@seeSourceCode": {

@@ -1,0 +1,17 @@
+---
+import { getEntry } from "astro:content";
+import { articles, localePaths } from "../../i18n";
+import Article from "../../layouts/Article.astro";
+
+export function getStaticPaths() {
+  return localePaths().flatMap(({ params, props }) =>
+    articles.map((article) => ({ params: { ...params, article }, props: { ...props, article } })),
+  );
+}
+
+const { locale, article } = Astro.props;
+const entry = await getEntry("articles", `${article}/${locale}`);
+if (!entry) throw new Error(`No ${article} page in ${locale}`);
+---
+
+<Article locale={locale} page={article} entry={entry} description={entry.data.description} />

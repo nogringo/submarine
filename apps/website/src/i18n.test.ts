@@ -1,6 +1,14 @@
 import { readdir, readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
-import { languageName, locales, message, openGraphLocaleOf, pathOf, websiteCatalogs } from "./i18n";
+import {
+  articles,
+  languageName,
+  locales,
+  message,
+  openGraphLocaleOf,
+  pathOf,
+  websiteCatalogs,
+} from "./i18n";
 import { pickLocale } from "./pick-locale";
 
 const read = (path: string) => readFile(new URL(path, import.meta.url), "utf8");
@@ -88,30 +96,44 @@ describe("the site's messages", () => {
   });
 });
 
-describe("the privacy policy", () => {
-  const structure = (markdown: string) => ({
-    headings: markdown.split("\n").filter((line) => line.startsWith("#")).length,
-    items: markdown.split("\n").filter((line) => line.startsWith("- ")).length,
-    links: [...markdown.matchAll(/\]\(([^)]+)\)/g)].map((match) => match[1]),
-  });
+const localePrefix = new RegExp(
+  `^/(${locales.map((locale) => locale.toLowerCase()).join("|")})(?=/|$)`,
+);
+/** Its links with the locale taken out of the site's own: /fr/faq is /faq. */
+const structure = (markdown: string) => ({
+  headings: markdown.split("\n").filter((line) => line.startsWith("#")).length,
+  items: markdown.split("\n").filter((line) => /^(- |\d+\. )/.test(line)).length,
+  links: [...markdown.matchAll(/\]\(([^)]+)\)/g)].map(
+    (match) => match[1]?.replace(localePrefix, "") || "/",
+  ),
+});
+const translations = locales.filter((locale) => locale !== "en");
+const fileOf = (locale: string) => `${locale.replace("-", "_")}.md`;
 
+describe("the privacy policy", () => {
   it("is translated in every other language", async () => {
     const files = await readdir(new URL("privacy", import.meta.url));
-    expect(files.toSorted()).toEqual(
-      locales
-        .filter((locale) => locale !== "en")
-        .map((locale) => `${locale.replace("-", "_")}.md`)
-        .toSorted(),
-    );
+    expect(files.toSorted()).toEqual(translations.map(fileOf).toSorted());
   });
 
-  it.each(locales.filter((locale) => locale !== "en"))(
-    "keeps the English structure and links in %s",
-    async (locale) => {
-      const english = await read("../../extension/PRIVACY.md");
-      const translation = await read(`privacy/${locale.replace("-", "_")}.md`);
-      expect(structure(translation)).toEqual(structure(english));
-      expect(translation).not.toMatch(banned);
-    },
-  );
+  it.each(translations)("keeps the English structure and links in %s", async (locale) => {
+    const english = await read("../../extension/PRIVACY.md");
+    const translation = await read(`privacy/${fileOf(locale)}`);
+    expect(structure(translation)).toEqual(structure(english));
+    expect(translation).not.toMatch(banned);
+  });
+});
+
+describe.each(articles)("the %s page", (article) => {
+  it("is written in every language", async () => {
+    const files = await readdir(new URL(`articles/${article}`, import.meta.url));
+    expect(files.toSorted()).toEqual(locales.map(fileOf).toSorted());
+  });
+
+  it.each(locales)("keeps the English structure and links in %s", async (locale) => {
+    const english = await read(`articles/${article}/en.md`);
+    const translation = await read(`articles/${article}/${fileOf(locale)}`);
+    expect(structure(translation)).toEqual(structure(english));
+    expect(translation).not.toMatch(banned);
+  });
 });

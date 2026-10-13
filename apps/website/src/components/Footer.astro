@@ -13,6 +13,11 @@ const { locale } = Astro.props;
   <div class="container">
     <ul>
       <li><a href={pathOf(locale, "download")}>{message(locale, "navDownload")}</a></li>
+      <li><a href={pathOf(locale, "security")}>{message(locale, "footerSecurity")}</a></li>
+      <li><a href={pathOf(locale, "faq")}>{message(locale, "footerFaq")}</a></li>
+      <li>
+        <a href={pathOf(locale, "import-bitwarden")}>{message(locale, "importFromBitwarden")}</a>
+      </li>
       <li><a href={pathOf(locale, "privacy")}>{message(locale, "privacyTitle")}</a></li>
       <li><a href={repository}>{message(locale, "footerSourceCode")}</a></li>
       <li><a href={`${repository}/issues`}>{message(locale, "footerReportProblem")}</a></li>

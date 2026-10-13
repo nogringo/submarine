@@ -1,0 +1,49 @@
+---
+import { type CollectionEntry, render } from "astro:content";
+import type { Page as PageName } from "../i18n";
+import Page from "./Page.astro";
+
+/** A page written in markdown: its first heading is its title. */
+interface Props {
+  locale: string;
+  page: PageName;
+  entry: CollectionEntry<"privacy" | "articles">;
+  description: string;
+}
+
+const { locale, page, entry, description } = Astro.props;
+const { Content, headings } = await render(entry);
+const heading = headings.find(({ depth }) => depth === 1);
+if (!heading) throw new Error(`No title in ${entry.collection} ${entry.id}`);
+---
+
+<Page locale={locale} page={page} title={heading.text} description={description}>
+  <article class="container">
+    <Content />
+  </article>
+</Page>
+
+<style>
+  article {
+    max-width: 46rem;
+  }
+
+  article :global(h1) {
+    margin: 0 0 1rem;
+    font-size: clamp(1.75rem, 5vw, 2.5rem);
+  }
+
+  article :global(h2) {
+    margin: 2.5rem 0 0.75rem;
+    font-size: 1.5rem;
+  }
+
+  article :global(h3) {
+    margin: 1.75rem 0 0.5rem;
+    font-size: 1.2rem;
+  }
+
+  article :global(li + li) {
+    margin-top: 0.5rem;
+  }
+</style>

@@ -59,7 +59,6 @@ for density in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
 done
 
 web=$app/web
-rounded 32 0 "$web/favicon.png"
 for size in 192 512; do
   rounded $size 0 "$web/icons/Icon-$size.png"
   square $size "$web/icons/Icon-maskable-$size.png"

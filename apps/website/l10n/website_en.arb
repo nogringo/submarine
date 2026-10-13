@@ -128,7 +128,7 @@
   "@goHome": {
     "description": "Link of the page shown for an unknown address."
   },
-  "heroIntro": "Submarine keeps your passwords, cards and notes in sync across your devices, with no account to create.",
+  "heroIntro": "Your passwords are your most important data, and they should not depend on a single company. Submarine syncs your vault across your devices, encrypted, through open servers that anyone can run.",
   "@heroIntro": {
     "description": "Paragraph under the tagline at the top of the home page."
   },
@@ -136,11 +136,11 @@
   "@home": {
     "description": "Accessible name of the Submarine wordmark in the header, a link to the home page."
   },
-  "homeDescription": "Submarine keeps your passwords, cards and notes in sync across your devices, encrypted, with no account to create. Free and open source.",
+  "homeDescription": "Submarine syncs your passwords, cards and notes across your devices, encrypted, through open servers that anyone can run. No company holds your vault, and there is no account to create. Free and open source.",
   "@homeDescription": {
     "description": "Description of the home page for search engines and link previews."
   },
-  "homeTitle": "Submarine, the password manager with no account",
+  "homeTitle": "Submarine, a password manager no company controls",
   "@homeTitle": {
     "description": "Title of the home page, in the browser tab and search results."
   },
@@ -291,6 +291,34 @@
   "whatsNew": "What's new, and every file of this version",
   "@whatsNew": {
     "description": "Link to the GitHub release of the latest version."
+  },
+  "whyLeaveBody": "Export your vault whenever you want, in a format other password managers can import.",
+  "@whyLeaveBody": {
+    "description": "Body of the third reason to use Submarine."
+  },
+  "whyLeaveTitle": "Free to leave",
+  "@whyLeaveTitle": {
+    "description": "Heading of the third reason to use Submarine."
+  },
+  "whySpofBody": "Your vault is copied, encrypted, on several independent servers and on each of your devices. If a server goes down, the others still have it. And you choose which servers keep it, your own included.",
+  "@whySpofBody": {
+    "description": "Body of the second reason to use Submarine."
+  },
+  "whySpofTitle": "No single point of failure",
+  "@whySpofTitle": {
+    "description": "Heading of the second reason to use Submarine."
+  },
+  "whySyncBody": "Your vault follows you on all your devices, with nothing to set up or copy by hand. It travels encrypted through open servers, not through a company that keeps it.",
+  "@whySyncBody": {
+    "description": "Body of the first reason to use Submarine."
+  },
+  "whySyncTitle": "Synced, without a company in the middle",
+  "@whySyncTitle": {
+    "description": "Heading of the first reason to use Submarine."
+  },
+  "whyTitle": "Why Submarine",
+  "@whyTitle": {
+    "description": "Heading of the home page section explaining why Submarine exists, under the computer screenshot."
   },
   "windows": "Windows",
   "@windows": {

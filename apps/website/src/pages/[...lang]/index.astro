@@ -18,6 +18,11 @@ export const getStaticPaths = localePaths;
 const { locale } = Astro.props;
 const t = (id: string) => message(locale, id);
 
+const reasons = [
+  ["whySyncTitle", "whySyncBody"],
+  ["whySpofTitle", "whySpofBody"],
+  ["whyLeaveTitle", "whyLeaveBody"],
+];
 const steps = [
   ["howEncryptedTitle", "howEncryptedBody"],
   ["howKeyTitle", "howKeyBody"],
@@ -66,6 +71,20 @@ const phones = [
       eager
     />
   </div>
+
+  <section class="container" aria-labelledby="why">
+    <h2 id="why">{t("whyTitle")}</h2>
+    <ul class="reasons">
+      {
+        reasons.map(([title, body]) => (
+          <li>
+            <h3>{t(title)}</h3>
+            <p>{t(body)}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
 
   <section class="container" aria-labelledby="how">
     <h2 id="how">{t("howTitle")}</h2>
@@ -179,6 +198,7 @@ const phones = [
     font-size: 1.25rem;
   }
 
+  .reasons,
   .steps {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
@@ -195,6 +215,12 @@ const phones = [
     background: var(--surface);
   }
 
+  .reasons li {
+    padding-top: 1rem;
+    border-top: 3px solid var(--accent);
+  }
+
+  .reasons p,
   .steps p {
     margin: 0;
   }

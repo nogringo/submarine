@@ -6,6 +6,7 @@ import Header from "../components/Header.astro";
 import LanguageBanner from "../components/LanguageBanner.astro";
 import favicon from "../favicon.svg?url";
 import { defaultLocale, locales, message, type Page, pathOf } from "../i18n";
+import { height as imageHeight, width as imageWidth } from "../pages/og.png";
 
 interface Props {
   locale: string;
@@ -18,6 +19,7 @@ interface Props {
 
 const { locale, page, title, description, indexed = true } = Astro.props;
 const url = (locale: string) => new URL(pathOf(locale, page), Astro.site).href;
+const image = new URL("/og.png", Astro.site).href;
 ---
 
 <!doctype html>
@@ -48,6 +50,12 @@ const url = (locale: string) => new URL(pathOf(locale, page), Astro.site).href;
     <meta property="og:description" content={description} />
     <meta property="og:url" content={url(locale)} />
     <meta property="og:locale" content={locale.replace("-", "_")} />
+    <meta property="og:image" content={image} />
+    <meta property="og:image:width" content={String(imageWidth)} />
+    <meta property="og:image:height" content={String(imageHeight)} />
+    <meta property="og:image:alt" content={message(locale, "desktopScreenshot")} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <slot name="head" />
   </head>
   <body>
     <a class="skip visually-hidden" href="#content">{message(locale, "skipToContent")}</a>

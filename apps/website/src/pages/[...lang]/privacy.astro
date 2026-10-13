@@ -8,13 +8,15 @@ export const getStaticPaths = localePaths;
 const { locale } = Astro.props;
 const policy = await getEntry("privacy", locale);
 if (!policy) throw new Error(`No privacy policy in ${locale}`);
-const { Content } = await render(policy);
+const { Content, headings } = await render(policy);
+const heading = headings.find(({ depth }) => depth === 1);
+if (!heading) throw new Error(`No title in the ${locale} privacy policy`);
 ---
 
 <Page
   locale={locale}
   page="privacy"
-  title={message(locale, "privacyTitle")}
+  title={heading.text}
   description={message(locale, "privacyDescription")}
 >
   <article class="container">

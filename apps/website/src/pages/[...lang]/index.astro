@@ -12,11 +12,30 @@ import Sonar from "../../components/Sonar.astro";
 import { localePaths, message, pathOf } from "../../i18n";
 import Page from "../../layouts/Page.astro";
 import { protocol, repository, webApp } from "../../links";
+import { latestRelease } from "../../release";
 
 export const getStaticPaths = localePaths;
 
 const { locale } = Astro.props;
 const t = (id: string) => message(locale, id);
+const release = await latestRelease();
+
+const app = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "Submarine",
+  description: t("homeDescription"),
+  url: new URL(pathOf(locale, ""), Astro.site).href,
+  inLanguage: locale,
+  applicationCategory: "SecurityApplication",
+  operatingSystem: "Android, Windows, macOS, Linux, Web",
+  downloadUrl: new URL(pathOf(locale, "download"), Astro.site).href,
+  image: new URL("/og.png", Astro.site).href,
+  license: "https://opensource.org/license/mit",
+  isAccessibleForFree: true,
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  ...(release && { softwareVersion: release.version }),
+};
 
 const reasons = [
   ["whySyncTitle", "whySyncBody"],
@@ -49,6 +68,7 @@ const phones = [
 ---
 
 <Page locale={locale} page="" title={t("homeTitle")} description={t("homeDescription")}>
+  <script is:inline slot="head" type="application/ld+json" set:html={JSON.stringify(app)} />
   <section class="hero container" aria-labelledby="title">
     <Sonar size="min(14rem, 60vw)" />
     <h1 id="title">Submarine</h1>

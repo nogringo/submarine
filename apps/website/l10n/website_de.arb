@@ -3,6 +3,8 @@
   "@@x-template": "website_en.arb",
   "android": "Android",
   "apkHint": "Du installierst es selbst und aktualisierst es von Hand.",
+  "auditBody": "Noch hat kein unabhängiges Unternehmen die Sicherheit von Submarine überprüft. Bis dahin bewahre deine wichtigsten Passwörter, etwa für E-Mail und Bank, in einem bewährten Passwortmanager auf und fang mit den übrigen an.",
+  "auditTitle": "Noch kein Audit",
   "commandLine": "Kommandozeile",
   "commandLineHint": "Für Entwickler: ein Terminal-Client, der wie die Bitwarden CLI funktioniert.",
   "desktopScreenshot": "Submarine auf einem Computer: drei Tresore, die Einträge aller drei und Zugangsdaten mit ihrem Verifizierungscode",
@@ -81,7 +83,5 @@
   "whySyncTitle": "Synchronisiert, ohne Unternehmen dazwischen",
   "whyTitle": "Warum Submarine",
   "windows": "Windows",
-  "youngBody": "Submarine ist noch jung. Für deine wichtigsten Passwörter empfehlen wir weiterhin einen bewährten Passwortmanager.",
-  "youngTitle": "Noch jung",
   "zapstoreHint": "Zapstore ist ein App-Store, der Submarine aktuell hält."
 }

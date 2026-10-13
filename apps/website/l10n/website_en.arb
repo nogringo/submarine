@@ -8,6 +8,14 @@
   "@apkHint": {
     "description": "Hint next to the APK link."
   },
+  "auditBody": "No independent firm has reviewed Submarine's security yet. Until one does, keep your most critical passwords, like your email and bank, in a password manager with a longer track record, and start with the rest.",
+  "@auditBody": {
+    "description": "Body of the section warning that Submarine has not been independently audited yet."
+  },
+  "auditTitle": "Not audited yet",
+  "@auditTitle": {
+    "description": "Heading of the home page section warning that Submarine has not been independently audited yet."
+  },
   "commandLine": "Command line",
   "@commandLine": {
     "description": "Heading of the command-line client on the download page."
@@ -327,14 +335,6 @@
   "windows": "Windows",
   "@windows": {
     "description": "Name of the platform, heading on the download page."
-  },
-  "youngBody": "Submarine is still young. For your most important passwords, we still recommend a proven password manager.",
-  "@youngBody": {
-    "description": "Body of the section warning that Submarine is new."
-  },
-  "youngTitle": "Still young",
-  "@youngTitle": {
-    "description": "Heading of the home page section warning that Submarine is new."
   },
   "zapstoreHint": "Zapstore is an app store that keeps Submarine up to date.",
   "@zapstoreHint": {

@@ -3,6 +3,8 @@
   "@@x-template": "website_en.arb",
   "android": "Android",
   "apkHint": "Asennat sen itse ja päivität käsin.",
+  "auditBody": "Mikään riippumaton taho ei ole vielä tarkastanut Submarinen tietoturvaa. Siihen asti säilytä tärkeimmät salasanasi, kuten sähköpostisi ja pankkisi, hyväksi todetussa salasanojen hallintaohjelmassa ja aloita muista.",
+  "auditTitle": "Ei vielä auditoitu",
   "commandLine": "Komentorivi",
   "commandLineHint": "Kehittäjille: päätesovellus, jota käytetään kuten Bitwarden CLI:tä.",
   "desktopScreenshot": "Submarine tietokoneella: kolme holvia, niiden kaikki kohteet ja kirjautumistieto todennuskoodeineen",
@@ -81,7 +83,5 @@
   "whySyncTitle": "Synkronointi ilman yritystä välissä",
   "whyTitle": "Miksi Submarine",
   "windows": "Windows",
-  "youngBody": "Submarine on vielä nuori. Tärkeimmille salasanoillesi suosittelemme toistaiseksi hyväksi todettua salasanojen hallintaohjelmaa.",
-  "youngTitle": "Vielä nuori",
   "zapstoreHint": "Zapstore on sovelluskauppa, joka pitää Submarinen ajan tasalla."
 }

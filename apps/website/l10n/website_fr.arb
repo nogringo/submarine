@@ -3,6 +3,8 @@
   "@@x-template": "website_en.arb",
   "android": "Android",
   "apkHint": "Pour l'installer vous-même et le mettre à jour à la main.",
+  "auditBody": "Aucun cabinet indépendant n'a encore vérifié la sécurité de Submarine. D'ici là, gardez vos mots de passe les plus critiques, comme ceux de votre e-mail et de votre banque, dans un gestionnaire de mots de passe qui a fait ses preuves, et commencez par les autres.",
+  "auditTitle": "Pas encore audité",
   "commandLine": "Ligne de commande",
   "commandLineHint": "Pour les développeurs : un client en terminal qui fonctionne comme la CLI de Bitwarden.",
   "desktopScreenshot": "Submarine sur un ordinateur : trois coffres, les éléments de tous ces coffres, et un identifiant avec son code de vérification",
@@ -81,7 +83,5 @@
   "whySyncTitle": "Synchronisé, sans passer par une entreprise",
   "whyTitle": "Pourquoi Submarine",
   "windows": "Windows",
-  "youngBody": "Submarine est encore jeune. Pour vos mots de passe les plus importants, nous vous conseillons encore un gestionnaire de mots de passe éprouvé.",
-  "youngTitle": "Encore jeune",
   "zapstoreHint": "Zapstore est une boutique d'applications qui garde Submarine à jour."
 }

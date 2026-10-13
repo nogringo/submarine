@@ -3,6 +3,8 @@
   "@@x-template": "website_en.arb",
   "android": "Android",
   "apkHint": "自分でインストールして、手動で更新したい方向けです。",
+  "auditBody": "Submarine のセキュリティは、まだ第三者機関による検証を受けていません。それまでは、メールや銀行など特に大切なパスワードは実績のあるパスワードマネージャーで管理し、それ以外のパスワードから始めてください。",
+  "auditTitle": "まだ監査を受けていません",
   "commandLine": "コマンドライン",
   "commandLineHint": "開発者向け：Bitwarden CLI と同じように使えるターミナル用クライアントです。",
   "desktopScreenshot": "パソコンで使う Submarine。3 つの保管庫とそのすべてのアイテム、認証コード付きのログインが表示されています",
@@ -81,7 +83,5 @@
   "whySyncTitle": "企業を介さずに同期",
   "whyTitle": "Submarine を選ぶ理由",
   "windows": "Windows",
-  "youngBody": "Submarine はまだ新しいアプリです。特に大切なパスワードには、今のところ実績のあるパスワードマネージャーをおすすめします。",
-  "youngTitle": "まだ新しいアプリです",
   "zapstoreHint": "Zapstore は、Submarine を最新の状態に保ってくれるアプリストアです。"
 }

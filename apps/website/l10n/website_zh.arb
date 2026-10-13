@@ -3,6 +3,8 @@
   "@@x-template": "website_en.arb",
   "android": "Android",
   "apkHint": "适合想自行安装、手动更新的用户。",
+  "auditBody": "Submarine 的安全性尚未经过独立机构的审查。在此之前，请将最重要的密码（例如邮箱和银行的密码）保存在久经考验的密码管理器中，先从其他密码开始使用。",
+  "auditTitle": "尚未经过审计",
   "commandLine": "命令行",
   "commandLineHint": "面向开发者：一个用法与 Bitwarden CLI 相同的终端客户端。",
   "desktopScreenshot": "电脑上的 Submarine：三个密码库及其中的所有项目，以及一个带验证码的登录",
@@ -81,7 +83,5 @@
   "whySyncTitle": "同步，但不经过任何公司",
   "whyTitle": "为什么选择 Submarine",
   "windows": "Windows",
-  "youngBody": "Submarine 还很年轻。对于您最重要的密码，我们仍建议使用久经考验的密码管理器。",
-  "youngTitle": "还很年轻",
   "zapstoreHint": "Zapstore 是一个应用商店，可让 Submarine 始终保持最新版本。"
 }

@@ -34,6 +34,9 @@ void main() {
         eventSignerFactory: signers,
         cache: SembastCacheManager(database),
         bootstrapRelays: [],
+        // For [refused], which waits for a retry once the broadcast is over.
+        defaultBroadcastTimeout: const Duration(seconds: 1),
+        pendingDeliveryRetryInterval: const Duration(seconds: 2),
       ),
     );
     final store = MemoryStore();
@@ -376,6 +379,15 @@ void main() {
       return relay.receivedEvents.sublist(before);
     }
 
+    /// Waits for ndk to save the relay's refusal: saved after the change sent
+    /// again, it would replace its acceptance.
+    Future<void> refused() => _until(
+      () async => [
+        for (final delivery in await ndk.broadcast.loadPendingDeliveries())
+          ...delivery.relayTargets,
+      ].any((target) => target.state == RelayDeliveryState.transientFailure),
+    );
+
     test('adds it to the favorites, takes it out, and tells', () async {
       final before = changes;
 
@@ -424,6 +436,7 @@ void main() {
       await sync.trashItem(pubkey: pubkey, id: id);
 
       await _until(() async => sync.states().single['unsent'] == 1);
+      await refused();
       relay.rejectFirstEventPublishes = 0;
       await sync.syncNow(pubkey: pubkey);
       expect(sync.states().single, containsPair('unsent', 0));
@@ -433,6 +446,7 @@ void main() {
       relay.rejectFirstEventPublishes = 1000;
       await sync.trashItem(pubkey: pubkey, id: id);
       await _until(() async => sync.states().single['unsent'] == 1);
+      await refused();
       await sync.stop();
       relay.rejectFirstEventPublishes = 0;
 
@@ -447,6 +461,7 @@ void main() {
       await sync.trashItem(pubkey: pubkey, id: id);
 
       await _until(() async => sending.lastOrNull == true);
+      await refused();
       relay.rejectFirstEventPublishes = 0;
       await sync.syncNow();
       expect(sending.last, isFalse);

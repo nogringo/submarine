@@ -20,7 +20,6 @@ By default, the vault lives on these relays:
 - `wss://relay.ditto.pub`
 - `wss://auth.nostr1.com`
 - `wss://relay.nostr.com`
-- `wss://nostr.oxtr.dev`
 - `wss://nostr.data.haus`
 - `wss://purplerelay.com`
 - `wss://relay.nostr.wirednet.jp`

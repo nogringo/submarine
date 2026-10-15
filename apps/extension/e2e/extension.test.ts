@@ -696,7 +696,10 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     expect(await popup.evaluate(() => document.activeElement?.getAttribute("aria-label"))).toBe(
       "Sync now",
     );
-    expect(await popup.$eval(".sync-status", (status) => status.textContent)).toBe(
+    // The status reads the states again once the core tells they changed, after the button.
+    await popup.waitForFunction(
+      (synced) => document.querySelector(".sync-status")?.textContent === synced,
+      { timeout: 10_000 },
       english.syncedJustNow,
     );
   });

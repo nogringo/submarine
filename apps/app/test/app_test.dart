@@ -391,8 +391,7 @@ void main() {
 
   Finder ncryptsecText() => find.byWidgetPredicate(
     (widget) =>
-        widget is SelectableText &&
-        (widget.data?.startsWith('ncryptsec1') ?? false),
+        widget is Text && (widget.data?.startsWith('ncryptsec1') ?? false),
   );
 
   testWidgets('welcomes a device without vaults, then creates one', (
@@ -452,7 +451,7 @@ void main() {
       encryptButton,
       () => ncryptsecText().evaluate().isNotEmpty,
     );
-    final ncryptsec = tester.widget<SelectableText>(ncryptsecText()).data!;
+    final ncryptsec = tester.widget<Text>(ncryptsecText()).data!;
     final privateKey = await tester.runAsync(
       () => decryptVaultKey(ncryptsec, password),
     );
@@ -1982,8 +1981,7 @@ void main() {
   });
 
   Finder nsecText() => find.byWidgetPredicate(
-    (widget) =>
-        widget is SelectableText && (widget.data?.startsWith('nsec1') ?? false),
+    (widget) => widget is Text && (widget.data?.startsWith('nsec1') ?? false),
   );
 
   testWidgets('gives a login an email address at the bridge of the settings', (
@@ -2322,7 +2320,7 @@ void main() {
     await settle(tester);
     await tester.tap(find.byTooltip('Afficher'));
     await settle(tester);
-    final nsec = tester.widget<SelectableText>(nsecText());
+    final nsec = tester.widget<Text>(nsecText());
     expect(
       vaults.all.single.record.login,
       isA<KeyLogin>().having(
@@ -2801,7 +2799,7 @@ void main() {
       () => ncryptsecText().evaluate().isNotEmpty,
     );
 
-    final ncryptsec = tester.widget<SelectableText>(ncryptsecText()).data!;
+    final ncryptsec = tester.widget<Text>(ncryptsecText()).data!;
     expect(
       await tester.runAsync(() => decryptVaultKey(ncryptsec, passphrase)),
       (vaults.all.single.record.login as KeyLogin).privateKey,

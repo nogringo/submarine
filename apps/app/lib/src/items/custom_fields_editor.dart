@@ -5,6 +5,7 @@ import '../context.dart';
 import '../mail/mail_settings.dart';
 import '../theme/theme.dart';
 import '../vaults/vaults.dart';
+import '../widgets/context_menus.dart';
 import 'item_fields.dart';
 
 /// A custom field in the item form, with the [field] it edits, whose other
@@ -327,6 +328,7 @@ class _FieldRow extends StatelessWidget {
         },
       ),
       FieldType.hidden => TextField(
+        contextMenuBuilder: textFieldMenu,
         controller: field.value,
         autofocus: field.isNew,
         obscureText: field.hidden,
@@ -351,6 +353,7 @@ class _FieldRow extends StatelessWidget {
         ),
       ),
       _ => TextField(
+        contextMenuBuilder: textFieldMenu,
         controller: field.value,
         autofocus: field.isNew,
         decoration: InputDecoration(
@@ -481,6 +484,7 @@ class _FieldDialogState extends State<_FieldDialog> {
                 const SizedBox(height: 16),
               ],
               TextField(
+                contextMenuBuilder: textFieldMenu,
                 controller: _label,
                 autofocus: true,
                 textCapitalization: TextCapitalization.sentences,

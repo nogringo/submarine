@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../context.dart';
 import '../theme/theme.dart';
+import 'context_menus.dart';
 
 /// A password the user types, hidden until [onToggleHidden] shows it.
 class PasswordField extends StatelessWidget {
@@ -33,6 +34,7 @@ class PasswordField extends StatelessWidget {
     final l10n = context.l10n;
     final onToggleHidden = this.onToggleHidden;
     return TextField(
+      contextMenuBuilder: textFieldMenu,
       controller: controller,
       autofocus: autofocus,
       obscureText: hidden,

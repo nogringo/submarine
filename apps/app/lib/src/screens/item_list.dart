@@ -10,7 +10,6 @@ import '../router.dart';
 import '../vaults/vaults.dart';
 import '../widgets/copy_button.dart';
 import '../widgets/item_icon.dart';
-import '../widgets/no_browser_menu.dart';
 import '../widgets/search_field.dart';
 import '../widgets/selectable_row.dart';
 import '../widgets/sync_status.dart';
@@ -429,36 +428,34 @@ class _ItemsState extends State<_Items> {
                   filter: widget.filter,
                   searched: items.isNotEmpty,
                 )
-              : NoBrowserMenu(
-                  child: ListView.builder(
-                    // Clear of the floating button on a phone.
-                    padding: EdgeInsets.fromLTRB(
-                      8,
-                      0,
-                      8,
-                      context.isWide ? 16 : 88,
-                    ),
-                    keyboardDismissBehavior:
-                        ScrollViewKeyboardDismissBehavior.onDrag,
-                    itemCount: shown.length,
-                    itemBuilder: (context, index) {
-                      final entry = shown[index];
-                      return _ItemRow(
-                        entry: entry,
-                        showVault: showVault,
-                        showCopy: showCopy,
-                        selected: entry.item.id == widget.selectedItemId,
-                        onTap: () => context.go(
-                          vaultPath(
-                            widget.vaultId,
-                            filter: widget.filter,
-                            itemId: entry.item.id,
-                          ),
-                        ),
-                        onAction: (action) => _run(action, entry),
-                      );
-                    },
+              : ListView.builder(
+                  // Clear of the floating button on a phone.
+                  padding: EdgeInsets.fromLTRB(
+                    8,
+                    0,
+                    8,
+                    context.isWide ? 16 : 88,
                   ),
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  itemCount: shown.length,
+                  itemBuilder: (context, index) {
+                    final entry = shown[index];
+                    return _ItemRow(
+                      entry: entry,
+                      showVault: showVault,
+                      showCopy: showCopy,
+                      selected: entry.item.id == widget.selectedItemId,
+                      onTap: () => context.go(
+                        vaultPath(
+                          widget.vaultId,
+                          filter: widget.filter,
+                          itemId: entry.item.id,
+                        ),
+                      ),
+                      onAction: (action) => _run(action, entry),
+                    );
+                  },
                 ),
         ),
       ],

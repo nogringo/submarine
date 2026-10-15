@@ -21,6 +21,7 @@ import '../theme/appearance.dart';
 import '../theme/theme.dart';
 import '../vaults/vault_controller.dart';
 import '../vaults/vaults.dart';
+import '../widgets/context_menus.dart';
 import '../widgets/dialog_buttons.dart';
 import '../widgets/settings_tile.dart';
 import '../widgets/vault_avatar.dart';
@@ -334,6 +335,7 @@ class _MailBridgeDialogState extends State<_MailBridgeDialog> {
               ),
               const SizedBox(height: 20),
               TextField(
+                contextMenuBuilder: textFieldMenu,
                 controller: _domain,
                 autofocus: true,
                 autocorrect: false,
@@ -551,6 +553,7 @@ class _MailListDialogState extends State<_MailListDialog> {
                 ),
               const SizedBox(height: 16),
               TextField(
+                contextMenuBuilder: textFieldMenu,
                 controller: _url,
                 autocorrect: false,
                 enableSuggestions: false,

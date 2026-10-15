@@ -4,6 +4,7 @@ import 'package:ndk/ndk.dart' show Nip19;
 import '../context.dart';
 import '../theme/theme.dart';
 import 'copy_button.dart';
+import 'selectable_area.dart';
 
 /// A vault key, as an nsec, hidden until asked and copyable either way.
 class VaultKeyBox extends StatefulWidget {
@@ -36,7 +37,7 @@ class _VaultKeyBoxState extends State<VaultKeyBox> {
         children: [
           Expanded(
             child: _shown
-                ? SelectableText(nsec, style: style)
+                ? SelectableArea(child: Text(nsec, style: style))
                 : Text(
                     '••••••••••••',
                     semanticsLabel: l10n.hiddenValue,

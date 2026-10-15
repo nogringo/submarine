@@ -5,6 +5,7 @@ import 'package:nostr_passwords/nostr_passwords.dart';
 import '../context.dart';
 import '../items/field_tile.dart';
 import '../theme/theme.dart';
+import '../widgets/context_menus.dart';
 import '../widgets/copy_button.dart';
 import '../widgets/dialog_buttons.dart';
 import '../widgets/select_chip.dart';
@@ -344,6 +345,7 @@ class _GeneratorViewState extends State<GeneratorView> {
             SizedBox(
               width: 56,
               child: TextField(
+                contextMenuBuilder: textFieldMenu,
                 controller: _separator,
                 maxLength: 1,
                 textAlign: TextAlign.center,

@@ -13,9 +13,11 @@ import '../vaults/vault_controller.dart';
 import '../vaults/vault_logins.dart';
 import '../vaults/vault_storage.dart';
 import '../vaults/vaults.dart';
+import '../widgets/context_menus.dart';
 import '../widgets/copy_button.dart';
 import '../widgets/dialog_buttons.dart';
 import '../widgets/encrypt_vault_key_dialog.dart';
+import '../widgets/selectable_area.dart';
 import '../widgets/settings_tile.dart';
 import '../widgets/spinning_icon.dart';
 import '../widgets/sync_status.dart';
@@ -213,6 +215,7 @@ class _VaultSettingsState extends State<_VaultSettings> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         TextField(
+                          contextMenuBuilder: textFieldMenu,
                           controller: _name,
                           textCapitalization: TextCapitalization.sentences,
                           onChanged: _rename,
@@ -245,9 +248,11 @@ class _VaultSettingsState extends State<_VaultSettings> {
                 children: [
                   SettingsTile(
                     title: Text(l10n.vaultPublicKey),
-                    subtitle: SelectableText(
-                      npub,
-                      style: monoStyle.copyWith(fontSize: 13),
+                    subtitle: SelectableArea(
+                      child: Text(
+                        npub,
+                        style: monoStyle.copyWith(fontSize: 13),
+                      ),
                     ),
                     trailing: CopyButton(value: npub),
                   ),
@@ -1242,6 +1247,7 @@ class _AddAddressDialogState extends State<_AddAddressDialog> {
               ),
               const SizedBox(height: 20),
               TextField(
+                contextMenuBuilder: textFieldMenu,
                 controller: _url,
                 autofocus: true,
                 autocorrect: false,

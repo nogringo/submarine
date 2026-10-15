@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../command_shortcut.dart';
 import '../context.dart';
 import '../theme/theme.dart';
+import 'context_menus.dart';
 
 /// A search box that Ctrl+F, or ⌘F on Apple devices, focuses from anywhere on
 /// its screen, and Escape clears.
@@ -80,6 +81,7 @@ class _SearchFieldState extends State<SearchField> {
       child: ListenableBuilder(
         listenable: _controller,
         builder: (context, _) => TextField(
+          contextMenuBuilder: textFieldMenu,
           controller: _controller,
           focusNode: _focus,
           onChanged: widget.onChanged,

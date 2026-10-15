@@ -6,6 +6,7 @@ import '../theme/theme.dart';
 import 'copy_button.dart';
 import 'dialog_buttons.dart';
 import 'password_field.dart';
+import 'selectable_area.dart';
 
 /// Encrypts a vault key with a password the user picks, then shows the
 /// ncryptsec, which can be kept anywhere since only that password opens it.
@@ -194,9 +195,11 @@ class _EncryptedKeyBox extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: SelectableText(
-              ncryptsec,
-              style: monoStyle.copyWith(fontSize: 13, height: 1.4),
+            child: SelectableArea(
+              child: Text(
+                ncryptsec,
+                style: monoStyle.copyWith(fontSize: 13, height: 1.4),
+              ),
             ),
           ),
           // Meant to be pasted anywhere, so not dropped from the clipboard.

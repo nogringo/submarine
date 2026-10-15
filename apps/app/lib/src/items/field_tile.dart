@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../context.dart';
 import '../theme/theme.dart';
 import '../widgets/copy_button.dart';
+import '../widgets/selectable_area.dart';
 import 'item_fields.dart';
 
 /// Rows sharing one rounded card, as the fields of an item do.
@@ -69,9 +70,10 @@ class _FieldTileState extends State<FieldTile> {
           style: row.kind == FieldKind.password ? _passwordStyle : _secretStyle,
         ),
         FieldKind.password => PasswordText(row.value),
-        FieldKind.secret ||
-        FieldKind.mono => SelectableText(row.value, style: _secretStyle),
-        _ => SelectableText(row.value, style: _valueStyle),
+        FieldKind.secret || FieldKind.mono => SelectableArea(
+          child: Text(row.value, style: _secretStyle),
+        ),
+        _ => SelectableArea(child: Text(row.value, style: _valueStyle)),
       },
       actions: [
         if (hidden)
@@ -165,23 +167,25 @@ class PasswordText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    return SelectableText.rich(
-      TextSpan(
-        children: [
-          for (final character in value.characters)
-            TextSpan(
-              text: character,
-              style: TextStyle(
-                color: _digit.hasMatch(character)
-                    ? palette.signal
-                    : _letter.hasMatch(character)
-                    ? palette.text
-                    : palette.symbol,
+    return SelectableArea(
+      child: Text.rich(
+        TextSpan(
+          children: [
+            for (final character in value.characters)
+              TextSpan(
+                text: character,
+                style: TextStyle(
+                  color: _digit.hasMatch(character)
+                      ? palette.signal
+                      : _letter.hasMatch(character)
+                      ? palette.text
+                      : palette.symbol,
+                ),
               ),
-            ),
-        ],
+          ],
+        ),
+        style: _passwordStyle,
       ),
-      style: _passwordStyle,
     );
   }
 }

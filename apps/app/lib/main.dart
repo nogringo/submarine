@@ -21,8 +21,14 @@ import 'src/vaults/vaults.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Flutter web builds no tree for screen readers until a hidden button asks.
-  if (kIsWeb) SemanticsBinding.instance.ensureSemantics();
+  if (kIsWeb) {
+    // Flutter web builds no tree for screen readers until a hidden button asks.
+    SemanticsBinding.instance.ensureSemantics();
+    // The semantics tree hides the selection from the browser's menu, so
+    // Flutter's take its place. Turned off once: a SelectionArea on screen
+    // breaks when the setting changes.
+    await BrowserContextMenu.disableContextMenu();
+  }
   // Otherwise Android paints its window background behind the navigation bar.
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   final ndk = Ndk(

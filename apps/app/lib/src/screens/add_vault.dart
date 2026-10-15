@@ -15,6 +15,7 @@ import '../vaults/vault_controller.dart';
 import '../vaults/vault_logins.dart';
 import '../vaults/vault_storage.dart';
 import '../vaults/vaults.dart';
+import '../widgets/context_menus.dart';
 import '../widgets/copy_button.dart';
 import '../widgets/dialog_buttons.dart';
 import '../widgets/encrypt_vault_key_dialog.dart';
@@ -380,6 +381,7 @@ class _VaultFormDialogState extends State<_VaultFormDialog> {
                 const SizedBox(height: 16),
               ],
               TextField(
+                contextMenuBuilder: textFieldMenu,
                 controller: _name,
                 autofocus: !_opening,
                 textCapitalization: TextCapitalization.sentences,
@@ -434,6 +436,7 @@ class _VaultFormDialogState extends State<_VaultFormDialog> {
     final palette = context.palette;
     return [
       TextField(
+        contextMenuBuilder: textFieldMenu,
         controller: _key,
         autofocus: true,
         obscureText: _keyHidden,
@@ -463,6 +466,7 @@ class _VaultFormDialogState extends State<_VaultFormDialog> {
       if (_encrypted) ...[
         const SizedBox(height: 16),
         TextField(
+          contextMenuBuilder: textFieldMenu,
           controller: _password,
           autofocus: true,
           obscureText: _passwordHidden,

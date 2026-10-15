@@ -14,6 +14,7 @@ import '../items/field_tile.dart';
 import '../theme/theme.dart';
 import '../vaults/vaults.dart';
 import '../widgets/copy_button.dart';
+import '../widgets/selectable_area.dart';
 import '../widgets/spinning_icon.dart';
 
 /// The emails and private messages of an item's mailbox, synced while it
@@ -399,93 +400,95 @@ class _MessageViewState extends State<_MessageView> {
         Nip19.encodePubKey(pubkey),
       ),
     };
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: SelectableText(
-                title,
-                style: Theme.of(context).dialogTheme.titleTextStyle,
+    return SelectableArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  style: Theme.of(context).dialogTheme.titleTextStyle,
+                ),
+              ),
+              // Lines the icons up with the text, past their padding.
+              Transform.translate(
+                offset: const Offset(8, -8),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // TODO: say when the email has attachments
+                    if (message is Email)
+                      FutureBuilder(
+                        future: _opened,
+                        builder: (context, snapshot) => IconButton(
+                          tooltip: l10n.saveEmail,
+                          onPressed: switch (snapshot.data) {
+                            final Email email => () => unawaited(_save(email)),
+                            _ => null,
+                          },
+                          icon: const Icon(Icons.download_rounded),
+                        ),
+                      ),
+                    IconButton(
+                      tooltip: l10n.delete,
+                      onPressed: _deleting ? null : _delete,
+                      icon: const Icon(Icons.delete_outline_rounded),
+                    ),
+                    if (widget.closable)
+                      IconButton(
+                        tooltip: l10n.close,
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.close_rounded),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(sender, style: TextStyle(color: palette.muted)),
+          Text(
+            DateFormat.yMMMd(locale).add_Hm().format(message.date.toLocal()),
+            style: TextStyle(fontSize: 13, color: palette.muted),
+          ),
+          if (_saveFailed)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                l10n.exportFailed,
+                style: TextStyle(color: palette.danger),
               ),
             ),
-            // Lines the icons up with the text, past their padding.
-            Transform.translate(
-              offset: const Offset(8, -8),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
+          const Divider(height: 32),
+          FutureBuilder(
+            future: _opened,
+            builder: (context, snapshot) => switch (snapshot) {
+              AsyncSnapshot(:final data?) => _LinkedText(switch (data) {
+                Email(:final text) => text!,
+                DirectMessage(:final text) => text,
+              }),
+              AsyncSnapshot(hasError: true) => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // TODO: say when the email has attachments
-                  if (message is Email)
-                    FutureBuilder(
-                      future: _opened,
-                      builder: (context, snapshot) => IconButton(
-                        tooltip: l10n.saveEmail,
-                        onPressed: switch (snapshot.data) {
-                          final Email email => () => unawaited(_save(email)),
-                          _ => null,
-                        },
-                        icon: const Icon(Icons.download_rounded),
-                      ),
-                    ),
-                  IconButton(
-                    tooltip: l10n.delete,
-                    onPressed: _deleting ? null : _delete,
-                    icon: const Icon(Icons.delete_outline_rounded),
+                  Text(
+                    l10n.emailDownloadFailed,
+                    style: TextStyle(color: palette.danger),
                   ),
-                  if (widget.closable)
-                    IconButton(
-                      tooltip: l10n.close,
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close_rounded),
-                    ),
+                  TextButton(
+                    onPressed: () => setState(() => _opened = _open()),
+                    child: Text(l10n.tryAgain),
+                  ),
                 ],
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        SelectableText(sender, style: TextStyle(color: palette.muted)),
-        Text(
-          DateFormat.yMMMd(locale).add_Hm().format(message.date.toLocal()),
-          style: TextStyle(fontSize: 13, color: palette.muted),
-        ),
-        if (_saveFailed)
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Text(
-              l10n.exportFailed,
-              style: TextStyle(color: palette.danger),
-            ),
+              _ => const Center(child: CircularProgressIndicator()),
+            },
           ),
-        const Divider(height: 32),
-        FutureBuilder(
-          future: _opened,
-          builder: (context, snapshot) => switch (snapshot) {
-            AsyncSnapshot(:final data?) => _LinkedText(switch (data) {
-              Email(:final text) => text!,
-              DirectMessage(:final text) => text,
-            }),
-            AsyncSnapshot(hasError: true) => Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.emailDownloadFailed,
-                  style: TextStyle(color: palette.danger),
-                ),
-                TextButton(
-                  onPressed: () => setState(() => _opened = _open()),
-                  child: Text(l10n.tryAgain),
-                ),
-              ],
-            ),
-            _ => const Center(child: CircularProgressIndicator()),
-          },
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -582,7 +585,7 @@ class _LinkedTextState extends State<_LinkedText> {
       start = match.end;
     }
     spans.add(TextSpan(text: text.substring(start)));
-    return SelectableText.rich(TextSpan(children: spans));
+    return Text.rich(TextSpan(children: spans));
   }
 
   Future<void> _open(Uri uri) async {

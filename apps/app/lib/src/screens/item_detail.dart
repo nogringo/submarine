@@ -10,6 +10,7 @@ import '../items/item_menu.dart';
 import '../mail/inbox.dart';
 import '../vaults/vaults.dart';
 import '../widgets/item_icon.dart';
+import '../widgets/selectable_area.dart';
 import '../widgets/vault_avatar.dart';
 
 /// Wide layout: the selected item, next to the list.
@@ -317,12 +318,14 @@ class _Header extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SelectableText(
-                cipher.name,
-                style: const TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w700,
-                  height: 1.2,
+              SelectableArea(
+                child: Text(
+                  cipher.name,
+                  style: const TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w700,
+                    height: 1.2,
+                  ),
                 ),
               ),
               const SizedBox(height: 6),

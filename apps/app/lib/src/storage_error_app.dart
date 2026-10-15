@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import 'context.dart';
 import 'theme/theme.dart';
+import 'widgets/selectable_area.dart';
 import 'widgets/sonar.dart';
 
 /// Shown instead of the app when the secure storage of the device could not
@@ -106,16 +107,18 @@ class _StorageErrorScreenState extends State<StorageErrorScreen> {
                     label: Text(l10n.tryAgain),
                   ),
                   const SizedBox(height: 24),
-                  SelectableText(
-                    switch (widget.error) {
-                      PlatformException(:final message, :final code) =>
-                        message ?? code,
-                      final error => '$error',
-                    },
-                    textAlign: TextAlign.center,
-                    style: monoStyle.copyWith(
-                      fontSize: 12,
-                      color: palette.muted,
+                  SelectableArea(
+                    child: Text(
+                      switch (widget.error) {
+                        PlatformException(:final message, :final code) =>
+                          message ?? code,
+                        final error => '$error',
+                      },
+                      textAlign: TextAlign.center,
+                      style: monoStyle.copyWith(
+                        fontSize: 12,
+                        color: palette.muted,
+                      ),
                     ),
                   ),
                 ],

@@ -17,6 +17,7 @@ import '../router.dart';
 import '../theme/theme.dart';
 import '../vaults/vault_controller.dart';
 import '../vaults/vaults.dart';
+import '../widgets/context_menus.dart';
 import '../widgets/vault_dropdown.dart';
 import 'item_detail.dart';
 
@@ -487,6 +488,7 @@ class _FormState extends State<_Form> {
                         gap,
                       ],
                       TextField(
+                        contextMenuBuilder: textFieldMenu,
                         controller: _name,
                         autofocus: _original == null,
                         textCapitalization: TextCapitalization.sentences,
@@ -499,6 +501,7 @@ class _FormState extends State<_Form> {
                       gap,
                       if (_type == CipherType.login) ...[
                         TextField(
+                          contextMenuBuilder: textFieldMenu,
                           controller: _username,
                           autocorrect: false,
                           enableSuggestions: false,
@@ -521,6 +524,7 @@ class _FormState extends State<_Form> {
                         ),
                         gap,
                         TextField(
+                          contextMenuBuilder: textFieldMenu,
                           controller: _password,
                           obscureText: _passwordHidden,
                           autocorrect: false,
@@ -549,6 +553,7 @@ class _FormState extends State<_Form> {
                         ),
                         gap,
                         TextField(
+                          contextMenuBuilder: textFieldMenu,
                           controller: _totp,
                           autocorrect: false,
                           enableSuggestions: false,
@@ -563,6 +568,7 @@ class _FormState extends State<_Form> {
                         gap,
                         for (final (_, controller) in _uris) ...[
                           TextField(
+                            contextMenuBuilder: textFieldMenu,
                             controller: controller,
                             autocorrect: false,
                             enableSuggestions: false,
@@ -589,6 +595,7 @@ class _FormState extends State<_Form> {
                       ],
                       if (_type == CipherType.card) ...[
                         TextField(
+                          contextMenuBuilder: textFieldMenu,
                           controller: _cardholder,
                           textCapitalization: TextCapitalization.words,
                           textInputAction: TextInputAction.next,
@@ -598,6 +605,7 @@ class _FormState extends State<_Form> {
                         ),
                         gap,
                         TextField(
+                          contextMenuBuilder: textFieldMenu,
                           controller: _cardNumber,
                           obscureText: _cardNumberHidden,
                           autocorrect: false,
@@ -647,6 +655,7 @@ class _FormState extends State<_Form> {
                         ),
                         gap,
                         TextField(
+                          contextMenuBuilder: textFieldMenu,
                           controller: _cardExpYear,
                           keyboardType: TextInputType.number,
                           textInputAction: TextInputAction.next,
@@ -657,6 +666,7 @@ class _FormState extends State<_Form> {
                         ),
                         gap,
                         TextField(
+                          contextMenuBuilder: textFieldMenu,
                           controller: _cardCode,
                           obscureText: _cardCodeHidden,
                           autocorrect: false,
@@ -675,6 +685,7 @@ class _FormState extends State<_Form> {
                         gap,
                       ],
                       TextField(
+                        contextMenuBuilder: textFieldMenu,
                         controller: _notes,
                         minLines: _type == CipherType.secureNote ? 8 : 3,
                         maxLines: _type == CipherType.secureNote ? 20 : 10,

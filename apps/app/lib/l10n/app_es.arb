@@ -431,6 +431,7 @@
   "openLinkTitle": "¿Abrir este enlace?",
   "openLink": "Abrir",
   "copyLink": "Copiar enlace",
+  "saveEmail": "Guardar correo (.eml)",
   "deleteMessageTitle": "¿Eliminar este mensaje?",
   "deleteMessageBody": "Se borrará del buzón en todos los dispositivos. Esta acción no se puede deshacer.",
   "refreshInbox": "Actualizar",

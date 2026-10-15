@@ -431,6 +431,7 @@
   "openLinkTitle": "Aprire questo link?",
   "openLink": "Apri",
   "copyLink": "Copia link",
+  "saveEmail": "Salva email (.eml)",
   "deleteMessageTitle": "Eliminare questo messaggio?",
   "deleteMessageBody": "Verrà cancellato dalla casella di posta, su tutti i dispositivi. Questa azione non può essere annullata.",
   "refreshInbox": "Aggiorna",

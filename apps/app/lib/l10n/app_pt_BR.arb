@@ -431,6 +431,7 @@
   "openLinkTitle": "Abrir este link?",
   "openLink": "Abrir",
   "copyLink": "Copiar link",
+  "saveEmail": "Salvar e-mail (.eml)",
   "deleteMessageTitle": "Excluir esta mensagem?",
   "deleteMessageBody": "Ela será apagada da caixa de e-mail, em todos os dispositivos. Esta ação não pode ser desfeita.",
   "refreshInbox": "Atualizar",

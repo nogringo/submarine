@@ -1562,6 +1562,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get copyLink => 'Copia link';
 
   @override
+  String get saveEmail => 'Salva email (.eml)';
+
+  @override
   String get deleteMessageTitle => 'Eliminare questo messaggio?';
 
   @override

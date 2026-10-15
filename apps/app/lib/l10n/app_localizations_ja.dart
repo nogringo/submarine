@@ -1525,6 +1525,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get copyLink => 'リンクをコピー';
 
   @override
+  String get saveEmail => 'メールを保存 (.eml)';
+
+  @override
   String get deleteMessageTitle => 'このメッセージを削除しますか？';
 
   @override

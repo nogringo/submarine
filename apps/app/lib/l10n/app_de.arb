@@ -431,6 +431,7 @@
   "openLinkTitle": "Diesen Link öffnen?",
   "openLink": "Öffnen",
   "copyLink": "Link kopieren",
+  "saveEmail": "E-Mail speichern (.eml)",
   "deleteMessageTitle": "Diese Nachricht löschen?",
   "deleteMessageBody": "Sie wird auf allen Geräten aus dem Postfach gelöscht. Das lässt sich nicht rückgängig machen.",
   "refreshInbox": "Aktualisieren",

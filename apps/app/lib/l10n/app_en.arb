@@ -1935,6 +1935,10 @@
   "@copyLink": {
     "description": "Tooltip of the button that copies a link of an email, in the dialog that asks before opening it."
   },
+  "saveEmail": "Save email (.eml)",
+  "@saveEmail": {
+    "description": "Tooltip of the button of an opened email that saves the whole message, attachments included, as a .eml file."
+  },
   "deleteMessageTitle": "Delete this message?",
   "@deleteMessageTitle": {
     "description": "Title of the dialog that asks before deleting an email or private message."

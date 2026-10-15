@@ -264,6 +264,7 @@ void main() {
             .having((m) => m.fromName, 'fromName', 'Example')
             .having((m) => m.subject, 'subject', 'Your code')
             .having((m) => m.text, 'text', 'Your code is 123456')
+            .having((m) => m.mime, 'mime', _email)
             .having(
               (m) => m.date.millisecondsSinceEpoch,
               'date',
@@ -376,9 +377,7 @@ void main() {
         await elsewhere.fetch();
         final [message] = await elsewhere.messages();
         await elsewhere.delete(message);
-        await _until(
-          () => inbox.matchingEvents(Filter(kinds: [5])).isNotEmpty,
-        );
+        await _until(() => inbox.matchingEvents(Filter(kinds: [5])).isNotEmpty);
         final device = Ndk.emptyBootstrapRelaysConfig();
         addTearDown(device.destroy);
         // Fetched before the deletion.
@@ -430,9 +429,11 @@ void main() {
       expect(large.subject, 'Your code');
       expect(large.from, 'noreply@example.com');
       expect(large.text, isNull);
+      expect(large.mime, isNull);
 
       final email = await mailbox.download(large);
       expect(email.text, 'Your code is 123456');
+      expect(email.mime, _email);
       expect(email.wrapId, large.wrapId);
     });
 

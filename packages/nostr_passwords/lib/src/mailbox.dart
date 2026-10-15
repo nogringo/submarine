@@ -471,6 +471,7 @@ final class Email extends MailMessage {
     this.fromName,
     required this.subject,
     required this.text,
+    required this.mime,
     this._blob,
   });
 
@@ -488,6 +489,7 @@ final class Email extends MailMessage {
       from: rumor.getFirstTag('mail-from') ?? rumor.getFirstTag('from') ?? '',
       subject: rumor.getFirstTag('subject') ?? '',
       text: null,
+      mime: null,
       blob: key == null || nonce == null
           ? null
           : (hash: hash, key: key, nonce: nonce),
@@ -513,6 +515,7 @@ final class Email extends MailMessage {
       fromName: sender?.hasPersonalName ?? false ? sender!.personalName : null,
       subject: message.decodeSubject() ?? '',
       text: text.replaceAll('\r\n', '\n').trim(),
+      mime: mime,
     );
   }
 
@@ -527,6 +530,10 @@ final class Email extends MailMessage {
   /// Plain text, an HTML email's included. Null for an email too large for a
   /// gift wrap until [Mailbox.download].
   final String? text;
+
+  /// The whole message (RFC 5322), its HTML and attachments included, as a
+  /// `.eml` file holds it. Null like [text] until [Mailbox.download].
+  final String? mime;
 
   final ({String hash, String key, String nonce})? _blob;
 }

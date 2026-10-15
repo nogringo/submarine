@@ -431,6 +431,7 @@
   "openLinkTitle": "Ouvrir ce lien ?",
   "openLink": "Ouvrir",
   "copyLink": "Copier le lien",
+  "saveEmail": "Enregistrer l'e-mail (.eml)",
   "deleteMessageTitle": "Supprimer ce message ?",
   "deleteMessageBody": "Il sera effacé de la boîte mail, sur tous les appareils. Vous ne pourrez pas revenir en arrière.",
   "refreshInbox": "Actualiser",

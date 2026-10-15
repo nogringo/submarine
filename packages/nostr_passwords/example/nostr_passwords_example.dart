@@ -227,8 +227,10 @@ Future<void> main() async {
         // Too large for a gift wrap, it waits on Blossom.
         final email = await inbox.download(message);
         print('${email.subject}: ${email.text}');
-      case Email(:final subject, :final text):
+      case Email(:final subject, :final text, :final mime):
         print('$subject: $text');
+        // The whole message, attachments included, for a mail client.
+        File('${message.wrapId}.eml').writeAsStringSync(mime!);
       case DirectMessage(:final text):
         print('Message: $text');
     }

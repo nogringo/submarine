@@ -1559,6 +1559,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get copyLink => 'Copiar ligação';
 
   @override
+  String get saveEmail => 'Guardar e-mail (.eml)';
+
+  @override
   String get deleteMessageTitle => 'Eliminar esta mensagem?';
 
   @override
@@ -3171,6 +3174,9 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get copyLink => 'Copiar link';
+
+  @override
+  String get saveEmail => 'Salvar e-mail (.eml)';
 
   @override
   String get deleteMessageTitle => 'Excluir esta mensagem?';

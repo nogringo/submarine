@@ -2701,6 +2701,12 @@ abstract class AppLocalizations {
   /// **'Copy link'**
   String get copyLink;
 
+  /// Tooltip of the button of an opened email that saves the whole message, attachments included, as a .eml file.
+  ///
+  /// In en, this message translates to:
+  /// **'Save email (.eml)'**
+  String get saveEmail;
+
   /// Title of the dialog that asks before deleting an email or private message.
   ///
   /// In en, this message translates to:

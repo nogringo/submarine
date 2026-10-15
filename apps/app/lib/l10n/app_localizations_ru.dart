@@ -1587,6 +1587,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get copyLink => 'Копировать ссылку';
 
   @override
+  String get saveEmail => 'Сохранить письмо (.eml)';
+
+  @override
   String get deleteMessageTitle => 'Удалить это сообщение?';
 
   @override

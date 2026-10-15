@@ -1510,6 +1510,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get copyLink => '复制链接';
 
   @override
+  String get saveEmail => '保存邮件 (.eml)';
+
+  @override
   String get deleteMessageTitle => '要删除此消息吗？';
 
   @override

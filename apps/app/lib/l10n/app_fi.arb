@@ -431,6 +431,7 @@
   "openLinkTitle": "Avataanko linkki?",
   "openLink": "Avaa",
   "copyLink": "Kopioi linkki",
+  "saveEmail": "Tallenna sähköposti (.eml)",
   "deleteMessageTitle": "Poistetaanko viesti?",
   "deleteMessageBody": "Se poistetaan postilaatikosta kaikilla laitteilla. Toimintoa ei voi kumota.",
   "refreshInbox": "Päivitä",

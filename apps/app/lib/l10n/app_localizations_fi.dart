@@ -1548,6 +1548,9 @@ class AppLocalizationsFi extends AppLocalizations {
   String get copyLink => 'Kopioi linkki';
 
   @override
+  String get saveEmail => 'Tallenna sähköposti (.eml)';
+
+  @override
   String get deleteMessageTitle => 'Poistetaanko viesti?';
 
   @override

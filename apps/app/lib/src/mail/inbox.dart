@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -345,16 +347,29 @@ class _MessageView extends StatefulWidget {
 }
 
 class _MessageViewState extends State<_MessageView> {
-  /// The text of a large email, downloaded once the view opens.
-  late Future<String> _text = _download();
+  /// The message, a large email downloaded once the view opens.
+  late Future<MailMessage> _opened = _open();
 
   var _deleting = false;
+  var _saveFailed = false;
 
-  Future<String> _download() async => switch (widget.message) {
-    Email(:final text?) => text,
-    final Email email => (await widget.mailbox.download(email)).text!,
-    DirectMessage(:final text) => text,
+  Future<MailMessage> _open() async => switch (widget.message) {
+    final Email email when email.text == null => widget.mailbox.download(email),
+    final message => message,
   };
+
+  Future<void> _save(Email email) async {
+    setState(() => _saveFailed = false);
+    try {
+      await FilePicker.saveFile(
+        fileName: _emlFileName(email.subject),
+        bytes: utf8.encode(email.mime!),
+        mimeType: 'message/rfc822',
+      );
+    } catch (_) {
+      if (mounted) setState(() => _saveFailed = true);
+    }
+  }
 
   Future<void> _delete() async {
     if (!await _confirmDelete(context)) return;
@@ -403,6 +418,19 @@ class _MessageViewState extends State<_MessageView> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // TODO: say when the email has attachments
+                  if (message is Email)
+                    FutureBuilder(
+                      future: _opened,
+                      builder: (context, snapshot) => IconButton(
+                        tooltip: l10n.saveEmail,
+                        onPressed: switch (snapshot.data) {
+                          final Email email => () => unawaited(_save(email)),
+                          _ => null,
+                        },
+                        icon: const Icon(Icons.download_rounded),
+                      ),
+                    ),
                   IconButton(
                     tooltip: l10n.delete,
                     onPressed: _deleting ? null : _delete,
@@ -425,11 +453,22 @@ class _MessageViewState extends State<_MessageView> {
           DateFormat.yMMMd(locale).add_Hm().format(message.date.toLocal()),
           style: TextStyle(fontSize: 13, color: palette.muted),
         ),
+        if (_saveFailed)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              l10n.exportFailed,
+              style: TextStyle(color: palette.danger),
+            ),
+          ),
         const Divider(height: 32),
         FutureBuilder(
-          future: _text,
+          future: _opened,
           builder: (context, snapshot) => switch (snapshot) {
-            AsyncSnapshot(:final data?) => _LinkedText(data),
+            AsyncSnapshot(:final data?) => _LinkedText(switch (data) {
+              Email(:final text) => text!,
+              DirectMessage(:final text) => text,
+            }),
             AsyncSnapshot(hasError: true) => Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -438,7 +477,7 @@ class _MessageViewState extends State<_MessageView> {
                   style: TextStyle(color: palette.danger),
                 ),
                 TextButton(
-                  onPressed: () => setState(() => _text = _download()),
+                  onPressed: () => setState(() => _opened = _open()),
                   child: Text(l10n.tryAgain),
                 ),
               ],
@@ -449,6 +488,17 @@ class _MessageViewState extends State<_MessageView> {
       ],
     );
   }
+}
+
+/// [subject] as a file name, without the characters file systems refuse.
+String _emlFileName(String subject) {
+  final name = subject
+      .replaceAll(RegExp(r'[\\/:*?"<>|\x00-\x1f]'), '_')
+      .trim()
+      .characters
+      .take(80)
+      .toString();
+  return '${name.isEmpty ? 'email' : name}.eml';
 }
 
 Future<bool> _confirmDelete(BuildContext context) async {

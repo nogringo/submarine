@@ -15,7 +15,7 @@ The tag runs the [release workflow](.github/workflows/release.yml), which builds
 
 - `APPLE_DEVELOPER_ID_APPLICATION_CERTIFICATE_BASE64`: the Developer ID Application certificate with its private key, exported as `.p12`, in base64.
 - `APPLE_DEVELOPER_ID_APPLICATION_CERTIFICATE_PASSWORD`: the password of that `.p12`.
-- `APPLE_DEVELOPER_ID_PROVISIONING_PROFILE_BASE64`: a Developer ID provisioning profile for `ovh.uid.submarine`, in base64. The keychain entitlement needs it, or macOS does not launch the app.
+- `APPLE_DEVELOPER_ID_PROVISIONING_PROFILE_BASE64`: a Developer ID provisioning profile for `li.submarine.app`, in base64. The keychain entitlement needs it, or macOS does not launch the app.
 - `APPLE_ID` and `APPLE_APP_SPECIFIC_PASSWORD`: an Apple ID of the team and one of its app-specific passwords, for the notary service.
 
 Android gets a universal APK and an arm64 one, the only architecture Zapstore distributes. Both are signed with the key of alias `submarine`, from these repository secrets:

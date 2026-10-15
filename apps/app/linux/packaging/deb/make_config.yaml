@@ -17,4 +17,4 @@ keywords:
   - nostr
 categories:
   - Utility
-startup_wm_class: ovh.uid.submarine
+startup_wm_class: li.submarine.app

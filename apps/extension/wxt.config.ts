@@ -36,7 +36,7 @@ export default defineConfig({
     ...(browser === "firefox" && {
       browser_specific_settings: {
         gecko: {
-          id: "submarine@uid.ovh",
+          id: "submarine@submarine.li",
           // The first version with Firefox's own consent to the data below.
           strict_min_version: "140.0",
           // What the extension sends to the vault's relays once it does all the app does, encrypted.

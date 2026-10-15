@@ -1,4 +1,4 @@
-package ovh.uid.submarine
+package li.submarine.app
 
 import android.app.job.JobInfo
 import android.app.job.JobParameters

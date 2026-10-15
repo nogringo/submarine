@@ -1,6 +1,6 @@
 name: submarine_cli
 description: Command-line client for Submarine, a password manager built on Nostr.
-version: 0.1.0
+version: 0.2.0
 publish_to: none
 repository: https://github.com/nogringo/submarine/tree/main/apps/cli
 
@@ -21,7 +21,7 @@ dependencies:
       url: https://github.com/relaystr/ndk.git
       path: packages/sqlite3
       ref: f15fc17a8cc1a71fe5aa50159641a7444ae53902
-  nostr_passwords: ^0.1.0
+  nostr_passwords: ^0.2.0
   path: ^1.9.1
   sqlite3: ^3.7.0
   sync_engine_shim_for_ndk: ^0.8.0

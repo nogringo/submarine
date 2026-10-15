@@ -1,3 +1,14 @@
+## 0.2.0
+
+- New app ID: install this version, remove the old one, then open your vaults again with their key. Nothing changes on the web.
+- Your logins can get an email address of their own, with its inbox in the item.
+- The file servers of a vault in its settings.
+- A full sync of a vault from its settings.
+- Your vault key protected with a password, to keep anywhere.
+- Smoother sync and two-factor code animations.
+- The web app at app.submarine.li.
+- Fixes for screen readers and for copying on the web.
+
 ## 0.1.0
 
 - First release, for Android, iOS, macOS, Windows, Linux and the web.

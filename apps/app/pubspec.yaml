@@ -1,7 +1,7 @@
 name: submarine
 description: "Submarine, a password manager built on Nostr."
 publish_to: 'none'
-version: 0.1.0+1
+version: 0.2.0+2
 
 environment:
   sdk: ^3.13.4
@@ -10,7 +10,7 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
-  nostr_passwords: ^0.1.0
+  nostr_passwords: ^0.2.0
   url_launcher: ^6.3.3
   ndk: ^0.10.1
   ndk_flutter: ^0.10.1

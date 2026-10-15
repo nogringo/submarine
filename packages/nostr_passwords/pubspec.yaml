@@ -1,6 +1,6 @@
 name: nostr_passwords
 description: Reference Dart implementation of a password manager protocol built on Nostr.
-version: 0.1.0
+version: 0.2.0
 repository: https://github.com/nogringo/submarine/tree/main/packages/nostr_passwords
 
 environment:

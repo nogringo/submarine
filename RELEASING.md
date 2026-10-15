@@ -2,7 +2,7 @@
 
 The app, the CLI, the browser extension and `nostr_passwords` share one version, and the tag `v<version>` marks a release, for example `v0.1.0`. Versions below 1.0.0 are pre-releases.
 
-1. Set the version in `apps/app/pubspec.yaml`, `apps/cli/pubspec.yaml`, `apps/cli/lib/src/version.dart`, `apps/extension/package.json` and `packages/nostr_passwords/pubspec.yaml`. In the app, also raise the build number after the `+`: the stores refuse a build number they already have.
+1. Set the version in `apps/app/pubspec.yaml`, `apps/cli/pubspec.yaml`, `apps/cli/lib/src/version.dart`, `apps/extension/package.json` and `packages/nostr_passwords/pubspec.yaml`, and the `nostr_passwords` constraint of `apps/app`, `apps/cli` and `apps/extension/core`: below 1.0.0, `^0.1.0` refuses 0.2.0. In the app, also raise the build number after the `+`: the stores refuse a build number they already have.
 2. Add the changes of the version to each `CHANGELOG.md`, and a short plain ASCII version of the app's to `apps/app/fastlane/metadata/android/en-US/changelogs/<build number>.txt`, 500 bytes at most. IzzyOnDroid reads it at the tag.
 3. Commit as `chore: release <version>`, then tag that commit and push the tag:
 

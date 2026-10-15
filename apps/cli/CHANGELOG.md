@@ -1,3 +1,10 @@
+## 0.2.0
+
+- `server list`, `server add` and `server remove` show and change the vault's
+  Blossom servers (BUD-03). `server add --private` encrypts the server in the
+  list, for the vault only to see.
+- A vault without a server list uses four Blossom servers by default.
+
 ## 0.1.0
 
 - First release.

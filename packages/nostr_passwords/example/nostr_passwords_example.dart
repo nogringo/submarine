@@ -233,6 +233,10 @@ Future<void> main() async {
         print('Message: $text');
     }
   }
+  // The mailbox key deletes a gift wrap, although a random key signed it.
+  if ((await inbox.messages()).lastOrNull case final oldest?) {
+    await inbox.delete(oldest);
+  }
   await arrivals.cancel();
 
   // Bitwarden's JSON export, both ways, password protected or not.

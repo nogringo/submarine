@@ -1546,6 +1546,22 @@ class AppLocalizationsDe extends AppLocalizations {
       'Diese E-Mail konnte nicht heruntergeladen werden.';
 
   @override
+  String get openLinkTitle => 'Diesen Link öffnen?';
+
+  @override
+  String get openLink => 'Öffnen';
+
+  @override
+  String get copyLink => 'Link kopieren';
+
+  @override
+  String get deleteMessageTitle => 'Diese Nachricht löschen?';
+
+  @override
+  String get deleteMessageBody =>
+      'Sie wird auf allen Geräten aus dem Postfach gelöscht. Das lässt sich nicht rückgängig machen.';
+
+  @override
   String get refreshInbox => 'Aktualisieren';
 
   @override

@@ -1578,6 +1578,22 @@ class AppLocalizationsRu extends AppLocalizations {
   String get emailDownloadFailed => 'Не удалось загрузить это письмо.';
 
   @override
+  String get openLinkTitle => 'Открыть эту ссылку?';
+
+  @override
+  String get openLink => 'Открыть';
+
+  @override
+  String get copyLink => 'Копировать ссылку';
+
+  @override
+  String get deleteMessageTitle => 'Удалить это сообщение?';
+
+  @override
+  String get deleteMessageBody =>
+      'Оно будет стёрто из почтового ящика на всех устройствах. Это действие нельзя отменить.';
+
+  @override
   String get refreshInbox => 'Обновить';
 
   @override

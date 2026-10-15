@@ -1923,6 +1923,26 @@
   "@emailDownloadFailed": {
     "description": "In an opened email too large for a gift wrap, when no Blossom server gave it."
   },
+  "openLinkTitle": "Open this link?",
+  "@openLinkTitle": {
+    "description": "Title of the dialog that asks before opening a link of an email in the browser."
+  },
+  "openLink": "Open",
+  "@openLink": {
+    "description": "Button of that dialog that opens the link."
+  },
+  "copyLink": "Copy link",
+  "@copyLink": {
+    "description": "Tooltip of the button that copies a link of an email, in the dialog that asks before opening it."
+  },
+  "deleteMessageTitle": "Delete this message?",
+  "@deleteMessageTitle": {
+    "description": "Title of the dialog that asks before deleting an email or private message."
+  },
+  "deleteMessageBody": "It is erased from the mailbox, on every device. This cannot be undone.",
+  "@deleteMessageBody": {
+    "description": "Body of that dialog."
+  },
   "refreshInbox": "Refresh",
   "@refreshInbox": {
     "description": "Button next to the inbox title, fetching its latest messages from the relays again."

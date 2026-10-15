@@ -1501,6 +1501,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get emailDownloadFailed => '无法下载此邮件。';
 
   @override
+  String get openLinkTitle => '要打开此链接吗？';
+
+  @override
+  String get openLink => '打开';
+
+  @override
+  String get copyLink => '复制链接';
+
+  @override
+  String get deleteMessageTitle => '要删除此消息吗？';
+
+  @override
+  String get deleteMessageBody => '它将从所有设备上的邮箱中清除。此操作无法撤销。';
+
+  @override
   String get refreshInbox => '刷新';
 
   @override

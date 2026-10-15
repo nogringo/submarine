@@ -1,14 +1,17 @@
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ndk/ndk.dart' show Nip19;
 import 'package:nostr_passwords/nostr_passwords.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../context.dart';
 import '../items/field_tile.dart';
 import '../theme/theme.dart';
 import '../vaults/vaults.dart';
+import '../widgets/copy_button.dart';
 import '../widgets/spinning_icon.dart';
 
 /// The emails and private messages of an item's mailbox, synced while it
@@ -167,7 +170,12 @@ class _InboxState extends State<Inbox> {
             for (final message in _messages)
               _MessageRow(
                 message: message,
-                onTap: () => _showMessage(context, _mailbox, message),
+                onTap: () => _showMessage(
+                  context,
+                  _mailbox,
+                  message,
+                  onDeleted: () => unawaited(_read()),
+                ),
               ),
           ],
         ),
@@ -279,10 +287,17 @@ String _formatDate(BuildContext context, DateTime date) {
 Future<void> _showMessage(
   BuildContext context,
   Mailbox mailbox,
-  MailMessage message,
-) {
-  final view = _MessageView(mailbox: mailbox, message: message);
-  if (context.isWide) {
+  MailMessage message, {
+  required VoidCallback onDeleted,
+}) {
+  final wide = context.isWide;
+  final view = _MessageView(
+    mailbox: mailbox,
+    message: message,
+    closable: wide,
+    onDeleted: onDeleted,
+  );
+  if (wide) {
     return showDialog<void>(
       context: context,
       builder: (context) => Dialog(
@@ -310,10 +325,20 @@ Future<void> _showMessage(
 }
 
 class _MessageView extends StatefulWidget {
-  const _MessageView({required this.mailbox, required this.message});
+  const _MessageView({
+    required this.mailbox,
+    required this.message,
+    required this.closable,
+    required this.onDeleted,
+  });
 
   final Mailbox mailbox;
   final MailMessage message;
+
+  /// Shows a close button, where no drag handle closes the view.
+  final bool closable;
+
+  final VoidCallback onDeleted;
 
   @override
   State<_MessageView> createState() => _MessageViewState();
@@ -323,11 +348,25 @@ class _MessageViewState extends State<_MessageView> {
   /// The text of a large email, downloaded once the view opens.
   late Future<String> _text = _download();
 
+  var _deleting = false;
+
   Future<String> _download() async => switch (widget.message) {
     Email(:final text?) => text,
     final Email email => (await widget.mailbox.download(email)).text!,
     DirectMessage(:final text) => text,
   };
+
+  Future<void> _delete() async {
+    if (!await _confirmDelete(context)) return;
+    setState(() => _deleting = true);
+    try {
+      await widget.mailbox.delete(widget.message);
+    } finally {
+      if (mounted) setState(() => _deleting = false);
+    }
+    widget.onDeleted();
+    if (mounted) Navigator.pop(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -349,9 +388,36 @@ class _MessageViewState extends State<_MessageView> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SelectableText(
-          title,
-          style: Theme.of(context).dialogTheme.titleTextStyle,
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: SelectableText(
+                title,
+                style: Theme.of(context).dialogTheme.titleTextStyle,
+              ),
+            ),
+            // Lines the icons up with the text, past their padding.
+            Transform.translate(
+              offset: const Offset(8, -8),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    tooltip: l10n.delete,
+                    onPressed: _deleting ? null : _delete,
+                    icon: const Icon(Icons.delete_outline_rounded),
+                  ),
+                  if (widget.closable)
+                    IconButton(
+                      tooltip: l10n.close,
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close_rounded),
+                    ),
+                ],
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 8),
         SelectableText(sender, style: TextStyle(color: palette.muted)),
@@ -363,7 +429,7 @@ class _MessageViewState extends State<_MessageView> {
         FutureBuilder(
           future: _text,
           builder: (context, snapshot) => switch (snapshot) {
-            AsyncSnapshot(:final data?) => SelectableText(data),
+            AsyncSnapshot(:final data?) => _LinkedText(data),
             AsyncSnapshot(hasError: true) => Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -382,5 +448,143 @@ class _MessageViewState extends State<_MessageView> {
         ),
       ],
     );
+  }
+}
+
+Future<bool> _confirmDelete(BuildContext context) async {
+  final l10n = context.l10n;
+  final colors = Theme.of(context).colorScheme;
+  final delete = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(l10n.deleteMessageTitle),
+      content: Text(l10n.deleteMessageBody),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: Text(l10n.cancel),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, true),
+          style: FilledButton.styleFrom(
+            backgroundColor: colors.error,
+            foregroundColor: colors.onError,
+          ),
+          child: Text(l10n.delete),
+        ),
+      ],
+    ),
+  );
+  return delete ?? false;
+}
+
+/// [text] with its web links tappable, each opened once the user saw where it
+/// leads, as anyone can send an email.
+class _LinkedText extends StatefulWidget {
+  const _LinkedText(this.text);
+
+  final String text;
+
+  @override
+  State<_LinkedText> createState() => _LinkedTextState();
+}
+
+class _LinkedTextState extends State<_LinkedText> {
+  final _recognizers = <TapGestureRecognizer>[];
+
+  /// Its last character is not the punctuation of the sentence around it.
+  static final _link = RegExp(r'''https?://[^\s<>"]*[^\s<>"'.,;:!?()\[\]]''');
+
+  @override
+  void dispose() {
+    _disposeRecognizers();
+    super.dispose();
+  }
+
+  void _disposeRecognizers() {
+    for (final recognizer in _recognizers) {
+      recognizer.dispose();
+    }
+    _recognizers.clear();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _disposeRecognizers();
+    final color = context.palette.signal;
+    final style = TextStyle(
+      color: color,
+      decoration: TextDecoration.underline,
+      decorationColor: color,
+    );
+    final text = widget.text;
+    final spans = <InlineSpan>[];
+    var start = 0;
+    for (final match in _link.allMatches(text)) {
+      final uri = Uri.tryParse(match[0]!);
+      if (uri == null || uri.host.isEmpty) continue;
+      final recognizer = TapGestureRecognizer()
+        ..onTap = () => unawaited(_open(uri));
+      _recognizers.add(recognizer);
+      spans
+        ..add(TextSpan(text: text.substring(start, match.start)))
+        ..add(TextSpan(text: match[0], style: style, recognizer: recognizer));
+      start = match.end;
+    }
+    spans.add(TextSpan(text: text.substring(start)));
+    return SelectableText.rich(TextSpan(children: spans));
+  }
+
+  Future<void> _open(Uri uri) async {
+    final l10n = context.l10n;
+    final palette = context.palette;
+    final open = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.openLinkTitle),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              uri.host,
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '$uri',
+                    maxLines: 4,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 13, color: palette.muted),
+                  ),
+                ),
+                // A link from an email may sign in, as a reset link does.
+                CopyButton(
+                  value: '$uri',
+                  sensitive: true,
+                  tooltip: l10n.copyLink,
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.openLink),
+          ),
+        ],
+      ),
+    );
+    if (open ?? false) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 }

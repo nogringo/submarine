@@ -1550,6 +1550,22 @@ class AppLocalizationsPt extends AppLocalizations {
   String get emailDownloadFailed => 'Não foi possível transferir este e-mail.';
 
   @override
+  String get openLinkTitle => 'Abrir esta ligação?';
+
+  @override
+  String get openLink => 'Abrir';
+
+  @override
+  String get copyLink => 'Copiar ligação';
+
+  @override
+  String get deleteMessageTitle => 'Eliminar esta mensagem?';
+
+  @override
+  String get deleteMessageBody =>
+      'Será apagada da caixa de correio, em todos os dispositivos. Esta ação não pode ser anulada.';
+
+  @override
   String get refreshInbox => 'Atualizar';
 
   @override
@@ -3146,6 +3162,22 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get emailDownloadFailed => 'Não foi possível baixar este e-mail.';
+
+  @override
+  String get openLinkTitle => 'Abrir este link?';
+
+  @override
+  String get openLink => 'Abrir';
+
+  @override
+  String get copyLink => 'Copiar link';
+
+  @override
+  String get deleteMessageTitle => 'Excluir esta mensagem?';
+
+  @override
+  String get deleteMessageBody =>
+      'Ela será apagada da caixa de e-mail, em todos os dispositivos. Esta ação não pode ser desfeita.';
 
   @override
   String get refreshInbox => 'Atualizar';

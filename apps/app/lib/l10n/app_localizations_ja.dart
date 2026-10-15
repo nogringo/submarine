@@ -1516,6 +1516,21 @@ class AppLocalizationsJa extends AppLocalizations {
   String get emailDownloadFailed => 'このメールをダウンロードできませんでした。';
 
   @override
+  String get openLinkTitle => 'このリンクを開きますか？';
+
+  @override
+  String get openLink => '開く';
+
+  @override
+  String get copyLink => 'リンクをコピー';
+
+  @override
+  String get deleteMessageTitle => 'このメッセージを削除しますか？';
+
+  @override
+  String get deleteMessageBody => 'すべてのデバイスで、メールボックスから消去されます。この操作は元に戻せません。';
+
+  @override
   String get refreshInbox => '更新';
 
   @override

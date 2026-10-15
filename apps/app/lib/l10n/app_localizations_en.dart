@@ -1536,6 +1536,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emailDownloadFailed => 'This email could not be downloaded.';
 
   @override
+  String get openLinkTitle => 'Open this link?';
+
+  @override
+  String get openLink => 'Open';
+
+  @override
+  String get copyLink => 'Copy link';
+
+  @override
+  String get deleteMessageTitle => 'Delete this message?';
+
+  @override
+  String get deleteMessageBody =>
+      'It is erased from the mailbox, on every device. This cannot be undone.';
+
+  @override
   String get refreshInbox => 'Refresh';
 
   @override

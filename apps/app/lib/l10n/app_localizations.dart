@@ -2683,6 +2683,36 @@ abstract class AppLocalizations {
   /// **'This email could not be downloaded.'**
   String get emailDownloadFailed;
 
+  /// Title of the dialog that asks before opening a link of an email in the browser.
+  ///
+  /// In en, this message translates to:
+  /// **'Open this link?'**
+  String get openLinkTitle;
+
+  /// Button of that dialog that opens the link.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get openLink;
+
+  /// Tooltip of the button that copies a link of an email, in the dialog that asks before opening it.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy link'**
+  String get copyLink;
+
+  /// Title of the dialog that asks before deleting an email or private message.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this message?'**
+  String get deleteMessageTitle;
+
+  /// Body of that dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'It is erased from the mailbox, on every device. This cannot be undone.'**
+  String get deleteMessageBody;
+
   /// Button next to the inbox title, fetching its latest messages from the relays again.
   ///
   /// In en, this message translates to:

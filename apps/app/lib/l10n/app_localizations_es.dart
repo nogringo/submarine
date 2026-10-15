@@ -1550,6 +1550,22 @@ class AppLocalizationsEs extends AppLocalizations {
   String get emailDownloadFailed => 'No se pudo descargar este correo.';
 
   @override
+  String get openLinkTitle => '¿Abrir este enlace?';
+
+  @override
+  String get openLink => 'Abrir';
+
+  @override
+  String get copyLink => 'Copiar enlace';
+
+  @override
+  String get deleteMessageTitle => '¿Eliminar este mensaje?';
+
+  @override
+  String get deleteMessageBody =>
+      'Se borrará del buzón en todos los dispositivos. Esta acción no se puede deshacer.';
+
+  @override
   String get refreshInbox => 'Actualizar';
 
   @override

@@ -1555,6 +1555,22 @@ class AppLocalizationsFr extends AppLocalizations {
   String get emailDownloadFailed => 'Impossible de télécharger cet e-mail.';
 
   @override
+  String get openLinkTitle => 'Ouvrir ce lien ?';
+
+  @override
+  String get openLink => 'Ouvrir';
+
+  @override
+  String get copyLink => 'Copier le lien';
+
+  @override
+  String get deleteMessageTitle => 'Supprimer ce message ?';
+
+  @override
+  String get deleteMessageBody =>
+      'Il sera effacé de la boîte mail, sur tous les appareils. Vous ne pourrez pas revenir en arrière.';
+
+  @override
   String get refreshInbox => 'Actualiser';
 
   @override

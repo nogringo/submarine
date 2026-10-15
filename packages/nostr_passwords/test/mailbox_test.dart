@@ -312,13 +312,12 @@ void main() {
         addTearDown(reader.destroy);
       });
 
-      Future<void> send(Nip01Event rumor) async {
+      Future<Nip01Event> send(Nip01Event rumor) async {
+        final wrap = await _giftWrap(rumor, sender, key);
         await ndk.broadcast
-            .broadcast(
-              nostrEvent: await _giftWrap(rumor, sender, key),
-              specificRelays: [inbox.url],
-            )
+            .broadcast(nostrEvent: wrap, specificRelays: [inbox.url])
             .broadcastDoneFuture;
+        return wrap;
       }
 
       test('finds them from the indexers, then fetches its messages', () async {
@@ -349,6 +348,47 @@ void main() {
 
         final [message] = await mailbox.messages();
         expect((message as DirectMessage).text, 'Just now');
+      });
+
+      test('deletes a message, its gift wrap on its relays too', () async {
+        final wrap = await send(rumor(14, 'Hello'));
+        final mailbox = mailboxOf(reader, indexers: [indexer.url]);
+        await mailbox.fetchRelays();
+        await mailbox.fetch();
+        final [message] = await mailbox.messages();
+
+        await mailbox.delete(message);
+
+        expect(await mailbox.messages(), isEmpty);
+        await _until(
+          () => inbox.matchingEvents(Filter(ids: [wrap.id])).isEmpty,
+        );
+        final [request] = inbox.matchingEvents(
+          Filter(kinds: [5], authors: [key.getPublicKey()]),
+        );
+        expect(request.getTags('e'), [wrap.id]);
+      });
+
+      test('leaves out a message another device deleted', () async {
+        final wrap = await send(rumor(14, 'Hello'));
+        final elsewhere = mailboxOf(reader, indexers: [indexer.url]);
+        await elsewhere.fetchRelays();
+        await elsewhere.fetch();
+        final [message] = await elsewhere.messages();
+        await elsewhere.delete(message);
+        await _until(
+          () => inbox.matchingEvents(Filter(kinds: [5])).isNotEmpty,
+        );
+        final device = Ndk.emptyBootstrapRelaysConfig();
+        addTearDown(device.destroy);
+        // Fetched before the deletion.
+        await device.config.cache.saveEvent(wrap);
+
+        final mailbox = mailboxOf(device, indexers: [indexer.url]);
+        await mailbox.fetchRelays();
+        await mailbox.fetch();
+
+        expect(await mailbox.messages(), isEmpty);
       });
     });
 

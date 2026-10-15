@@ -1539,6 +1539,22 @@ class AppLocalizationsFi extends AppLocalizations {
   String get emailDownloadFailed => 'Tätä sähköpostia ei voitu ladata.';
 
   @override
+  String get openLinkTitle => 'Avataanko linkki?';
+
+  @override
+  String get openLink => 'Avaa';
+
+  @override
+  String get copyLink => 'Kopioi linkki';
+
+  @override
+  String get deleteMessageTitle => 'Poistetaanko viesti?';
+
+  @override
+  String get deleteMessageBody =>
+      'Se poistetaan postilaatikosta kaikilla laitteilla. Toimintoa ei voi kumota.';
+
+  @override
   String get refreshInbox => 'Päivitä';
 
   @override

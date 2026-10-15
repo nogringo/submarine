@@ -8,6 +8,7 @@ import 'package:enough_mail_plus/mime.dart' show MimeMessage;
 import 'package:ndk/domain_layer/entities/nip_65.dart';
 import 'package:ndk/ndk.dart';
 import 'package:ndk/shared/helpers/relay_helper.dart';
+import 'package:ndk/shared/nips/nip09/deletion.dart';
 
 import 'cipher/cipher.dart';
 import 'cipher/field.dart';
@@ -197,12 +198,16 @@ class Mailbox {
   }
 
   /// Fetches the latest [limit] gift wraps of the mailbox from [relays] into
-  /// the ndk cache. Opening an inbox is to read the latest ones.
-  Future<void> fetch({int limit = 100}) async => _query(
-    _wraps..limit = limit,
-    await relays(),
-    auth: AuthPolicy.require(_account),
-  );
+  /// the ndk cache, with the deletions another device asked for. Opening an
+  /// inbox is to read the latest ones.
+  Future<void> fetch({int limit = 100}) async {
+    final relays = await this.relays();
+    final auth = AuthPolicy.require(_account);
+    await Future.wait([
+      _query(_wraps..limit = limit, relays, auth: auth),
+      _query(_deletions..limit = limit, relays, auth: auth),
+    ]);
+  }
 
   /// Holds a subscription open on [relays] for the gift wraps that arrive from
   /// now on, and saves them in the ndk cache. An event comes out of the stream
@@ -248,15 +253,25 @@ class Mailbox {
   }
 
   /// The emails and private messages of the gift wraps in the ndk cache, the
-  /// newest first. Leaves out a gift wrap that does not open, or holds
-  /// anything else.
+  /// newest first. Leaves out a gift wrap that does not open, holds anything
+  /// else, or was [delete]d.
   Future<List<MailMessage>> messages() async {
-    final wraps = await ndk.config.cache.loadEvents(
-      kinds: [GiftWrap.kGiftWrapEventkind],
-      tags: {
-        'p': [signer.getPublicKey()],
-      },
-    );
+    final deleted = {
+      for (final request in await ndk.config.cache.loadEvents(
+        pubKeys: [signer.getPublicKey()],
+        kinds: [Deletion.kKind],
+      ))
+        ...request.getTags('e'),
+    };
+    final wraps = [
+      for (final wrap in await ndk.config.cache.loadEvents(
+        kinds: [GiftWrap.kGiftWrapEventkind],
+        tags: {
+          'p': [signer.getPublicKey()],
+        },
+      ))
+        if (!deleted.contains(wrap.id)) wrap,
+    ];
     await Future.wait([
       for (final wrap in wraps)
         if (!_opened.containsKey(wrap.id))
@@ -297,10 +312,45 @@ class Mailbox {
     throw EmailDownloadException(blob.hash);
   }
 
+  /// Deletes [message]: asks [relays] to delete its gift wrap, which the
+  /// mailbox key may do although a random key signed it (NIP-59), and drops it
+  /// from the ndk cache. The request waits in ndk's pending deliveries for the
+  /// relays that do not answer yet.
+  Future<void> delete(MailMessage message) async {
+    final request = await signer.sign(
+      Nip01Event(
+        pubKey: signer.getPublicKey(),
+        kind: Deletion.kKind,
+        tags: [
+          ['e', message.wrapId],
+          ['k', '${GiftWrap.kGiftWrapEventkind}'],
+        ],
+        content: '',
+      ),
+    );
+    await ndk.config.cache.saveEvent(request);
+    await ndk.config.cache.removeEvents(ids: [message.wrapId]);
+    _opened.remove(message.wrapId);
+    final relays = await this.relays();
+    if (relays.isEmpty) return;
+    await ndk.broadcast
+        .broadcast(
+          nostrEvent: request,
+          specificRelays: relays,
+          timeout: Duration.zero,
+          saveToCache: false,
+          auth: AuthPolicy.allow(_account),
+        )
+        .broadcastDoneFuture;
+  }
+
   Filter get _wraps => Filter(
     kinds: [GiftWrap.kGiftWrapEventkind],
     pTags: [signer.getPublicKey()],
   );
+
+  Filter get _deletions =>
+      Filter(kinds: [Deletion.kKind], authors: [signer.getPublicKey()]);
 
   Account get _account => Account(
     type: AccountType.privateKey,

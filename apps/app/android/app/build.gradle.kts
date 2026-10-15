@@ -53,6 +53,13 @@ android {
             signingConfig = signingConfigs.getByName(if (keystorePropertiesFile.exists()) "release" else "debug")
         }
     }
+
+    // Compressed native libraries keep the arm64 APK under IzzyOnDroid's 30 MB limit.
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
 }
 
 kotlin {

@@ -1,0 +1,10 @@
+First release.
+
+- Logins, cards and secure notes, with custom fields.
+- Two-factor codes, and a password, passphrase and username generator.
+- Vaults opened with their key or through a signer app such as Amber.
+- Import and export of Bitwarden files.
+- Live sync on Nostr relays, encrypted before it leaves the device.
+- A lock password, with biometrics or the screen lock as a shortcut.
+- Copied passwords cleared from the clipboard, screenshots blocked.
+- 11 languages.

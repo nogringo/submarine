@@ -1,4 +1,5 @@
-// Renders the screenshots of the READMEs into screenshots/:
+// Renders the screenshots of the READMEs into screenshots/, and those of the
+// Android stores into fastlane/:
 // flutter test tool/screenshots_test.dart
 import 'dart:convert';
 import 'dart:io'
@@ -27,6 +28,9 @@ import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
 
 const desktop = Size(1280, 800);
 const phone = Size(390, 844);
+// Fastlane screenshots are at most twice as tall as wide.
+const android = Size(412, 824);
+const store = 'fastlane/metadata/android/en-US/images/phoneScreenshots';
 
 Cipher login(
   String name,
@@ -234,7 +238,11 @@ void main() {
     debugDisableShadows = true;
   }
 
-  Future<void> capture(WidgetTester tester, String name) async {
+  Future<void> capture(
+    WidgetTester tester,
+    String name, {
+    String folder = 'screenshots',
+  }) async {
     await settle(tester);
     final render = tester.renderObject<RenderRepaintBoundary>(
       find.byKey(boundary),
@@ -242,7 +250,7 @@ void main() {
     await tester.runAsync(() async {
       final image = await render.toImage(pixelRatio: 2);
       final png = await image.toByteData(format: ImageByteFormat.png);
-      final file = File('screenshots/$name.png');
+      final file = File('$folder/$name.png');
       await file.parent.create(recursive: true);
       await file.writeAsBytes(png!.buffer.asUint8List());
     });
@@ -283,6 +291,26 @@ void main() {
       await start(tester, phone, theme);
       await tester.tap(find.text('Generator'));
       await capture(tester, 'phone-generator-$suffix');
+      await close(tester);
+    });
+  }
+
+  for (final (index, theme, screen) in [
+    (1, ThemeMode.light, 'list'),
+    (2, ThemeMode.light, 'item'),
+    (3, ThemeMode.light, 'generator'),
+    (4, ThemeMode.dark, 'list'),
+    (5, ThemeMode.light, 'welcome'),
+  ]) {
+    testWidgets('store $screen, ${theme.name}', (tester) async {
+      await start(tester, android, theme, empty: screen == 'welcome');
+      switch (screen) {
+        case 'item':
+          await openGitHub(tester);
+        case 'generator':
+          await tester.tap(find.text('Generator'));
+      }
+      await capture(tester, '$index', folder: store);
       await close(tester);
     });
   }

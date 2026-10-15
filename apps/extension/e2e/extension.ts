@@ -109,9 +109,15 @@ export async function launch(name: BrowserName, language = "en"): Promise<Extens
         }
       }, key),
     reload: async () => {
-      // The page goes away with the script that reloads it.
-      await popup.evaluate(() => location.reload()).catch(() => {});
-      await popup.waitForSelector("#root > *");
+      // Reloads once the script returned, as a page going away under it can leave it unanswered, and
+      // marks the page, which matches the selector until it is gone.
+      await popup.evaluate(() => {
+        Object.assign(window, { reloading: true });
+        setTimeout(() => location.reload());
+      });
+      await popup.waitForFunction(
+        () => !("reloading" in window) && document.querySelector("#root > *"),
+      );
     },
     readClipboard: () => popup.evaluate(() => navigator.clipboard.readText()),
   };

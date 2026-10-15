@@ -7,3 +7,10 @@ workspace:
   - apps/app
   - apps/cli
   - apps/extension/core
+hooks:
+  user_defines:
+    sqlite3:
+      source:
+        android: source
+        default: sqlite3
+      path: third_party/sqlite/sqlite3.c

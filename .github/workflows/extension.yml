@@ -58,3 +58,4 @@ jobs:
         with:
           name: submarine-extension
           path: apps/extension/.output/*.zip
+          include-hidden-files: true

@@ -697,11 +697,11 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
       "Sync now",
     );
     // The status reads the states again once the core tells they changed, after the button.
-    await popup.waitForFunction(
-      (synced) => document.querySelector(".sync-status")?.textContent === synced,
-      { timeout: 10_000 },
-      english.syncedJustNow,
-    );
+    await expect
+      .poll(() => popup.$eval(".sync-status", (status) => status.textContent), {
+        timeout: 10_000,
+      })
+      .toBe(english.syncedJustNow);
   });
 
   it("lists the vault in the drawer, and shows it once chosen", async () => {

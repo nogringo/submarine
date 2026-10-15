@@ -1015,6 +1015,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
   it("asks before removing a vault from this device, and keeps it on Escape", async () => {
     const { popup } = extension;
     await extension.click(".drawer [role=row] button[aria-label='Vault settings']");
+    await popup.waitForSelector("[role=dialog]", { hidden: true });
     await extension.click(".vault-settings .settings-tile button");
     const dialog = await popup.waitForSelector("[role=alertdialog]");
     expect(await dialog?.$eval("h2", (title) => title.textContent)).toBe(

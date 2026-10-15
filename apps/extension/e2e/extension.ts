@@ -1,6 +1,6 @@
 import { createServer } from "node:http";
 import { resolve } from "node:path";
-import puppeteer, { type Browser, type KeyInput, type Page } from "puppeteer";
+import puppeteer, { type Browser, type ElementHandle, type KeyInput, type Page } from "puppeteer";
 
 export type BrowserName = "chrome" | "firefox";
 
@@ -69,15 +69,15 @@ export async function launch(name: BrowserName, language = "en"): Promise<Extens
     browser,
     popup,
     click: async (selector) => {
-      await popup.waitForSelector(selector);
-      await popup.$eval(selector, (element) => {
+      const element = await waitForClickable(popup, selector);
+      await element.evaluate((element) => {
         (element as HTMLElement).focus();
         (element as HTMLElement).click();
       });
     },
     rightClick: async (selector) => {
-      await popup.waitForSelector(selector);
-      await popup.$eval(selector, (element) => {
+      const element = await waitForClickable(popup, selector);
+      await element.evaluate((element) => {
         const { left, top, width, height } = element.getBoundingClientRect();
         const at = { clientX: left + width / 2, clientY: top + height / 2 };
         element.dispatchEvent(
@@ -168,6 +168,42 @@ export async function openPopupOver(
   const popup = await (await opened).asPage();
   await popup.waitForSelector("#root > *");
   return { page, popup };
+}
+
+/**
+ * The element of `selector` once a click would reach it, as Chrome's locators wait for one: shown,
+ * enabled, still for two frames, and on top, where a drawer or a sheet still closing covers it.
+ */
+async function waitForClickable(popup: Page, selector: string): Promise<ElementHandle> {
+  const deadline = Date.now() + popup.getDefaultTimeout();
+  while (Date.now() < deadline) {
+    const element = await popup.waitForSelector(selector, { visible: true });
+    const clickable = await element
+      ?.evaluate(
+        (element) =>
+          new Promise<boolean>((resolve) => {
+            element.scrollIntoView({ block: "nearest" });
+            const before = element.getBoundingClientRect();
+            requestAnimationFrame(() =>
+              requestAnimationFrame(() => {
+                const { left, top, width, height } = element.getBoundingClientRect();
+                const still =
+                  left === before.left &&
+                  top === before.top &&
+                  width === before.width &&
+                  height === before.height;
+                const hit = document.elementFromPoint(left + width / 2, top + height / 2);
+                resolve(still && !element.matches(":disabled") && !!hit && element.contains(hit));
+              }),
+            );
+          }),
+      )
+      // Gone meanwhile, as React renders again.
+      .catch(() => false);
+    if (element && clickable) return element;
+    await element?.dispose();
+  }
+  throw new Error(`${selector} never became clickable`);
 }
 
 async function waitForPopup(browser: Browser): Promise<Page> {

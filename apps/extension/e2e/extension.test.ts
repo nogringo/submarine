@@ -7,11 +7,20 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { fillPage } from "../lib/fill-page";
 import { violations } from "./axe";
 import { type BrowserName, type Extension, launch, openPopupOver } from "./extension";
+import { startRelay } from "./relay";
 import { publishItems } from "./vault-items";
 
 const english = JSON.parse(await readFile(appArb("en"), "utf8"));
 // Taller than the popup, for its copy button to sit below it.
 const cardNotes = Array(40).fill("Kept in the wallet").join("\n");
+
+let relay: Awaited<ReturnType<typeof startRelay>> | undefined;
+beforeAll(async () => {
+  relay = await startRelay();
+});
+afterAll(async () => {
+  await relay?.close();
+});
 
 describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
   const secretKey = generateSecretKey();

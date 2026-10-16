@@ -9,6 +9,7 @@
   },
   "scripts": {
     "core": "dart compile js -O2 -o public/core.js core/web/core.dart && rm -f public/core.js.deps",
+    "core:e2e": "dart compile js -O2 -DTEST_RELAY=ws://127.0.0.1:4869 -o public/core.js core/web/core.dart && rm -f public/core.js.deps",
     "dev": "pnpm core && wxt",
     "dev:firefox": "pnpm core && wxt -b firefox",
     "build": "pnpm core && wxt build",
@@ -18,9 +19,9 @@
     "check": "biome check . && tsc --noEmit && tsc --noEmit -p e2e",
     "format": "biome check --write .",
     "test": "vitest run --project unit",
-    "test:e2e": "pnpm core && wxt build --mode e2e && wxt build -b firefox --mode e2e && vitest run --project e2e",
+    "test:e2e": "pnpm core:e2e && wxt build --mode e2e && wxt build -b firefox --mode e2e && vitest run --project e2e",
     "e2e:browsers": "puppeteer browsers install chrome && puppeteer browsers install firefox",
-    "screenshots": "pnpm core && wxt build --mode e2e && node e2e/screenshots.ts",
+    "screenshots": "pnpm core:e2e && wxt build --mode e2e && node e2e/screenshots.ts",
     "postinstall": "wxt prepare"
   },
   "dependencies": {
@@ -42,12 +43,14 @@
     "@types/node": "24.19.2",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
+    "@types/ws": "8.18.2",
     "@wxt-dev/module-react": "1.2.2",
     "axe-core": "4.14.0",
     "puppeteer": "25.13.0",
     "typescript": "7.0.2",
     "vite": "8.3.4",
     "vitest": "5.0.3",
+    "ws": "8.22.0",
     "wxt": "0.21.4"
   }
 }

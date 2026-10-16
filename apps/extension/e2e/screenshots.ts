@@ -1,5 +1,5 @@
 /**
- * Takes the stores' screenshots, 1280 by 800, of two demo vaults published to the relays, and the
+ * Takes the stores' screenshots, 1280 by 800, of two demo vaults published to a local relay, and the
  * Chrome Web Store's promo tile, into `store/`. Run with `pnpm screenshots`.
  */
 import { mkdir, readFile, writeFile } from "node:fs/promises";
@@ -7,6 +7,7 @@ import { resolve } from "node:path";
 import { generateSecretKey, nip19 } from "nostr-tools";
 import type { Browser } from "puppeteer";
 import { type Extension, launch } from "./extension.ts";
+import { startRelay } from "./relay.ts";
 import { setTheme } from "./theme.ts";
 import { publishItems } from "./vault-items.ts";
 
@@ -15,6 +16,7 @@ const out = resolve(root, "store");
 
 const personal = generateSecretKey();
 const work = generateSecretKey();
+const relay = await startRelay();
 await publishItems(personal, [
   {
     type: 1,
@@ -120,6 +122,7 @@ try {
   ]);
 } finally {
   await extension.browser.close();
+  await relay.close();
 }
 
 async function openVault({ click, fill, popup }: Extension, key: Uint8Array, name: string) {

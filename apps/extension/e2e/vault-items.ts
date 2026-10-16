@@ -1,13 +1,11 @@
 import { bytesToHex } from "@noble/hashes/utils.js";
 import { finalizeEvent, getPublicKey, SimplePool } from "nostr-tools";
 import { createWrap } from "nostr-tools/nip59";
-
-/** Default relays of a vault that serve its gift wraps without NIP-42. */
-const relays = ["wss://relay.primal.net", "wss://relay.nos.social", "wss://relay.coinos.io"];
+import { relayUrl } from "./relay.ts";
 
 /**
- * Publishes `ciphers`, Bitwarden's cipher JSON, as new items of the vault of `secretKey`, as another
- * device of the vault would. Each one lands on every relay that takes it, one at least.
+ * Publishes `ciphers`, Bitwarden's cipher JSON, as new items of the vault of `secretKey` on the
+ * local relay, as another device of the vault would.
  */
 export async function publishItems(secretKey: Uint8Array, ciphers: object[]) {
   const pubkey = getPublicKey(secretKey);
@@ -34,19 +32,11 @@ export async function publishItems(secretKey: Uint8Array, ciphers: object[]) {
           },
           secretKey,
         );
-        return landed(pool.publish(relays, createWrap(version, pubkey)));
+        return Promise.all(pool.publish([relayUrl], createWrap(version, pubkey)));
       }),
     );
   } finally {
-    pool.close(relays);
-  }
-}
-
-/** Waits for every relay, as closing the pool at the first one could keep the others from storing. */
-async function landed(publishes: Promise<string>[]) {
-  const results = await Promise.allSettled(publishes);
-  if (!results.some((result) => result.status === "fulfilled")) {
-    throw new Error("No relay took the item");
+    pool.close([relayUrl]);
   }
 }
 

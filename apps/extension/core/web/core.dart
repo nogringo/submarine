@@ -5,6 +5,8 @@ import 'package:ndk/ndk.dart';
 import 'package:sembast_web/sembast_web.dart';
 import 'package:nostr_passwords/nostr_passwords.dart'
     show
+        defaultIndexerRelays,
+        defaultVaultRelays,
         generateBirthDate,
         generateFirstName,
         generateLastName,
@@ -230,6 +232,10 @@ const _databaseName = 'submarine';
 /// Where the popup keeps the item form it leaves unsaved, see `item-draft.ts`.
 const _itemDraftKey = 'itemDraft';
 
+/// The local relay of the end-to-end tests, in place of every other, see
+/// `e2e/relay.ts`.
+const _testRelay = String.fromEnvironment('TEST_RELAY');
+
 Future<VaultSync> _openSync(Vaults vaults) async {
   // The ndk cache, the sync coverage and the versions opened, together: the
   // coverage must never outlive the cache it describes.
@@ -250,6 +256,8 @@ Future<VaultSync> _openSync(Vaults vaults) async {
     vaults: vaults,
     onChanged: emitVaultsChanged,
     onSending: (sending) => keepAwake(sending),
+    relays: _testRelay.isEmpty ? defaultVaultRelays : const [_testRelay],
+    indexers: _testRelay.isEmpty ? defaultIndexerRelays : const [_testRelay],
   );
 }
 

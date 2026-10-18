@@ -25,7 +25,7 @@ Cada cofre tem sua própria chave, criada no seu dispositivo quando você cria o
 
 ## Nos servidores
 
-Seus cofres ficam em relays Nostr: servidores abertos mantidos por operadores independentes, que qualquer pessoa pode usar ou manter. Cada cofre é copiado em vários relays, então ele continua disponível se um deles sair do ar, e é você quem escolhe quais relays o guardam, inclusive os seus.
+Seus cofres ficam em relays Nostr: servidores abertos mantidos por operadores independentes, que qualquer pessoa pode usar ou manter. Cada cofre é copiado em vários relays, então ele continua disponível se um deles sair do ar, e é você quem escolhe quais relays o guardam, [inclusive os seus](/pt-br/self-hosting).
 
 Cada alteração que você faz é criptografada no seu dispositivo e enviada aos relays em um envelope lacrado. Um relay vê:
 

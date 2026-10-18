@@ -25,7 +25,7 @@ Cada caja fuerte tiene su propia clave, creada en tu dispositivo cuando creas la
 
 ## En los servidores
 
-Tus cajas fuertes se guardan en relays de Nostr: servidores abiertos gestionados por operadores independientes, que cualquiera puede usar o gestionar. Cada caja fuerte se copia en varios relays, así que sobrevive si uno de ellos cae, y tú eliges qué relays la guardan, incluidos los tuyos.
+Tus cajas fuertes se guardan en relays de Nostr: servidores abiertos gestionados por operadores independientes, que cualquiera puede usar o gestionar. Cada caja fuerte se copia en varios relays, así que sobrevive si uno de ellos cae, y tú eliges qué relays la guardan, [incluidos los tuyos](/es/self-hosting).
 
 Cada cambio que haces se cifra en tu dispositivo y se envía a los relays en un sobre sellado. Un relay ve:
 

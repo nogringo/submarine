@@ -14,7 +14,7 @@ Cada caja fuerte se copia en varios relays, y cada uno de tus dispositivos guard
 
 ## ¿Quién gestiona los servidores?
 
-Los relays de Nostr los gestionan operadores independientes, para todas las apps que usan Nostr, no solo para Submarine. Solo ven datos cifrados. También puedes tener tu propio relay y añadirlo a tu caja fuerte.
+Los relays de Nostr los gestionan operadores independientes, para todas las apps que usan Nostr, no solo para Submarine. Solo ven datos cifrados. También puedes tener tu propio relay y añadirlo a tu caja fuerte. [Aloja tus propios servidores](/es/self-hosting).
 
 ## ¿Submarine funciona sin conexión?
 

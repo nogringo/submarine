@@ -25,7 +25,7 @@ Jeder Tresor hat seinen eigenen Schlüssel, der auf deinem Gerät entsteht, wenn
 
 ## Auf den Servern
 
-Deine Tresore liegen auf Nostr-Relays: offenen Servern unabhängiger Betreiber, die jeder nutzen oder selbst betreiben kann. Jeder Tresor wird auf mehrere Relays kopiert, damit er erhalten bleibt, wenn eines davon ausfällt, und du wählst, welche Relays ihn aufbewahren, auch deine eigenen.
+Deine Tresore liegen auf Nostr-Relays: offenen Servern unabhängiger Betreiber, die jeder nutzen oder selbst betreiben kann. Jeder Tresor wird auf mehrere Relays kopiert, damit er erhalten bleibt, wenn eines davon ausfällt, und du wählst, welche Relays ihn aufbewahren, [auch deine eigenen](/de/self-hosting).
 
 Jede Änderung, die du machst, wird auf deinem Gerät verschlüsselt und in einem versiegelten Umschlag an die Relays gesendet. Ein Relay sieht:
 

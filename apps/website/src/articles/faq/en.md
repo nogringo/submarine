@@ -14,7 +14,7 @@ Each vault is copied to several relays, and each of your devices keeps its own c
 
 ## Who runs the servers?
 
-Nostr relays are run by independent operators, for every app that uses Nostr, not just Submarine. They only see encrypted data. You can also run your own relay and add it to your vault.
+Nostr relays are run by independent operators, for every app that uses Nostr, not just Submarine. They only see encrypted data. You can also run your own relay and add it to your vault. [Run your own servers](/self-hosting).
 
 ## Does Submarine work offline?
 

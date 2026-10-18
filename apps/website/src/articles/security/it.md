@@ -25,7 +25,7 @@ Ogni cassaforte ha la propria chiave, creata sul tuo dispositivo quando crei la 
 
 ## Sui server
 
-Le tue casseforti si trovano sui relay Nostr: server aperti gestiti da operatori indipendenti, che chiunque può usare o gestire. Ogni cassaforte è copiata su più relay, così sopravvive se uno di essi si ferma, e sei tu a scegliere quali relay la conservano, compresi i tuoi.
+Le tue casseforti si trovano sui relay Nostr: server aperti gestiti da operatori indipendenti, che chiunque può usare o gestire. Ogni cassaforte è copiata su più relay, così sopravvive se uno di essi si ferma, e sei tu a scegliere quali relay la conservano, [compresi i tuoi](/it/self-hosting).
 
 Ogni modifica che fai viene cifrata sul tuo dispositivo e inviata ai relay in una busta sigillata. Un relay vede:
 

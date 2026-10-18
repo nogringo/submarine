@@ -14,7 +14,7 @@ Cada cofre é copiado para vários relays, e cada um dos seus dispositivos guard
 
 ## Quem gere os servidores?
 
-Os relays Nostr são geridos por operadores independentes, para todas as aplicações que usam o Nostr, e não apenas para o Submarine. Só veem dados encriptados. Também pode alojar o seu próprio relay e adicioná-lo ao seu cofre.
+Os relays Nostr são geridos por operadores independentes, para todas as aplicações que usam o Nostr, e não apenas para o Submarine. Só veem dados encriptados. Também pode alojar o seu próprio relay e adicioná-lo ao seu cofre. [Aloje os seus próprios servidores](/pt/self-hosting).
 
 ## O Submarine funciona offline?
 

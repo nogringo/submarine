@@ -14,7 +14,7 @@ Ogni cassaforte è copiata su più relay, e ciascuno dei tuoi dispositivi ne con
 
 ## Chi gestisce i server?
 
-I relay Nostr sono gestiti da operatori indipendenti, per tutte le app che usano Nostr, non solo per Submarine. Vedono solo dati cifrati. Puoi anche gestire un tuo relay e aggiungerlo alla tua cassaforte.
+I relay Nostr sono gestiti da operatori indipendenti, per tutte le app che usano Nostr, non solo per Submarine. Vedono solo dati cifrati. Puoi anche gestire un tuo relay e aggiungerlo alla tua cassaforte. [Gestisci i tuoi server](/it/self-hosting).
 
 ## Submarine funziona offline?
 

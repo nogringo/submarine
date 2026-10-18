@@ -25,7 +25,7 @@ Chaque coffre a sa propre clé, créée sur votre appareil quand vous créez le 
 
 ## Sur les serveurs
 
-Vos coffres sont gardés sur des relais Nostr : des serveurs ouverts, gérés par des opérateurs indépendants, que tout le monde peut utiliser ou faire tourner. Chaque coffre est copié sur plusieurs relais, il survit donc à la panne de l'un d'eux, et c'est vous qui choisissez les relais qui le gardent, y compris le vôtre.
+Vos coffres sont gardés sur des relais Nostr : des serveurs ouverts, gérés par des opérateurs indépendants, que tout le monde peut utiliser ou faire tourner. Chaque coffre est copié sur plusieurs relais, il survit donc à la panne de l'un d'eux, et c'est vous qui choisissez les relais qui le gardent, [y compris le vôtre](/fr/self-hosting).
 
 Chaque modification que vous faites est chiffrée sur votre appareil et envoyée aux relais dans une enveloppe scellée. Un relais voit :
 

@@ -14,7 +14,7 @@ Jeder Tresor wird auf mehrere Relays kopiert, und jedes deiner Geräte hat seine
 
 ## Wer betreibt die Server?
 
-Nostr-Relays werden von unabhängigen Betreibern betrieben, für alle Apps, die Nostr nutzen, nicht nur für Submarine. Sie sehen nur verschlüsselte Daten. Du kannst auch dein eigenes Relay betreiben und es deinem Tresor hinzufügen.
+Nostr-Relays werden von unabhängigen Betreibern betrieben, für alle Apps, die Nostr nutzen, nicht nur für Submarine. Sie sehen nur verschlüsselte Daten. Du kannst auch dein eigenes Relay betreiben und es deinem Tresor hinzufügen. [Eigene Server betreiben](/de/self-hosting).
 
 ## Funktioniert Submarine offline?
 

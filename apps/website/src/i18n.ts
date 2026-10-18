@@ -63,7 +63,7 @@ export function segmentOf(locale: string): string | undefined {
   return locale === defaultLocale ? undefined : locale.toLowerCase();
 }
 
-export const articles = ["security", "import-bitwarden", "faq"] as const;
+export const articles = ["security", "import-bitwarden", "faq", "self-hosting"] as const;
 
 export type Page = "" | "download" | "privacy" | (typeof articles)[number];
 

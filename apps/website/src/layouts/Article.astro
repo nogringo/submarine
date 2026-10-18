@@ -46,4 +46,14 @@ if (!heading) throw new Error(`No title in ${entry.collection} ${entry.id}`);
   article :global(li + li) {
     margin-top: 0.5rem;
   }
+
+  article :global(code) {
+    padding: 0.05em 0.35em;
+    border: 1px solid var(--line);
+    border-radius: 0.3em;
+    background: var(--raised);
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.9em;
+    box-decoration-break: clone;
+  }
 </style>

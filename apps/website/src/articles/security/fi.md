@@ -25,7 +25,7 @@ Jokaisella holvilla on oma avaimensa, joka luodaan laitteellasi, kun luot holvin
 
 ## Palvelimilla
 
-Holvisi sijaitsevat Nostr-releillä eli avoimilla palvelimilla, joita ylläpitävät riippumattomat tahot ja joita kuka tahansa voi käyttää tai ylläpitää. Jokainen holvi kopioidaan useille releille, joten se säilyy, vaikka yksi niistä lakkaisi toimimasta, ja sinä valitset, mitkä releet sitä säilyttävät, myös omasi.
+Holvisi sijaitsevat Nostr-releillä eli avoimilla palvelimilla, joita ylläpitävät riippumattomat tahot ja joita kuka tahansa voi käyttää tai ylläpitää. Jokainen holvi kopioidaan useille releille, joten se säilyy, vaikka yksi niistä lakkaisi toimimasta, ja sinä valitset, mitkä releet sitä säilyttävät, [myös omasi](/fi/self-hosting).
 
 Jokainen tekemäsi muutos salataan laitteellasi ja lähetetään releille sinetöidyssä kirjekuoressa. Rele näkee:
 

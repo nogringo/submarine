@@ -14,7 +14,7 @@ Jokainen holvi kopioidaan useille releille, ja jokaisella laitteellasi on oma ko
 
 ## Kuka ylläpitää palvelimia?
 
-Nostr-releitä ylläpitävät riippumattomat tahot kaikille Nostria käyttäville sovelluksille, ei vain Submarinelle. Ne näkevät vain salattua tietoa. Voit myös ylläpitää omaa relettä ja lisätä sen holviisi.
+Nostr-releitä ylläpitävät riippumattomat tahot kaikille Nostria käyttäville sovelluksille, ei vain Submarinelle. Ne näkevät vain salattua tietoa. Voit myös ylläpitää omaa relettä ja lisätä sen holviisi. [Ylläpidä omia palvelimiasi](/fi/self-hosting).
 
 ## Toimiiko Submarine ilman verkkoyhteyttä?
 

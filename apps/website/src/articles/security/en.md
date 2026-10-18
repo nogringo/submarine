@@ -25,7 +25,7 @@ Each vault has its own key, made on your device when you create the vault. Whoev
 
 ## On the servers
 
-Your vaults are kept on Nostr relays: open servers run by independent operators, which anyone can use or run. Each vault is copied to several relays, so it survives if one of them goes down, and you choose which relays keep it, your own included.
+Your vaults are kept on Nostr relays: open servers run by independent operators, which anyone can use or run. Each vault is copied to several relays, so it survives if one of them goes down, and you choose which relays keep it, [your own included](/self-hosting).
 
 Each change you make is encrypted on your device and sent to the relays in a sealed envelope. A relay sees:
 

@@ -46,10 +46,10 @@ export function AllVaultsAvatar({ size }: { size: number }) {
   );
 }
 
-/** Stands in the place of a vault's avatar, to open a vault. */
-export function OpenVaultMark({ size }: { size: number }) {
+/** Stands in the place of a vault's avatar, to add a vault. */
+export function AddVaultMark({ size }: { size: number }) {
   return (
-    <span className="open-vault-mark" style={{ width: size, height: size }} aria-hidden="true">
+    <span className="add-vault-mark" style={{ width: size, height: size }} aria-hidden="true">
       <Icon src={add} size={size * 0.5} />
     </span>
   );

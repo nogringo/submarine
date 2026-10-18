@@ -162,6 +162,8 @@ export interface CoreMethods {
     args: { key: string; password?: string; name: string; color: number };
     result: Vault;
   };
+  /** Creates an empty vault with a new key. */
+  createVault: { args: { name: string; color: number }; result: Vault };
   /** Renames a vault or changes its color, on this device. */
   editVault: { args: { vault: string; name?: string; color?: number }; result: Vault };
   /** The key of a vault, as an nsec, asked for only when shown or copied. */

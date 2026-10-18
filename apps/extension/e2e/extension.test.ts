@@ -895,7 +895,10 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
 
   it("refuses a vault already open", async () => {
     await extension.click("button[aria-label=Vaults]");
-    await extension.click("button::-p-text(Open a vault)");
+    await extension.click(`.drawer button::-p-text(${english.addVault})`);
+    await extension.popup.waitForSelector("[role=dialog] .add-vault-choice");
+    expect(await violations(extension.popup)).toEqual([]);
+    await extension.click(`[role=dialog] button::-p-text(${english.openVault})`);
     await extension.fill("input[name=key]", nip19.nsecEncode(secretKey));
     await extension.fill("input[name=name]", "Work");
     await extension.click("button[type=submit]");
@@ -1183,13 +1186,31 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s, the lock password forgott
     await extension?.browser.close();
   });
 
-  it("removes the vaults from this device, and the lock password with them", async () => {
+  it("creates a vault, then asks to save its key until saved or later", async () => {
     const { popup } = extension;
-    await extension.click("button::-p-text(Open a vault)");
-    await extension.fill("input[name=key]", nip19.nsecEncode(generateSecretKey()));
+    await extension.click(`button::-p-text(${english.createVault})`);
+    await popup.waitForFunction(() => document.activeElement?.getAttribute("name") === "name");
+    expect(await popup.$("input[name=key]")).toBeNull();
     await extension.fill("input[name=name]", "Home");
     await extension.click("button[type=submit]");
+    const dialog = await popup.waitForSelector("[role=dialog]");
+    expect(await dialog?.$eval("h2", (title) => title.textContent)).toBe(english.saveVaultKeyTitle);
+    expect(await violations(popup)).toEqual([]);
+    // Escape leaves it open: the Later button is still there to press.
+    await extension.press("Escape");
+    await extension.click(`[role=dialog] button::-p-text(${english.later})`);
     await popup.waitForSelector(".home-title");
+    await extension.click("button[aria-label=Vaults]");
+    const rows = await popup.waitForSelector(".drawer [role=grid]");
+    expect(
+      await rows?.$$eval(".drawer-row-title", (titles) => titles.map((title) => title.textContent)),
+    ).toEqual(["All vaults", "Home"]);
+    await extension.click(".drawer [role=row]::-p-text(Home)");
+    await popup.waitForSelector("[role=dialog]", { hidden: true });
+  });
+
+  it("removes the vaults from this device, and the lock password with them", async () => {
+    const { popup } = extension;
     await extension.click("button[aria-label=Vaults]");
     await extension.click(".drawer button::-p-text(Settings)");
     await extension.click(".settings button::-p-text(Set up)");

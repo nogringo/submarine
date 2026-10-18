@@ -79,6 +79,26 @@ void main() {
     );
   });
 
+  test('creates a vault with a new key, each its own', () async {
+    final home = await vaults.create(name: ' Home ', color: 1);
+    final work = await vaults.create(name: 'Work', color: 2);
+    expect(home, {'pubkey': home['pubkey'], 'name': 'Home', 'color': 1});
+    expect(home['pubkey'], isNot(work['pubkey']));
+    final records = await reopened().records();
+    expect(
+      records.map((record) => signers.derivePublicKey(record.privateKey)),
+      [home['pubkey'], work['pubkey']],
+    );
+  });
+
+  test('refuses to create a vault without a name', () async {
+    await expectLater(
+      vaults.create(name: '  ', color: 1),
+      throwsCode('vaultNameRequired'),
+    );
+    expect(await vaults.list(), isEmpty);
+  });
+
   test('refuses a vault already open, by its name', () async {
     await vaults.add(key: privateKey, name: 'Home', color: 1);
     await expectLater(

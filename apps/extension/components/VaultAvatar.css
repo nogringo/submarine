@@ -14,7 +14,7 @@
   color: var(--on-accent);
 }
 
-.open-vault-mark {
+.add-vault-mark {
   display: inline-flex;
   flex: none;
   align-items: center;

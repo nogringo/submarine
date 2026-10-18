@@ -138,6 +138,14 @@ void main() {
         if (syncs.current case final current?) await (await current).update();
         return vault;
       },
+      'createVault': (args) async {
+        final vault = await vaults.create(
+          name: args['name'] as String,
+          color: args['color'] as int,
+        );
+        if (syncs.current case final current?) await (await current).update();
+        return vault;
+      },
       'editVault': (args) => vaults.edit(
         args['vault'] as String,
         name: args['name'] as String?,

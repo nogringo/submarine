@@ -77,6 +77,7 @@ try {
   await popup.emulateMediaFeatures([{ name: "prefers-reduced-motion", value: "reduce" }]);
   await openVault(extension, personal, "Personal");
   await extension.click("button[aria-label=Vaults]");
+  await extension.click(".drawer button::-p-text(Add a vault)");
   await openVault(extension, work, "Work");
   await popup.waitForFunction(() => document.querySelectorAll(".item-row").length === 7, {
     timeout: 30_000,

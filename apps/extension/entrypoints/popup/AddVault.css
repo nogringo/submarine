@@ -1,0 +1,78 @@
+.add-vault {
+  padding: 24px;
+}
+
+.screen-title {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.add-vault-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.add-vault-error {
+  color: var(--danger);
+}
+
+.add-vault-status {
+  color: var(--muted);
+}
+
+.add-vault-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.add-vault-choices {
+  padding-inline: 0;
+}
+
+.add-vault-choices > .dialog-title {
+  padding: 0 24px 12px;
+}
+
+.add-vault-choice {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  padding: 12px 24px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  outline: none;
+}
+
+.add-vault-choice[data-hovered] {
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+}
+
+.add-vault-choice[data-focus-visible] {
+  outline: 2px solid var(--text);
+  outline-offset: -2px;
+}
+
+.add-vault-choice-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.add-vault-choice-title {
+  color: var(--text);
+  font-size: 16px;
+}
+
+.add-vault-choice-description {
+  font-size: 13px;
+}

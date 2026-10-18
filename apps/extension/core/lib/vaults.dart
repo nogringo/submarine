@@ -94,8 +94,7 @@ class Vaults {
     required String name,
     required int color,
   }) => _write(() async {
-    final trimmed = name.trim();
-    if (trimmed.isEmpty) throw CoreException('vaultNameRequired');
+    final trimmed = _requireName(name);
     final privateKey =
         parseVaultKey(key) ??
         (isEncryptedVaultKey(key)
@@ -109,14 +108,39 @@ class Vaults {
         throw CoreException('vaultAlreadyOpen', record.name);
       }
     }
+    return _append(records, privateKey, trimmed, color);
+  });
+
+  /// Creates a vault with a new key, empty, as the app does.
+  Future<Map<String, Object>> create({
+    required String name,
+    required int color,
+  }) => _write(() async {
+    final trimmed = _requireName(name);
+    final (privateKey, _) = _signers.generateKeyPair();
+    return _append(await records(), privateKey, trimmed, color);
+  });
+
+  String _requireName(String name) {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) throw CoreException('vaultNameRequired');
+    return trimmed;
+  }
+
+  Future<Map<String, Object>> _append(
+    List<VaultRecord> records,
+    String privateKey,
+    String name,
+    int color,
+  ) async {
     final record = VaultRecord(
       privateKey: privateKey,
-      name: trimmed,
+      name: name,
       color: color,
     );
     await _save([...records, record]);
     return _summary(record);
-  });
+  }
 
   /// Renames the vault [pubkey], or changes its color.
   Future<Map<String, Object>> edit(String pubkey, {String? name, int? color}) =>

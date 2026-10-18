@@ -11,7 +11,7 @@ The manifest gives both: "Submarine Password Manager", and the app's tagline in 
 ```text
 Submarine keeps your passwords, cards and notes safe and in sync across your devices, with no account to create. This extension brings your vaults into your browser.
 
-- Open your vaults with their key, the one the Submarine app gave you when you created them.
+- Create your vaults, or open those you already have with their key.
 - See the logins for the site you are on first, and fill one into the page in one click, or with Alt+Shift+L (Ctrl+Shift+L in Firefox, Control+Shift+L on a Mac).
 - Search your logins, cards, notes and identities, across all your vaults, or filter them: favorites, each type, the trash.
 - Create and edit your logins, cards and notes, with custom fields. Generate strong passwords, passphrases and usernames as you fill them in.
@@ -23,7 +23,7 @@ Submarine keeps your passwords, cards and notes safe and in sync across your dev
 
 Everything is encrypted before it is synced, so nobody but you can read it, not even us. Your vaults live on Nostr relays: open servers that anyone can run, and that only see encrypted data.
 
-Create your vaults in the Submarine app, at https://github.com/nogringo/submarine.
+Get the Submarine app for your other devices at https://github.com/nogringo/submarine.
 
 Free and open source. No ads, no tracking.
 
@@ -58,5 +58,5 @@ Submarine is still young. For your most important passwords, we still recommend 
 ```text
 The background runs a core written in Dart, compiled to JavaScript (core.js). The sources archive holds it, and SOURCE_CODE_REVIEW.md at its root explains how to rebuild the extension identically.
 
-To try the extension, create a vault in the Submarine web app, https://app.submarine.li, copy its key from the vault's settings, then open it in the extension.
+To try the extension, create a vault from its welcome screen.
 ```

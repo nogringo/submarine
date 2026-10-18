@@ -1,12 +1,12 @@
 # Privacy policy of the Submarine browser extension
 
-Last updated: October 12, 2026.
+Last updated: October 18, 2026.
 
 Submarine is a password manager. Its browser extension shows the passwords, cards and notes of your vaults, lets you create and edit them, copies them for you, and fills your logins into websites. This policy explains what the extension does with your data. In short: there is no Submarine server, and the extension sends nothing to its developers.
 
 ## What stays in your browser
 
-- The key of each vault you open, with the name and color you give it. They are encrypted with a key of this browser, itself protected by your lock password once you set one.
+- The key of each vault you create or open, with the name and color you give it. They are encrypted with a key of this browser, itself protected by your lock password once you set one.
 - A copy of your vaults' contents, so that they open without waiting for the network. It is encrypted too.
 - Your settings: the lock delay, the clipboard delay and the options of the password generator.
 - A form you leave unsaved, so that it shows again when you reopen the extension. It stays in the browser's memory, never on disk, and goes once you save it, discard it, lock the extension or close the browser.

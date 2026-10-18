@@ -30,6 +30,12 @@
   margin-top: 40px;
 }
 
+.welcome > .button.outlined {
+  align-self: stretch;
+  min-height: 48px;
+  margin-top: 12px;
+}
+
 .welcome > .button.text {
   margin-top: 24px;
 }

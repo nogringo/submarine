@@ -21,15 +21,41 @@ interface Errors {
 /**
  * Encrypts the key of `vault` with a password the user picks, then shows the ncryptsec, which can be
  * kept anywhere since only that password opens it, as the app's dialog does. Opened by a
- * DialogTrigger.
+ * DialogTrigger, or by `isOpen` once a vault is created: then only its buttons close it, the
+ * dismiss one named `dismissLabel`.
  */
-export function EncryptVaultKeyDialog({ vault }: { vault: string }) {
+export function EncryptVaultKeyDialog({
+  vault,
+  title,
+  dismissLabel,
+  isOpen,
+  onOpenChange,
+}: {
+  vault: string;
+  title?: string;
+  dismissLabel?: string;
+  isOpen?: boolean;
+  onOpenChange?: (isOpen: boolean) => void;
+}) {
   const [busy, setBusy] = useState(false);
+  const dismissable = !busy && isOpen === undefined;
   return (
-    <ModalOverlay className="dialog-overlay" isDismissable={!busy}>
+    <ModalOverlay
+      className="dialog-overlay"
+      isDismissable={dismissable}
+      isKeyboardDismissDisabled={!dismissable}
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
+    >
       <Modal className="dialog-modal">
         <Dialog className="dialog">
-          <EncryptVaultKeyForm vault={vault} busy={busy} onBusy={setBusy} />
+          <EncryptVaultKeyForm
+            vault={vault}
+            title={title}
+            dismissLabel={dismissLabel}
+            busy={busy}
+            onBusy={setBusy}
+          />
         </Dialog>
       </Modal>
     </ModalOverlay>
@@ -39,10 +65,14 @@ export function EncryptVaultKeyDialog({ vault }: { vault: string }) {
 /** Mounted while the dialog is open: the password and the ncryptsec go once it closes. */
 function EncryptVaultKeyForm({
   vault,
+  title: titleText,
+  dismissLabel,
   busy,
   onBusy: setBusy,
 }: {
   vault: string;
+  title?: string;
+  dismissLabel?: string;
   busy: boolean;
   onBusy: (busy: boolean) => void;
 }) {
@@ -83,7 +113,7 @@ function EncryptVaultKeyForm({
 
   const title = (
     <Heading slot="title" className="dialog-title">
-      {t({ id: "exportEncryptedVaultKey" })}
+      {titleText ?? t({ id: "exportEncryptedVaultKey" })}
     </Heading>
   );
   if (ncryptsec) {
@@ -135,7 +165,7 @@ function EncryptVaultKeyForm({
       </div>
       <div className="dialog-actions">
         <TextButton slot="close" isDisabled={busy}>
-          {t({ id: "cancel" })}
+          {dismissLabel ?? t({ id: "cancel" })}
         </TextButton>
         <FilledButton type="submit" isPending={busy}>
           {t({ id: "encryptKey" })}

@@ -23,7 +23,7 @@ import { ActionMenu } from "@/components/MoreMenu";
 import { SearchField } from "@/components/SearchField";
 import { SyncButton } from "@/components/SyncButton";
 import { SyncStatus } from "@/components/SyncStatus";
-import { AllVaultsAvatar, OpenVaultMark, VaultAvatar } from "@/components/VaultAvatar";
+import { AddVaultMark, AllVaultsAvatar, VaultAvatar } from "@/components/VaultAvatar";
 import type { Cipher } from "@/lib/cipher";
 import type { Item, ItemFilter, Vault, VaultListName } from "@/lib/core";
 import { fillLogin } from "@/lib/fill";
@@ -35,6 +35,7 @@ import { anySyncing } from "@/lib/sync-status";
 import { useItems, useItemTypes, usePageItems } from "@/lib/use-items";
 import { usePage } from "@/lib/use-page";
 import type { Sync } from "@/lib/use-sync";
+import { type AddVaultChoice, AddVaultDialog } from "./AddVault";
 import { GeneratorPage } from "./Generator";
 import "./Home.css";
 import { ItemDetail } from "./ItemDetail";
@@ -69,7 +70,7 @@ export function Home({
   sync,
   hasLockPassword,
   onLock,
-  onOpenVault,
+  onAddVault,
   onVaultChanged,
   onVaultRemoved,
 }: {
@@ -77,7 +78,7 @@ export function Home({
   sync: Sync;
   hasLockPassword: boolean;
   onLock: () => void;
-  onOpenVault: () => void;
+  onAddVault: (choice: AddVaultChoice) => void;
   onVaultChanged: (vault: Vault) => void;
   onVaultRemoved: (pubkey: string) => void;
 }) {
@@ -113,6 +114,7 @@ export function Home({
     !!pageItems?.some((item) => item.vault === vault && item.id === id);
   const [opened, setOpened] = useState<Opened>();
   const [menu, setMenu] = useState<ItemMenuRequest & { row: HTMLElement }>();
+  const [choosingVault, setChoosingVault] = useState(false);
   // The form or the item the last popup showed, shown again once read.
   const [restored, setRestored] = useState(false);
   // biome-ignore lint/correctness/useExhaustiveDependencies: read once, as the list shows.
@@ -266,11 +268,11 @@ export function Home({
                         className="drawer-row"
                         onPress={() => {
                           close();
-                          onOpenVault();
+                          setChoosingVault(true);
                         }}
                       >
-                        <OpenVaultMark size={40} />
-                        <span className="drawer-row-title">{t({ id: "openVault" })}</span>
+                        <AddVaultMark size={40} />
+                        <span className="drawer-row-title">{t({ id: "addVault" })}</span>
                       </Button>
                       <Button
                         className="drawer-row"
@@ -302,6 +304,11 @@ export function Home({
               </Modal>
             </ModalOverlay>
           </DialogTrigger>
+          <AddVaultDialog
+            isOpen={choosingVault}
+            onOpenChange={setChoosingVault}
+            onChoose={onAddVault}
+          />
           <div className="home-heading">
             <h1 className="home-title">{title}</h1>
             <SyncStatus pubkeys={pubkeys} states={sync.states} />

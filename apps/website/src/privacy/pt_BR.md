@@ -1,14 +1,15 @@
 # Política de privacidade da extensão do Submarine para navegador
 
-Última atualização: 12 de outubro de 2026.
+Última atualização: 18 de outubro de 2026.
 
-O Submarine é um gerenciador de senhas. A extensão para navegador mostra as senhas, os cartões e as anotações dos seus cofres, permite criar e editar esses itens, copia os dados para você e preenche suas credenciais nos sites. Esta política explica o que a extensão faz com seus dados. Em resumo: não existe nenhum servidor do Submarine, e a extensão não envia nada para os desenvolvedores dela.
+O Submarine é um gerenciador de senhas. A extensão para navegador mostra as senhas, os cartões e as anotações dos seus cofres, permite criar e editar esses itens, copia os dados para você, preenche suas credenciais nos sites e mostra os e-mails enviados para os endereços de e-mail que você atribui às suas credenciais. Esta política explica o que a extensão faz com seus dados. Em resumo: não existe nenhum servidor do Submarine, e a extensão não envia nada para os desenvolvedores dela.
 
 ## O que fica no seu navegador
 
-- A chave de cada cofre que você abre, com o nome e a cor que você dá a ele. Esses dados são criptografados com uma chave deste navegador, que por sua vez é protegida pela sua senha de bloqueio, a partir do momento em que você define uma.
+- A chave de cada cofre que você cria ou abre, com o nome e a cor que você dá a ele. Esses dados são criptografados com uma chave deste navegador, que por sua vez é protegida pela sua senha de bloqueio, a partir do momento em que você define uma.
 - Uma cópia do conteúdo dos seus cofres, para que eles abram sem esperar pela rede. Ela também é criptografada.
-- Suas configurações: o tempo até o bloqueio, o tempo até limpar a área de transferência e as opções do gerador de senhas.
+- As mensagens de um endereço de e-mail, tal como chegaram: criptografadas para a chave desse endereço. A extensão as descriptografa toda vez que as mostra e nunca as armazena descriptografadas.
+- Suas configurações: o tempo até o bloqueio, o tempo até limpar a área de transferência, as opções do gerador de senhas, e a ponte de e-mail, os relays e os servidores que os novos endereços de e-mail recebem.
 - Um formulário que você deixa sem salvar, para que ele apareça de novo quando você reabrir a extensão. Ele fica na memória do navegador, nunca no disco, e some assim que você o salva ou descarta, bloqueia a extensão ou fecha o navegador.
 
 Remover um cofre da extensão apaga do seu navegador a chave e a cópia desse cofre. Desinstalar a extensão apaga tudo o que ela guardou.
@@ -23,11 +24,24 @@ Quando você cria, edita, marca como favorito, move para a lixeira ou restaura u
 
 O gerador de senhas funciona no seu navegador: o que ele gera só sai de lá dentro de um item que você salva.
 
+Quando você importa uma exportação do Bitwarden, a extensão lê no seu navegador o arquivo que você escolhe e depois salva os itens dele no cofre que você indica, como itens criados por você. Quando você exporta um cofre, ela salva o arquivo no seu computador, criptografado com a senha que você escolhe, ou sem criptografia, se você desativar essa opção. O arquivo não vai para nenhum outro lugar.
+
 Quando você pede para preencher uma credencial, pela janela da extensão ou com o atalho de teclado, a extensão escreve o nome de usuário e a senha no formulário de login da página atual, e só se o endereço da página corresponder à credencial. O site recebe esses dados quando você faz login, como quando você os digita.
+
+## Endereços de e-mail
+
+Você pode dar a uma credencial um endereço de e-mail próprio, como `npub1...@uid.ovh`, pelo menu que adiciona um campo. A extensão cria uma chave nova para cada endereço, sem relação com seus cofres, e a guarda em um campo oculto da credencial, criptografada junto com o resto do item. O domínio é o de uma ponte de e-mail, `uid.ovh` se você não escolher outra nas configurações: um servidor mantido por um operador independente, que recebe os e-mails enviados para o endereço, como qualquer servidor de e-mail, os criptografa para a chave do endereço e os envia para os relays do endereço. A extensão nunca envia e-mails e nunca se conecta à ponte.
+
+Quando você salva uma credencial com um endereço de e-mail novo, a extensão publica três listas públicas assinadas com a chave do endereço, para que a ponte saiba onde entregar: a lista dos relays do endereço, enviada para esses relays e para os três relays de diretório; a dos relays onde chegam os e-mails do endereço; e a dos servidores que recebem os e-mails grandes demais para um relay. Essas listas indicam a chave, os relays e os servidores do endereço, nunca seus cofres. Por padrão, são os [relays e servidores de e-mail padrão](https://github.com/nogringo/submarine/blob/main/packages/nostr_passwords/lib/src/defaults.dart) do Submarine; você pode mudar nas configurações os que os novos endereços recebem.
+
+Enquanto uma credencial com um endereço de e-mail está aberta, a extensão se conecta aos relays desse endereço, encontrados nos relays de diretório, se autentica neles com a chave do endereço, baixa as últimas mensagens e recebe as novas até você fechar a credencial. Cada relay vê seu endereço IP e a chave pública do endereço. A extensão também recebe as mensagens privadas (NIP-17) enviadas para essa chave. Um e-mail grande demais para um relay é baixado, criptografado, quando você o abre, de um dos servidores do endereço ou da ponte, ou então dos servidores padrão do Submarine; esse servidor vê seu endereço IP.
+
+Quando você salva um e-mail, a extensão grava a mensagem inteira, com os anexos, em um arquivo no seu computador. Quando você exclui uma mensagem, ela pede aos relays do endereço que a excluam. Excluir uma credencial permanentemente não apaga dos relays as mensagens dela. Um link em uma mensagem só abre em uma nova aba depois que você confirma, quando a extensão já mostrou para onde ele leva.
 
 ## O que a extensão não faz
 
 - Ela não tem conta nem servidor próprio: os desenvolvedores dela não recebem nenhum dado.
+- Ela nunca envia e-mails, e nunca mostra as imagens nem outros conteúdos que um e-mail carregaria da internet: ela mostra os e-mails como texto simples.
 - Ela não tem análises de uso, rastreamento nem anúncios.
 - Ela não lê nada das páginas que você visita, exceto os campos da página atual quando você pede para preencher uma credencial, para saber onde vão o nome de usuário e a senha. Quando você a abre, ela lê o endereço da aba atual para mostrar primeiro as credenciais desse site. Nenhuma dessas informações sai do seu navegador.
 - Ela só escreve na área de transferência o que você copia e o código de verificação de uma credencial que ela preenche, e depois esvazia a área de transferência após o tempo escolhido nas configurações. Ela nunca lê a área de transferência.

@@ -1,14 +1,15 @@
 # Datenschutzerklärung der Browser-Erweiterung von Submarine
 
-Zuletzt aktualisiert: 12. Oktober 2026.
+Zuletzt aktualisiert: 18. Oktober 2026.
 
-Submarine ist ein Passwortmanager. Seine Browser-Erweiterung zeigt die Passwörter, Karten und Notizen deiner Tresore, lässt dich sie erstellen und bearbeiten, kopiert sie für dich und füllt deine Zugangsdaten auf Websites aus. Diese Erklärung beschreibt, was die Erweiterung mit deinen Daten macht. Kurz gesagt: Es gibt keinen Submarine-Server, und die Erweiterung sendet nichts an ihre Entwickler.
+Submarine ist ein Passwortmanager. Seine Browser-Erweiterung zeigt die Passwörter, Karten und Notizen deiner Tresore, lässt dich sie erstellen und bearbeiten, kopiert sie für dich, füllt deine Zugangsdaten auf Websites aus und zeigt die E-Mails, die an die E-Mail-Adressen gesendet werden, die du deinen Zugangsdaten gibst. Diese Erklärung beschreibt, was die Erweiterung mit deinen Daten macht. Kurz gesagt: Es gibt keinen Submarine-Server, und die Erweiterung sendet nichts an ihre Entwickler.
 
 ## Was in deinem Browser bleibt
 
-- Der Schlüssel jedes Tresors, den du öffnest, mit dem Namen und der Farbe, die du ihm gibst. Diese Angaben werden mit einem Schlüssel dieses Browsers verschlüsselt, der wiederum durch dein Sperrpasswort geschützt ist, sobald du eines festlegst.
+- Der Schlüssel jedes Tresors, den du erstellst oder öffnest, mit dem Namen und der Farbe, die du ihm gibst. Diese Angaben werden mit einem Schlüssel dieses Browsers verschlüsselt, der wiederum durch dein Sperrpasswort geschützt ist, sobald du eines festlegst.
 - Eine Kopie des Inhalts deiner Tresore, damit sie sich öffnen, ohne auf das Netzwerk zu warten. Auch sie ist verschlüsselt.
-- Deine Einstellungen: die Zeit bis zum Sperren, die Zeit bis zum Leeren der Zwischenablage und die Optionen des Passwortgenerators.
+- Die Nachrichten einer E-Mail-Adresse, so wie sie angekommen sind: verschlüsselt für den Schlüssel dieser Adresse. Die Erweiterung entschlüsselt sie jedes Mal, wenn sie sie anzeigt, und speichert sie nie entschlüsselt.
+- Deine Einstellungen: die Zeit bis zum Sperren, die Zeit bis zum Leeren der Zwischenablage, die Optionen des Passwortgenerators sowie die E-Mail-Bridge, die Relays und die Server, die neue E-Mail-Adressen erhalten.
 - Ein Formular, das du ungespeichert verlässt, damit es wieder erscheint, wenn du die Erweiterung erneut öffnest. Es bleibt im Arbeitsspeicher des Browsers, nie auf der Festplatte, und verschwindet, sobald du es speicherst, verwirfst, die Erweiterung sperrst oder den Browser schließt.
 
 Wenn du einen Tresor aus der Erweiterung entfernst, werden sein Schlüssel und seine Kopie aus deinem Browser gelöscht. Wenn du die Erweiterung deinstallierst, wird alles gelöscht, was sie gespeichert hat.
@@ -23,11 +24,24 @@ Wenn du einen Eintrag erstellst, bearbeitest, zu den Favoriten hinzufügst, in d
 
 Der Passwortgenerator arbeitet in deinem Browser: Was er erzeugt, verlässt ihn nur in einem Eintrag, den du speicherst.
 
+Wenn du einen Bitwarden-Export importierst, liest die Erweiterung die Datei, die du auswählst, in deinem Browser und speichert ihre Einträge dann in dem Tresor, den du wählst, wie Einträge, die du selbst erstellst. Wenn du einen Tresor exportierst, speichert sie die Datei auf deinem Computer, verschlüsselt mit dem Passwort, das du wählst, oder unverschlüsselt, wenn du diesen Schutz ausschaltest. Die Datei gelangt nirgendwo anders hin.
+
 Wenn du sie bittest, Zugangsdaten auszufüllen, über ihr Fenster oder mit ihrem Tastenkürzel, schreibt die Erweiterung Benutzername und Passwort in das Anmeldeformular der aktuellen Seite, und zwar nur, wenn die Adresse der Seite zu den Zugangsdaten passt. Die Website erhält sie, sobald du dich anmeldest, genau wie beim Eintippen.
+
+## E-Mail-Adressen
+
+Zugangsdaten können über das Menü zum Hinzufügen eines Felds eine eigene E-Mail-Adresse bekommen, etwa `npub1...@uid.ovh`. Die Erweiterung erstellt für jede Adresse einen neuen Schlüssel, der nichts mit deinen Tresoren zu tun hat, und bewahrt ihn in einem versteckten Feld der Zugangsdaten auf, zusammen mit dem Rest des Eintrags verschlüsselt. Die Domain ist die einer E-Mail-Bridge, `uid.ovh`, sofern du in den Einstellungen keine andere wählst: ein Server eines unabhängigen Betreibers, der die an die Adresse gesendeten E-Mails empfängt, wie jeder E-Mail-Server, sie für den Schlüssel der Adresse verschlüsselt und an die Relays der Adresse weitergibt. Die Erweiterung sendet nie eine E-Mail und verbindet sich nie mit der Bridge.
+
+Wenn du Zugangsdaten mit einer neuen E-Mail-Adresse speicherst, veröffentlicht die Erweiterung drei öffentliche Listen, signiert mit dem Schlüssel der Adresse, damit die Bridge weiß, wohin sie zustellen soll: die Relays der Adresse, gesendet an diese Relays und an die drei Verzeichnis-Relays; die Relays, auf denen ihre E-Mails ankommen; und die Server, die E-Mails empfangen, die für ein Relay zu groß sind. Diese Listen nennen den Schlüssel der Adresse und ihre Relays und Server, nie deine Tresore. Sofern du nichts änderst, sind das die [Standard-Relays und -Server für E-Mails](https://github.com/nogringo/submarine/blob/main/packages/nostr_passwords/lib/src/defaults.dart) von Submarine. In den Einstellungen kannst du ändern, welche neue Adressen erhalten.
+
+Solange Zugangsdaten mit einer E-Mail-Adresse angezeigt werden, verbindet sich die Erweiterung mit den Relays dieser Adresse, die sie auf den Verzeichnis-Relays findet, meldet sich dort mit dem Schlüssel der Adresse an, lädt ihre neuesten Nachrichten herunter und empfängt neu eintreffende, bis du die Zugangsdaten schließt. Jedes Relay sieht deine IP-Adresse und den öffentlichen Schlüssel der Adresse. Die Erweiterung empfängt auch die privaten Nachrichten (NIP-17), die an diesen Schlüssel gesendet werden. Eine E-Mail, die für ein Relay zu groß ist, wird verschlüsselt heruntergeladen, wenn du sie öffnest, und zwar von einem der Server der Adresse oder der Bridge, sonst von den Standard-Servern von Submarine. Dieser Server sieht deine IP-Adresse.
+
+Wenn du eine E-Mail speicherst, schreibt die Erweiterung die ganze Nachricht samt Anhängen in eine Datei auf deinem Computer. Wenn du eine Nachricht löschst, bittet sie die Relays der Adresse, sie zu löschen. Wenn du Zugangsdaten dauerhaft löschst, werden ihre Nachrichten nicht von den Relays gelöscht. Ein Link in einer Nachricht öffnet sich erst in einem neuen Tab, wenn du ihn bestätigt hast, nachdem die Erweiterung gezeigt hat, wohin er führt.
 
 ## Was die Erweiterung nicht tut
 
 - Sie hat kein Konto und keinen eigenen Server: Ihre Entwickler erhalten keine Daten von ihr.
+- Sie sendet nie eine E-Mail und zeigt nie die Bilder oder anderen Inhalte an, die eine E-Mail aus dem Web laden würde: Sie zeigt E-Mails als reinen Text an.
 - Sie hat keine Analyse, kein Tracking und keine Werbung.
 - Sie liest nichts von den Seiten, die du besuchst, außer den Feldern der aktuellen Seite, wenn du sie bittest, Zugangsdaten auszufüllen, um herauszufinden, wohin Benutzername und Passwort gehören. Beim Öffnen liest sie die Adresse des aktuellen Tabs, um die Zugangsdaten für diese Website zuerst anzuzeigen. Beides verlässt deinen Browser nicht.
 - Sie schreibt nur das in die Zwischenablage, was du kopierst, und den Verifizierungscode der Zugangsdaten, die sie ausfüllt. Danach leert sie die Zwischenablage nach der in den Einstellungen gewählten Zeit. Sie liest die Zwischenablage nie.

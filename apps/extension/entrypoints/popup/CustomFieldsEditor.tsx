@@ -63,12 +63,13 @@ export function CustomFieldsEditor({
         fields.findIndex((field) => field.key === key),
         1,
       );
-      if (!field) return;
+      if (!field) return false;
       moved.splice(to, 0, field);
       onChange(moved);
       setAnnouncement(
         t({ id: "fieldPosition" }, { field: field.name, position: to + 1, count: fields.length }),
       );
+      return true;
     },
   );
 

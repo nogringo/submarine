@@ -119,7 +119,7 @@ export function AddressList({
     handleProps,
   } = useReorder(allRows, (url, to) => {
     const moved = moveInDraft(lists, draft, url, to);
-    if (moved === draft) return;
+    if (moved === draft) return false;
     setDraft(moved);
     const movedRows = draftRows(lists, moved);
     const group = movedRows.public.includes(url) ? movedRows.public : movedRows.private;
@@ -129,6 +129,7 @@ export function AddressList({
         { field: host(url), position: group.indexOf(url) + 1, count: group.length },
       ),
     );
+    return true;
   });
 
   function discard() {

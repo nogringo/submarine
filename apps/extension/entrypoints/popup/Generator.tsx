@@ -1,16 +1,11 @@
 import casino from "@material-design-icons/svg/outlined/casino.svg";
-import closeIcon from "@material-design-icons/svg/round/close.svg";
 import refresh from "@material-design-icons/svg/round/refresh.svg";
 import { useId } from "react";
 import {
   TextField as AriaTextField,
-  Dialog,
   DialogTrigger,
-  Heading,
   Input,
   Label,
-  Modal,
-  ModalOverlay,
   Slider,
   SliderFill,
   SliderThumb,
@@ -24,6 +19,7 @@ import { CopyButton } from "@/components/CopyButton";
 import { CountField } from "@/components/CountField";
 import { PasswordText } from "@/components/FieldCard";
 import { Page, PageHeader } from "@/components/Page";
+import { Sheet } from "@/components/Sheet";
 import { SwitchTile } from "@/components/ToggleTile";
 import {
   maxMinCount,
@@ -68,29 +64,17 @@ export function GenerateButton({
         icon={casino}
         label={t({ id: username ? "generateUsername" : "generatePassword" })}
       />
-      <ModalOverlay className="sheet-overlay" isDismissable>
-        <Modal className="sheet">
-          <Dialog className="sheet-dialog">
-            {({ close }) => (
-              <>
-                <div className="sheet-header">
-                  <Heading slot="title" className="sheet-title">
-                    {t({ id: username ? "generateUsername" : "generator" })}
-                  </Heading>
-                  <IconButton icon={closeIcon} label={t({ id: "close" })} onPress={close} />
-                </div>
-                <Generator
-                  username={username}
-                  onUse={(value) => {
-                    close();
-                    onUse(value);
-                  }}
-                />
-              </>
-            )}
-          </Dialog>
-        </Modal>
-      </ModalOverlay>
+      <Sheet title={t({ id: username ? "generateUsername" : "generator" })}>
+        {(close) => (
+          <Generator
+            username={username}
+            onUse={(value) => {
+              close();
+              onUse(value);
+            }}
+          />
+        )}
+      </Sheet>
     </DialogTrigger>
   );
 }

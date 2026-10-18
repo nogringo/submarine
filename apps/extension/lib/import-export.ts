@@ -38,17 +38,6 @@ export function exportFileName(now: Date, isProtected: boolean): string {
   return `submarine_${isProtected ? "encrypted_" : ""}export_${stamp}.json`;
 }
 
-/** Downloads `content` as the JSON file `name`. */
-export function saveFile(name: string, content: string) {
-  const url = URL.createObjectURL(new Blob([content], { type: "application/json" }));
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = name;
-  link.click();
-  // Firefox reads it once the click has returned.
-  setTimeout(() => URL.revokeObjectURL(url), 60_000);
-}
-
 /** Few enough for the progress to move, and for the lists to read the vault again seldom. */
 export const importBatch = 50;
 

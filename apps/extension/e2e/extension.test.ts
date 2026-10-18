@@ -620,7 +620,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
           "Subject: Confirm your address",
           "Content-Type: text/plain; charset=utf-8",
           "",
-          "Your code is 123456",
+          "Your code is 123456, or confirm at https://shop.example/confirm?code=123456.",
         ].join("\r\n"),
       },
       bridge,
@@ -639,6 +639,68 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     );
     expect(await popup.$$eval(".inbox-sender", (senders) => senders[1]?.textContent)).toBe("Shop");
     expect(await violations(popup)).toEqual([]);
+    await extension.press("Escape");
+    await popup.waitForSelector(".item-detail", { hidden: true });
+  });
+
+  it("opens an email in a sheet, its links once asked, and saves it as a .eml file", async () => {
+    const { popup } = extension;
+    await extension.click(".item-row[aria-label=Forum]");
+    await extension.click(".inbox-item:nth-child(2) .inbox-message");
+    await popup.waitForSelector(".sheet-title::-p-text(Confirm your address)");
+    await popup.waitForSelector(".message-text::-p-text(Your code is 123456)");
+    expect(await popup.$eval(".message-meta", (sender) => sender.textContent)).toBe(
+      "Shop <noreply@shop.example>",
+    );
+    expect(await violations(popup)).toEqual([]);
+    await extension.click(".message-link");
+    await popup.waitForSelector(".open-link-host::-p-text(shop.example)");
+    expect(await violations(popup)).toEqual([]);
+    await extension.click(".dialog button::-p-text(Cancel)");
+    await popup.waitForSelector(".open-link-host", { hidden: true });
+    await popup.evaluate(() => {
+      const click = HTMLAnchorElement.prototype.click;
+      // Read back rather than downloaded.
+      HTMLAnchorElement.prototype.click = function (this: HTMLAnchorElement) {
+        if (!this.download) return click.call(this);
+        const name = this.download;
+        Object.assign(window, {
+          saved: fetch(this.href).then(async (file) => ({ name, content: await file.text() })),
+        });
+      };
+    });
+    await extension.click(`.sheet button[aria-label="${english.saveEmail}"]`);
+    await popup.waitForFunction(() => "saved" in window);
+    const saved = await popup.evaluate(() => {
+      const { saved } = window as unknown as { saved: Promise<{ name: string; content: string }> };
+      delete (window as { saved?: unknown }).saved;
+      return saved;
+    });
+    expect(saved.name).toBe("Confirm your address.eml");
+    expect(saved.content).toContain("Subject: Confirm your address");
+    await extension.click(`.sheet button[aria-label=${english.close}]`);
+    await popup.waitForSelector(".sheet", { hidden: true });
+    await popup.waitForFunction(
+      () => document.activeElement === document.querySelector(".inbox-item:nth-child(2) button"),
+    );
+  });
+
+  it("deletes a message of the mailbox, once confirmed", async () => {
+    const { popup } = extension;
+    await extension.click(".inbox-item:nth-child(1) .inbox-message");
+    await popup.waitForSelector(`.sheet-title::-p-text(${english.privateMessage})`);
+    await popup.waitForSelector(".message-text::-p-text(See you at 8)");
+    await extension.click(`.sheet button[aria-label=${english.delete}]`);
+    await popup.waitForSelector(`[role=alertdialog] ::-p-text(${english.deleteMessageTitle})`);
+    expect(await violations(popup)).toEqual([]);
+    await extension.click(`[role=alertdialog] button::-p-text(${english.delete})`);
+    await popup.waitForSelector(".sheet", { hidden: true });
+    await popup.waitForFunction(
+      () =>
+        [...document.querySelectorAll(".inbox-summary")]
+          .map((summary) => summary.textContent)
+          .join() === "Confirm your address",
+    );
     await extension.press("Escape");
     await popup.waitForSelector(".item-detail", { hidden: true });
   });

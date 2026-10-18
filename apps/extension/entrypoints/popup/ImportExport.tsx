@@ -15,9 +15,9 @@ import {
   importCiphers,
   inPopup,
   openInTab,
-  saveFile,
 } from "@/lib/import-export";
 import "@/components/Dialog.css";
+import { saveFile } from "@/lib/save-file";
 import "./ImportExport.css";
 
 /**
@@ -384,7 +384,7 @@ function ExportDialog({ vaults, onClose }: { vaults: Vault[]; onClose: () => voi
         vault: from.pubkey,
         password: isProtected ? password : undefined,
       });
-      saveFile(exportFileName(new Date(), isProtected), content);
+      saveFile(exportFileName(new Date(), isProtected), content, "application/json");
       onClose();
     } catch {
       setError(t({ id: "exportFailed" }));

@@ -20,16 +20,26 @@
   list-style: none;
 }
 
+.inbox-item + .inbox-item {
+  border-top: 1px solid var(--line);
+}
+
 .inbox-message {
   display: flex;
   align-items: center;
   gap: 12px;
+  width: 100%;
   padding: 12px 16px;
+  border: none;
+  background: none;
   color: var(--muted);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
 }
 
-.inbox-message + .inbox-message {
-  border-top: 1px solid var(--line);
+.inbox-message[data-hovered] {
+  background: color-mix(in srgb, currentColor 6%, transparent);
 }
 
 .inbox-message-text {

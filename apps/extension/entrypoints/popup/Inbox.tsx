@@ -8,11 +8,12 @@ import { Icon } from "@/components/Icon";
 import { SyncArrows } from "@/components/SyncButton";
 import { callCore, type MailMessage } from "@/lib/core";
 import { dayFormat, timeFormat } from "@/lib/i18n";
+import { MessageSheet } from "./MessageSheet";
 import "./Inbox.css";
 
 /**
  * The emails and private messages of the mailbox of an item, its key an nsec, synced while it shows,
- * as in the app. Read again each time `revision` goes up.
+ * as in the app. Read again each time `revision` goes up. A message opens in a sheet.
  */
 export function Inbox({
   mailboxKey,
@@ -27,6 +28,7 @@ export function Inbox({
   const { formatMessage: t } = intl;
   const [messages, setMessages] = useState<MailMessage[]>([]);
   const [syncing, setSyncing] = useState(true);
+  const [opened, setOpened] = useState<MailMessage>();
   const sync = () => {
     setSyncing(true);
     void callCore("syncInbox", { key: mailboxKey }).finally(() => setSyncing(false));
@@ -65,16 +67,36 @@ export function Inbox({
         ) : (
           <ul className="inbox-messages">
             {messages.map((message) => (
-              <MessageRow key={message.wrapId} message={message} intl={intl} />
+              <MessageRow
+                key={message.wrapId}
+                message={message}
+                intl={intl}
+                onPress={() => setOpened(message)}
+              />
             ))}
           </ul>
         )}
       </div>
+      {opened && (
+        <MessageSheet
+          mailboxKey={mailboxKey}
+          message={opened}
+          onClose={() => setOpened(undefined)}
+        />
+      )}
     </section>
   );
 }
 
-function MessageRow({ message, intl }: { message: MailMessage; intl: IntlShape }) {
+function MessageRow({
+  message,
+  intl,
+  onPress,
+}: {
+  message: MailMessage;
+  intl: IntlShape;
+  onPress: () => void;
+}) {
   const { formatMessage: t } = intl;
   const [icon, kind, sender, summary] =
     message.kind === "email"
@@ -86,21 +108,23 @@ function MessageRow({ message, intl }: { message: MailMessage; intl: IntlShape }
           message.text.trim().split("\n")[0] ?? "",
         ];
   return (
-    <li className="inbox-message">
-      <span role="img" aria-label={kind} title={kind}>
-        <Icon src={icon} />
-      </span>
-      <span className="inbox-message-text">
-        <span className="inbox-message-top">
-          <span className={message.kind === "email" ? "inbox-sender" : "inbox-sender mono"}>
-            {sender}
+    <li className="inbox-item">
+      <Button className="inbox-message" onPress={onPress}>
+        <span role="img" aria-label={kind} title={kind}>
+          <Icon src={icon} />
+        </span>
+        <span className="inbox-message-text">
+          <span className="inbox-message-top">
+            <span className={message.kind === "email" ? "inbox-sender" : "inbox-sender mono"}>
+              {sender}
+            </span>
+            <span className="inbox-date">{formatDate(message.date, intl)}</span>
           </span>
-          <span className="inbox-date">{formatDate(message.date, intl)}</span>
+          <span className="inbox-summary">
+            {message.kind === "email" && !summary ? t({ id: "noSubject" }) : summary}
+          </span>
         </span>
-        <span className="inbox-summary">
-          {message.kind === "email" && !summary ? t({ id: "noSubject" }) : summary}
-        </span>
-      </span>
+      </Button>
     </li>
   );
 }

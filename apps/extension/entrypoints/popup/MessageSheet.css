@@ -1,0 +1,89 @@
+.message-meta {
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.message-date {
+  font-size: 13px;
+}
+
+.message-divider {
+  margin: 16px 0;
+  border: none;
+  border-top: 1px solid var(--line);
+}
+
+.message-text {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  user-select: text;
+}
+
+.message-link {
+  color: var(--signal);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.message-failed {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.message-error {
+  color: var(--danger);
+}
+
+.message-loading {
+  display: flex;
+  justify-content: center;
+  padding: 16px;
+}
+
+.message-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--line);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: message-spin 1s linear infinite;
+}
+
+@keyframes message-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .message-spinner {
+    animation-duration: 3s;
+  }
+}
+
+.open-link-host {
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.open-link-url {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.open-link-url > p {
+  display: -webkit-box;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+}

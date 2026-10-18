@@ -442,7 +442,7 @@
   "changeMailRelays": "Cambiar",
   "mailRelaysNeedOne": "Las nuevas direcciones necesitan al menos un relay.",
   "resetMailRelays": "Restablecer",
-  "mailServers": "Servidores de correos grandes",
-  "mailServersExplanation": "Las nuevas direcciones reciben en estos servidores, cifrados, los correos demasiado grandes para un relay. Las direcciones creadas antes conservan los suyos.",
+  "mailServers": "Servidores para correos grandes",
+  "mailServersExplanation": "Los correos demasiado grandes para entregarse directamente se guardan aquí, cifrados. Las direcciones creadas a partir de ahora usan estos servidores. Las creadas antes conservan los suyos.",
   "mailServersNeedOne": "Las nuevas direcciones necesitan al menos un servidor."
 }

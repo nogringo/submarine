@@ -1581,11 +1581,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resetMailRelays => 'Reset';
 
   @override
-  String get mailServers => 'Large email servers';
+  String get mailServers => 'Servers for large emails';
 
   @override
   String get mailServersExplanation =>
-      'New addresses receive the emails too large for a relay on these servers, encrypted. Addresses created before keep theirs.';
+      'Emails too large to be delivered directly are stored here, encrypted. Addresses created from now on use these servers. Those created before keep theirs.';
 
   @override
   String get mailServersNeedOne => 'New addresses need at least one server.';

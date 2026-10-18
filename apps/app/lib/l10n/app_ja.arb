@@ -442,7 +442,7 @@
   "changeMailRelays": "変更",
   "mailRelaysNeedOne": "新しいアドレスには少なくとも 1 つのリレーが必要です。",
   "resetMailRelays": "リセット",
-  "mailServers": "大きなメールのサーバー",
-  "mailServersExplanation": "新しいアドレスは、リレーには大きすぎるメールを暗号化された状態でこれらのサーバーで受け取ります。作成済みのアドレスはそのままです。",
+  "mailServers": "大きなメール用のサーバー",
+  "mailServersExplanation": "直接届けるには大きすぎるメールは、暗号化されてここに保存されます。今後作成するアドレスはこれらのサーバーを使います。作成済みのアドレスはそのままです。",
   "mailServersNeedOne": "新しいアドレスには少なくとも 1 つのサーバーが必要です。"
 }

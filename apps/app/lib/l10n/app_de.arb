@@ -443,6 +443,6 @@
   "mailRelaysNeedOne": "Neue Adressen brauchen mindestens ein Relay.",
   "resetMailRelays": "Zurücksetzen",
   "mailServers": "Server für große E-Mails",
-  "mailServersExplanation": "Neue Adressen empfangen E-Mails, die für ein Relay zu groß sind, verschlüsselt auf diesen Servern. Bereits erstellte Adressen behalten ihre.",
+  "mailServersExplanation": "E-Mails, die für die direkte Zustellung zu groß sind, werden hier verschlüsselt gespeichert. Ab jetzt erstellte Adressen nutzen diese Server. Bereits erstellte behalten ihre.",
   "mailServersNeedOne": "Neue Adressen brauchen mindestens einen Server."
 }

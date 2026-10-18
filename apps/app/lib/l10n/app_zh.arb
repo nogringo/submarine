@@ -442,7 +442,7 @@
   "changeMailRelays": "更改",
   "mailRelaysNeedOne": "新地址至少需要一个中继。",
   "resetMailRelays": "重置",
-  "mailServers": "大邮件服务器",
-  "mailServersExplanation": "新地址在这些服务器上接收对中继来说过大的加密邮件。之前创建的地址保持不变。",
+  "mailServers": "用于大邮件的服务器",
+  "mailServersExplanation": "过大而无法直接投递的邮件会加密存储在这里。今后创建的地址使用这些服务器，之前创建的地址保持不变。",
   "mailServersNeedOne": "新地址至少需要一个服务器。"
 }

@@ -1596,7 +1596,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get mailServersExplanation =>
-      'Neue Adressen empfangen E-Mails, die für ein Relay zu groß sind, verschlüsselt auf diesen Servern. Bereits erstellte Adressen behalten ihre.';
+      'E-Mails, die für die direkte Zustellung zu groß sind, werden hier verschlüsselt gespeichert. Ab jetzt erstellte Adressen nutzen diese Server. Bereits erstellte behalten ihre.';
 
   @override
   String get mailServersNeedOne =>

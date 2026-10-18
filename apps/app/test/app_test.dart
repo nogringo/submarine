@@ -4437,14 +4437,14 @@ void main() {
 
     await tester.tap(find.byTooltip('Settings'));
     await settle(tester);
-    await tester.ensureVisible(find.text('Large email servers'));
+    await tester.ensureVisible(find.text('Servers for large emails'));
     await settle(tester);
     expect(
       find.text('blossom.nmail.li, blossom.yakihonne.com, blossom.ditto.pub'),
       findsOneWidget,
     );
 
-    await tester.tap(settingsButton('Large email servers', 'Change'));
+    await tester.tap(settingsButton('Servers for large emails', 'Change'));
     await settle(tester);
     await tester.enterText(find.byType(TextField), 'not a server');
     await tester.tap(find.byTooltip('Add a server'));

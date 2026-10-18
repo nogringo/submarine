@@ -1589,7 +1589,7 @@ class AppLocalizationsFi extends AppLocalizations {
 
   @override
   String get mailServersExplanation =>
-      'Uudet osoitteet vastaanottavat releelle liian suuret sähköpostit salattuina näille palvelimille. Aiemmin luodut osoitteet säilyttävät omansa.';
+      'Sähköpostit, jotka ovat liian suuria toimitettaviksi suoraan, tallennetaan tänne salattuina. Tästä eteenpäin luodut osoitteet käyttävät näitä palvelimia. Aiemmin luodut säilyttävät omansa.';
 
   @override
   String get mailServersNeedOne =>

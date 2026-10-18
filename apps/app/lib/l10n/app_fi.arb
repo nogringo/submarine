@@ -443,6 +443,6 @@
   "mailRelaysNeedOne": "Uudet osoitteet tarvitsevat vähintään yhden releen.",
   "resetMailRelays": "Palauta oletukset",
   "mailServers": "Suurten sähköpostien palvelimet",
-  "mailServersExplanation": "Uudet osoitteet vastaanottavat releelle liian suuret sähköpostit salattuina näille palvelimille. Aiemmin luodut osoitteet säilyttävät omansa.",
+  "mailServersExplanation": "Sähköpostit, jotka ovat liian suuria toimitettaviksi suoraan, tallennetaan tänne salattuina. Tästä eteenpäin luodut osoitteet käyttävät näitä palvelimia. Aiemmin luodut säilyttävät omansa.",
   "mailServersNeedOne": "Uudet osoitteet tarvitsevat vähintään yhden palvelimen."
 }

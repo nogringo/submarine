@@ -2770,13 +2770,13 @@ abstract class AppLocalizations {
   /// Setting, and title of its dialog, listing the Blossom servers where new email addresses receive the emails too large for a relay (their kind:10063 list).
   ///
   /// In en, this message translates to:
-  /// **'Large email servers'**
+  /// **'Servers for large emails'**
   String get mailServers;
 
   /// In the large email servers dialog: what the servers are for, and that changing them does not change the addresses already created.
   ///
   /// In en, this message translates to:
-  /// **'New addresses receive the emails too large for a relay on these servers, encrypted. Addresses created before keep theirs.'**
+  /// **'Emails too large to be delivered directly are stored here, encrypted. Addresses created from now on use these servers. Those created before keep theirs.'**
   String get mailServersExplanation;
 
   /// In the large email servers dialog, when its list is empty.

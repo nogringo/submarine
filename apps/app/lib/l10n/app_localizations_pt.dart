@@ -1596,11 +1596,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String get resetMailRelays => 'Repor';
 
   @override
-  String get mailServers => 'Servidores de e-mails grandes';
+  String get mailServers => 'Servidores para e-mails grandes';
 
   @override
   String get mailServersExplanation =>
-      'Os novos endereços recebem nestes servidores, cifrados, os e-mails demasiado grandes para um relay. Os endereços criados antes mantêm os seus.';
+      'Os e-mails demasiado grandes para serem entregues diretamente ficam guardados aqui, cifrados. Os endereços criados a partir de agora usam estes servidores. Os criados antes mantêm os seus.';
 
   @override
   String get mailServersNeedOne =>
@@ -3213,11 +3213,11 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   String get resetMailRelays => 'Redefinir';
 
   @override
-  String get mailServers => 'Servidores de e-mails grandes';
+  String get mailServers => 'Servidores para e-mails grandes';
 
   @override
   String get mailServersExplanation =>
-      'Os novos endereços recebem nestes servidores, criptografados, os e-mails grandes demais para um relay. Os endereços criados antes mantêm os seus.';
+      'Os e-mails grandes demais para serem entregues diretamente ficam armazenados aqui, criptografados. Os endereços criados a partir de agora usam estes servidores. Os criados antes mantêm os seus.';
 
   @override
   String get mailServersNeedOne =>

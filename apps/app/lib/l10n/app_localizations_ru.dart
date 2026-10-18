@@ -1623,11 +1623,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get resetMailRelays => 'Сбросить';
 
   @override
-  String get mailServers => 'Серверы больших писем';
+  String get mailServers => 'Серверы для больших писем';
 
   @override
   String get mailServersExplanation =>
-      'Новые адреса получают на эти серверы в зашифрованном виде письма, слишком большие для реле. Созданные раньше адреса сохраняют свои.';
+      'Письма, слишком большие для прямой доставки, хранятся здесь в зашифрованном виде. Адреса, созданные с этого момента, используют эти серверы. Созданные раньше сохраняют свои.';
 
   @override
   String get mailServersNeedOne => 'Новым адресам нужен хотя бы один сервер.';

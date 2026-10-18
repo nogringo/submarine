@@ -14,7 +14,7 @@
   },
   "fieldPosition": "{field}: position {position} of {count}",
   "@fieldPosition": {
-    "description": "Read by a screen reader once a custom field of the item form moved, with the up and down arrow keys or the pointer.",
+    "description": "Read by a screen reader once a custom field of the item form, or a server of a list (field is then its address), moved with the up and down arrow keys or the pointer.",
     "placeholders": {
       "field": {
         "type": "String"
@@ -57,6 +57,6 @@
   },
   "reorderFieldHelp": "Move it with the up and down arrow keys.",
   "@reorderFieldHelp": {
-    "description": "Read by a screen reader on the button that moves a custom field of the item form, after its name (\"Move {field}\")."
+    "description": "Read by a screen reader on the button that moves a custom field of the item form or a server of a list, after its name (\"Move {field}\")."
   }
 }

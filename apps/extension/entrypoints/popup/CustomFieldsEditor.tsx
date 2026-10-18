@@ -5,7 +5,7 @@ import deleteOutline from "@material-design-icons/svg/round/delete_outline.svg";
 import dragIndicator from "@material-design-icons/svg/round/drag_indicator.svg";
 import refresh from "@material-design-icons/svg/round/refresh.svg";
 import textFields from "@material-design-icons/svg/round/text_fields.svg";
-import { type FormEvent, useEffect, useId, useRef, useState } from "react";
+import { type FormEvent, useId, useState } from "react";
 import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
 import { useIntl } from "react-intl";
 import { FilledButton, IconButton, TextButton } from "@/components/Button";
@@ -18,6 +18,7 @@ import type { Field } from "@/lib/cipher";
 import { callCore, type MadeUpValue } from "@/lib/core";
 import { linkedFieldLabel } from "@/lib/item-fields";
 import { type EditedField, editedField, linkedIds } from "@/lib/item-form";
+import { useReorder } from "@/lib/use-reorder";
 import "./CustomFieldsEditor.css";
 
 type MessageId = FormatjsIntl.Message["ids"];
@@ -54,55 +55,25 @@ export function CustomFieldsEditor({
   const [dialog, setDialog] = useState<{ editing?: EditedField }>();
   const [announcement, setAnnouncement] = useState("");
   const helpId = useId();
-  const rows = useRef<HTMLDivElement>(null);
-  const handles = useRef(new Map<string, HTMLButtonElement>());
-  // A new one at each move, the same field moved twice included.
-  const [focusHandle, setFocusHandle] = useState<{ key: string }>();
-  const [dragging, setDragging] = useState<string>();
-  useEffect(() => {
-    // Moved in the page, the handle may have lost the focus.
-    if (focusHandle) handles.current.get(focusHandle.key)?.focus();
-  }, [focusHandle]);
+  const { rows, dragging, handleProps } = useReorder(
+    fields.map((field) => field.key),
+    (key, to) => {
+      const moved = [...fields];
+      const [field] = moved.splice(
+        fields.findIndex((field) => field.key === key),
+        1,
+      );
+      if (!field) return;
+      moved.splice(to, 0, field);
+      onChange(moved);
+      setAnnouncement(
+        t({ id: "fieldPosition" }, { field: field.name, position: to + 1, count: fields.length }),
+      );
+    },
+  );
 
   const replace = (field: EditedField, changes: Partial<EditedField>) =>
     onChange(fields.map((each) => (each === field ? { ...each, ...changes } : each)));
-
-  const move = (key: string, to: number) => {
-    const from = fields.findIndex((field) => field.key === key);
-    if (from < 0 || to < 0 || to >= fields.length || to === from) return;
-    const moved = [...fields];
-    const [field] = moved.splice(from, 1);
-    if (!field) return;
-    moved.splice(to, 0, field);
-    onChange(moved);
-    setFocusHandle({ key });
-    setAnnouncement(
-      t({ id: "fieldPosition" }, { field: field.name, position: to + 1, count: fields.length }),
-    );
-  };
-
-  /** Moves the field dragged to the row under the pointer. */
-  const dragOver = (key: string, y: number) => {
-    const rects = [...(rows.current?.children ?? [])].map((row) => row.getBoundingClientRect());
-    const below = rects.findIndex((rect) => y < rect.top + rect.height / 2);
-    const from = fields.findIndex((field) => field.key === key);
-    const to = below < 0 ? fields.length - 1 : below > from ? below - 1 : below;
-    move(key, to);
-  };
-  useEffect(() => {
-    if (!dragging) return;
-    // On the window: moved in the page, the handle would lose a pointer capture.
-    const follow = (event: PointerEvent) => dragOver(dragging, event.clientY);
-    const drop = () => setDragging(undefined);
-    window.addEventListener("pointermove", follow);
-    window.addEventListener("pointerup", drop);
-    window.addEventListener("pointercancel", drop);
-    return () => {
-      window.removeEventListener("pointermove", follow);
-      window.removeEventListener("pointerup", drop);
-      window.removeEventListener("pointercancel", drop);
-    };
-  });
 
   const addMadeUp = async (kind: MadeUpValue, label: MessageId) => {
     const value = await callCore("generateValue", { kind });
@@ -145,25 +116,10 @@ export function CustomFieldsEditor({
               {fields.length > 1 && (
                 <button
                   type="button"
-                  ref={(handle) => {
-                    if (handle) handles.current.set(field.key, handle);
-                    else handles.current.delete(field.key);
-                  }}
-                  className="button icon-button custom-field-handle"
+                  {...handleProps(field.key)}
+                  className="button icon-button drag-handle"
                   aria-label={t({ id: "reorderField" }, { field: field.name })}
                   aria-describedby={helpId}
-                  onKeyDown={(event) => {
-                    const index = fields.indexOf(field);
-                    if (event.key === "ArrowUp") move(field.key, index - 1);
-                    else if (event.key === "ArrowDown") move(field.key, index + 1);
-                    else return;
-                    event.preventDefault();
-                  }}
-                  onPointerDown={(event) => {
-                    if (event.button !== 0) return;
-                    event.preventDefault();
-                    setDragging(field.key);
-                  }}
                 >
                   <Icon src={dragIndicator} />
                 </button>

@@ -542,7 +542,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     await extension.click("button::-p-text(Add a field)");
     await extension.click("[role=menuitem]::-p-text(First name)");
     await popup.waitForFunction(() => document.querySelectorAll(".custom-field").length === 2);
-    await popup.$eval(".custom-field:nth-child(2) .custom-field-handle", (handle) =>
+    await popup.$eval(".custom-field:nth-child(2) .drag-handle", (handle) =>
       (handle as HTMLElement).focus(),
     );
     await extension.press("ArrowUp");
@@ -1095,6 +1095,39 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     await popup.waitForSelector(".mail-list .address-tile[data-removed]", { hidden: true });
     await backOnRow();
     await description("relay.nmail.li, auth.nostr1.com");
+  });
+
+  it("moves a server of new email addresses with the arrow keys, in the order saved", async () => {
+    const { popup } = extension;
+    const row = `.settings .settings-link-tile::-p-text(${english.mailServers})`;
+    const description = (hosts: string) =>
+      popup.waitForSelector(`.settings .settings-tile-description::-p-text("${hosts}")`);
+    const back = async () => {
+      await extension.press("Escape");
+      await popup.waitForSelector(".mail-list", { hidden: true });
+    };
+    await extension.click(row);
+    const handle = await popup.waitForSelector(".mail-list .address-tile:first-child .drag-handle");
+    await handle?.evaluate((handle) => (handle as HTMLElement).focus());
+    await extension.press("ArrowDown");
+    await popup.waitForFunction(
+      () =>
+        document.querySelector(".mail-list [role=status]")?.textContent ===
+        "blossom.nmail.li: position 2 of 3",
+    );
+    expect(await popup.evaluate(() => document.activeElement?.getAttribute("aria-label"))).toBe(
+      english.moveServer.replace("{server}", "blossom.nmail.li"),
+    );
+    expect(await violations(popup)).toEqual([]);
+    await extension.click(".address-list-footer button::-p-text(Save)");
+    await back();
+    await description("blossom.yakihonne.com, blossom.nmail.li, blossom.ditto.pub");
+    await extension.click(row);
+    await extension.click(`.address-list-footer button::-p-text(${english.resetMailRelays})`);
+    await extension.click(".address-list-footer button::-p-text(Save)");
+    await popup.waitForSelector(".address-list-footer button[data-disabled]::-p-text(Save)");
+    await back();
+    await description("blossom.nmail.li, blossom.yakihonne.com, blossom.ditto.pub");
   });
 
   /** Exports the vault from the settings, `password` protecting the file, and reads the file. */

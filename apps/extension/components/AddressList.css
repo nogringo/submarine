@@ -3,14 +3,19 @@
   padding-right: 4px;
 }
 
-.address-tile > .icon,
 .address-tile-status {
+  display: flex;
   flex: none;
   color: var(--muted);
 }
 
-.address-tile-status {
-  display: flex;
+.address-list-rows:has([data-dragging]) {
+  user-select: none;
+}
+
+.address-tile[data-dragging] {
+  background: var(--raised);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.24);
 }
 
 .address-tile-url {
@@ -36,6 +41,10 @@
 
 .address-list-add > .icon {
   color: var(--signal);
+}
+
+.address-list-rows + .address-list-add {
+  border-top: 1px solid var(--line);
 }
 
 .address-list-add[data-hovered] {

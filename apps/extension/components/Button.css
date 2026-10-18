@@ -90,3 +90,22 @@
 .button.icon-button.danger {
   color: var(--danger);
 }
+
+/* Moves its row, dragged or with the arrow keys. */
+.button.drag-handle {
+  cursor: grab;
+  touch-action: none;
+}
+
+[data-dragging] .button.drag-handle {
+  cursor: grabbing;
+}
+
+.button.drag-handle:hover {
+  background: color-mix(in srgb, currentColor 8%, transparent);
+}
+
+.button.drag-handle:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}

@@ -10,7 +10,6 @@ import {
   DialogTrigger,
   GridList,
   GridListItem,
-  Heading,
   Modal,
   ModalOverlay,
 } from "react-aria-components";
@@ -221,89 +220,91 @@ export function Home({
             </Button>
             <ModalOverlay className="drawer-overlay" isDismissable>
               <Modal className="drawer">
-                <Dialog className="drawer-dialog">
+                <Dialog className="drawer-dialog" aria-label={t({ id: "vaults" })}>
                   {({ close }) => (
                     <>
-                      <Heading slot="title" className="drawer-title">
-                        {t({ id: "vaults" })}
-                      </Heading>
-                      <GridList
-                        aria-label={t({ id: "vaults" })}
-                        selectionMode="single"
-                        selectionBehavior="replace"
-                        disallowEmptySelection
-                        selectedKeys={[vault?.pubkey ?? allVaults]}
-                        onSelectionChange={(keys) => {
-                          if (keys !== "all") {
-                            const key = String([...keys][0] ?? allVaults);
-                            onSelect(key === allVaults ? undefined : key);
-                          }
-                          close();
-                        }}
-                        className="drawer-list"
-                      >
-                        <GridListItem
-                          id={allVaults}
-                          textValue={t({ id: "allVaults" })}
-                          className="drawer-row"
+                      <div className="drawer-scroll">
+                        <GridList
+                          aria-label={t({ id: "vaults" })}
+                          selectionMode="single"
+                          selectionBehavior="replace"
+                          disallowEmptySelection
+                          selectedKeys={[vault?.pubkey ?? allVaults]}
+                          onSelectionChange={(keys) => {
+                            if (keys !== "all") {
+                              const key = String([...keys][0] ?? allVaults);
+                              onSelect(key === allVaults ? undefined : key);
+                            }
+                            close();
+                          }}
+                          className="drawer-list"
                         >
-                          <AllVaultsAvatar size={40} />
-                          <span className="drawer-row-title">{t({ id: "allVaults" })}</span>
-                        </GridListItem>
-                        {vaults.map((vault) => (
                           <GridListItem
-                            key={vault.pubkey}
-                            id={vault.pubkey}
-                            textValue={vault.name}
+                            id={allVaults}
+                            textValue={t({ id: "allVaults" })}
                             className="drawer-row"
                           >
-                            <VaultAvatar vault={vault} size={40} />
-                            <span className="drawer-row-title">{vault.name}</span>
-                            <IconButton
-                              icon={settings}
-                              label={t({ id: "vaultSettings" })}
-                              onPress={() => {
-                                close();
-                                openFromDrawer({ page: "vaultSettings", pubkey: vault.pubkey });
-                              }}
-                            />
+                            <AllVaultsAvatar size={36} />
+                            <span className="drawer-row-title">{t({ id: "allVaults" })}</span>
                           </GridListItem>
-                        ))}
-                      </GridList>
-                      <Button
-                        className="drawer-row"
-                        onPress={() => {
-                          close();
-                          setChoosingVault(true);
-                        }}
-                      >
-                        <AddVaultMark size={40} />
-                        <span className="drawer-row-title">{t({ id: "addVault" })}</span>
-                      </Button>
-                      <Button
-                        className="drawer-row"
-                        onPress={() => {
-                          close();
-                          openFromDrawer({ page: "generator" });
-                        }}
-                      >
-                        <span className="drawer-row-mark">
-                          <Icon src={casino} />
-                        </span>
-                        <span className="drawer-row-title">{t({ id: "generator" })}</span>
-                      </Button>
-                      <Button
-                        className="drawer-row"
-                        onPress={() => {
-                          close();
-                          openFromDrawer({ page: "settings" });
-                        }}
-                      >
-                        <span className="drawer-row-mark">
-                          <Icon src={tune} />
-                        </span>
-                        <span className="drawer-row-title">{t({ id: "settings" })}</span>
-                      </Button>
+                          {vaults.map((vault) => (
+                            <GridListItem
+                              key={vault.pubkey}
+                              id={vault.pubkey}
+                              textValue={vault.name}
+                              className="drawer-row"
+                            >
+                              <VaultAvatar vault={vault} size={36} />
+                              <span className="drawer-row-title">{vault.name}</span>
+                              <IconButton
+                                className="drawer-row-settings"
+                                icon={settings}
+                                label={t({ id: "vaultSettings" })}
+                                onPress={() => {
+                                  close();
+                                  openFromDrawer({ page: "vaultSettings", pubkey: vault.pubkey });
+                                }}
+                              />
+                            </GridListItem>
+                          ))}
+                        </GridList>
+                        <Button
+                          className="drawer-row"
+                          onPress={() => {
+                            close();
+                            setChoosingVault(true);
+                          }}
+                        >
+                          <AddVaultMark size={36} />
+                          <span className="drawer-row-title">{t({ id: "addVault" })}</span>
+                        </Button>
+                      </div>
+                      <div className="drawer-footer">
+                        <Button
+                          className="drawer-row"
+                          onPress={() => {
+                            close();
+                            openFromDrawer({ page: "generator" });
+                          }}
+                        >
+                          <span className="drawer-row-mark">
+                            <Icon src={casino} />
+                          </span>
+                          <span className="drawer-row-title">{t({ id: "generator" })}</span>
+                        </Button>
+                        <Button
+                          className="drawer-row"
+                          onPress={() => {
+                            close();
+                            openFromDrawer({ page: "settings" });
+                          }}
+                        >
+                          <span className="drawer-row-mark">
+                            <Icon src={tune} />
+                          </span>
+                          <span className="drawer-row-title">{t({ id: "settings" })}</span>
+                        </Button>
+                      </div>
                     </>
                   )}
                 </Dialog>

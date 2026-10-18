@@ -108,6 +108,7 @@
   "serverPrivate": "非公開",
   "removeServer": "このサーバーを削除",
   "keepServer": "このサーバーを残す",
+  "moveServer": "{server} を移動",
   "addServer": "サーバーを追加",
   "serverAddress": "サーバーのアドレス",
   "serverAddressInvalid": "サーバーのアドレスではありません。",

@@ -108,6 +108,7 @@
   "serverPrivate": "Yksityinen",
   "removeServer": "Poista tämä palvelin",
   "keepServer": "Säilytä tämä palvelin",
+  "moveServer": "Siirrä palvelinta {server}",
   "addServer": "Lisää palvelin",
   "serverAddress": "Palvelimen osoite",
   "serverAddressInvalid": "Tämä ei ole palvelimen osoite.",

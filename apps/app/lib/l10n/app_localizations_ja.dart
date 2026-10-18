@@ -415,6 +415,11 @@ class AppLocalizationsJa extends AppLocalizations {
   String get keepServer => 'このサーバーを残す';
 
   @override
+  String moveServer(String server) {
+    return '$server を移動';
+  }
+
+  @override
   String get addServer => 'サーバーを追加';
 
   @override

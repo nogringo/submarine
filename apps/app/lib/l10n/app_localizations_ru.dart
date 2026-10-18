@@ -443,6 +443,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get keepServer => 'Оставить этот сервер';
 
   @override
+  String moveServer(String server) {
+    return 'Переместить сервер $server';
+  }
+
+  @override
   String get addServer => 'Добавить сервер';
 
   @override

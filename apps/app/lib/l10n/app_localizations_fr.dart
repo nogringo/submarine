@@ -435,6 +435,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get keepServer => 'Garder ce serveur';
 
   @override
+  String moveServer(String server) {
+    return 'Déplacer $server';
+  }
+
+  @override
   String get addServer => 'Ajouter un serveur';
 
   @override

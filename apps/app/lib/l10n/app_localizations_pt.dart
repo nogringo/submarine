@@ -433,6 +433,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String get keepServer => 'Manter este servidor';
 
   @override
+  String moveServer(String server) {
+    return 'Mover $server';
+  }
+
+  @override
   String get addServer => 'Adicionar um servidor';
 
   @override
@@ -2036,6 +2041,11 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get keepServer => 'Manter este servidor';
+
+  @override
+  String moveServer(String server) {
+    return 'Mover $server';
+  }
 
   @override
   String get addServer => 'Adicionar servidor';

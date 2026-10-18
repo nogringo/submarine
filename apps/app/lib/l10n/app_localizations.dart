@@ -763,6 +763,12 @@ abstract class AppLocalizations {
   /// **'Keep this server'**
   String get keepServer;
 
+  /// Tooltip of the handle dragging a server up or down its list, whose order is the order of preference.
+  ///
+  /// In en, this message translates to:
+  /// **'Move {server}'**
+  String moveServer(String server);
+
   /// Row of the file servers of a vault opening the dialog that adds a server, and title of that dialog.
   ///
   /// In en, this message translates to:

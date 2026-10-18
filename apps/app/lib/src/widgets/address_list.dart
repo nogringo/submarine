@@ -44,6 +44,7 @@ class AddressList extends StatefulWidget {
     required this.texts,
     this.status,
     this.problem,
+    this.moveLabel,
     required this.save,
   });
 
@@ -70,6 +71,10 @@ class AddressList extends StatefulWidget {
 
   /// What went wrong with a listed address, if anything.
   final String? Function(String url)? problem;
+
+  /// The tooltip of the handle moving an address, for a list whose order
+  /// counts. Private addresses stay after the public ones, as published.
+  final String Function(String host)? moveLabel;
   final Future<void> Function(List<String> public, List<String> private) save;
 
   @override
@@ -84,20 +89,32 @@ class _AddressListState extends State<AddressList> {
   var _saving = false;
   String? _saveError;
 
-  bool get _changed => _removed.isNotEmpty || _added.isNotEmpty;
+  /// The order of the rows once one was moved.
+  List<String>? _order;
 
   List<String> get _listed => [...widget.public, ...?widget.private];
 
-  List<String> _draft(List<String> listed, {required bool private}) => [
-    for (final url in listed)
-      if (!_removed.contains(url)) url,
-    for (final MapEntry(key: url, value: isPrivate) in _added.entries)
-      if (isPrivate == private) url,
-  ];
+  /// The listed and added addresses of a group, in the order of the draft.
+  List<String> _rows(List<String> listed, {required bool private}) {
+    final rows = [
+      ...listed,
+      for (final MapEntry(key: url, value: isPrivate) in _added.entries)
+        if (isPrivate == private) url,
+    ];
+    final order = _order;
+    if (order == null) return rows;
+    return [
+      for (final url in order)
+        if (rows.contains(url)) url,
+      for (final url in rows)
+        if (!order.contains(url)) url,
+    ];
+  }
 
   void _discard() => setState(() {
     _removed.clear();
     _added.clear();
+    _order = null;
     _saveError = null;
   });
 
@@ -112,6 +129,7 @@ class _AddressListState extends State<AddressList> {
         for (final url in defaults)
           if (!listed.contains(url)) MapEntry(url, false),
       ]);
+    _order = [...defaults];
     _saveError = null;
   });
 
@@ -127,6 +145,7 @@ class _AddressListState extends State<AddressList> {
         setState(() {
           _removed.clear();
           _added.clear();
+          _order = null;
         });
       }
     } on SignerRequestCancelledException {
@@ -154,6 +173,83 @@ class _AddressListState extends State<AddressList> {
     }
   }
 
+  Widget _row(
+    String url, {
+    required int index,
+    required bool isPrivate,
+    required int groupLength,
+    required bool editable,
+  }) {
+    final palette = context.palette;
+    final texts = widget.texts;
+    final note = isPrivate ? texts.private : null;
+    final removed = _removed.contains(url);
+    final moveLabel = widget.moveLabel;
+    final handle = moveLabel != null && groupLength > 1 && !removed
+        ? ReorderableDragStartListener(
+            index: index,
+            enabled: editable,
+            child: MouseRegion(
+              cursor: editable ? SystemMouseCursors.grab : MouseCursor.defer,
+              child: Tooltip(
+                message: moveLabel(_host(url)),
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Icon(
+                    Icons.drag_indicator_rounded,
+                    color: palette.muted,
+                  ),
+                ),
+              ),
+            ),
+          )
+        : null;
+    IconButton removeButton(VoidCallback remove) => IconButton(
+      tooltip: texts.remove,
+      onPressed: editable ? () => setState(remove) : null,
+      icon: const Icon(Icons.close_rounded, size: 20),
+    );
+    final listed = (isPrivate ? widget.private ?? [] : widget.public).contains(
+      url,
+    );
+    if (!listed) {
+      return _AddressTile(
+        url: url,
+        icon: widget.icon,
+        note: note,
+        status: (texts.added, Icons.add_circle_outline_rounded),
+        action: removeButton(() => _added.remove(url)),
+        handle: handle,
+      );
+    }
+    if (removed) {
+      return _AddressTile(
+        url: url,
+        icon: widget.icon,
+        note: note,
+        status: (texts.removed, Icons.remove_circle_outline_rounded),
+        removed: true,
+        action: IconButton(
+          tooltip: texts.keep,
+          onPressed: editable
+              ? () => setState(() => _removed.remove(url))
+              : null,
+          icon: const Icon(Icons.undo_rounded, size: 20),
+        ),
+        handle: handle,
+      );
+    }
+    return _AddressTile(
+      url: url,
+      icon: widget.icon,
+      note: note,
+      status: widget.status?.call(url),
+      problem: widget.problem?.call(url),
+      action: removeButton(() => _removed.add(url)),
+      handle: handle,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -161,15 +257,22 @@ class _AddressListState extends State<AddressList> {
     final texts = widget.texts;
     final editable = widget.editable && !_saving;
     final defaults = widget.defaults;
-    var public = _draft(widget.public, private: false);
-    final private = _draft(widget.private ?? [], private: true);
+    final publicRows = _rows(widget.public, private: false);
+    final rows = [...publicRows, ..._rows(widget.private ?? [], private: true)];
+    final public = [
+      for (final url in publicRows)
+        if (!_removed.contains(url)) url,
+    ];
+    final private = [
+      for (final url in rows.skip(publicRows.length))
+        if (!_removed.contains(url)) url,
+    ];
+    final changed =
+        !listEquals(public, widget.public) ||
+        !listEquals(private, widget.private ?? const []);
     final empty = public.isEmpty && private.isEmpty;
     final isDefault =
-        defaults != null &&
-        private.isEmpty &&
-        setEquals(public.toSet(), defaults.toSet());
-    // Saved in their own order, so that the list is the defaults again.
-    if (isDefault) public = defaults;
+        defaults != null && private.isEmpty && listEquals(public, defaults);
     final message =
         _saveError ??
         (!widget.editable
@@ -177,11 +280,6 @@ class _AddressListState extends State<AddressList> {
             : empty
             ? texts.needOne
             : null);
-    IconButton removeButton(VoidCallback remove) => IconButton(
-      tooltip: texts.remove,
-      onPressed: editable ? () => setState(remove) : null,
-      icon: const Icon(Icons.close_rounded, size: 20),
-    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -201,49 +299,43 @@ class _AddressListState extends State<AddressList> {
                   const SizedBox(height: 12),
                   FieldCard(
                     children: [
-                      for (final (listed, isPrivate) in [
-                        (widget.public, false),
-                        (widget.private ?? [], true),
-                      ])
-                        for (final url in listed)
-                          if (_removed.contains(url))
-                            _AddressTile(
-                              url: url,
-                              icon: widget.icon,
-                              note: isPrivate ? texts.private : null,
-                              status: (
-                                texts.removed,
-                                Icons.remove_circle_outline_rounded,
+                      if (rows.isNotEmpty)
+                        ReorderableListView(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          padding: EdgeInsets.zero,
+                          buildDefaultDragHandles: false,
+                          onReorderItem: (from, to) {
+                            // Within the group of the address moved.
+                            final (first, last) = from < publicRows.length
+                                ? (0, publicRows.length - 1)
+                                : (publicRows.length, rows.length - 1);
+                            final order = [...rows];
+                            order.insert(
+                              to.clamp(first, last),
+                              order.removeAt(from),
+                            );
+                            setState(() => _order = order);
+                          },
+                          children: [
+                            for (final (index, url) in rows.indexed)
+                              Column(
+                                key: ValueKey(url),
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  if (index > 0) const Divider(),
+                                  _row(
+                                    url,
+                                    index: index,
+                                    isPrivate: index >= publicRows.length,
+                                    groupLength: index < publicRows.length
+                                        ? publicRows.length
+                                        : rows.length - publicRows.length,
+                                    editable: editable,
+                                  ),
+                                ],
                               ),
-                              removed: true,
-                              action: IconButton(
-                                tooltip: texts.keep,
-                                onPressed: editable
-                                    ? () => setState(() => _removed.remove(url))
-                                    : null,
-                                icon: const Icon(Icons.undo_rounded, size: 20),
-                              ),
-                            )
-                          else
-                            _AddressTile(
-                              url: url,
-                              icon: widget.icon,
-                              note: isPrivate ? texts.private : null,
-                              status: widget.status?.call(url),
-                              problem: widget.problem?.call(url),
-                              action: removeButton(() => _removed.add(url)),
-                            ),
-                      for (final MapEntry(key: url, value: isPrivate)
-                          in _added.entries)
-                        _AddressTile(
-                          url: url,
-                          icon: widget.icon,
-                          note: isPrivate ? texts.private : null,
-                          status: (
-                            texts.added,
-                            Icons.add_circle_outline_rounded,
-                          ),
-                          action: removeButton(() => _added.remove(url)),
+                          ],
                         ),
                       SettingsTile(
                         leading: Icon(
@@ -304,11 +396,11 @@ class _AddressListState extends State<AddressList> {
                         child: Text(l10n.resetMailRelays),
                       ),
                     TextButton(
-                      onPressed: _changed && !_saving ? _discard : null,
+                      onPressed: changed && !_saving ? _discard : null,
                       child: Text(l10n.cancel),
                     ),
                     FilledButton(
-                      onPressed: _changed && editable && !empty
+                      onPressed: changed && editable && !empty
                           ? () => _save(public, private)
                           : null,
                       child: Text(l10n.save),
@@ -334,6 +426,7 @@ class _AddressTile extends StatelessWidget {
     this.problem,
     this.removed = false,
     required this.action,
+    this.handle,
   });
 
   final String url;
@@ -347,6 +440,7 @@ class _AddressTile extends StatelessWidget {
   final String? problem;
   final bool removed;
   final Widget action;
+  final Widget? handle;
 
   @override
   Widget build(BuildContext context) {
@@ -356,7 +450,7 @@ class _AddressTile extends StatelessWidget {
     return SettingsTile(
       leading: Icon(icon, size: 20, color: palette.muted),
       title: Text(
-        url.replaceFirst(RegExp('^(wss|https)://'), ''),
+        _host(url),
         style: TextStyle(
           fontWeight: FontWeight.w500,
           color: removed ? palette.muted : null,
@@ -390,6 +484,7 @@ class _AddressTile extends StatelessWidget {
             const SizedBox(width: 4),
           ],
           action,
+          ?handle,
         ],
       ),
     );
@@ -531,3 +626,5 @@ class _AddAddressDialogState extends State<_AddAddressDialog> {
     );
   }
 }
+
+String _host(String url) => url.replaceFirst(RegExp('^(wss|https)://'), '');

@@ -506,6 +506,7 @@ class _MailListScreenState extends State<MailListScreen> {
       icon: describe.icon,
       hint: describe.hint,
       texts: describe.texts,
+      moveLabel: list == MailList.servers ? l10n.moveServer : null,
       save: (public, _) => mail.setUrls(list, public),
     );
     if (!wide) {

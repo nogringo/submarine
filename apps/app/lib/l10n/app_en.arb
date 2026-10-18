@@ -493,6 +493,15 @@
   "@keepServer": {
     "description": "Tooltip of the button undoing the removal of a server from the draft."
   },
+  "moveServer": "Move {server}",
+  "@moveServer": {
+    "description": "Tooltip of the handle dragging a server up or down its list, whose order is the order of preference.",
+    "placeholders": {
+      "server": {
+        "type": "String"
+      }
+    }
+  },
   "addServer": "Add a server",
   "@addServer": {
     "description": "Row of the file servers of a vault opening the dialog that adds a server, and title of that dialog."

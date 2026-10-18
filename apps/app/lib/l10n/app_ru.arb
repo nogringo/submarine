@@ -108,6 +108,7 @@
   "serverPrivate": "Приватный",
   "removeServer": "Удалить этот сервер",
   "keepServer": "Оставить этот сервер",
+  "moveServer": "Переместить сервер {server}",
   "addServer": "Добавить сервер",
   "serverAddress": "Адрес сервера",
   "serverAddressInvalid": "Это не адрес сервера.",

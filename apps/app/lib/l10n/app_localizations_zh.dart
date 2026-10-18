@@ -411,6 +411,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get keepServer => '保留此服务器';
 
   @override
+  String moveServer(String server) {
+    return '移动 $server';
+  }
+
+  @override
   String get addServer => '添加服务器';
 
   @override

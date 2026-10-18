@@ -818,6 +818,7 @@ class _Servers extends StatelessWidget {
         waitForSync: l10n.serversWaitForSync,
         needOne: l10n.serversNeedOne,
       ),
+      moveLabel: l10n.moveServer,
       save: (public, private) =>
           vault.setServerList(ServerList(public: public, private: private)),
     );

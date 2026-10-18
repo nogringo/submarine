@@ -423,6 +423,11 @@ class AppLocalizationsFi extends AppLocalizations {
   String get keepServer => 'Säilytä tämä palvelin';
 
   @override
+  String moveServer(String server) {
+    return 'Siirrä palvelinta $server';
+  }
+
+  @override
   String get addServer => 'Lisää palvelin';
 
   @override

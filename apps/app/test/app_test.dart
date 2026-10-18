@@ -261,6 +261,18 @@ void main() {
   Finder inDialog(String text) =>
       find.descendant(of: find.byType(Dialog), matching: find.text(text));
 
+  /// Drags [handle] by [dy], slowly enough for a reorderable list to follow.
+  Future<void> dragBy(WidgetTester tester, Finder handle, double dy) async {
+    final gesture = await tester.startGesture(tester.getCenter(handle));
+    final steps = (dy.abs() / 20).ceil();
+    for (var i = 0; i < steps; i++) {
+      await gesture.moveBy(Offset(0, dy / steps));
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+    await gesture.up();
+    await settle(tester);
+  }
+
   bool saveEnabled(WidgetTester tester) => tester
       .widget<FilledButton>(find.widgetWithText(FilledButton, 'Save'))
       .enabled;
@@ -3260,6 +3272,34 @@ void main() {
     expect(serverRow('nostr.download'), findsNothing);
     expect(inRow('files.alice.example', find.text('Private')), findsOneWidget);
     expect(saveEnabled(tester), isFalse);
+
+    expect(find.byTooltip('Move files.alice.example'), findsNothing);
+    await tester.ensureVisible(serverRow('files.alice.example'));
+    await settle(tester);
+    await dragBy(tester, find.byTooltip('Move blossom.jumble.social'), 120);
+    expect(
+      tester.getTopLeft(serverRow('blossom.jumble.social')).dy,
+      lessThan(tester.getTopLeft(serverRow('files.alice.example')).dy),
+    );
+    expect(saveEnabled(tester), isFalse);
+    await tester.ensureVisible(serverRow('blossom.nmail.li'));
+    await settle(tester);
+    await dragBy(
+      tester,
+      find.byTooltip('Move blossom.ditto.pub'),
+      tester.getTopLeft(serverRow('blossom.nmail.li')).dy -
+          tester.getTopLeft(serverRow('blossom.ditto.pub')).dy -
+          10,
+    );
+    await write(tester, find.widgetWithText(FilledButton, 'Save'));
+    expect(family.serverList?.public, [
+      'https://blossom.ditto.pub',
+      for (final server in defaultVaultBlossomServers)
+        if (server != 'https://nostr.download' &&
+            server != 'https://blossom.ditto.pub')
+          server,
+    ]);
+    expect(family.serverList?.private, ['https://files.alice.example']);
     await tester.runAsync(() async {
       while (!relay.received.any((event) => event['kind'] == 10063)) {
         await Future<void>.delayed(const Duration(milliseconds: 10));
@@ -4501,12 +4541,46 @@ void main() {
         'https://blossom.example.com',
       ]);
     });
+
+    await dragBy(
+      tester,
+      find.byTooltip('Move blossom.example.com'),
+      tester
+              .getTopLeft(find.widgetWithText(SettingsTile, 'blossom.nmail.li'))
+              .dy -
+          tester
+              .getTopLeft(
+                find.widgetWithText(SettingsTile, 'blossom.example.com'),
+              )
+              .dy -
+          10,
+    );
+    await write(tester, find.widgetWithText(FilledButton, 'Save'));
+    await tester.runAsync(() async {
+      expect((await MailSettings.load()).urls(MailList.servers), [
+        'https://blossom.example.com',
+        'https://blossom.nmail.li',
+        'https://blossom.yakihonne.com',
+      ]);
+    });
     await tester.tap(find.byType(BackButton));
     await settle(tester);
     expect(
-      find.text('blossom.nmail.li, blossom.yakihonne.com, blossom.example.com'),
+      find.text('blossom.example.com, blossom.nmail.li, blossom.yakihonne.com'),
       findsOneWidget,
     );
+
+    await tester.tap(find.text('Servers for large emails'));
+    await settle(tester);
+    await tester.tap(find.text('Reset'));
+    await settle(tester);
+    await write(tester, find.widgetWithText(FilledButton, 'Save'));
+    await tester.runAsync(() async {
+      expect(
+        await const FlutterSecureStorage().read(key: 'mailBlossomServers'),
+        isNull,
+      );
+    });
     await close(tester);
   });
 

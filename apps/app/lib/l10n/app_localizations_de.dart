@@ -428,6 +428,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get keepServer => 'Server behalten';
 
   @override
+  String moveServer(String server) {
+    return '$server verschieben';
+  }
+
+  @override
   String get addServer => 'Server hinzufügen';
 
   @override

@@ -108,6 +108,7 @@
   "serverPrivate": "Privado",
   "removeServer": "Quitar este servidor",
   "keepServer": "Conservar este servidor",
+  "moveServer": "Mover {server}",
   "addServer": "Añadir servidor",
   "serverAddress": "Dirección del servidor",
   "serverAddressInvalid": "Esto no es una dirección de servidor.",

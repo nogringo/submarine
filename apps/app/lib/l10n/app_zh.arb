@@ -108,6 +108,7 @@
   "serverPrivate": "私密",
   "removeServer": "移除此服务器",
   "keepServer": "保留此服务器",
+  "moveServer": "移动 {server}",
   "addServer": "添加服务器",
   "serverAddress": "服务器地址",
   "serverAddressInvalid": "这不是有效的服务器地址。",

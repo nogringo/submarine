@@ -39,7 +39,6 @@ class AddressList extends StatefulWidget {
     this.defaults,
     this.editable = true,
     required this.parse,
-    required this.icon,
     required this.hint,
     required this.texts,
     this.status,
@@ -62,7 +61,6 @@ class AddressList extends StatefulWidget {
 
   /// An address as the user types it, normalized, or null if invalid.
   final String? Function(String text) parse;
-  final IconData icon;
   final String hint;
   final AddressTexts texts;
 
@@ -215,7 +213,6 @@ class _AddressListState extends State<AddressList> {
     if (!listed) {
       return _AddressTile(
         url: url,
-        icon: widget.icon,
         note: note,
         status: (texts.added, Icons.add_circle_outline_rounded),
         action: removeButton(() => _added.remove(url)),
@@ -225,7 +222,6 @@ class _AddressListState extends State<AddressList> {
     if (removed) {
       return _AddressTile(
         url: url,
-        icon: widget.icon,
         note: note,
         status: (texts.removed, Icons.remove_circle_outline_rounded),
         removed: true,
@@ -241,7 +237,6 @@ class _AddressListState extends State<AddressList> {
     }
     return _AddressTile(
       url: url,
-      icon: widget.icon,
       note: note,
       status: widget.status?.call(url),
       problem: widget.problem?.call(url),
@@ -420,7 +415,6 @@ class _AddressListState extends State<AddressList> {
 class _AddressTile extends StatelessWidget {
   const _AddressTile({
     required this.url,
-    required this.icon,
     this.note,
     this.status,
     this.problem,
@@ -430,7 +424,6 @@ class _AddressTile extends StatelessWidget {
   });
 
   final String url;
-  final IconData icon;
 
   /// Under the address, that it is private.
   final String? note;
@@ -448,7 +441,6 @@ class _AddressTile extends StatelessWidget {
     final note = this.note;
     final problem = this.problem;
     return SettingsTile(
-      leading: Icon(icon, size: 20, color: palette.muted),
       title: Text(
         _host(url),
         style: TextStyle(

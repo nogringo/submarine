@@ -734,7 +734,6 @@ class _Relays extends StatelessWidget {
         private: list.private.keys.toList(),
         editable: vault.relaysEditable,
         parse: parseRelayUrl,
-        icon: Icons.cell_tower_rounded,
         hint: 'wss://relay.example.com',
         texts: (
           title: l10n.relays,
@@ -796,7 +795,6 @@ class _Servers extends StatelessWidget {
       private: list.private,
       editable: vault.serversEditable,
       parse: parseServerUrl,
-      icon: Icons.dns_rounded,
       hint: 'https://blossom.example.com',
       texts: (
         title: l10n.fileServers,

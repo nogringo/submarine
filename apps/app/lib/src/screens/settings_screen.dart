@@ -370,12 +370,7 @@ class _MailBridgeDialogState extends State<_MailBridgeDialog> {
 String _host(String url) => url.replaceFirst(RegExp(r'^(wss|https)://'), '');
 
 /// What a list of [list] says and takes, of relays or of servers.
-({
-  AddressTexts texts,
-  String hint,
-  IconData icon,
-  String? Function(String text) parse,
-})
+({AddressTexts texts, String hint, String? Function(String text) parse})
 _describe(AppLocalizations l10n, MailList list) {
   final (title, description) = switch (list) {
     MailList.inbox => (l10n.mailInboxRelays, l10n.mailInboxRelaysExplanation),
@@ -405,7 +400,6 @@ _describe(AppLocalizations l10n, MailList list) {
             waitForSync: null,
           ),
           hint: 'https://blossom.example.com',
-          icon: Icons.dns_rounded,
           parse: parseServerUrl,
         )
       : (
@@ -427,7 +421,6 @@ _describe(AppLocalizations l10n, MailList list) {
             waitForSync: null,
           ),
           hint: 'wss://relay.example.com',
-          icon: Icons.cell_tower_rounded,
           parse: parseRelayUrl,
         );
 }
@@ -503,7 +496,6 @@ class _MailListScreenState extends State<MailListScreen> {
       public: mail.urls(list),
       defaults: list.defaults,
       parse: describe.parse,
-      icon: describe.icon,
       hint: describe.hint,
       texts: describe.texts,
       moveLabel: list == MailList.servers ? l10n.moveServer : null,

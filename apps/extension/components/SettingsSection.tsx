@@ -60,18 +60,27 @@ export function SettingsTile({
 
 /** A row of a settings card that opens a page of its own, as its chevron tells. */
 export function SettingsLinkTile({
+  className,
+  leading,
   title,
   description,
   onPress,
   ref,
 }: {
+  className?: string;
+  leading?: ReactNode;
   title: string;
   description?: string;
   onPress: () => void;
   ref?: Ref<HTMLButtonElement>;
 }) {
   return (
-    <Button ref={ref} className="settings-tile settings-link-tile" onPress={onPress}>
+    <Button
+      ref={ref}
+      className={`settings-tile settings-link-tile ${className ?? ""}`}
+      onPress={onPress}
+    >
+      {leading}
       <span className="settings-tile-text">
         <span className="settings-tile-title">{title}</span>
         {description && <span className="settings-tile-description">{description}</span>}

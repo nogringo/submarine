@@ -1,11 +1,13 @@
+import { npubEncode } from "nostr-tools/nip19";
 import { useEffect, useRef, useState } from "react";
-import { DialogTrigger } from "react-aria-components";
+import { Button, DialogTrigger } from "react-aria-components";
 import { type IntlShape, useIntl } from "react-intl";
 import { TextButton } from "@/components/Button";
 import { type LockPasswordChange, LockPasswordDialog } from "@/components/LockPasswordDialog";
 import { Page, PageHeader } from "@/components/Page";
 import { SelectTile } from "@/components/SelectTile";
-import { SettingsSection, SettingsTile } from "@/components/SettingsSection";
+import { SettingsLinkTile, SettingsSection, SettingsTile } from "@/components/SettingsSection";
+import { AddVaultMark, VaultAvatar } from "@/components/VaultAvatar";
 import {
   type ClipboardTimeout,
   clipboardTimeouts,
@@ -18,18 +20,35 @@ import { useChosenLocale } from "@/lib/use-locale";
 import { ImportExportSection } from "./ImportExport";
 import "./Settings.css";
 
-/** The settings of the extension on this device, as in the app. */
+/**
+ * The settings of the extension on this device, as in the app. Stays under the settings of a vault
+ * it opens, `covered`, and gives the focus back to that vault's row once back.
+ */
 export function Settings({
   hasLockPassword,
   vaults,
+  covered,
+  onOpenVault,
+  onAddVault,
   onBack,
 }: {
   hasLockPassword: boolean;
   vaults: Vault[];
+  covered: boolean;
+  onOpenVault: (pubkey: string) => void;
+  onAddVault: () => void;
   onBack: () => void;
 }) {
   const intl = useIntl();
   const { formatMessage: t } = intl;
+  const vaultRows = useRef(new Map<string, HTMLButtonElement>());
+  const addVaultRow = useRef<HTMLButtonElement>(null);
+  const openedVault = useRef<string>(undefined);
+  useEffect(() => {
+    if (covered || !openedVault.current) return;
+    // Gone once removed: the row in its place gets the focus.
+    (vaultRows.current.get(openedVault.current) ?? addVaultRow.current)?.focus();
+  }, [covered]);
   const [clipboardTimeout, setClipboardTimeout] = useState<ClipboardTimeout>();
   const [lockTimeout, setLockTimeout] = useState<LockTimeout>();
   useEffect(() => {
@@ -52,9 +71,40 @@ export function Settings({
     </DialogTrigger>
   );
   return (
-    <Page className="settings" onBack={onBack}>
+    <Page className="settings" covered={covered} onBack={onBack}>
       <div className="page-content">
         <PageHeader title={t({ id: "settings" })} />
+        <SettingsSection title={t({ id: "vaults" })}>
+          {vaults.map((vault) => (
+            <SettingsLinkTile
+              key={vault.pubkey}
+              ref={(row) => {
+                if (row) vaultRows.current.set(vault.pubkey, row);
+                return () => {
+                  vaultRows.current.delete(vault.pubkey);
+                };
+              }}
+              className="settings-vault"
+              leading={<VaultAvatar vault={vault} size={36} />}
+              title={vault.name}
+              description={npubEncode(vault.pubkey)}
+              onPress={() => {
+                openedVault.current = vault.pubkey;
+                onOpenVault(vault.pubkey);
+              }}
+            />
+          ))}
+          <Button
+            ref={addVaultRow}
+            className="settings-tile settings-link-tile"
+            onPress={onAddVault}
+          >
+            <AddVaultMark size={36} />
+            <span className="settings-tile-text">
+              <span className="settings-tile-title">{t({ id: "addVault" })}</span>
+            </span>
+          </Button>
+        </SettingsSection>
         <SettingsSection title={t({ id: "security" })}>
           <SettingsTile
             title={t({ id: "lockPassword" })}

@@ -3,3 +3,16 @@
   flex-wrap: wrap;
   justify-content: flex-end;
 }
+
+/* On one line each, as in the app. */
+.settings-vault .settings-tile-title,
+.settings-vault .settings-tile-description {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-vault .settings-tile-description {
+  font-family: var(--mono-font);
+  font-size: 12px;
+}

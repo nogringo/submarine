@@ -57,9 +57,10 @@ type Opened =
    * if the last popup closed over the form.
    */
   | { page: "form"; vault: Vault; type: number; item?: Item; draft?: ItemDraft }
-  | { page: "vaultSettings"; pubkey: string }
+  /** Over the settings, which it goes back to, when opened `fromSettings`. */
+  | { page: "vaultSettings"; pubkey: string; fromSettings?: boolean }
   /** A list of the vault, opened from its settings, which it goes back to. */
-  | { page: "vaultList"; pubkey: string; list: VaultListName }
+  | { page: "vaultList"; pubkey: string; list: VaultListName; fromSettings?: boolean }
   | { page: "generator" }
   | { page: "settings" };
 
@@ -148,10 +149,14 @@ export function Home({
     opened?.page === "vaultSettings" || opened?.page === "vaultList"
       ? vaults.find((vault) => vault.pubkey === opened.pubkey)
       : undefined;
-  // Gone with its vault, once removed.
+  const fromSettings =
+    (opened?.page === "vaultSettings" || opened?.page === "vaultList") && !!opened.fromSettings;
+  // Gone with its vault, once removed, onto the settings if opened from them.
   const paged =
     opened !== undefined &&
-    ((opened.page !== "vaultSettings" && opened.page !== "vaultList") || !!settingsVault);
+    ((opened.page !== "vaultSettings" && opened.page !== "vaultList") ||
+      !!settingsVault ||
+      fromSettings);
   // What the page opened from, which gets the focus back.
   const openedFrom = useRef<HTMLElement>(null);
   const vaultsButton = useRef<HTMLButtonElement>(null);
@@ -425,6 +430,16 @@ export function Home({
           }
         />
       )}
+      {(opened?.page === "settings" || fromSettings) && (
+        <Settings
+          hasLockPassword={hasLockPassword}
+          vaults={vaults}
+          covered={!!settingsVault}
+          onOpenVault={(pubkey) => setOpened({ page: "vaultSettings", pubkey, fromSettings: true })}
+          onAddVault={() => setChoosingVault(true)}
+          onBack={back}
+        />
+      )}
       {settingsVault && (
         <VaultSettings
           vault={settingsVault}
@@ -433,9 +448,9 @@ export function Home({
           onChanged={onVaultChanged}
           onRemoved={onVaultRemoved}
           onOpenList={(list) =>
-            setOpened({ page: "vaultList", pubkey: settingsVault.pubkey, list })
+            setOpened({ page: "vaultList", pubkey: settingsVault.pubkey, list, fromSettings })
           }
-          onBack={back}
+          onBack={fromSettings ? () => setOpened({ page: "settings" }) : back}
         />
       )}
       {settingsVault && opened?.page === "vaultList" && (
@@ -443,13 +458,12 @@ export function Home({
           vault={settingsVault}
           list={opened.list}
           sync={sync}
-          onBack={() => setOpened({ page: "vaultSettings", pubkey: settingsVault.pubkey })}
+          onBack={() =>
+            setOpened({ page: "vaultSettings", pubkey: settingsVault.pubkey, fromSettings })
+          }
         />
       )}
       {opened?.page === "generator" && <GeneratorPage onBack={back} />}
-      {opened?.page === "settings" && (
-        <Settings hasLockPassword={hasLockPassword} vaults={vaults} onBack={back} />
-      )}
       {/* Kept in the page, empty, for a screen reader to read what it says once it does. */}
       <p role="status" className="visually-hidden home-status">
         {copied ? t({ id: "copied" }) : ""}

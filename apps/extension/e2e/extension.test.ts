@@ -957,6 +957,23 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     );
   });
 
+  it("opens the settings of a vault from the settings, and comes back onto its row", async () => {
+    const { popup } = extension;
+    await extension.click(".settings .settings-vault::-p-text(Family)");
+    await popup.waitForFunction(
+      () =>
+        document.activeElement?.matches(".vault-settings h1") &&
+        document.activeElement.textContent === "Family",
+    );
+    await extension.press("Escape");
+    await popup.waitForSelector(".vault-settings", { hidden: true });
+    await popup.waitForFunction(
+      () =>
+        document.activeElement?.matches(".settings .settings-vault") &&
+        document.activeElement.querySelector(".settings-tile-title")?.textContent === "Family",
+    );
+  });
+
   it("speaks the language chosen in the settings at once, and again as the popup opens", async () => {
     const { popup } = extension;
     const french = JSON.parse(await readFile(appArb("fr"), "utf8"));

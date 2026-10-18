@@ -261,4 +261,56 @@ void main() {
       expect(year, inInclusiveRange(now - 61, now - 18));
     });
   });
+
+  group('phone number', () {
+    void expectNumbers(String? locale, String pattern) {
+      for (var i = 0; i < 1000; i++) {
+        expect(generatePhoneNumber(locale: locale), matches('^$pattern\$'));
+      }
+    }
+
+    const northAmerican = r'\(\d{3}\) [2-9][02-46-9]\d-\d{4}';
+
+    test('is a mobile number of the region, as it writes it', () {
+      expectNumbers('fr-FR', r'0(6 [0-24-8]|7 [3-9])\d( \d\d){3}');
+      expectNumbers('en-US', northAmerican);
+      expectNumbers('en-GB', r'07[1-3]\d\d \d{6}');
+      expectNumbers('en-AU', r'04[0-3]\d \d{3} \d{3}');
+      expectNumbers('fr-BE', r'04[5-9]\d( \d\d){3}');
+      expectNumbers('de-CH', r'07[6-9] \d{3} \d\d \d\d');
+      expectNumbers('de-DE', r'0(15[127]\d|17\d) \d{7}');
+      expectNumbers('es-ES', r'6\d\d( \d\d){3}');
+      expectNumbers('it-IT', r'3[2-4]\d \d{3} \d{4}');
+      expectNumbers('pt-PT', r'9[1236]\d \d{3} \d{3}');
+      expectNumbers('pt-BR', r'\([1-9]1\) 9[6-9]\d{3}-\d{4}');
+      expectNumbers('ru-RU', r'8 \(9\d\d\) \d{3}-\d\d-\d\d');
+      expectNumbers('ja-JP', r'0[7-9]0-[1-9]\d{3}-\d{4}');
+      expectNumbers('zh-CN', r'1[38]\d \d{4} \d{4}');
+      expectNumbers('fi-FI', r'0(4[0-6]|50) \d{7}');
+    });
+
+    test('keeps to real area codes in North America', () {
+      final areas = {
+        for (var i = 0; i < 2000; i++)
+          generatePhoneNumber(locale: 'en-CA').substring(1, 4),
+      };
+      expect(areas, hasLength(10));
+      expect(areas, containsAll(['416', '514', '604']));
+    });
+
+    test('takes the region over the language', () {
+      expectNumbers('en-FR', r'0[67] .*');
+      expectNumbers('fr_CA', northAmerican);
+      expectNumbers('zh-Hans-CN', r'1[38]\d .*');
+    });
+
+    test('falls back on the language, then on the US', () {
+      expectNumbers('fr', r'0[67] .*');
+      expectNumbers('fr-SN', r'0[67] .*');
+      expectNumbers('pt', r'\([1-9]1\) .*');
+      expectNumbers('ko-KR', northAmerican);
+      expectNumbers('', northAmerican);
+      expectNumbers(null, northAmerican);
+    });
+  });
 }

@@ -1940,6 +1940,12 @@ void main() {
     expect(birthDate, isoDate);
     await tester.tap(find.text('Add a field'));
     await settle(tester);
+    await tester.tap(find.text('Phone'));
+    await settle(tester);
+    final phone = textOf('Phone');
+    expect(phone, matches(RegExp(r'^\(\d{3}\) \d{3}-\d{4}$')));
+    await tester.tap(find.text('Add a field'));
+    await settle(tester);
     await tester.tap(find.text('Custom field'));
     await settle(tester);
     expect(find.text('Field type'), findsOneWidget);
@@ -1952,7 +1958,11 @@ void main() {
     expect(forum.cipher.login!.username, username);
     expect(
       [for (final field in forum.cipher.fields) (field.name, field.value)],
-      [('First name', firstName), ('Date of birth', birthDate)],
+      [
+        ('First name', firstName),
+        ('Date of birth', birthDate),
+        ('Phone', phone),
+      ],
     );
 
     await tester.tap(find.byTooltip('New item'));

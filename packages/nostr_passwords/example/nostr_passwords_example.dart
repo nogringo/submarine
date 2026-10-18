@@ -176,7 +176,7 @@ Future<void> main() async {
   // Made-up details for the sites that ask for them.
   print(
     'Sign up as ${generateFirstName()} ${generateLastName()}, '
-    'born ${generateBirthDate()}',
+    'born ${generateBirthDate()}, on ${generatePhoneNumber(locale: 'fr-FR')}',
   );
   // The bridge a user picked, as they typed it, or the default one.
   final bridge = parseMailBridge(' @Mail.Example.com ') ?? defaultMailBridge;

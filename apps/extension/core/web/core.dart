@@ -12,6 +12,7 @@ import 'package:nostr_passwords/nostr_passwords.dart'
         generateLastName,
         generateMailbox,
         generatePassphrase,
+        generatePhoneNumber,
         parseRelayUrl,
         parseServerUrl;
 import 'package:submarine_extension_core/auto_lock.dart';
@@ -132,6 +133,11 @@ void main() {
         'firstName' => generateFirstName(),
         'lastName' => generateLastName(),
         'birthDate' => generateBirthDate(),
+        'phoneNumber' => generatePhoneNumber(
+          locale:
+              (globalContext['navigator'] as JSObject)['language'].dartify()
+                  as String?,
+        ),
         final kind => throw CoreException('unknownKind', '$kind'),
       },
       'vaults': (_) => vaults.list(),

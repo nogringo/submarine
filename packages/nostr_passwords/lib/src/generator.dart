@@ -271,6 +271,75 @@ String generateBirthDate({DateTime? today}) {
   return date.toIso8601String().substring(0, 10);
 }
 
+/// A mobile number of the country of [locale], a BCP 47 tag like `fr-FR`, as
+/// that country writes it, to give a site instead of a real one. The country
+/// is the region of the tag, or else the main one of its language, or else the
+/// US.
+///
+/// It follows the numbering plan, not a range reserved for fiction, so that a
+/// site cannot tell it apart, and it may well belong to someone.
+String generatePhoneNumber({String? locale}) {
+  final templates = _mobileNumbers[_phoneCountry(locale)]!;
+  final number = StringBuffer();
+  for (final part in RegExp(r'\[(\d+)\]|.').allMatches(_pickFrom(templates))) {
+    number.write(switch (part[0]) {
+      '#' => _random.nextInt(10),
+      _ when part[1] != null => _pick(part[1]!),
+      final character => character,
+    });
+  }
+  return number.toString();
+}
+
+String _phoneCountry(String? locale) {
+  final [language, ...subtags] = (locale ?? '').split(RegExp('[-_]'));
+  for (final subtag in subtags) {
+    final region = subtag.toUpperCase();
+    if (_mobileNumbers.containsKey(region)) return region;
+  }
+  return _languageCountries[language.toLowerCase()] ?? 'US';
+}
+
+const _languageCountries = {
+  'en': 'US',
+  'fr': 'FR',
+  'de': 'DE',
+  'es': 'ES',
+  'it': 'IT',
+  'pt': 'BR',
+  'ru': 'RU',
+  'ja': 'JP',
+  'zh': 'CN',
+  'fi': 'FI',
+};
+
+/// The mobile numbers of each country as libphonenumber validates and writes
+/// them, `#` for any digit and `[...]` for one of a set. North American
+/// exchanges have no 1 or 5 in the middle, to skip the N11 codes and 555.
+final _mobileNumbers = {
+  for (final (country, areas) in const [
+    ('US', '206 212 213 214 303 305 310 312 404 408 415 512 602 617 619 646'),
+    ('CA', '204 403 416 514 604 613 647 778 780 902'),
+  ])
+    country: [
+      for (final area in areas.split(' ')) '($area) [23456789][02346789]#-####',
+    ],
+  'GB': ['07[123]## ######'],
+  'AU': ['04[0123]# ### ###'],
+  'FR': ['06 [01245678]# ## ## ##', '07 [3456789]# ## ## ##'],
+  'BE': ['04[56789]# ## ## ##'],
+  'CH': ['07[6789] ### ## ##'],
+  'DE': ['015[127]# #######', '017# #######'],
+  'ES': ['6## ## ## ##'],
+  'IT': ['3[234]# ### ####'],
+  'PT': ['9[1236]# ### ###'],
+  'BR': ['([123456789]1) 9[6789]###-####'],
+  'RU': ['8 (9##) ###-##-##'],
+  'JP': ['0[789]0-[123456789]###-####'],
+  'CN': ['1[38]# #### ####'],
+  'FI': ['04[0123456] #######', '050 #######'],
+};
+
 /// The same day [years] earlier, in UTC so that every day lasts 24 hours.
 /// February 29 becomes February 28 in a year without it.
 DateTime _yearsBefore(DateTime day, int years) {

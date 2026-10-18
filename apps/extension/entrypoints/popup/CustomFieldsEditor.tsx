@@ -36,12 +36,14 @@ const madeUpValues: [kind: MadeUpValue, label: MessageId][] = [
   ["firstName", "firstName"],
   ["lastName", "lastName"],
   ["birthDate", "dateOfBirth"],
+  ["phoneNumber", "phone"],
 ];
 
 /**
  * The custom fields of an item of `type`, as Bitwarden's form edits them: added with a type and a
- * label, renamed, deleted and moved. A login can also get a made-up first name, last name or birth
- * date, or an email address of its own whose mailbox key goes in a hidden field, as in the app.
+ * label, renamed, deleted and moved. A login can also get a made-up first name, last name, birth
+ * date or phone number, or an email address of its own whose mailbox key goes in a hidden field,
+ * as in the app.
  */
 export function CustomFieldsEditor({
   type,

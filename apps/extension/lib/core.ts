@@ -100,7 +100,7 @@ export type MailMessage = {
 export type ItemFilter = "all" | "favorites" | "trash" | number;
 
 /** The made-up values a login's custom field can hold, as in the app. */
-export type MadeUpValue = "firstName" | "lastName" | "birthDate";
+export type MadeUpValue = "firstName" | "lastName" | "birthDate" | "phoneNumber";
 
 /** Where the sync of a vault stands. */
 export interface SyncState {

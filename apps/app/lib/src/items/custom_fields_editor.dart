@@ -80,6 +80,14 @@ class CustomFieldsEditor extends StatelessWidget {
       (l10n.firstName, generateFirstName),
       (l10n.lastName, generateLastName),
       (l10n.dateOfBirth, generateBirthDate),
+      (
+        l10n.phone,
+        // The device's locale, as the app's language often has no region.
+        () => generatePhoneNumber(
+          locale: WidgetsBinding.instance.platformDispatcher.locale
+              .toLanguageTag(),
+        ),
+      ),
     ];
     final overlay =
         Navigator.of(button).overlay!.context.findRenderObject()! as RenderBox;

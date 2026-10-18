@@ -49,6 +49,31 @@ export async function loadMessages(locale: string): Promise<Messages> {
   return { ...appMessages.default, ...extensionMessages.default } as Messages;
 }
 
+/** The name of each of the app's languages, in that language: "Français". */
+export async function languageNames(): Promise<Map<string, string>> {
+  return new Map(
+    await Promise.all(
+      [...appCatalogs].map(
+        async ([locale, load]) => [locale, (await load()).default.languageName ?? locale] as const,
+      ),
+    ),
+  );
+}
+
+/** The app's key, in `storage.local`. */
+const localeKey = "locale";
+
+/** The language chosen on this device, undefined to follow the browser's. */
+export async function readChosenLocale(): Promise<string | undefined> {
+  const saved = (await browser.storage.local.get(localeKey))[localeKey];
+  return typeof saved === "string" && locales.includes(saved) ? saved : undefined;
+}
+
+export async function saveChosenLocale(locale: string | undefined) {
+  if (locale) await browser.storage.local.set({ [localeKey]: locale });
+  else await browser.storage.local.remove(localeKey);
+}
+
 /** A date as the app writes it, `yMMMd`: "Oct 11, 2026". */
 export const dayFormat: Intl.DateTimeFormatOptions = {
   year: "numeric",

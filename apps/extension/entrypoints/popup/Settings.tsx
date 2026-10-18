@@ -13,6 +13,8 @@ import {
   saveClipboardTimeout,
 } from "@/lib/clipboard";
 import { callCore, type LockTimeout, lockTimeouts, type Vault } from "@/lib/core";
+import { languageNames } from "@/lib/i18n";
+import { useChosenLocale } from "@/lib/use-locale";
 import { ImportExportSection } from "./ImportExport";
 import "./Settings.css";
 
@@ -95,9 +97,39 @@ export function Settings({
             />
           )}
         </SettingsSection>
+        <SettingsSection title={t({ id: "appearance" })}>
+          <LanguageTile />
+        </SettingsSection>
         <ImportExportSection vaults={vaults} />
       </div>
     </Page>
+  );
+}
+
+/** Stands for the browser's language, as an option's id cannot be undefined. */
+const browserLanguage = "system";
+
+/** The languages by their own names, the browser's first, as the app sorts them. */
+function LanguageTile() {
+  const { formatMessage: t } = useIntl();
+  const { chosen, choose } = useChosenLocale();
+  const [names, setNames] = useState<Map<string, string>>();
+  useEffect(() => {
+    void languageNames().then(setNames);
+  }, []);
+  if (!names) return null;
+  return (
+    <SelectTile
+      title={t({ id: "language" })}
+      value={chosen ?? browserLanguage}
+      options={[
+        { id: browserLanguage, label: t({ id: "languageSystem" }) },
+        ...[...names]
+          .map(([id, label]) => ({ id, label }))
+          .toSorted((a, b) => (a.label < b.label ? -1 : 1)),
+      ]}
+      onChange={(locale) => choose(locale === browserLanguage ? undefined : locale)}
+    />
   );
 }
 

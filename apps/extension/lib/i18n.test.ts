@@ -1,7 +1,15 @@
 import { readFile } from "node:fs/promises";
 import { parse } from "@formatjs/icu-messageformat-parser";
-import { describe, expect, it } from "vitest";
-import { loadMessages, locales, pickLocale } from "./i18n";
+import { beforeEach, describe, expect, it } from "vitest";
+import { fakeBrowser } from "wxt/testing/fake-browser";
+import {
+  languageNames,
+  loadMessages,
+  locales,
+  pickLocale,
+  readChosenLocale,
+  saveChosenLocale,
+} from "./i18n";
 
 describe("pickLocale", () => {
   it.each([
@@ -14,6 +22,36 @@ describe("pickLocale", () => {
     [[], "en"],
   ])("picks from %j: %s", (preferred, locale) => {
     expect(pickLocale(preferred)).toBe(locale);
+  });
+});
+
+describe("the language chosen", () => {
+  beforeEach(() => {
+    fakeBrowser.reset();
+  });
+
+  it("follows the browser's until one is, in the app's key", async () => {
+    expect(await readChosenLocale()).toBeUndefined();
+    await saveChosenLocale("pt-BR");
+    expect(await readChosenLocale()).toBe("pt-BR");
+    expect(await browser.storage.local.get()).toEqual({ locale: "pt-BR" });
+    await saveChosenLocale(undefined);
+    expect(await readChosenLocale()).toBeUndefined();
+    expect(await browser.storage.local.get()).toEqual({});
+  });
+
+  it("follows the browser's again when the app no longer speaks it", async () => {
+    await browser.storage.local.set({ locale: "ko" });
+    expect(await readChosenLocale()).toBeUndefined();
+  });
+});
+
+describe("languageNames", () => {
+  it("names each language in itself", async () => {
+    const names = await languageNames();
+    expect([...names.keys()].toSorted()).toEqual(locales.toSorted());
+    expect(names.get("fr")).toBe("Français");
+    expect(names.get("pt-BR")).toBe("Português (Brasil)");
   });
 });
 

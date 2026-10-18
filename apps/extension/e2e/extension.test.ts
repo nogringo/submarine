@@ -957,6 +957,31 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     );
   });
 
+  it("speaks the language chosen in the settings at once, and again as the popup opens", async () => {
+    const { popup } = extension;
+    const french = JSON.parse(await readFile(appArb("fr"), "utf8"));
+    const heading = (text: string) => popup.waitForSelector(`.settings h1::-p-text(${text})`);
+    // Shown once the names of the languages are read.
+    await extension.click(`.settings .select-tile-button::-p-text(${english.languageSystem})`);
+    await popup.waitForSelector("[role=option]");
+    expect(await violations(popup)).toEqual([]);
+    expect(
+      await popup.$eval(".select-tile-popover", (menu) => menu.scrollHeight <= menu.clientHeight),
+    ).toBe(true);
+    await extension.click(`[role=option]::-p-text(${french.languageName})`);
+    await heading(french.settings);
+    expect(await popup.evaluate(() => document.documentElement.lang)).toBe("fr");
+    await extension.reload();
+    await popup.waitForSelector(".home-title");
+    expect(await popup.evaluate(() => document.documentElement.lang)).toBe("fr");
+    await extension.click(`button[aria-label=${french.vaults}]`);
+    await extension.click(`.drawer button::-p-text(${french.settings})`);
+    await extension.click(`.settings .select-tile-button::-p-text(${french.languageName})`);
+    await extension.click(`[role=option]::-p-text(${french.languageSystem})`);
+    await heading(english.settings);
+    expect(await popup.evaluate(() => document.documentElement.lang)).toBe("en");
+  });
+
   /** Exports the vault from the settings, `password` protecting the file, and reads the file. */
   async function exportVault(password?: string): Promise<{ name: string; content: string }> {
     const { popup } = extension;
@@ -1109,19 +1134,13 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
 
   it("empties the clipboard of a password after the delay chosen", async () => {
     const { popup } = extension;
-    const select = ".settings .select-tile-button";
+    const select = (delay: string) => `.settings .select-tile-button::-p-text(${delay})`;
     // Shown once the delay is read.
-    await popup.waitForSelector(select);
-    expect(await popup.$eval(select, (button) => button.textContent)).toContain("30 seconds");
-    await extension.click(select);
+    await extension.click(select("30 seconds"));
     await popup.waitForSelector("[role=option]");
     expect(await violations(popup)).toEqual([]);
     await extension.click("[role=option]::-p-text(10 seconds)");
-    await popup.waitForFunction(
-      (select) => document.querySelector(select)?.textContent?.includes("10 seconds"),
-      {},
-      select,
-    );
+    await popup.waitForSelector(select("10 seconds"));
     await extension.press("Escape");
     await popup.waitForSelector(".settings", { hidden: true });
     await extension.click(".item-row[aria-label=GitHub] button[aria-label='Copy password']");

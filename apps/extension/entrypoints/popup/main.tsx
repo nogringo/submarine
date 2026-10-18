@@ -1,23 +1,20 @@
 import { StrictMode } from "react";
-import { I18nProvider } from "react-aria-components";
 import { createRoot } from "react-dom/client";
-import { IntlProvider } from "react-intl";
 import "@/assets/theme.css";
-import { loadMessages, pickLocale } from "@/lib/i18n";
+import { readChosenLocale } from "@/lib/i18n";
+import { LocaleProvider, loadLanguage } from "@/lib/use-locale";
 import { App } from "./App";
 
 const root = document.getElementById("root");
 if (root) {
-  const locale = pickLocale(navigator.languages);
-  document.documentElement.lang = locale;
-  const messages = await loadMessages(locale);
+  const chosen = await readChosenLocale();
+  const language = await loadLanguage(chosen);
+  document.documentElement.lang = language.locale;
   createRoot(root).render(
     <StrictMode>
-      <IntlProvider locale={locale} messages={messages}>
-        <I18nProvider locale={locale}>
-          <App />
-        </I18nProvider>
-      </IntlProvider>
+      <LocaleProvider chosen={chosen} language={language}>
+        <App />
+      </LocaleProvider>
     </StrictMode>,
   );
 }

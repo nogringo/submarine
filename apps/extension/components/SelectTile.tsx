@@ -12,8 +12,11 @@ import {
 import { Icon } from "./Icon";
 import "./SelectTile.css";
 
-/** The height of an option and the padding of the list, as in SelectTile.css. */
-const optionHeight = 48;
+/**
+ * The height of an option and the padding of the list, as in SelectTile.css. Below the app's 48 for
+ * the 12 languages to fit the popup without scrolling.
+ */
+const optionHeight = 46;
 const listPadding = 8;
 
 /**

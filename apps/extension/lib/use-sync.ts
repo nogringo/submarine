@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { callCore, type SyncState, syncPort } from "./core";
+import { type CoreEvent, callCore, type SyncState, syncPort } from "./core";
 
 export interface Sync {
   states: SyncState[];
@@ -21,7 +21,8 @@ export function useSync(): Sync {
         if (open) setStates(states);
       });
     const port = browser.runtime.connect({ name: syncPort });
-    port.onMessage.addListener(() => {
+    port.onMessage.addListener((event: CoreEvent) => {
+      if (event !== "vaultsChanged") return;
       setRevision((revision) => revision + 1);
       void read();
     });

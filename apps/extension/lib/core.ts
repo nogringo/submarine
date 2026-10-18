@@ -49,7 +49,49 @@ export interface Item {
   cipher: Cipher;
   /** The versions it was read from, which a change saved with `updateItem` builds on. */
   base: unknown[];
+  /** The mailboxes it holds: an nsec in a hidden field, and its address, its npub at a bridge. */
+  mailboxes: Mailbox[];
 }
+
+export interface Mailbox {
+  /** The nsec, by which the core's inbox methods name the mailbox. */
+  key: string;
+  address: string;
+}
+
+/** The lists a new email address publishes, as the app's email settings name them. */
+export type MailListName = "address" | "inbox" | "servers";
+
+/** The email settings of this device, for the new email addresses. */
+export type MailSettings = {
+  bridge: string;
+  defaultBridge: string;
+} & Record<MailListName, { urls: string[]; defaults: string[] }>;
+
+/**
+ * A message of a mailbox, the newest first in its inbox: an email (nostr-mail) or a private
+ * message (NIP-17). An inbox leaves out an email's text and MIME, which `inboxMessage` gives.
+ */
+export type MailMessage = {
+  /** The gift wrap it came in, by which the core names it. */
+  wrapId: string;
+  /** Who sealed it: the sender of a private message, the bridge of an email. */
+  pubkey: string;
+  /** In milliseconds. */
+  date: number;
+} & (
+  | {
+      kind: "email";
+      from: string;
+      fromName: string | null;
+      subject: string;
+      /** Plain text, an HTML email's included. */
+      text?: string;
+      /** The whole message, as a `.eml` file holds it. */
+      mime?: string;
+    }
+  | { kind: "privateMessage"; text: string }
+);
 
 /**
  * The lists of the app's filters: every item but the trash, the favorites, the items of one of
@@ -101,9 +143,9 @@ export const syncPort = "sync";
 
 /**
  * What the core tells the popups through {@link syncPort}: the sync or the items of a vault moved,
- * or the vaults locked or unlocked.
+ * or the vaults locked or unlocked, or the messages of a mailbox synced changed.
  */
-export type CoreEvent = "vaultsChanged";
+export type CoreEvent = "vaultsChanged" | "inboxChanged";
 
 /** Whether a lock password protects the vaults, and whether it must unlock them now. */
 export interface LockState {
@@ -236,6 +278,27 @@ export interface CoreMethods {
   deleteItem: { args: { vault: string; id: string }; result: null };
   /** The code of a verification key at `at`, in milliseconds, and how long a code lasts, in seconds. */
   totp: { args: { key: string; at: number }; result: { code: string; period: number } };
+  mailSettings: { args: Record<string, never>; result: MailSettings };
+  /** The bridge of the new email addresses, as typed. Fails with `invalidBridge`. */
+  setMailBridge: { args: { text: string }; result: null };
+  setMailList: { args: { list: MailListName; urls: string[] }; result: null };
+  /** A new mailbox at the bridge of the settings. Saving the item publishes its lists. */
+  generateMailbox: { args: Record<string, never>; result: Mailbox };
+  /** The messages of a mailbox on this device, the newest first. Fails with `invalidMailboxKey`. */
+  inbox: { args: { key: string }; result: MailMessage[] };
+  /**
+   * Fetches the latest messages of a mailbox, then brings what arrives, telling `inboxChanged`,
+   * until `closeInbox` or the popup closes.
+   */
+  syncInbox: { args: { key: string }; result: null };
+  closeInbox: { args: { key: string }; result: null };
+  /**
+   * A message in full, an email downloaded from Blossom when too large for a gift wrap. Fails with
+   * `messageNotFound` or `emailDownloadFailed`.
+   */
+  inboxMessage: { args: { key: string; wrapId: string }; result: MailMessage };
+  /** Deletes a message, on the relays of its mailbox too. */
+  deleteMessage: { args: { key: string; wrapId: string }; result: null };
 }
 
 /** Calls a method of the Dart core, which runs in the background. */

@@ -10,6 +10,7 @@ import 'package:nostr_passwords/nostr_passwords.dart'
         generateBirthDate,
         generateFirstName,
         generateLastName,
+        generateMailbox,
         generatePassphrase,
         parseRelayUrl,
         parseServerUrl;
@@ -23,6 +24,7 @@ import 'package:submarine_extension_core/js_events.dart';
 import 'package:submarine_extension_core/js_keep_awake.dart';
 import 'package:submarine_extension_core/js_lock_alarm.dart';
 import 'package:submarine_extension_core/js_storage.dart';
+import 'package:submarine_extension_core/mail_settings.dart';
 import 'package:submarine_extension_core/reopenable.dart';
 import 'package:submarine_extension_core/sync.dart';
 import 'package:submarine_extension_core/totp.dart';
@@ -34,9 +36,13 @@ void main() {
   final deviceKey = DeviceKey(local, session);
   final autoLock = AutoLock(deviceKey, local, session, const JsLockAlarm());
   final vaults = Vaults(local, const JsEventSignerFactory(), deviceKey);
+  final mail = MailSettings(local);
   // The database opens once a popup asks for the sync or the items, not at
   // each wake.
-  final syncs = Reopenable(() => _openSync(vaults), (sync) => sync.close());
+  final syncs = Reopenable(
+    () => _openSync(vaults, mail),
+    (sync) => sync.close(),
+  );
   Future<VaultSync> sync() => syncs.open();
   // Whether a popup is open, for the sync to start again once unlocked.
   var popupOpen = false;
@@ -278,6 +284,46 @@ void main() {
         pubkey: args['vault'] as String,
         id: args['id'] as String,
       ),
+      'mailSettings': (_) => mail.toJson(),
+      'setMailBridge': (args) async {
+        await mail.setBridge(args['text'] as String);
+        return null;
+      },
+      'setMailList': (args) async {
+        await mail.setUrls(
+          MailList.values.byName(args['list'] as String),
+          (args['urls'] as List).cast(),
+        );
+        return null;
+      },
+      'generateMailbox': (_) async {
+        final mailbox = generateMailbox(
+          await mail.bridge(),
+          signerFactory: const JsEventSignerFactory(),
+        );
+        return {'key': mailbox.key, 'address': mailbox.address};
+      },
+      'inbox': (args) async =>
+          (await sync()).inboxes.messages(args['key'] as String),
+      'syncInbox': (args) async {
+        await (await sync()).inboxes.sync(args['key'] as String);
+        return null;
+      },
+      'closeInbox': (args) async {
+        await (await syncs.current)?.inboxes.close(args['key'] as String);
+        return null;
+      },
+      'inboxMessage': (args) async => (await sync()).inboxes.message(
+        args['key'] as String,
+        args['wrapId'] as String,
+      ),
+      'deleteMessage': (args) async {
+        await (await sync()).inboxes.delete(
+          args['key'] as String,
+          args['wrapId'] as String,
+        );
+        return null;
+      },
     },
   );
   globalContext['submarineCore'] = createJSInteropWrapper(_JsCore(core));
@@ -292,7 +338,7 @@ const _itemDraftKey = 'itemDraft';
 /// `e2e/relay.ts`.
 const _testRelay = String.fromEnvironment('TEST_RELAY');
 
-Future<VaultSync> _openSync(Vaults vaults) async {
+Future<VaultSync> _openSync(Vaults vaults, MailSettings mail) async {
   // The ndk cache, the sync coverage and the versions opened, together: the
   // coverage must never outlive the cache it describes.
   final database = await databaseFactoryWebWorker.openDatabase(_databaseName);
@@ -310,8 +356,10 @@ Future<VaultSync> _openSync(Vaults vaults) async {
     ndk: ndk,
     database: database,
     vaults: vaults,
+    mail: mail,
     onChanged: emitVaultsChanged,
     onSending: (sending) => keepAwake(sending),
+    onInboxChanged: emitInboxChanged,
     relays: _testRelay.isEmpty ? defaultVaultRelays : const [_testRelay],
     indexers: _testRelay.isEmpty ? defaultIndexerRelays : const [_testRelay],
   );

@@ -4,6 +4,7 @@ import 'package:nostr_passwords/nostr_passwords.dart';
 import 'package:sembast/sembast_memory.dart';
 import 'package:submarine_extension_core/core.dart';
 import 'package:submarine_extension_core/device_key.dart';
+import 'package:submarine_extension_core/mail_settings.dart';
 import 'package:submarine_extension_core/sync.dart';
 import 'package:submarine_extension_core/vaults.dart';
 import 'package:test/test.dart';
@@ -18,6 +19,7 @@ void main() {
   late Database database;
   late Ndk ndk;
   late Vaults vaults;
+  late MailSettings mail;
   late VaultSync sync;
   late int changes;
   late List<bool> sending;
@@ -41,12 +43,14 @@ void main() {
     );
     final store = MemoryStore();
     vaults = Vaults(store, signers, DeviceKey(store, MemoryStore()));
+    mail = MailSettings(MemoryStore());
     changes = 0;
     sending = [];
     sync = VaultSync(
       ndk: ndk,
       database: database,
       vaults: vaults,
+      mail: mail,
       onChanged: () => changes++,
       onSending: sending.add,
       relays: [relay.url],
@@ -758,6 +762,7 @@ void main() {
       ndk: ndk,
       database: database,
       vaults: vaults,
+      mail: mail,
       onChanged: () {},
       relays: [relay.url],
       indexers: const [],

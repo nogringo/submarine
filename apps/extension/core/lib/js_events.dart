@@ -12,3 +12,6 @@ extension type _CoreEvents._(JSObject _) implements JSObject {
 /// Tells the popups that what they show of the vaults changed: their sync,
 /// their items, or whether they are locked.
 void emitVaultsChanged() => _js.emit('vaultsChanged');
+
+/// Tells the popups that the messages of a mailbox they show changed.
+void emitInboxChanged() => _js.emit('inboxChanged');

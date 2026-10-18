@@ -8,6 +8,8 @@ import 'package:sembast/sembast.dart';
 import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
 
 import 'core.dart';
+import 'inboxes.dart';
+import 'mail_settings.dart';
 import 'vaults.dart';
 
 /// Keeps the vaults of this device synced from their relays from [start] to
@@ -18,8 +20,10 @@ class VaultSync {
     required this.ndk,
     required this._database,
     required this._vaults,
+    required this.mail,
     required this.onChanged,
     this.onSending = _sendsQuietly,
+    this.onInboxChanged = _changesQuietly,
     this.relays = defaultVaultRelays,
     this.indexers = defaultIndexerRelays,
   }) : _engine = SyncEngine(
@@ -53,6 +57,19 @@ class VaultSync {
   /// background to stay awake.
   final void Function(bool sending) onSending;
 
+  /// What a new email address of an item publishes.
+  final MailSettings mail;
+
+  /// Tells that the messages of a mailbox of [inboxes] changed.
+  final void Function() onInboxChanged;
+
+  /// The mailboxes of the items the popup shows, synced until it closes.
+  late final inboxes = Inboxes(
+    ndk,
+    indexers: indexers,
+    onChanged: onInboxChanged,
+  );
+
   /// How long the changes saved or pushed keep being sent once the popup
   /// closed: ndk tries again after 5, 15 and 60 seconds. The next opening of
   /// the popup sends what is left.
@@ -83,6 +100,7 @@ class VaultSync {
     _running = false;
     await Future.wait([
       _engine.stop(),
+      inboxes.closeAll(),
       for (final vault in _synced.values) vault.pause(),
     ]);
   }
@@ -95,6 +113,7 @@ class VaultSync {
     _unsentCheck?.cancel();
     await _connectivity.cancel();
     _setSending(false);
+    await inboxes.closeAll();
     for (final synced in _synced.values) {
       await synced.close();
       ndk.accounts.removeAccount(pubkey: synced.pubkey);
@@ -339,7 +358,8 @@ class VaultSync {
 
   /// The item [id] of the vault [pubkey], its cipher in Bitwarden's JSON,
   /// in the trash or not, or null once gone. Its `base`, the versions it was
-  /// read from, is what [updateItem] builds on.
+  /// read from, is what [updateItem] builds on. Its `mailboxes`, each a key
+  /// and its address, are those [inboxes] read.
   Future<Map<String, Object?>?> item({
     required String pubkey,
     required String id,
@@ -352,6 +372,10 @@ class VaultSync {
             'id': id,
             'cipher': item.cipher.toJson(),
             'base': [for (final head in item.heads) head.toJson()],
+            'mailboxes': [
+              for (final (:key, :address) in _mailboxesOf(item.cipher))
+                {'key': key, 'address': address},
+            ],
           };
         }
       }
@@ -360,14 +384,19 @@ class VaultSync {
   }
 
   /// Saves [cipher], in Bitwarden's JSON, as a new item of the vault
-  /// [pubkey]. Returns its id.
+  /// [pubkey], then publishes the lists of its mailboxes. Returns its id.
   Future<String> createItem({
     required String pubkey,
     required Map<String, dynamic> cipher,
-  }) => _write(
-    pubkey,
-    (vault) async => (await vault.createItem(_newCipher(cipher))).id,
-  );
+  }) async {
+    final created = _newCipher(cipher);
+    final id = await _write(
+      pubkey,
+      (vault) async => (await vault.createItem(created)).id,
+    );
+    await _publishNewMailboxes(created);
+    return id;
+  }
 
   /// Saves [ciphers], in Bitwarden's JSON, as new items of the vault
   /// [pubkey], in order: an import, a part of it at a time.
@@ -395,20 +424,42 @@ class VaultSync {
   /// Saves [cipher] as the next version of the [base] an [item] read gave,
   /// rather than of the versions synced since: as in the app, saving over
   /// another device's change keeps both, as a conflict, instead of losing it.
+  /// Then publishes the lists of the mailboxes [base] did not hold.
   Future<void> updateItem({
     required String pubkey,
     required List<Object?> base,
     required Map<String, dynamic> cipher,
-  }) => _write(
-    pubkey,
-    (vault) => vault.updateItem(
-      Item([
-        for (final head in base)
-          Envelope.fromJson(head as Map<String, dynamic>),
-      ]),
-      Cipher.fromJson(cipher),
-    ),
-  );
+  }) async {
+    final previous = Item([
+      for (final head in base) Envelope.fromJson(head as Map<String, dynamic>),
+    ]);
+    final updated = Cipher.fromJson(cipher);
+    await _write(pubkey, (vault) => vault.updateItem(previous, updated));
+    await _publishNewMailboxes(updated, previous: previous.cipher);
+  }
+
+  /// After the item is saved, as in the app: a save that fails publishes
+  /// nothing.
+  Future<void> _publishNewMailboxes(Cipher cipher, {Cipher? previous}) async {
+    final known = {
+      if (previous != null)
+        for (final (:key, address: _) in _mailboxesOf(previous)) key,
+    };
+    for (final (:key, address: _) in _mailboxesOf(cipher)) {
+      if (known.contains(key)) continue;
+      await publishMailboxLists(
+        ndk,
+        key,
+        relays: await mail.urls(MailList.address),
+        inboxRelays: await mail.urls(MailList.inbox),
+        blossomServers: await mail.urls(MailList.servers),
+        indexers: indexers,
+      );
+    }
+  }
+
+  List<({String key, String address})> _mailboxesOf(Cipher cipher) =>
+      mailboxesOf(cipher, signerFactory: ndk.config.eventSignerFactory);
 
   /// Adds the item [id] of the vault [pubkey] to the favorites, or takes it
   /// out.
@@ -501,6 +552,8 @@ class VaultSync {
 }
 
 void _sendsQuietly(bool sending) {}
+
+void _changesQuietly() {}
 
 /// [json], a cipher in Bitwarden's JSON, dated now unless it is dated.
 Cipher _newCipher(Map<String, dynamic> json) {

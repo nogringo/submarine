@@ -1582,9 +1582,6 @@ class AppLocalizationsDe extends AppLocalizations {
       'Neue Adressen veröffentlichen ihre Empfangs-Relays auf diesen Relays, wo die Bridge sie findet. Bereits erstellte Adressen behalten ihre.';
 
   @override
-  String get changeMailRelays => 'Ändern';
-
-  @override
   String get mailRelaysNeedOne =>
       'Neue Adressen brauchen mindestens ein Relay.';
 

@@ -1863,7 +1863,7 @@
   },
   "mailBridge": "Email bridge",
   "@mailBridge": {
-    "description": "Setting, and title of its dialog, choosing the bridge: the service at a domain that receives the email sent to an address and passes it on to Nostr."
+    "description": "Setting, and title of its page, choosing the bridge: the service at a domain that receives the email sent to an address and passes it on to Nostr."
   },
   "mailBridgeDescription": "New email addresses end with @{domain}",
   "@mailBridgeDescription": {
@@ -1953,42 +1953,38 @@
   },
   "mailInboxRelays": "Inbox relays",
   "@mailInboxRelays": {
-    "description": "Setting, and title of its dialog, listing the relays the emails of new email addresses arrive on (their kind:10050 list)."
+    "description": "Setting, and title of its page, listing the relays the emails of new email addresses arrive on (their kind:10050 list)."
   },
   "mailInboxRelaysExplanation": "Emails sent to new addresses arrive on these relays. Addresses created before keep theirs.",
   "@mailInboxRelaysExplanation": {
-    "description": "In the inbox relays dialog: what the relays are for, and that changing them does not change the addresses already created."
+    "description": "In the inbox relays page: what the relays are for, and that changing them does not change the addresses already created."
   },
   "mailAddressRelays": "Address relays",
   "@mailAddressRelays": {
-    "description": "Setting, and title of its dialog, listing the relays where new email addresses publish their inbox relays (their NIP-65 list)."
+    "description": "Setting, and title of its page, listing the relays where new email addresses publish their inbox relays (their NIP-65 list)."
   },
   "mailAddressRelaysExplanation": "New addresses publish their inbox relays on these relays, where the bridge finds them. Addresses created before keep theirs.",
   "@mailAddressRelaysExplanation": {
-    "description": "In the address relays dialog: what the relays are for, and that changing them does not change the addresses already created."
-  },
-  "changeMailRelays": "Change",
-  "@changeMailRelays": {
-    "description": "Button of an email relays or servers setting opening its dialog."
+    "description": "In the address relays page: what the relays are for, and that changing them does not change the addresses already created."
   },
   "mailRelaysNeedOne": "New addresses need at least one relay.",
   "@mailRelaysNeedOne": {
-    "description": "In an email relays dialog, when its list is empty."
+    "description": "In an email relays page, when its list is empty."
   },
   "resetMailRelays": "Reset",
   "@resetMailRelays": {
-    "description": "Button of an email relays or servers dialog putting back the defaults."
+    "description": "Button of an email relays or servers page putting back the defaults."
   },
   "mailServers": "Servers for large emails",
   "@mailServers": {
-    "description": "Setting, and title of its dialog, listing the Blossom servers where new email addresses receive the emails too large for a relay (their kind:10063 list)."
+    "description": "Setting, and title of its page, listing the Blossom servers where new email addresses receive the emails too large for a relay (their kind:10063 list)."
   },
   "mailServersExplanation": "Emails too large to be delivered directly are stored here, encrypted. Addresses created from now on use these servers. Those created before keep theirs.",
   "@mailServersExplanation": {
-    "description": "In the large email servers dialog: what the servers are for, and that changing them does not change the addresses already created."
+    "description": "In the large email servers page: what the servers are for, and that changing them does not change the addresses already created."
   },
   "mailServersNeedOne": "New addresses need at least one server.",
   "@mailServersNeedOne": {
-    "description": "In the large email servers dialog, when its list is empty."
+    "description": "In the large email servers page, when its list is empty."
   }
 }

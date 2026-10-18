@@ -439,7 +439,6 @@
   "mailInboxRelaysExplanation": "Les e-mails envoyés aux nouvelles adresses arrivent sur ces relais. Les adresses créées avant gardent les leurs.",
   "mailAddressRelays": "Relais de l'adresse",
   "mailAddressRelaysExplanation": "Les nouvelles adresses publient leurs relais de réception sur ces relais, où le pont les trouve. Les adresses créées avant gardent les leurs.",
-  "changeMailRelays": "Changer",
   "mailRelaysNeedOne": "Les nouvelles adresses ont besoin d'au moins un relais.",
   "resetMailRelays": "Réinitialiser",
   "mailServers": "Serveurs pour les gros e-mails",

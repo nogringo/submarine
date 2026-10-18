@@ -4,6 +4,7 @@ import 'package:nostr_passwords/nostr_passwords.dart';
 
 import 'context.dart';
 import 'items/item_filter.dart';
+import 'mail/mail_settings.dart';
 import 'screens/generator_screen.dart';
 import 'screens/item_detail.dart';
 import 'screens/item_form.dart';
@@ -64,6 +65,8 @@ const generatorPath = '/generator';
 
 const settingsPath = '/settings';
 
+String mailListPath(MailList list) => '$settingsPath/email/${list.name}';
+
 ItemFilter _filterOf(GoRouterState state) =>
     ItemFilter.fromSlug(state.pathParameters['filter']!)!;
 
@@ -122,6 +125,14 @@ GoRouter buildRouter(Vaults vaults) => GoRouter(
           ),
       ],
     ),
+    for (final list in MailList.values)
+      GoRoute(
+        path: mailListPath(list),
+        pageBuilder: (context, state) => _AdaptivePage(
+          key: state.pageKey,
+          child: MailListScreen(list: list),
+        ),
+      ),
     // Each branch keeps its screens as they were left, in the order of
     // AppDestination.
     StatefulShellRoute.indexedStack(

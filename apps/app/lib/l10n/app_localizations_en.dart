@@ -1572,9 +1572,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'New addresses publish their inbox relays on these relays, where the bridge finds them. Addresses created before keep theirs.';
 
   @override
-  String get changeMailRelays => 'Change';
-
-  @override
   String get mailRelaysNeedOne => 'New addresses need at least one relay.';
 
   @override

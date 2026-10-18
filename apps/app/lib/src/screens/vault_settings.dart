@@ -13,9 +13,9 @@ import '../vaults/vault_controller.dart';
 import '../vaults/vault_logins.dart';
 import '../vaults/vault_storage.dart';
 import '../vaults/vaults.dart';
+import '../widgets/address_list.dart';
 import '../widgets/context_menus.dart';
 import '../widgets/copy_button.dart';
-import '../widgets/dialog_buttons.dart';
 import '../widgets/encrypt_vault_key_dialog.dart';
 import '../widgets/selectable_area.dart';
 import '../widgets/settings_tile.dart';
@@ -127,22 +127,6 @@ class _VaultSettingsFrame extends StatelessWidget {
 void _goBack(BuildContext context, String fallback) =>
     context.canPop() ? context.pop() : context.go(fallback);
 
-/// [child] centered, at most as wide as the settings.
-class _SettingsWidth extends StatelessWidget {
-  const _SettingsWidth({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => Align(
-    alignment: Alignment.topCenter,
-    child: ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 720),
-      child: child,
-    ),
-  );
-}
-
 class _VaultSettings extends StatefulWidget {
   const _VaultSettings({super.key, required this.vault});
 
@@ -195,7 +179,7 @@ class _VaultSettingsState extends State<_VaultSettings> {
         20,
         32 + MediaQuery.paddingOf(context).bottom,
       ),
-      child: _SettingsWidth(
+      child: SettingsWidth(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -739,8 +723,13 @@ class _Relays extends StatelessWidget {
         markers[url] ?? ReadWriteMarker.readWrite;
     return _RelayConnections(
       vault: vault,
-      builder: (context, connected) => _AddressList(
-        vault: vault,
+      builder: (context, connected) => AddressList(
+        header: _Header(
+          vault: vault,
+          title: l10n.relays,
+          subtitle: vault.name,
+          back: vaultSettingsPath(vault.pubkey),
+        ),
         public: list.public.keys.toList(),
         private: list.private.keys.toList(),
         editable: vault.relaysEditable,
@@ -759,8 +748,10 @@ class _Relays extends StatelessWidget {
           private: l10n.relayPrivate,
           added: l10n.relayAdded,
           removed: l10n.relayRemoved,
-          keepPrivate: l10n.relayKeepPrivate,
-          keepPrivateDescription: l10n.relayKeepPrivateDescription,
+          keepPrivate: (
+            title: l10n.relayKeepPrivate,
+            description: l10n.relayKeepPrivateDescription,
+          ),
           saveFailed: l10n.relaysSaveFailed,
           waitForSync: l10n.relaysWaitForSync,
           needOne: l10n.relaysNeedOne,
@@ -794,8 +785,13 @@ class _Servers extends StatelessWidget {
     final l10n = context.l10n;
     final list = vault.serverList;
     if (list == null) return const SizedBox.shrink();
-    return _AddressList(
-      vault: vault,
+    return AddressList(
+      header: _Header(
+        vault: vault,
+        title: l10n.fileServers,
+        subtitle: vault.name,
+        back: vaultSettingsPath(vault.pubkey),
+      ),
       public: list.public,
       private: list.private,
       editable: vault.serversEditable,
@@ -814,502 +810,16 @@ class _Servers extends StatelessWidget {
         private: l10n.serverPrivate,
         added: l10n.serverAdded,
         removed: l10n.serverRemoved,
-        keepPrivate: l10n.serverKeepPrivate,
-        keepPrivateDescription: l10n.serverKeepPrivateDescription,
+        keepPrivate: (
+          title: l10n.serverKeepPrivate,
+          description: l10n.serverKeepPrivateDescription,
+        ),
         saveFailed: l10n.serversSaveFailed,
         waitForSync: l10n.serversWaitForSync,
         needOne: l10n.serversNeedOne,
       ),
       save: (public, private) =>
           vault.setServerList(ServerList(public: public, private: private)),
-    );
-  }
-}
-
-/// What an [_AddressList] says, of relays or of servers.
-typedef _AddressTexts = ({
-  String title,
-  String description,
-  String add,
-  String address,
-  String invalid,
-  String alreadyListed,
-  String remove,
-  String keep,
-  String private,
-  String added,
-  String removed,
-  String keepPrivate,
-  String keepPrivateDescription,
-  String saveFailed,
-  String waitForSync,
-  String needOne,
-});
-
-/// The page of the addresses of a list of the vault, public or private. Keeps
-/// the changes in a draft, published as a single list on save.
-class _AddressList extends StatefulWidget {
-  const _AddressList({
-    required this.vault,
-    required this.public,
-    required this.private,
-    required this.editable,
-    required this.parse,
-    required this.icon,
-    required this.hint,
-    required this.texts,
-    this.status,
-    this.problem,
-    required this.save,
-  });
-
-  final VaultController vault;
-  final List<String> public;
-  final List<String> private;
-
-  /// Whether saving cannot replace a newer list.
-  final bool editable;
-
-  /// An address as the user types it, normalized, or null if invalid.
-  final String? Function(String text) parse;
-  final IconData icon;
-  final String hint;
-  final _AddressTexts texts;
-
-  /// What a listed address shows while the draft keeps it, if anything.
-  final (String, IconData) Function(String url)? status;
-
-  /// What went wrong with a listed address, if anything.
-  final String? Function(String url)? problem;
-  final Future<void> Function(List<String> public, List<String> private) save;
-
-  @override
-  State<_AddressList> createState() => _AddressListState();
-}
-
-class _AddressListState extends State<_AddressList> {
-  final _removed = <String>{};
-
-  /// Whether each address to add is private.
-  final _added = <String, bool>{};
-  var _saving = false;
-  String? _saveError;
-
-  bool get _changed => _removed.isNotEmpty || _added.isNotEmpty;
-
-  List<String> _draft(List<String> listed, {required bool private}) => [
-    for (final url in listed)
-      if (!_removed.contains(url)) url,
-    for (final MapEntry(key: url, value: isPrivate) in _added.entries)
-      if (isPrivate == private) url,
-  ];
-
-  void _discard() => setState(() {
-    _removed.clear();
-    _added.clear();
-    _saveError = null;
-  });
-
-  Future<void> _save(List<String> public, List<String> private) async {
-    final failed = widget.texts.saveFailed;
-    setState(() {
-      _saving = true;
-      _saveError = null;
-    });
-    try {
-      await widget.save(public, private);
-      if (mounted) {
-        setState(() {
-          _removed.clear();
-          _added.clear();
-        });
-      }
-    } on SignerRequestCancelledException {
-      // Cancelled by the user: the draft stays, to save again.
-    } catch (_) {
-      if (mounted) setState(() => _saveError = failed);
-    } finally {
-      if (mounted) setState(() => _saving = false);
-    }
-  }
-
-  Future<void> _add(List<String> draft) async {
-    final added = await showDialog<(String, bool)>(
-      context: context,
-      builder: (context) => _AddAddressDialog(
-        texts: widget.texts,
-        hint: widget.hint,
-        parse: widget.parse,
-        listed: (url) =>
-            draft.any((listed) => (widget.parse(listed) ?? listed) == url),
-      ),
-    );
-    if (added case (final url, final private) when mounted) {
-      setState(() => _added[url] = private);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.palette;
-    final texts = widget.texts;
-    final editable = widget.editable && !_saving;
-    final public = _draft(widget.public, private: false);
-    final private = _draft(widget.private, private: true);
-    final empty = public.isEmpty && private.isEmpty;
-    final message =
-        _saveError ??
-        (!widget.editable
-            ? texts.waitForSync
-            : empty
-            ? texts.needOne
-            : null);
-    IconButton removeButton(VoidCallback remove) => IconButton(
-      tooltip: texts.remove,
-      onPressed: editable ? () => setState(remove) : null,
-      icon: const Icon(Icons.close_rounded, size: 20),
-    );
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: _SettingsWidth(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _Header(
-                    vault: widget.vault,
-                    title: texts.title,
-                    subtitle: widget.vault.name,
-                    back: vaultSettingsPath(widget.vault.pubkey),
-                  ),
-                  const SizedBox(height: 28),
-                  Text(
-                    texts.description,
-                    style: TextStyle(fontSize: 13, color: palette.muted),
-                  ),
-                  const SizedBox(height: 12),
-                  FieldCard(
-                    children: [
-                      for (final (listed, isPrivate) in [
-                        (widget.public, false),
-                        (widget.private, true),
-                      ])
-                        for (final url in listed)
-                          if (_removed.contains(url))
-                            _AddressTile(
-                              url: url,
-                              icon: widget.icon,
-                              note: isPrivate ? texts.private : null,
-                              status: (
-                                texts.removed,
-                                Icons.remove_circle_outline_rounded,
-                              ),
-                              removed: true,
-                              action: IconButton(
-                                tooltip: texts.keep,
-                                onPressed: editable
-                                    ? () => setState(() => _removed.remove(url))
-                                    : null,
-                                icon: const Icon(Icons.undo_rounded, size: 20),
-                              ),
-                            )
-                          else
-                            _AddressTile(
-                              url: url,
-                              icon: widget.icon,
-                              note: isPrivate ? texts.private : null,
-                              status: widget.status?.call(url),
-                              problem: widget.problem?.call(url),
-                              action: removeButton(() => _removed.add(url)),
-                            ),
-                      for (final MapEntry(key: url, value: isPrivate)
-                          in _added.entries)
-                        _AddressTile(
-                          url: url,
-                          icon: widget.icon,
-                          note: isPrivate ? texts.private : null,
-                          status: (
-                            texts.added,
-                            Icons.add_circle_outline_rounded,
-                          ),
-                          action: removeButton(() => _added.remove(url)),
-                        ),
-                      SettingsTile(
-                        leading: Icon(
-                          Icons.add_rounded,
-                          size: 20,
-                          color: editable ? palette.signal : palette.muted,
-                        ),
-                        title: Text(
-                          texts.add,
-                          style: editable
-                              ? null
-                              : TextStyle(color: palette.muted),
-                        ),
-                        onTap: editable
-                            ? () => _add([...public, ...private])
-                            : null,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        const Divider(),
-        Padding(
-          // Clear of the system navigation bar, the app drawing edge to edge.
-          padding: EdgeInsets.fromLTRB(
-            20,
-            12,
-            20,
-            12 + MediaQuery.paddingOf(context).bottom,
-          ),
-          child: _SettingsWidth(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Next to the buttons it explains, wherever the list scrolled.
-                if (message != null) ...[
-                  Text(
-                    message,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: _saveError == null
-                          ? palette.muted
-                          : palette.danger,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                ],
-                DialogButtons(
-                  children: [
-                    TextButton(
-                      onPressed: _changed && !_saving ? _discard : null,
-                      child: Text(context.l10n.cancel),
-                    ),
-                    FilledButton(
-                      onPressed: _changed && editable && !empty
-                          ? () => _save(public, private)
-                          : null,
-                      child: Text(context.l10n.save),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// The draft shows in [status], so that the row keeps its height.
-class _AddressTile extends StatelessWidget {
-  const _AddressTile({
-    required this.url,
-    required this.icon,
-    this.note,
-    this.status,
-    this.problem,
-    this.removed = false,
-    required this.action,
-  });
-
-  final String url;
-  final IconData icon;
-
-  /// Under the address, that it is private.
-  final String? note;
-  final (String, IconData)? status;
-
-  /// Under the address and [note].
-  final String? problem;
-  final bool removed;
-  final Widget action;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.palette;
-    final note = this.note;
-    final problem = this.problem;
-    return SettingsTile(
-      leading: Icon(icon, size: 20, color: palette.muted),
-      title: Text(
-        url.replaceFirst(RegExp('^(wss|https)://'), ''),
-        style: TextStyle(
-          fontWeight: FontWeight.w500,
-          color: removed ? palette.muted : null,
-          decoration: removed ? TextDecoration.lineThrough : null,
-        ),
-      ),
-      subtitle: note == null && problem == null
-          ? null
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (note != null) Text(note),
-                if (problem != null)
-                  Text(problem, style: TextStyle(color: palette.danger)),
-              ],
-            ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (status case (final text, final statusIcon)) ...[
-            // Spelled out in the wide layout, a tooltip in the narrow one.
-            if (context.isWide) ...[
-              Icon(statusIcon, size: 16, color: palette.muted),
-              const SizedBox(width: 6),
-              Text(text, style: TextStyle(fontSize: 13, color: palette.muted)),
-            ] else
-              Tooltip(
-                message: text,
-                child: Icon(statusIcon, size: 16, color: palette.muted),
-              ),
-            const SizedBox(width: 4),
-          ],
-          action,
-        ],
-      ),
-    );
-  }
-}
-
-/// Gives the address to add, and whether it is private.
-class _AddAddressDialog extends StatefulWidget {
-  const _AddAddressDialog({
-    required this.texts,
-    required this.hint,
-    required this.parse,
-    required this.listed,
-  });
-
-  final _AddressTexts texts;
-  final String hint;
-  final String? Function(String text) parse;
-
-  /// Whether the draft lists the normalized address.
-  final bool Function(String url) listed;
-
-  @override
-  State<_AddAddressDialog> createState() => _AddAddressDialogState();
-}
-
-class _AddAddressDialogState extends State<_AddAddressDialog> {
-  final _url = TextEditingController();
-  var _private = false;
-  String? _error;
-
-  @override
-  void dispose() {
-    _url.dispose();
-    super.dispose();
-  }
-
-  void _submit() {
-    final texts = widget.texts;
-    final url = widget.parse(_url.text);
-    final error = url == null
-        ? texts.invalid
-        : widget.listed(url)
-        ? texts.alreadyListed
-        : null;
-    if (error != null) {
-      setState(() => _error = error);
-      return;
-    }
-    Navigator.pop(context, (url!, _private));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final palette = context.palette;
-    final texts = widget.texts;
-    return Dialog(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 440),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                texts.add,
-                style: Theme.of(context).dialogTheme.titleTextStyle,
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                contextMenuBuilder: textFieldMenu,
-                controller: _url,
-                autofocus: true,
-                autocorrect: false,
-                enableSuggestions: false,
-                keyboardType: TextInputType.url,
-                onSubmitted: (_) => _submit(),
-                decoration: InputDecoration(
-                  labelText: texts.address,
-                  hintText: widget.hint,
-                  errorText: _error,
-                ),
-              ),
-              const SizedBox(height: 16),
-              // The switch takes its name from the text.
-              MergeSemantics(
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            texts.keepPrivate,
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            texts.keepPrivateDescription,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: palette.muted,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Switch(
-                      value: _private,
-                      onChanged: (private) =>
-                          setState(() => _private = private),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              DialogButtons(
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(l10n.cancel),
-                  ),
-                  FilledButton(onPressed: _submit, child: Text(l10n.add)),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

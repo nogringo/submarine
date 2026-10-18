@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:local_auth/local_auth.dart';
@@ -21,6 +20,7 @@ import '../theme/appearance.dart';
 import '../theme/theme.dart';
 import '../vaults/vault_controller.dart';
 import '../vaults/vaults.dart';
+import '../widgets/address_list.dart';
 import '../widgets/context_menus.dart';
 import '../widgets/dialog_buttons.dart';
 import '../widgets/settings_tile.dart';
@@ -28,6 +28,7 @@ import '../widgets/vault_avatar.dart';
 import 'add_vault.dart';
 import 'app_navigation.dart';
 import 'import_export.dart';
+import 'vault_navigation.dart';
 
 /// The settings of the app.
 class SettingsScreen extends StatelessWidget {
@@ -368,22 +369,15 @@ class _MailBridgeDialogState extends State<_MailBridgeDialog> {
 
 String _host(String url) => url.replaceFirst(RegExp(r'^(wss|https)://'), '');
 
-/// What the setting of [list] says and takes, of relays or of servers.
+/// What a list of [list] says and takes, of relays or of servers.
 ({
-  String title,
-  String explanation,
-  String needOne,
-  String address,
+  AddressTexts texts,
   String hint,
-  String invalid,
-  String alreadyListed,
-  String add,
-  String remove,
   IconData icon,
   String? Function(String text) parse,
 })
 _describe(AppLocalizations l10n, MailList list) {
-  final (title, explanation) = switch (list) {
+  final (title, description) = switch (list) {
     MailList.inbox => (l10n.mailInboxRelays, l10n.mailInboxRelaysExplanation),
     MailList.address => (
       l10n.mailAddressRelays,
@@ -393,28 +387,46 @@ _describe(AppLocalizations l10n, MailList list) {
   };
   return list == MailList.servers
       ? (
-          title: title,
-          explanation: explanation,
-          needOne: l10n.mailServersNeedOne,
-          address: l10n.serverAddress,
+          texts: (
+            title: title,
+            description: description,
+            add: l10n.addServer,
+            address: l10n.serverAddress,
+            invalid: l10n.serverAddressInvalid,
+            alreadyListed: l10n.serverAlreadyListed,
+            remove: l10n.removeServer,
+            keep: l10n.keepServer,
+            added: l10n.serverAdded,
+            removed: l10n.serverRemoved,
+            needOne: l10n.mailServersNeedOne,
+            private: null,
+            keepPrivate: null,
+            saveFailed: null,
+            waitForSync: null,
+          ),
           hint: 'https://blossom.example.com',
-          invalid: l10n.serverAddressInvalid,
-          alreadyListed: l10n.serverAlreadyListed,
-          add: l10n.addServer,
-          remove: l10n.removeServer,
           icon: Icons.dns_rounded,
           parse: parseServerUrl,
         )
       : (
-          title: title,
-          explanation: explanation,
-          needOne: l10n.mailRelaysNeedOne,
-          address: l10n.relayAddress,
+          texts: (
+            title: title,
+            description: description,
+            add: l10n.addRelay,
+            address: l10n.relayAddress,
+            invalid: l10n.relayAddressInvalid,
+            alreadyListed: l10n.relayAlreadyListed,
+            remove: l10n.removeRelay,
+            keep: l10n.keepRelay,
+            added: l10n.relayAdded,
+            removed: l10n.relayRemoved,
+            needOne: l10n.mailRelaysNeedOne,
+            private: null,
+            keepPrivate: null,
+            saveFailed: null,
+            waitForSync: null,
+          ),
           hint: 'wss://relay.example.com',
-          invalid: l10n.relayAddressInvalid,
-          alreadyListed: l10n.relayAlreadyListed,
-          add: l10n.addRelay,
-          remove: l10n.removeRelay,
           icon: Icons.cell_tower_rounded,
           parse: parseRelayUrl,
         );
@@ -427,170 +439,94 @@ class _MailListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
     final mail = MailSettings.of(context);
     return SettingsTile(
-      title: Text(_describe(l10n, list).title),
+      title: Text(_describe(context.l10n, list).texts.title),
       subtitle: Text(mail.urls(list).map(_host).join(', ')),
-      trailing: TextButton(
-        onPressed: () => showDialog<void>(
-          context: context,
-          builder: (context) => _MailListDialog(mail: mail, list: list),
-        ),
-        child: Text(l10n.changeMailRelays),
-      ),
+      trailing: Icon(Icons.chevron_right_rounded, color: context.palette.muted),
+      onTap: () => context.push(mailListPath(list)),
     );
   }
 }
 
-class _MailListDialog extends StatefulWidget {
-  const _MailListDialog({required this.mail, required this.list});
+/// A list of the email settings, whose draft takes a Save of its own.
+class MailListScreen extends StatefulWidget {
+  const MailListScreen({super.key, required this.list});
 
-  final MailSettings mail;
   final MailList list;
 
   @override
-  State<_MailListDialog> createState() => _MailListDialogState();
+  State<MailListScreen> createState() => _MailListScreenState();
 }
 
-class _MailListDialogState extends State<_MailListDialog> {
-  late final _urls = [...widget.mail.urls(widget.list)];
-  final _url = TextEditingController();
-  String? _error;
+class _MailListScreenState extends State<MailListScreen> {
+  /// Keeps the draft when the layout changes.
+  final _listKey = GlobalKey();
 
-  @override
-  void dispose() {
-    _url.dispose();
-    super.dispose();
-  }
-
-  /// Adds the address typed, if any. False when the text is not one to add.
-  bool _add() {
-    final text = _url.text;
-    if (text.trim().isEmpty) return true;
-    final describe = _describe(context.l10n, widget.list);
-    final url = describe.parse(text);
-    final error = url == null
-        ? describe.invalid
-        : _urls.contains(url)
-        ? describe.alreadyListed
-        : null;
-    setState(() {
-      _error = error;
-      if (url != null && error == null) {
-        _urls.add(url);
-        _url.clear();
-      }
-    });
-    return error == null;
-  }
-
-  void _reset() => setState(() {
-    _urls
-      ..clear()
-      ..addAll(widget.list.defaults);
-    _url.clear();
-    _error = null;
-  });
-
-  // An address typed but not added yet is saved too.
-  void _save() {
-    if (!_add()) return;
-    unawaited(widget.mail.setUrls(widget.list, _urls));
-    Navigator.pop(context);
-  }
+  void _back() => context.canPop() ? context.pop() : context.go(settingsPath);
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final palette = context.palette;
-    final describe = _describe(l10n, widget.list);
-    return Dialog(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 440),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                describe.title,
-                style: Theme.of(context).dialogTheme.titleTextStyle,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                describe.explanation,
-                style: TextStyle(fontSize: 13, color: palette.muted),
-              ),
-              const SizedBox(height: 20),
-              if (_urls.isEmpty)
+    final mail = MailSettings.of(context);
+    final list = widget.list;
+    final describe = _describe(l10n, list);
+    final wide = context.isWide;
+    final addresses = AddressList(
+      key: _listKey,
+      header: Row(
+        children: [
+          if (wide) ...[BackButton(onPressed: _back), const SizedBox(width: 8)],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 Text(
-                  describe.needOne,
-                  style: TextStyle(fontSize: 13, color: palette.muted),
-                )
-              else
-                FieldCard(
-                  children: [
-                    for (final url in _urls)
-                      SettingsTile(
-                        leading: Icon(
-                          describe.icon,
-                          size: 20,
-                          color: palette.muted,
-                        ),
-                        title: Text(
-                          _host(url),
-                          style: const TextStyle(fontWeight: FontWeight.w500),
-                        ),
-                        trailing: IconButton(
-                          tooltip: describe.remove,
-                          onPressed: () => setState(() => _urls.remove(url)),
-                          icon: const Icon(Icons.close_rounded, size: 20),
-                        ),
-                      ),
-                  ],
-                ),
-              const SizedBox(height: 16),
-              TextField(
-                contextMenuBuilder: textFieldMenu,
-                controller: _url,
-                autocorrect: false,
-                enableSuggestions: false,
-                keyboardType: TextInputType.url,
-                onSubmitted: (_) => _add(),
-                decoration: InputDecoration(
-                  labelText: describe.address,
-                  hintText: describe.hint,
-                  errorText: _error,
-                  suffixIcon: IconButton(
-                    tooltip: describe.add,
-                    onPressed: _add,
-                    icon: const Icon(Icons.add_rounded),
+                  describe.texts.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w700,
+                    height: 1.2,
                   ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              DialogButtons(
-                children: [
-                  TextButton(
-                    onPressed: listEquals(_urls, widget.list.defaults)
-                        ? null
-                        : _reset,
-                    child: Text(l10n.resetMailRelays),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(l10n.cancel),
-                  ),
-                  FilledButton(
-                    onPressed: _urls.isEmpty ? null : _save,
-                    child: Text(l10n.save),
-                  ),
-                ],
-              ),
-            ],
+                Text(
+                  l10n.emailSettings,
+                  style: TextStyle(fontSize: 14, color: context.palette.muted),
+                ),
+              ],
+            ),
           ),
+        ],
+      ),
+      public: mail.urls(list),
+      defaults: list.defaults,
+      parse: describe.parse,
+      icon: describe.icon,
+      hint: describe.hint,
+      texts: describe.texts,
+      save: (public, _) => mail.setUrls(list, public),
+    );
+    if (!wide) {
+      return Scaffold(
+        appBar: AppBar(leading: BackButton(onPressed: _back)),
+        body: addresses,
+      );
+    }
+    return Scaffold(
+      body: SafeArea(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const VaultRail(
+              selectedVaultId: null,
+              selectedItemId: null,
+              destination: AppDestination.settings,
+            ),
+            const VerticalDivider(width: 1),
+            Expanded(child: addresses),
+          ],
         ),
       ),
     );

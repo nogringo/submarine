@@ -439,7 +439,6 @@
   "mailInboxRelaysExplanation": "发送到新地址的邮件会到达这些中继。之前创建的地址保持不变。",
   "mailAddressRelays": "地址中继",
   "mailAddressRelaysExplanation": "新地址在这些中继上发布其收件中继，桥接在那里找到它们。之前创建的地址保持不变。",
-  "changeMailRelays": "更改",
   "mailRelaysNeedOne": "新地址至少需要一个中继。",
   "resetMailRelays": "重置",
   "mailServers": "用于大邮件的服务器",

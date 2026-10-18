@@ -1575,9 +1575,6 @@ class AppLocalizationsFi extends AppLocalizations {
       'Uudet osoitteet julkaisevat vastaanottoreleensä näillä releillä, joilta silta löytää ne. Aiemmin luodut osoitteet säilyttävät omansa.';
 
   @override
-  String get changeMailRelays => 'Vaihda';
-
-  @override
   String get mailRelaysNeedOne =>
       'Uudet osoitteet tarvitsevat vähintään yhden releen.';
 

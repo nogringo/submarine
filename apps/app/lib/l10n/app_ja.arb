@@ -439,7 +439,6 @@
   "mailInboxRelaysExplanation": "新しいアドレスに送られたメールはこれらのリレーに届きます。作成済みのアドレスはそのままです。",
   "mailAddressRelays": "アドレスのリレー",
   "mailAddressRelaysExplanation": "新しいアドレスは受信リレーをこれらのリレーに公開し、ブリッジはそこでそれを見つけます。作成済みのアドレスはそのままです。",
-  "changeMailRelays": "変更",
   "mailRelaysNeedOne": "新しいアドレスには少なくとも 1 つのリレーが必要です。",
   "resetMailRelays": "リセット",
   "mailServers": "大きなメール用のサーバー",

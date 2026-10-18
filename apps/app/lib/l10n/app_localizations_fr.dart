@@ -1591,9 +1591,6 @@ class AppLocalizationsFr extends AppLocalizations {
       'Les nouvelles adresses publient leurs relais de réception sur ces relais, où le pont les trouve. Les adresses créées avant gardent les leurs.';
 
   @override
-  String get changeMailRelays => 'Changer';
-
-  @override
   String get mailRelaysNeedOne =>
       'Les nouvelles adresses ont besoin d\'au moins un relais.';
 

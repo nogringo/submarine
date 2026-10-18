@@ -1614,9 +1614,6 @@ class AppLocalizationsRu extends AppLocalizations {
       'Новые адреса публикуют на этих реле свои реле входящих, где их находит мост. Созданные раньше адреса сохраняют свои.';
 
   @override
-  String get changeMailRelays => 'Изменить';
-
-  @override
   String get mailRelaysNeedOne => 'Новым адресам нужно хотя бы одно реле.';
 
   @override

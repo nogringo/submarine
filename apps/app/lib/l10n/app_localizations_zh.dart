@@ -1535,9 +1535,6 @@ class AppLocalizationsZh extends AppLocalizations {
       '新地址在这些中继上发布其收件中继，桥接在那里找到它们。之前创建的地址保持不变。';
 
   @override
-  String get changeMailRelays => '更改';
-
-  @override
   String get mailRelaysNeedOne => '新地址至少需要一个中继。';
 
   @override

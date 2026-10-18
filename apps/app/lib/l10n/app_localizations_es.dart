@@ -1586,9 +1586,6 @@ class AppLocalizationsEs extends AppLocalizations {
       'Las nuevas direcciones publican sus relays de recepción en estos relays, donde el puente los encuentra. Las direcciones creadas antes conservan los suyos.';
 
   @override
-  String get changeMailRelays => 'Cambiar';
-
-  @override
   String get mailRelaysNeedOne =>
       'Las nuevas direcciones necesitan al menos un relay.';
 

@@ -1586,9 +1586,6 @@ class AppLocalizationsPt extends AppLocalizations {
       'Os novos endereços publicam os seus relays de receção nestes relays, onde a ponte os encontra. Os endereços criados antes mantêm os seus.';
 
   @override
-  String get changeMailRelays => 'Alterar';
-
-  @override
   String get mailRelaysNeedOne =>
       'Os novos endereços precisam de pelo menos um relay.';
 
@@ -3201,9 +3198,6 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
   @override
   String get mailAddressRelaysExplanation =>
       'Os novos endereços publicam seus relays de recebimento nestes relays, onde a ponte os encontra. Os endereços criados antes mantêm os seus.';
-
-  @override
-  String get changeMailRelays => 'Alterar';
 
   @override
   String get mailRelaysNeedOne =>

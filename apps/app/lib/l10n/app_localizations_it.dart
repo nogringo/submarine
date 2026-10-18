@@ -1589,9 +1589,6 @@ class AppLocalizationsIt extends AppLocalizations {
       'I nuovi indirizzi pubblicano i loro relay di ricezione su questi relay, dove il ponte li trova. Gli indirizzi creati prima mantengono i loro.';
 
   @override
-  String get changeMailRelays => 'Cambia';
-
-  @override
   String get mailRelaysNeedOne =>
       'I nuovi indirizzi hanno bisogno di almeno un relay.';
 

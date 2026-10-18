@@ -2599,7 +2599,7 @@ abstract class AppLocalizations {
   /// **'Email'**
   String get emailSettings;
 
-  /// Setting, and title of its dialog, choosing the bridge: the service at a domain that receives the email sent to an address and passes it on to Nostr.
+  /// Setting, and title of its page, choosing the bridge: the service at a domain that receives the email sent to an address and passes it on to Nostr.
   ///
   /// In en, this message translates to:
   /// **'Email bridge'**
@@ -2725,61 +2725,55 @@ abstract class AppLocalizations {
   /// **'Refresh'**
   String get refreshInbox;
 
-  /// Setting, and title of its dialog, listing the relays the emails of new email addresses arrive on (their kind:10050 list).
+  /// Setting, and title of its page, listing the relays the emails of new email addresses arrive on (their kind:10050 list).
   ///
   /// In en, this message translates to:
   /// **'Inbox relays'**
   String get mailInboxRelays;
 
-  /// In the inbox relays dialog: what the relays are for, and that changing them does not change the addresses already created.
+  /// In the inbox relays page: what the relays are for, and that changing them does not change the addresses already created.
   ///
   /// In en, this message translates to:
   /// **'Emails sent to new addresses arrive on these relays. Addresses created before keep theirs.'**
   String get mailInboxRelaysExplanation;
 
-  /// Setting, and title of its dialog, listing the relays where new email addresses publish their inbox relays (their NIP-65 list).
+  /// Setting, and title of its page, listing the relays where new email addresses publish their inbox relays (their NIP-65 list).
   ///
   /// In en, this message translates to:
   /// **'Address relays'**
   String get mailAddressRelays;
 
-  /// In the address relays dialog: what the relays are for, and that changing them does not change the addresses already created.
+  /// In the address relays page: what the relays are for, and that changing them does not change the addresses already created.
   ///
   /// In en, this message translates to:
   /// **'New addresses publish their inbox relays on these relays, where the bridge finds them. Addresses created before keep theirs.'**
   String get mailAddressRelaysExplanation;
 
-  /// Button of an email relays or servers setting opening its dialog.
-  ///
-  /// In en, this message translates to:
-  /// **'Change'**
-  String get changeMailRelays;
-
-  /// In an email relays dialog, when its list is empty.
+  /// In an email relays page, when its list is empty.
   ///
   /// In en, this message translates to:
   /// **'New addresses need at least one relay.'**
   String get mailRelaysNeedOne;
 
-  /// Button of an email relays or servers dialog putting back the defaults.
+  /// Button of an email relays or servers page putting back the defaults.
   ///
   /// In en, this message translates to:
   /// **'Reset'**
   String get resetMailRelays;
 
-  /// Setting, and title of its dialog, listing the Blossom servers where new email addresses receive the emails too large for a relay (their kind:10063 list).
+  /// Setting, and title of its page, listing the Blossom servers where new email addresses receive the emails too large for a relay (their kind:10063 list).
   ///
   /// In en, this message translates to:
   /// **'Servers for large emails'**
   String get mailServers;
 
-  /// In the large email servers dialog: what the servers are for, and that changing them does not change the addresses already created.
+  /// In the large email servers page: what the servers are for, and that changing them does not change the addresses already created.
   ///
   /// In en, this message translates to:
   /// **'Emails too large to be delivered directly are stored here, encrypted. Addresses created from now on use these servers. Those created before keep theirs.'**
   String get mailServersExplanation;
 
-  /// In the large email servers dialog, when its list is empty.
+  /// In the large email servers page, when its list is empty.
   ///
   /// In en, this message translates to:
   /// **'New addresses need at least one server.'**

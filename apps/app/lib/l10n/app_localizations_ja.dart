@@ -1551,9 +1551,6 @@ class AppLocalizationsJa extends AppLocalizations {
       '新しいアドレスは受信リレーをこれらのリレーに公開し、ブリッジはそこでそれを見つけます。作成済みのアドレスはそのままです。';
 
   @override
-  String get changeMailRelays => '変更';
-
-  @override
   String get mailRelaysNeedOne => '新しいアドレスには少なくとも 1 つのリレーが必要です。';
 
   @override

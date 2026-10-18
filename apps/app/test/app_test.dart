@@ -4357,6 +4357,13 @@ void main() {
       ),
     );
     await settle(tester);
+    Finder row(String host) => find.widgetWithText(SettingsTile, host);
+    Finder inRow(String host, Finder finder) =>
+        find.descendant(of: row(host), matching: finder);
+    Future<void> back() async {
+      await tester.tap(find.byType(BackButton));
+      await settle(tester);
+    }
 
     await tester.tap(find.byTooltip('Settings'));
     await settle(tester);
@@ -4368,46 +4375,67 @@ void main() {
       findsOneWidget,
     );
 
-    await tester.tap(settingsButton('Inbox relays', 'Change'));
+    await tester.tap(find.text('Inbox relays'));
     await settle(tester);
-    await tester.enterText(find.byType(TextField), 'not a relay');
-    await tester.tap(find.byTooltip('Add a relay'));
+    expect(find.byType(Dialog), findsNothing);
+    expect(saveEnabled(tester), isFalse);
+    await tester.tap(find.text('Add a relay'));
+    await settle(tester);
+    expect(
+      find.descendant(of: find.byType(Dialog), matching: find.byType(Switch)),
+      findsNothing,
+    );
+    final address = find.widgetWithText(TextField, 'Relay address');
+    await tester.enterText(address, 'not a relay');
+    await tester.tap(inDialog('Add'));
     await settle(tester);
     expect(find.text('This is not a relay address.'), findsOneWidget);
-    await tester.enterText(find.byType(TextField), 'relay.nmail.li');
-    await tester.tap(find.byTooltip('Add a relay'));
+    await tester.enterText(address, 'relay.nmail.li');
+    await tester.tap(inDialog('Add'));
     await settle(tester);
     expect(find.text('This relay is already in the list.'), findsOneWidget);
-
-    await tester.tap(find.byTooltip('Remove this relay').last);
-    await tester.enterText(find.byType(TextField), 'relay.example.com');
-    await tester.tap(find.text('Save'));
+    await tester.enterText(address, 'relay.example.com');
+    await tester.tap(inDialog('Add'));
     await settle(tester);
-    expect(find.text('relay.nmail.li, relay.example.com'), findsOneWidget);
+    expect(inRow('relay.example.com', find.byTooltip('New')), findsOneWidget);
+
+    await tester.tap(
+      inRow('auth.nostr1.com', find.byTooltip('Remove this relay')),
+    );
+    await settle(tester);
+    await write(tester, find.widgetWithText(FilledButton, 'Save'));
+    expect(row('auth.nostr1.com'), findsNothing);
+    expect(saveEnabled(tester), isFalse);
     await tester.runAsync(() async {
       expect((await MailSettings.load()).urls(MailList.inbox), [
         'wss://relay.nmail.li',
         'wss://relay.example.com',
       ]);
     });
+    await back();
+    expect(find.text('relay.nmail.li, relay.example.com'), findsOneWidget);
 
-    await tester.tap(settingsButton('Inbox relays', 'Change'));
+    await tester.tap(find.text('Inbox relays'));
     await settle(tester);
-    await tester.tap(find.byTooltip('Remove this relay').first);
-    await settle(tester);
-    await tester.tap(find.byTooltip('Remove this relay'));
-    await settle(tester);
+    for (final host in ['relay.nmail.li', 'relay.example.com']) {
+      await tester.tap(inRow(host, find.byTooltip('Remove this relay')));
+      await settle(tester);
+    }
     expect(find.text('New addresses need at least one relay.'), findsOneWidget);
-    expect(
-      tester
-          .widget<FilledButton>(find.widgetWithText(FilledButton, 'Save'))
-          .onPressed,
-      isNull,
-    );
+    expect(saveEnabled(tester), isFalse);
     await tester.tap(find.text('Reset'));
     await settle(tester);
-    await tester.tap(find.text('Save'));
-    await settle(tester);
+    expect(inRow('relay.nmail.li', find.byTooltip('Removed')), findsNothing);
+    expect(inRow('relay.example.com', find.byTooltip('Removed')), findsOne);
+    expect(inRow('auth.nostr1.com', find.byTooltip('New')), findsOneWidget);
+    await write(tester, find.widgetWithText(FilledButton, 'Save'));
+    expect(
+      tester
+          .widget<TextButton>(find.widgetWithText(TextButton, 'Reset'))
+          .enabled,
+      isFalse,
+    );
+    await back();
     expect(find.text('relay.nmail.li, auth.nostr1.com'), findsOneWidget);
     await tester.runAsync(() async {
       expect(
@@ -4421,7 +4449,7 @@ void main() {
   testWidgets('changes the servers of the large emails of new addresses', (
     tester,
   ) async {
-    setScreen(tester, const Size(390, 844));
+    setScreen(tester, const Size(1280, 800));
     await open(tester, items: [github]);
     await tester.pumpWidget(
       SubmarineApp(
@@ -4444,21 +4472,28 @@ void main() {
       findsOneWidget,
     );
 
-    await tester.tap(settingsButton('Servers for large emails', 'Change'));
+    await tester.tap(find.text('Servers for large emails'));
     await settle(tester);
-    await tester.enterText(find.byType(TextField), 'not a server');
-    await tester.tap(find.byTooltip('Add a server'));
+    await tester.tap(find.text('Add a server'));
+    await settle(tester);
+    final address = find.widgetWithText(TextField, 'Server address');
+    await tester.enterText(address, 'not a server');
+    await tester.tap(inDialog('Add'));
     await settle(tester);
     expect(find.text('This is not a server address.'), findsOneWidget);
-
-    await tester.tap(find.byTooltip('Remove this server').last);
-    await tester.enterText(find.byType(TextField), 'blossom.example.com/');
-    await tester.tap(find.text('Save'));
+    await tester.enterText(address, 'blossom.example.com/');
+    await tester.tap(inDialog('Add'));
     await settle(tester);
-    expect(
-      find.text('blossom.nmail.li, blossom.yakihonne.com, blossom.example.com'),
-      findsOneWidget,
+    await tester.tap(
+      find.descendant(
+        of: find.widgetWithText(SettingsTile, 'blossom.ditto.pub'),
+        matching: find.byTooltip('Remove this server'),
+      ),
     );
+    await settle(tester);
+    expect(find.text('Removed'), findsOneWidget);
+    expect(find.text('New'), findsOneWidget);
+    await write(tester, find.widgetWithText(FilledButton, 'Save'));
     await tester.runAsync(() async {
       expect((await MailSettings.load()).urls(MailList.servers), [
         'https://blossom.nmail.li',
@@ -4466,6 +4501,12 @@ void main() {
         'https://blossom.example.com',
       ]);
     });
+    await tester.tap(find.byType(BackButton));
+    await settle(tester);
+    expect(
+      find.text('blossom.nmail.li, blossom.yakihonne.com, blossom.example.com'),
+      findsOneWidget,
+    );
     await close(tester);
   });
 

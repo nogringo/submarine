@@ -133,3 +133,19 @@ final settingsButtonStyle = OutlinedButton.styleFrom(
   minimumSize: const Size(0, 40),
   padding: const EdgeInsets.symmetric(horizontal: 16),
 );
+
+/// [child] centered, at most as wide as the settings.
+class SettingsWidth extends StatelessWidget {
+  const SettingsWidth({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Align(
+    alignment: Alignment.topCenter,
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 720),
+      child: child,
+    ),
+  );
+}

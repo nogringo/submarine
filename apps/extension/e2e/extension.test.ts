@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { generateSecretKey, nip19 } from "nostr-tools";
+import { generateSecretKey, getPublicKey, nip19 } from "nostr-tools";
 import * as nip49 from "nostr-tools/nip49";
 import type { Page } from "puppeteer";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -765,6 +765,44 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     );
   });
 
+  it("shows the keys of the vault, its private key hidden until asked", async () => {
+    const { popup } = extension;
+    expect(await popup.$eval(".vault-settings-npub", (npub) => npub.textContent)).toBe(
+      nip19.npubEncode(getPublicKey(secretKey)),
+    );
+    const nsec = nip19.nsecEncode(secretKey);
+    await extension.click(".vault-settings .key-box button[aria-label=Copy]");
+    await popup.waitForSelector(".vault-settings .key-box button[aria-label=Copied]");
+    expect(await extension.readClipboard()).toBe(nsec);
+    expect(await popup.$(".key-box [role=img]")).not.toBeNull();
+    await extension.click(".vault-settings .key-box button[aria-label=Show]");
+    await popup.waitForFunction(
+      (nsec) => document.querySelector(".vault-settings .key-box-value")?.textContent === nsec,
+      {},
+      nsec,
+    );
+    expect(await violations(popup)).toEqual([]);
+  });
+
+  it("exports the vault key encrypted with a password of 12 characters at least", async () => {
+    const { popup } = extension;
+    await extension.click(".vault-settings button::-p-text(Export)");
+    await popup.waitForSelector("[role=dialog] input[name=password]");
+    await extension.fill("input[name=password]", "too short");
+    await extension.click("[role=dialog] button[type=submit]");
+    await popup.waitForSelector(`::-p-text(${english.passwordMinLength.replace("{count}", "12")})`);
+    expect(await violations(popup)).toEqual([]);
+    await extension.fill("input[name=password]", "a long password");
+    await extension.fill("input[name=confirmation]", "a long password");
+    await extension.click("[role=dialog] button[type=submit]");
+    const box = await popup.waitForSelector("[role=dialog] .key-box-value");
+    const ncryptsec = (await box?.evaluate((value) => value.textContent)) ?? "";
+    expect(nip49.decrypt(ncryptsec, "a long password")).toEqual(secretKey);
+    expect(await violations(popup)).toEqual([]);
+    await extension.click("[role=dialog] button::-p-text(Done)");
+    await popup.waitForSelector("[role=dialog]", { hidden: true });
+  });
+
   it("goes back to the list with Escape, onto the vaults button", async () => {
     const { popup } = extension;
     await extension.press("Escape");
@@ -1028,7 +1066,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     const { popup } = extension;
     await extension.click(".drawer [role=row] button[aria-label='Vault settings']");
     await popup.waitForSelector("[role=dialog]", { hidden: true });
-    await extension.click(".vault-settings .settings-tile button");
+    await extension.click(".vault-settings button::-p-text(Remove)");
     const dialog = await popup.waitForSelector("[role=alertdialog]");
     expect(await dialog?.$eval("h2", (title) => title.textContent)).toBe(
       english.removeVaultTitle.replace("{name}", "Family"),
@@ -1045,7 +1083,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
 
   it("removes the vault from this device, for good", async () => {
     const { popup } = extension;
-    await extension.click(".vault-settings .settings-tile button");
+    await extension.click(".vault-settings button::-p-text(Remove)");
     await extension.click("[role=alertdialog] button::-p-text(Remove)");
     await popup.waitForSelector(".tagline");
     await extension.reload();

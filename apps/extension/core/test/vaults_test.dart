@@ -134,6 +134,25 @@ void main() {
     expect((record.name, record.color), ('Family', 2));
   });
 
+  test('gives the key of a vault, as an nsec', () async {
+    await vaults.add(key: privateKey, name: 'Home', color: 1);
+    expect(await vaults.key(pubkey), Nip19.encodePrivateKey(privateKey));
+    await expectLater(
+      vaults.key(signers.derivePublicKey('${'1' * 63}2')),
+      throwsCode('vaultNotFound'),
+    );
+  });
+
+  test('encrypts the key of a vault with a password', () async {
+    await vaults.add(key: privateKey, name: 'Home', color: 1);
+    await expectLater(
+      vaults.encryptedKey(pubkey, 'too short'),
+      throwsCode('vaultKeyPasswordTooShort'),
+    );
+    final ncryptsec = await vaults.encryptedKey(pubkey, 'a long password');
+    expect(await decryptVaultKey(ncryptsec, 'a long password'), privateKey);
+  });
+
   test('removes a vault, the others kept', () async {
     const otherKey =
         '7f7ff03d123792d6ac594bfa67bf6d0c0ab55b6b1fdb6249303fe861f1ccba9a';

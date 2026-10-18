@@ -126,10 +126,7 @@ class Vaults {
           throw CoreException('vaultNameRequired');
         }
         final records = await this.records();
-        final index = records.indexWhere(
-          (record) => _signers.derivePublicKey(record.privateKey) == pubkey,
-        );
-        if (index == -1) throw CoreException('vaultNotFound');
+        final index = _indexOf(records, pubkey);
         final record = records[index] = records[index].copyWith(
           name: trimmed,
           color: color,
@@ -138,14 +135,31 @@ class Vaults {
         return _summary(record);
       });
 
+  /// The key of the vault [pubkey], as an nsec, for the vault settings to show
+  /// or copy.
+  Future<String> key(String pubkey) async {
+    final records = await this.records();
+    return Nip19.encodePrivateKey(
+      records[_indexOf(records, pubkey)].privateKey,
+    );
+  }
+
+  /// The key of the vault [pubkey] encrypted with [password], as an ncryptsec.
+  Future<String> encryptedKey(String pubkey, String password) async {
+    if (password.length < minVaultKeyPasswordLength) {
+      throw CoreException('vaultKeyPasswordTooShort');
+    }
+    final records = await this.records();
+    return encryptVaultKey(
+      records[_indexOf(records, pubkey)].privateKey,
+      password,
+    );
+  }
+
   /// Removes the vault [pubkey] from this device, and returns its record.
   Future<VaultRecord> remove(String pubkey) => _write(() async {
     final records = await this.records();
-    final index = records.indexWhere(
-      (record) => _signers.derivePublicKey(record.privateKey) == pubkey,
-    );
-    if (index == -1) throw CoreException('vaultNotFound');
-    final record = records.removeAt(index);
+    final record = records.removeAt(_indexOf(records, pubkey));
     await _save(records);
     return record;
   });
@@ -153,6 +167,14 @@ class Vaults {
   /// Removes every vault from this device, without reading them: what a
   /// forgotten lock password leaves.
   Future<void> forget() => _write(() => _store.remove(_vaultsKey));
+
+  int _indexOf(List<VaultRecord> records, String pubkey) {
+    final index = records.indexWhere(
+      (record) => _signers.derivePublicKey(record.privateKey) == pubkey,
+    );
+    if (index == -1) throw CoreException('vaultNotFound');
+    return index;
+  }
 
   Future<T> _write<T>(Future<T> Function() write) {
     final written = _writing.then((_) => write());

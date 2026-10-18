@@ -20,16 +20,21 @@ export function SettingsSection({
   );
 }
 
-/** A row of a settings card: its title, then `error` in red or else its description, `children` at its end. */
+/**
+ * A row of a settings card: its title, then `error` in red or else its description, `below` under
+ * them, `children` at its end.
+ */
 export function SettingsTile({
   title,
   description,
   error,
+  below,
   children,
 }: {
   title: string;
   description?: string;
   error?: string;
+  below?: ReactNode;
   children?: ReactNode;
 }) {
   return (
@@ -43,6 +48,7 @@ export function SettingsTile({
         ) : (
           description && <span className="settings-tile-description">{description}</span>
         )}
+        {below}
       </div>
       {children && <div className="settings-tile-end">{children}</div>}
     </div>

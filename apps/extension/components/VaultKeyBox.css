@@ -1,0 +1,23 @@
+.key-box {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 4px 4px 4px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--background);
+}
+
+.key-box-value {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--mono-font);
+  font-size: 14px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.dialog-content + .key-box {
+  margin-top: 20px;
+}

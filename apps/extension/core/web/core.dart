@@ -141,6 +141,11 @@ void main() {
         name: args['name'] as String?,
         color: args['color'] as int?,
       ),
+      'vaultKey': (args) => vaults.key(args['vault'] as String),
+      'encryptVaultKey': (args) => vaults.encryptedKey(
+        args['vault'] as String,
+        args['password'] as String,
+      ),
       'removeVault': (args) async {
         final record = await vaults.remove(args['vault'] as String);
         await (await sync()).forget(record);

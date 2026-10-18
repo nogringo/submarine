@@ -120,7 +120,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     await extension.fill("input[name=password]", "a long password");
     await extension.click("button[type=submit]");
     const title = await popup.waitForSelector(".home-title");
-    expect(await title?.evaluate((h1) => h1.textContent)).toBe("All vaults");
+    expect(await title?.evaluate((h1) => h1.textContent)).toBe("Home");
   });
 
   it("syncs the vault from its relays while the popup is open", async () => {
@@ -1199,14 +1199,10 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s, the lock password forgott
     // Escape leaves it open: the Later button is still there to press.
     await extension.press("Escape");
     await extension.click(`[role=dialog] button::-p-text(${english.later})`);
-    await popup.waitForSelector(".home-title");
-    await extension.click("button[aria-label=Vaults]");
-    const rows = await popup.waitForSelector(".drawer [role=grid]");
-    expect(
-      await rows?.$$eval(".drawer-row-title", (titles) => titles.map((title) => title.textContent)),
-    ).toEqual(["All vaults", "Home"]);
-    await extension.click(".drawer [role=row]::-p-text(Home)");
-    await popup.waitForSelector("[role=dialog]", { hidden: true });
+    // The vault just created shows, as in the app.
+    await popup.waitForFunction(
+      () => document.querySelector(".home-title")?.textContent === "Home",
+    );
   });
 
   it("removes the vaults from this device, and the lock password with them", async () => {

@@ -64,9 +64,11 @@ type Opened =
   | { page: "generator" }
   | { page: "settings" };
 
-/** The vaults of this device, one of them or all of them shown. */
+/** The vaults of this device, the `selected` one or all of them shown. */
 export function Home({
   vaults,
+  selected,
+  onSelect,
   sync,
   hasLockPassword,
   onLock,
@@ -75,6 +77,8 @@ export function Home({
   onVaultRemoved,
 }: {
   vaults: Vault[];
+  selected?: string;
+  onSelect: (pubkey?: string) => void;
   sync: Sync;
   hasLockPassword: boolean;
   onLock: () => void;
@@ -83,7 +87,6 @@ export function Home({
   onVaultRemoved: (pubkey: string) => void;
 }) {
   const { formatMessage: t } = useIntl();
-  const [selected, setSelected] = useState(allVaults);
   // Kept from a vault to another, as in the app.
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<ItemFilter>("all");
@@ -199,7 +202,7 @@ export function Home({
   /** Shows the item saved, in the list of the vault it went to, under a filter that keeps it. */
   const showSaved = (savedVault: Vault, id: string, cipher: Cipher) => {
     if (!filterKeeps(filter, cipher)) setFilter("all");
-    if (vault && vault.pubkey !== savedVault.pubkey) setSelected(savedVault.pubkey);
+    if (vault && vault.pubkey !== savedVault.pubkey) onSelect(savedVault.pubkey);
     setOpened({ page: "item", vault: savedVault, id });
   };
   if (!restored) return null;
@@ -231,7 +234,10 @@ export function Home({
                         disallowEmptySelection
                         selectedKeys={[vault?.pubkey ?? allVaults]}
                         onSelectionChange={(keys) => {
-                          if (keys !== "all") setSelected(String([...keys][0] ?? allVaults));
+                          if (keys !== "all") {
+                            const key = String([...keys][0] ?? allVaults);
+                            onSelect(key === allVaults ? undefined : key);
+                          }
                           close();
                         }}
                         className="drawer-list"

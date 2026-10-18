@@ -13,6 +13,8 @@ import { Welcome } from "./Welcome";
 export function App() {
   const [vaults, setVaults] = useState<Vault[]>();
   const [adding, setAdding] = useState<AddVaultChoice>();
+  // Here, for a vault just added to show at once, as in the app.
+  const [selected, setSelected] = useState<string>();
   const sync = useSync();
   // Read again as the core tells: another popup or the lock delay may lock or unlock.
   const { lock, read: readLock, lockNow } = useLockState(sync.revision);
@@ -21,7 +23,10 @@ export function App() {
   useEffect(() => {
     // Locking lets go of them.
     if (unlocked) callCore("vaults", {}).then(setVaults);
-    else setVaults(undefined);
+    else {
+      setVaults(undefined);
+      setSelected(undefined);
+    }
   }, [unlocked]);
   useEffect(() => {
     // However they locked, a popup sees it before unlocking them.
@@ -39,6 +44,7 @@ export function App() {
         vaultCount={vaults.length}
         onAdded={(vault) => {
           setVaults([...vaults, vault]);
+          setSelected(vault.pubkey);
           setAdding(undefined);
         }}
         onCancel={() => setAdding(undefined)}
@@ -49,6 +55,8 @@ export function App() {
   return (
     <Home
       vaults={vaults}
+      selected={selected}
+      onSelect={setSelected}
       sync={sync}
       hasLockPassword={lock.hasPassword}
       onLock={lockNow}

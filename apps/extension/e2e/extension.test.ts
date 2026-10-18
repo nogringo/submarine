@@ -555,10 +555,25 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
       "Move First name",
     );
     expect(await violations(popup)).toEqual([]);
+    await extension.click("button::-p-text(Add a field)");
+    await extension.click(`[role=menuitem]::-p-text(${english.emailAddressField})`);
+    await popup.waitForFunction(() => document.querySelectorAll(".custom-field").length === 4);
+    const [address, key] = await popup.$$eval(".custom-field:nth-child(n+3) input", (inputs) =>
+      inputs.map((input) => [(input as HTMLInputElement).value, (input as HTMLInputElement).type]),
+    );
+    expect(address).toEqual([expect.stringMatching(/^npub1[a-z0-9]{58}@uid\.ovh$/), "text"]);
+    expect(key).toEqual([expect.stringMatching(/^nsec1[a-z0-9]{58}$/), "password"]);
     await extension.click(save);
     await popup.waitForSelector(".item-form", { hidden: true });
     await popup.waitForFunction(() => document.activeElement?.textContent === "Forum");
-    expect(await fieldLabels()).toEqual(["Username", "Password", "First name", "PIN"]);
+    expect(await fieldLabels()).toEqual([
+      "Username",
+      "Password",
+      "First name",
+      "PIN",
+      english.email,
+      english.mailboxKey,
+    ]);
     await extension.press("Escape");
     await rowNames("Forum,GitHub,Visa,wifi");
   });

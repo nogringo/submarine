@@ -1,5 +1,6 @@
 import editOutlined from "@material-design-icons/svg/outlined/edit.svg";
 import add from "@material-design-icons/svg/round/add.svg";
+import alternateEmail from "@material-design-icons/svg/round/alternate_email.svg";
 import casino from "@material-design-icons/svg/round/casino.svg";
 import deleteOutline from "@material-design-icons/svg/round/delete_outline.svg";
 import dragIndicator from "@material-design-icons/svg/round/drag_indicator.svg";
@@ -40,7 +41,7 @@ const madeUpValues: [kind: MadeUpValue, label: MessageId][] = [
 /**
  * The custom fields of an item of `type`, as Bitwarden's form edits them: added with a type and a
  * label, renamed, deleted and moved. A login can also get a made-up first name, last name or birth
- * date, as in the app. Email addresses are left to the app.
+ * date, or an email address of its own whose mailbox key goes in a hidden field, as in the app.
  */
 export function CustomFieldsEditor({
   type,
@@ -81,6 +82,16 @@ export function CustomFieldsEditor({
     onChange([
       ...fields,
       editedField({ name: t({ id: label }), value, type: 0, linkedId: null }, { madeUp: kind }),
+    ]);
+  };
+
+  /** An address at the bridge of the email settings. Saving the item publishes its lists. */
+  const addMailbox = async () => {
+    const { key, address } = await callCore("generateMailbox", {});
+    onChange([
+      ...fields,
+      editedField({ name: t({ id: "email" }), value: address, type: 0, linkedId: null }),
+      editedField({ name: t({ id: "mailboxKey" }), value: key, type: 1, linkedId: null }),
     ]);
   };
 
@@ -141,9 +152,11 @@ export function CustomFieldsEditor({
               icon: casino,
               separated: index === 0,
             })),
+            { id: "email", label: t({ id: "emailAddressField" }), icon: alternateEmail },
           ]}
           onAction={(id) => {
             if (id === "custom") setDialog({});
+            else if (id === "email") void addMailbox();
             else {
               const [kind, label] = madeUpValues.find(([kind]) => kind === id) ?? [];
               if (kind && label) void addMadeUp(kind, label);

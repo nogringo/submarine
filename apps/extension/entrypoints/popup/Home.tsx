@@ -446,7 +446,9 @@ export function Home({
         />
       )}
       {opened?.page === "generator" && <GeneratorPage onBack={back} />}
-      {opened?.page === "settings" && <Settings hasLockPassword={hasLockPassword} onBack={back} />}
+      {opened?.page === "settings" && (
+        <Settings hasLockPassword={hasLockPassword} vaults={vaults} onBack={back} />
+      )}
       {/* Kept in the page, empty, for a screen reader to read what it says once it does. */}
       <p role="status" className="visually-hidden home-status">
         {copied ? t({ id: "copied" }) : ""}

@@ -14,6 +14,7 @@ import 'package:nostr_passwords/nostr_passwords.dart'
         parseRelayUrl,
         parseServerUrl;
 import 'package:submarine_extension_core/auto_lock.dart';
+import 'package:submarine_extension_core/bitwarden_files.dart';
 import 'package:submarine_extension_core/core.dart';
 import 'package:submarine_extension_core/device_key.dart';
 import 'package:submarine_extension_core/generator.dart';
@@ -219,6 +220,19 @@ void main() {
           cipher: args['cipher'] as Map<String, dynamic>,
         ),
       },
+      'importItems': (args) async {
+        await (await sync()).importItems(
+          pubkey: args['vault'] as String,
+          ciphers: args['ciphers'] as List<Object?>,
+        );
+        return null;
+      },
+      'openExport': (args) =>
+          openExport(args['source'] as String, args['password'] as String?),
+      'exportVault': (args) async => (await sync()).exportVault(
+        pubkey: args['vault'] as String,
+        password: args['password'] as String?,
+      ),
       'updateItem': (args) async {
         await (await sync()).updateItem(
           pubkey: args['vault'] as String,

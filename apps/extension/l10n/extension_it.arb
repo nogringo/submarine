@@ -7,6 +7,7 @@
   "fieldPosition": "{field}: posizione {position} di {count}",
   "fill": "Compila",
   "forThisSite": "Per questo sito",
+  "importExportInTab": "I file si scelgono e si salvano in questa scheda. La finestra dell'estensione si chiude quando si apre una finestra di dialogo dei file.",
   "itemFilters": "Filtri",
   "lockOnBrowserRestart": "Al riavvio del browser",
   "nothingToFill": "Nessun modulo di accesso da compilare in questa pagina.",

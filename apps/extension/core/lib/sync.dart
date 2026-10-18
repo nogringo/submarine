@@ -364,13 +364,33 @@ class VaultSync {
   Future<String> createItem({
     required String pubkey,
     required Map<String, dynamic> cipher,
+  }) => _write(
+    pubkey,
+    (vault) async => (await vault.createItem(_newCipher(cipher))).id,
+  );
+
+  /// Saves [ciphers], in Bitwarden's JSON, as new items of the vault
+  /// [pubkey], in order: an import, a part of it at a time.
+  Future<void> importItems({
+    required String pubkey,
+    required List<Object?> ciphers,
   }) => _write(pubkey, (vault) async {
-    final now = DateTime.now().toUtc();
-    final created = Cipher.fromJson(cipher)
-      ..creationDate ??= now
-      ..revisionDate ??= now;
-    return (await vault.createItem(created)).id;
+    for (final cipher in ciphers) {
+      await vault.createItem(_newCipher(cipher as Map<String, dynamic>));
+    }
   });
+
+  /// The items of the vault [pubkey] as a Bitwarden JSON export, the trash
+  /// left out, protected by [password] as Bitwarden protects its exports
+  /// when given.
+  Future<String> exportVault({required String pubkey, String? password}) async {
+    final vaults = await _vaultsOf(pubkey);
+    if (vaults.isEmpty) throw CoreException('vaultNotFound');
+    final export = writeBitwardenExport(
+      await vaults.single.vault.openedItems(),
+    );
+    return password == null ? export : encryptBitwardenExport(export, password);
+  }
 
   /// Saves [cipher] as the next version of the [base] an [item] read gave,
   /// rather than of the versions synced since: as in the app, saving over
@@ -481,6 +501,14 @@ class VaultSync {
 }
 
 void _sendsQuietly(bool sending) {}
+
+/// [json], a cipher in Bitwarden's JSON, dated now unless it is dated.
+Cipher _newCipher(Map<String, dynamic> json) {
+  final now = DateTime.now().toUtc();
+  return Cipher.fromJson(json)
+    ..creationDate ??= now
+    ..revisionDate ??= now;
+}
 
 /// What the copy button of an item's row copies, as in the app: the secret a
 /// login or a card is opened for.

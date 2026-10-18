@@ -16,6 +16,7 @@ Submarine keeps your passwords, cards and notes safe and in sync across your dev
 - Search your logins, cards, notes and identities, across all your vaults, or filter them: favorites, each type, the trash.
 - Create and edit your logins, cards and notes, with custom fields. Generate strong passwords, passphrases and usernames as you fill them in.
 - Mark your favorites, move items to the trash and restore them, from an item or with a right click on it.
+- Import your passwords from a Bitwarden export, and export a vault to a file Bitwarden opens.
 - Copy a username, a password or a two-factor code in one click. Copied passwords are cleared from the clipboard after a delay.
 - Open it from the keyboard with Ctrl+Shift+Y (Command+Shift+Y on a Mac, Ctrl+Shift+U on Linux).
 - Lock the extension with a password, by itself after the delay you choose.

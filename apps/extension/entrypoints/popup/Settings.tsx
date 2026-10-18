@@ -12,15 +12,18 @@ import {
   readClipboardTimeout,
   saveClipboardTimeout,
 } from "@/lib/clipboard";
-import { callCore, type LockTimeout, lockTimeouts } from "@/lib/core";
+import { callCore, type LockTimeout, lockTimeouts, type Vault } from "@/lib/core";
+import { ImportExportSection } from "./ImportExport";
 import "./Settings.css";
 
 /** The settings of the extension on this device, as in the app. */
 export function Settings({
   hasLockPassword,
+  vaults,
   onBack,
 }: {
   hasLockPassword: boolean;
+  vaults: Vault[];
   onBack: () => void;
 }) {
   const intl = useIntl();
@@ -92,6 +95,7 @@ export function Settings({
             />
           )}
         </SettingsSection>
+        <ImportExportSection vaults={vaults} />
       </div>
     </Page>
   );

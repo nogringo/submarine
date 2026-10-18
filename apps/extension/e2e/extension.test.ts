@@ -957,6 +957,156 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     );
   });
 
+  /** Exports the vault from the settings, `password` protecting the file, and reads the file. */
+  async function exportVault(password?: string): Promise<{ name: string; content: string }> {
+    const { popup } = extension;
+    await popup.evaluate(() => {
+      const click = HTMLAnchorElement.prototype.click;
+      // Read back rather than downloaded.
+      HTMLAnchorElement.prototype.click = function (this: HTMLAnchorElement) {
+        if (!this.download) return click.call(this);
+        const name = this.download;
+        Object.assign(window, {
+          saved: fetch(this.href).then(async (file) => ({ name, content: await file.text() })),
+        });
+      };
+    });
+    await extension.click(".settings button::-p-text(Export)");
+    await popup.waitForSelector("[role=dialog] input[name=password]");
+    if (password) {
+      await extension.fill("input[name=password]", password);
+      await extension.fill("input[name=confirmation]", password);
+    } else {
+      await popup.$eval("[role=dialog] [role=switch]", (input) => (input as HTMLElement).click());
+      await popup.waitForSelector(`[role=dialog] ::-p-text(${english.exportWarning})`);
+    }
+    await extension.click("[role=dialog] button[type=submit]");
+    await popup.waitForSelector("[role=dialog]", { hidden: true });
+    await popup.waitForFunction(() => "saved" in window);
+    return popup.evaluate(() => {
+      const { saved } = window as unknown as { saved: Promise<{ name: string; content: string }> };
+      delete (window as { saved?: unknown }).saved;
+      return saved;
+    });
+  }
+
+  /**
+   * Chooses `content` as the file `name` to import from the settings. Firefox's WebDriver BiDi sets
+   * no file on an extension page.
+   */
+  async function chooseImport(name: string, content: string) {
+    const input = await extension.popup.waitForSelector(".settings input[type=file]");
+    await input?.evaluate(
+      (input, name, content) => {
+        const files = new DataTransfer();
+        files.items.add(new File([content], name, { type: "application/json" }));
+        (input as HTMLInputElement).files = files.files;
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+      },
+      name,
+      content,
+    );
+  }
+
+  it("exports the vault to a Bitwarden file, the trash left out", async () => {
+    const { popup } = extension;
+    await extension.click(".settings button::-p-text(Export)");
+    await popup.waitForSelector("[role=dialog] input[name=password]");
+    expect(await violations(popup)).toEqual([]);
+    await extension.fill("input[name=password]", "file password");
+    await extension.fill("input[name=confirmation]", "other password");
+    await extension.click("[role=dialog] button[type=submit]");
+    await popup.waitForSelector(`::-p-text(${english.filePasswordMismatch})`);
+    await extension.click("[role=dialog] button::-p-text(Cancel)");
+    await popup.waitForSelector("[role=dialog]", { hidden: true });
+
+    const { name: fileName, content } = await exportVault();
+
+    expect(fileName).toMatch(/^submarine_export_\d{14}\.json$/);
+    const names = JSON.parse(content).items.map((item: { name: string }) => item.name);
+    expect(names).toEqual(expect.arrayContaining(["GitHub", "Visa", "wifi"]));
+    expect(names).not.toContain("Old bank");
+  });
+
+  it("imports a password protected Bitwarden file, once its password opens it", async () => {
+    const { popup } = extension;
+    const { name: fileName, content } = await exportVault("file password");
+    expect(fileName).toMatch(/^submarine_encrypted_export_\d{14}\.json$/);
+    expect(JSON.parse(content)).toMatchObject({ encrypted: true, passwordProtected: true });
+
+    await chooseImport(fileName, content);
+    await popup.waitForSelector("[role=dialog] input[name=password]");
+    expect(await violations(popup)).toEqual([]);
+    await extension.fill("input[name=password]", "wrong password");
+    await extension.click("[role=dialog] button[type=submit]");
+    await popup.waitForSelector(`::-p-text(${english.wrongFilePassword})`);
+    await extension.fill("input[name=password]", "file password");
+    await extension.click("[role=dialog] button[type=submit]");
+    await popup.waitForSelector(`[role=dialog] ::-p-text(found in ${fileName})`);
+    // Rather than every item twice.
+    await extension.click("[role=dialog] button::-p-text(Cancel)");
+    await popup.waitForSelector("[role=dialog]", { hidden: true });
+  });
+
+  it("imports a Bitwarden file into the vault, which lists its items", async () => {
+    const { popup } = extension;
+    await chooseImport("bitwarden.json", "{}");
+    await popup.waitForSelector(`.settings [role=alert]::-p-text(${english.importNotBitwarden})`);
+
+    await chooseImport(
+      "bitwarden.json",
+      JSON.stringify({
+        encrypted: false,
+        folders: [],
+        items: [{ id: "x", type: 2, name: "Imported note", secureNote: { type: 0 } }],
+      }),
+    );
+    await popup.waitForSelector("[role=dialog] ::-p-text(1 item found in bitwarden.json.)");
+    expect(await violations(popup)).toEqual([]);
+    await extension.click("[role=dialog] button::-p-text(Import)");
+    await popup.waitForSelector("[role=dialog] ::-p-text(1 item imported into)");
+    expect(await violations(popup)).toEqual([]);
+    await extension.click("[role=dialog] button::-p-text(Done)");
+    await popup.waitForSelector("[role=dialog]", { hidden: true });
+    await extension.press("Escape");
+    await popup.waitForSelector(".settings", { hidden: true });
+    await popup.waitForSelector(".item-row[aria-label='Imported note']");
+    await extension.click("button[aria-label=Vaults]");
+    await extension.click(".drawer button::-p-text(Settings)");
+    await popup.waitForSelector(".settings");
+  });
+
+  it.skipIf(name === "firefox")(
+    "imports and exports in a tab, which file dialogs do not close",
+    async () => {
+      for (const [button, ready] of [
+        ["Import", () => document.activeElement?.textContent === "Import"],
+        ["Export", () => !!document.querySelector("[role=dialog] input[name=password]")],
+      ] as const) {
+        const { page, popup } = await openPopupOver(extension.browser, "https://www.example.com/");
+        let tab: Page | undefined;
+        try {
+          await popup.locator("button[aria-label=Vaults]").click();
+          await popup.locator(".drawer button::-p-text(Settings)").click();
+          const hash = `#${button.toLowerCase()}`;
+          const opened = extension.browser.waitForTarget((target) => target.url().endsWith(hash));
+          await popup.locator(`.settings button::-p-text(${button})`).click();
+          tab = await (await opened).asPage();
+          await tab.waitForFunction(ready);
+          expect(await tab.$eval("h1", (title) => title.textContent)).toBe(english.importExport);
+          // The other settings stay in the popup.
+          expect(await tab.$(".settings")).toBeNull();
+          expect(await violations(tab)).toEqual([]);
+        } finally {
+          await tab?.close();
+          if (!popup.isClosed()) await popup.close();
+          await page.close();
+          await extension.popup.bringToFront();
+        }
+      }
+    },
+  );
+
   it("empties the clipboard of a password after the delay chosen", async () => {
     const { popup } = extension;
     const select = ".settings .select-tile-button";

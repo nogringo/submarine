@@ -26,7 +26,10 @@ export function FilledButton({
 }
 
 /** The action of a row of settings, in red for one that destroys. */
-export function OutlinedButton({ danger, ...props }: ButtonProps & { danger?: boolean }) {
+export function OutlinedButton({
+  danger,
+  ...props
+}: ButtonProps & { danger?: boolean; ref?: Ref<HTMLButtonElement> }) {
   return <Button {...props} className={danger ? "button outlined danger" : "button outlined"} />;
 }
 

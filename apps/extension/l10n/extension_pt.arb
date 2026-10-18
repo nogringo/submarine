@@ -7,6 +7,7 @@
   "fieldPosition": "{field}: posição {position} de {count}",
   "fill": "Preencher",
   "forThisSite": "Para este site",
+  "importExportInTab": "Os ficheiros são escolhidos e guardados neste separador. A janela da extensão fecha-se quando se abre uma caixa de diálogo de ficheiros.",
   "itemFilters": "Filtros",
   "lockOnBrowserRestart": "Ao reiniciar o navegador",
   "nothingToFill": "Não há nenhum formulário de início de sessão para preencher nesta página.",

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { callCore, type Vault } from "@/lib/core";
+import { tabAction } from "@/lib/import-export";
 import { forgetOpenedItem } from "@/lib/opened-item";
 import { useLockState } from "@/lib/use-lock-state";
 import { useReportUse } from "@/lib/use-report-use";
@@ -7,6 +8,7 @@ import { useSync } from "@/lib/use-sync";
 import { AddVault, type AddVaultChoice } from "./AddVault";
 import "./App.css";
 import { Home } from "./Home";
+import { ImportExportPage } from "./ImportExport";
 import { LockScreen } from "./LockScreen";
 import { Welcome } from "./Welcome";
 
@@ -15,6 +17,7 @@ export function App() {
   const [adding, setAdding] = useState<AddVaultChoice>();
   // Here, for a vault just added to show at once, as in the app.
   const [selected, setSelected] = useState<string>();
+  const [fileAction] = useState(tabAction);
   const sync = useSync();
   // Read again as the core tells: another popup or the lock delay may lock or unlock.
   const { lock, read: readLock, lockNow } = useLockState(sync.revision);
@@ -52,6 +55,7 @@ export function App() {
     );
   }
   if (vaults.length === 0) return <Welcome onAddVault={setAdding} />;
+  if (fileAction) return <ImportExportPage vaults={vaults} action={fileAction} />;
   return (
     <Home
       vaults={vaults}

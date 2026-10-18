@@ -521,6 +521,79 @@ void main() {
       expect(changes, greaterThan(before));
     });
 
+    test('imports items in order, dated now unless dated', () async {
+      final before = changes;
+
+      await sync.importItems(
+        pubkey: pubkey,
+        ciphers: [
+          {
+            'type': 2,
+            'name': 'Alarm code',
+            'secureNote': {'type': 0},
+          },
+          {
+            'type': 1,
+            'name': 'GitHub',
+            'login': {'username': 'alice'},
+            'creationDate': '2020-01-02T03:04:05.000Z',
+          },
+        ],
+      );
+
+      final items = await sync.items();
+      expect(
+        [for (final item in items) item['name']],
+        ['Alarm code', 'GitHub', 'Wifi'],
+      );
+      final github = (await sync.item(
+        pubkey: pubkey,
+        id: items[1]['id'] as String,
+      ))!;
+      expect(
+        github['cipher'],
+        containsPair('creationDate', '2020-01-02T03:04:05.000Z'),
+      );
+      expect(changes, greaterThan(before));
+    });
+
+    test('exports the vault as Bitwarden does, the trash left out', () async {
+      await publish(
+        'Old',
+        cipher: Cipher(type: CipherType.secureNote, name: 'Old'),
+      );
+      await _until(() async => await opened() == 2);
+      final old = (await sync.items()).firstWhere(
+        (item) => item['name'] == 'Old',
+      );
+      await sync.trashItem(pubkey: pubkey, id: old['id'] as String);
+
+      final export = await sync.exportVault(pubkey: pubkey);
+
+      expect(
+        [for (final cipher in parseBitwardenExport(export)) cipher.name],
+        ['Wifi'],
+      );
+    });
+
+    test('exports the vault protected by a password', () async {
+      final export = await sync.exportVault(pubkey: pubkey, password: 'pw');
+
+      expect(
+        () => parseBitwardenExport(export),
+        throwsA(isA<PasswordProtectedExportException>()),
+      );
+      expect(
+        [
+          for (final cipher in parseBitwardenExport(
+            await decryptBitwardenExport(export, 'pw'),
+          ))
+            cipher.name,
+        ],
+        ['Wifi'],
+      );
+    });
+
     test('saves a new version of it, its other keys kept', () async {
       final read = (await sync.item(pubkey: pubkey, id: id))!;
 

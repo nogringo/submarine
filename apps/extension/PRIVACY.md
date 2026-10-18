@@ -23,6 +23,8 @@ When you create, edit, favorite, trash or restore an item, the extension encrypt
 
 The password generator works in your browser: what it generates leaves it only inside an item you save.
 
+When you import a Bitwarden export, the extension reads the file you choose in your browser, then saves its items into the vault you pick, as items you create. When you export a vault, it saves the file to your computer, encrypted with the password you choose, or not encrypted if you turn that off. The file goes nowhere else.
+
 When you ask it to fill a login, from its window or with its keyboard shortcut, the extension writes the username and password into the sign-in form of the current page, and only if the page's address matches the login. The website receives them once you sign in, as when you type them.
 
 ## What the extension does not do

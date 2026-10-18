@@ -7,6 +7,7 @@
   "fieldPosition": "{field}: posición {position} de {count}",
   "fill": "Rellenar",
   "forThisSite": "Para este sitio",
+  "importExportInTab": "Los archivos se eligen y se guardan en esta pestaña. La ventana de la extensión se cierra cuando se abre un cuadro de diálogo de archivos.",
   "itemFilters": "Filtros",
   "lockOnBrowserRestart": "Al reiniciar el navegador",
   "nothingToFill": "No hay ningún formulario de inicio de sesión que rellenar en esta página.",

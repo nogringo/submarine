@@ -7,6 +7,7 @@
   "fieldPosition": "{field} : position {position} sur {count}",
   "fill": "Remplir",
   "forThisSite": "Pour ce site",
+  "importExportInTab": "Les fichiers se choisissent et s'enregistrent dans cet onglet. La fenêtre de l'extension se ferme quand une boîte de dialogue de fichier s'ouvre.",
   "itemFilters": "Filtres",
   "lockOnBrowserRestart": "Au redémarrage du navigateur",
   "nothingToFill": "Aucun formulaire de connexion à remplir sur cette page.",

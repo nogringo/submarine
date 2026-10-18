@@ -209,6 +209,19 @@ export interface CoreMethods {
   item: { args: { vault: string; id: string }; result: Item | null };
   /** Saves a cipher as a new item of the vault. */
   createItem: { args: { vault: string; cipher: Cipher }; result: { id: string } };
+  /** Saves ciphers as new items of the vault, in order: an import, a part of it at a time. */
+  importItems: { args: { vault: string; ciphers: Cipher[] }; result: null };
+  /**
+   * The items of a Bitwarden JSON export, as the app imports them, once `password` opens it if it
+   * is password protected. Fails with `passwordProtectedExport`, `wrongExportPassword`,
+   * `encryptedExport` for one only its Bitwarden account opens, or `notBitwardenExport`.
+   */
+  openExport: { args: { source: string; password?: string }; result: Cipher[] };
+  /**
+   * The vault as a Bitwarden JSON export, the trash left out, protected by `password` as Bitwarden
+   * protects its exports when given.
+   */
+  exportVault: { args: { vault: string; password?: string }; result: string };
   /**
    * Saves a cipher as the next version of the `base` the item was read from. Saving over a change
    * synced since keeps both, as a conflict, rather than losing it.

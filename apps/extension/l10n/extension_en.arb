@@ -35,6 +35,10 @@
   "@forThisSite": {
     "description": "Heading of the logins for the page the popup opened over, above the list of all items. The extension does not fill them in yet."
   },
+  "importExportInTab": "Files are chosen and saved in this tab. The extension's window closes when a file dialog opens.",
+  "@importExportInTab": {
+    "description": "Under the title of the tab the popup opens to import or export, which says why it opened."
+  },
   "itemFilters": "Filters",
   "@itemFilters": {
     "description": "Name read by a screen reader of the row of chips filtering the items: all, favorites, each type, trash."

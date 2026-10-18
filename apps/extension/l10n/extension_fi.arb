@@ -7,6 +7,7 @@
   "fieldPosition": "{field}: sijainti {position}/{count}",
   "fill": "Täytä",
   "forThisSite": "Tälle sivustolle",
+  "importExportInTab": "Tiedostot valitaan ja tallennetaan tässä välilehdessä. Laajennuksen ikkuna sulkeutuu, kun tiedostoikkuna avautuu.",
   "itemFilters": "Suodattimet",
   "lockOnBrowserRestart": "Kun selain käynnistyy uudelleen",
   "nothingToFill": "Tällä sivulla ei ole täytettävää kirjautumislomaketta.",

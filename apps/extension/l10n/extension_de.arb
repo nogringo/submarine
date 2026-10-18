@@ -7,6 +7,7 @@
   "fieldPosition": "{field}: Position {position} von {count}",
   "fill": "Ausfüllen",
   "forThisSite": "Für diese Website",
+  "importExportInTab": "Dateien werden in diesem Tab ausgewählt und gespeichert. Das Fenster der Erweiterung schließt sich, sobald ein Dateidialog geöffnet wird.",
   "itemFilters": "Filter",
   "lockOnBrowserRestart": "Beim Neustart des Browsers",
   "nothingToFill": "Auf dieser Seite gibt es kein Anmeldeformular zum Ausfüllen.",

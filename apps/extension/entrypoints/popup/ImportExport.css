@@ -1,0 +1,49 @@
+/* Over the whole tab, as a page over the popup, in a column a row can be read across. */
+.import-export-page {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--background);
+}
+
+.import-export-page > .page-content {
+  width: 100%;
+  max-width: 560px;
+  margin-inline: auto;
+  padding-top: 40px;
+}
+
+.import-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.import-progress-track {
+  height: 4px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--line);
+}
+
+.import-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.2s;
+}
+
+.import-progress-text,
+.import-export-muted {
+  color: var(--muted);
+}
+
+.import-done {
+  color: var(--text);
+}
+
+.dialog-content.import-export-error,
+.import-export-error {
+  color: var(--danger);
+}

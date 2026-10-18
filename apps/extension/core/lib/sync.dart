@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:ndk/entities.dart' show RelayConnectivity;
 import 'package:ndk/ndk.dart';
+import 'package:ndk/shared/helpers/relay_helper.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
 import 'package:sembast/sembast.dart';
 import 'package:sync_engine_shim_for_ndk/sync_engine_shim_for_ndk.dart';
@@ -27,7 +29,11 @@ class VaultSync {
          // subscription brings the rest while it stays open.
          maxStaleness: Duration.zero,
          minRevisitPeriod: const Duration(minutes: 5),
-       );
+       ) {
+    _connectivity = ndk.connectivity.relayConnectivityChanges.listen(
+      _onConnectivity,
+    );
+  }
 
   final Ndk ndk;
   final Database _database;
@@ -43,7 +49,8 @@ class VaultSync {
   /// Tells that what [states] returns, or what the vaults hold, changed.
   final void Function() onChanged;
 
-  /// Tells while changes are being sent, for the background to stay awake.
+  /// Tells while changes are being sent or a full sync runs, for the
+  /// background to stay awake.
   final void Function(bool sending) onSending;
 
   /// How long the changes saved or pushed keep being sent once the popup
@@ -55,8 +62,14 @@ class VaultSync {
   var _running = false;
   var _closed = false;
   var _sending = false;
+  var _pushing = false;
+  var _reconciles = 0;
   var _sendingUntil = DateTime(0);
   Timer? _unsentCheck;
+  late final StreamSubscription<List<RelayConnectivity>> _connectivity;
+
+  /// The relays connected, as ndk normalizes them.
+  var _connected = <String>{};
 
   /// Sends the changes no relay accepted yet too.
   Future<void> start() async {
@@ -80,6 +93,7 @@ class VaultSync {
     _running = false;
     _closed = true;
     _unsentCheck?.cancel();
+    await _connectivity.cancel();
     _setSending(false);
     for (final synced in _synced.values) {
       await synced.close();
@@ -141,11 +155,114 @@ class VaultSync {
     _setSending(sending);
   }
 
-  void _setSending(bool sending) {
+  void _setSending(bool pushing) {
+    _pushing = pushing;
+    _tellSending();
+  }
+
+  void _tellSending() {
+    final sending = !_closed && (_pushing || _reconciles > 0);
     if (sending == _sending) return;
     _sending = sending;
     onSending(sending);
   }
+
+  /// Tells only when the relays connected change: ndk tells much more.
+  void _onConnectivity(List<RelayConnectivity> relays) {
+    final connected = {
+      for (final relay in relays)
+        if (relay.isConnected) relay.url,
+    };
+    if (connected.length == _connected.length &&
+        _connected.containsAll(connected)) {
+      return;
+    }
+    _connected = connected;
+    onChanged();
+  }
+
+  /// Reads the whole vault [pubkey] on each relay, then gives the cache and
+  /// every relay what it lacks, see [Vault.reconcile]. [states] tells the
+  /// relays it left out.
+  Future<void> reconcile(String pubkey) async {
+    final vaults = await _vaultsOf(pubkey);
+    if (vaults.isEmpty) throw CoreException('vaultNotFound');
+    _reconciles++;
+    _tellSending();
+    try {
+      await vaults.single.reconcile();
+    } finally {
+      _reconciles--;
+      _tellSending();
+    }
+  }
+
+  /// The relays and the Blossom servers of the vault [pubkey], public or
+  /// private, the relays connected to, and whether saving a list cannot
+  /// replace a newer one.
+  Future<Map<String, Object?>> lists(String pubkey) async {
+    final vaults = await _vaultsOf(pubkey);
+    if (vaults.isEmpty) throw CoreException('vaultNotFound');
+    final synced = vaults.single;
+    final relays = await synced.vault.currentRelayList();
+    final servers = await synced.vault.currentServerList();
+    return {
+      'relays': [
+        for (final (urls, private) in [
+          (relays.public.keys, false),
+          (relays.private.keys, true),
+        ])
+          for (final url in urls)
+            {
+              'url': url,
+              'private': private,
+              'connected': _connected.contains(cleanRelayUrl(url) ?? url),
+            },
+      ],
+      'servers': [
+        for (final (urls, private) in [
+          (servers.public, false),
+          (servers.private, true),
+        ])
+          for (final url in urls) {'url': url, 'private': private},
+      ],
+      'editable': synced.listsEditable,
+    };
+  }
+
+  /// Saves the relays of the vault [pubkey], each keeping its read or write
+  /// marker. The relays it adds get a copy of the vault.
+  Future<void> setRelays({
+    required String pubkey,
+    required List<String> public,
+    required List<String> private,
+  }) async {
+    await _write(pubkey, (vault) async {
+      final current = await vault.currentRelayList();
+      final markers = {...current.public, ...current.private};
+      Map<String, ReadWriteMarker> marked(List<String> urls) => {
+        for (final url in urls) url: markers[url] ?? ReadWriteMarker.readWrite,
+      };
+      await vault.setRelayList(
+        RelayList(public: marked(public), private: marked(private)),
+      );
+    });
+    for (final synced in await _vaultsOf(pubkey)) {
+      await synced._follow();
+    }
+  }
+
+  /// Saves the Blossom servers of the vault [pubkey], each list in order of
+  /// preference.
+  Future<void> setServers({
+    required String pubkey,
+    required List<String> public,
+    required List<String> private,
+  }) => _write(
+    pubkey,
+    (vault) =>
+        vault.setServerList(ServerList(public: public, private: private)),
+  );
 
   /// Removes the vault of [record] from this device, see [Vault.forget]: its
   /// relays keep it. Remove its record first, for nothing to open it again.
@@ -165,6 +282,8 @@ class VaultSync {
         'phase': vault.phase.name,
         'lastSync': vault.lastSync?.toIso8601String(),
         'unsent': vault.unsent,
+        'reconciling': vault.reconciling,
+        'leftOut': vault.leftOut,
       },
   ];
 
@@ -388,6 +507,36 @@ class _SyncedVault {
   /// Null until the vault reached a relay once.
   DateTime? lastSync;
 
+  var _relaysFetched = false;
+
+  /// Whether saving a list cannot replace a newer one: the newest relay list
+  /// was looked for, and the vault reached a relay once, as in the app.
+  bool get listsEditable => _relaysFetched && lastSync != null;
+
+  /// Whether [reconcile] runs.
+  var reconciling = false;
+
+  /// The relays the last [reconcile] left out of sync, with why, null until
+  /// one ended.
+  Map<String, String>? leftOut;
+
+  Future<void> reconcile() async {
+    if (reconciling) return;
+    reconciling = true;
+    _onChanged();
+    try {
+      leftOut = await vault.reconcile();
+      _relaysFetched = true;
+    } finally {
+      reconciling = false;
+      _onChanged();
+    }
+    if (_closed) return;
+    await _follow();
+    if (_handle case final handle?) unawaited(handle.then(_engine.refresh));
+    unawaited(_reload());
+  }
+
   /// Changes saved on this device that no relay accepted yet, as last counted
   /// by [checkUnsent].
   var unsent = 0;
@@ -466,6 +615,8 @@ class _SyncedVault {
   Future<void> _fetchRelays() async {
     try {
       await vault.fetchRelayList();
+      _relaysFetched = true;
+      _onChanged();
     } catch (error, stack) {
       print('Fetching the relay list of $pubkey failed: $error\n$stack');
     }
@@ -509,7 +660,13 @@ class _SyncedVault {
       do {
         _reloadAgain = false;
         await vault.open();
-        lastSync = await vault.lastSync(_engine);
+        final lastSync = await vault.lastSync(_engine);
+        if (this.lastSync == null && lastSync != null && _relaysFetched) {
+          // Fetched before the vault ever reached a relay.
+          _relaysFetched = false;
+          unawaited(_fetchRelays());
+        }
+        this.lastSync = lastSync;
         _onChanged();
       } while (_reloadAgain);
     } catch (error, stack) {

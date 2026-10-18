@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useIntl } from "react-intl";
 import type { SyncState } from "@/lib/core";
 import { dayFormat } from "@/lib/i18n";
-import { syncStatus } from "@/lib/sync-status";
+import { type SyncStatus as SyncStatusValue, syncStatus } from "@/lib/sync-status";
 import { Icon } from "./Icon";
 import "./SyncStatus.css";
 
@@ -12,6 +12,25 @@ import "./SyncStatus.css";
  * send after an arrow, a failure in red.
  */
 export function SyncStatus({ pubkeys, states }: { pubkeys: string[]; states: SyncState[] }) {
+  const { status, text } = useSyncStatus(pubkeys, states);
+  // A screen reader announces a failure, as the app does, and nothing else.
+  return status.id === "syncFailed" ? (
+    <p className="sync-status" data-failed role="alert">
+      {text}
+    </p>
+  ) : (
+    <p className="sync-status">
+      {status.id === "changesNotSent" && <Icon src={upload} size={15} />}
+      {text}
+    </p>
+  );
+}
+
+/** Where the sync of the vaults of `pubkeys` stands, and its text, kept up to date as time goes. */
+export function useSyncStatus(
+  pubkeys: string[],
+  states: SyncState[],
+): { status: SyncStatusValue; text: string } {
   const { formatMessage: t, formatDate } = useIntl();
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
@@ -24,15 +43,5 @@ export function SyncStatus({ pubkeys, states }: { pubkeys: string[]; states: Syn
     status.id === "syncedOn"
       ? t({ id: status.id }, { date: formatDate(status.date, dayFormat) })
       : t({ id: status.id }, status);
-  // A screen reader announces a failure, as the app does, and nothing else.
-  return status.id === "syncFailed" ? (
-    <p className="sync-status" data-failed role="alert">
-      {text}
-    </p>
-  ) : (
-    <p className="sync-status">
-      {status.id === "changesNotSent" && <Icon src={upload} size={15} />}
-      {text}
-    </p>
-  );
+  return { status, text };
 }

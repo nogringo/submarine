@@ -3,19 +3,28 @@ import { Checkbox, Switch } from "react-aria-components";
 import { Icon } from "./Icon";
 import "./ToggleTile.css";
 
-/** A row that turns `label` on or off, as the app's SwitchListTile. */
+/** A row that turns `label` on or off, as the app's SwitchListTile, `description` under it. */
 export function SwitchTile({
   label,
+  description,
   isSelected,
   onChange,
 }: {
   label: string;
+  description?: string;
   isSelected: boolean;
   onChange: (isSelected: boolean) => void;
 }) {
   return (
     <Switch className="toggle-tile" isSelected={isSelected} onChange={onChange}>
-      <span className="toggle-tile-label">{label}</span>
+      {description ? (
+        <span className="toggle-tile-label">
+          {label}
+          <span className="toggle-tile-description">{description}</span>
+        </span>
+      ) : (
+        <span className="toggle-tile-label">{label}</span>
+      )}
       <span className="switch-track" aria-hidden="true">
         <span className="switch-thumb" />
       </span>

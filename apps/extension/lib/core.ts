@@ -69,6 +69,31 @@ export interface SyncState {
   lastSync: string | null;
   /** Changes saved on this device that no relay accepted yet. */
   unsent: number;
+  /** Whether a full sync runs. */
+  reconciling: boolean;
+  /** The relays the last full sync left out, with why, null until one ended. */
+  leftOut: Record<string, string> | null;
+}
+
+/** The lists of a vault that its settings open, each on a page of its own. */
+export type VaultListName = "relays" | "servers";
+
+/** A relay or a Blossom server of a vault, whose private ones only the vault reads. */
+export interface VaultAddress {
+  url: string;
+  private: boolean;
+}
+
+export interface VaultLists {
+  /** The public ones first. */
+  relays: (VaultAddress & { connected: boolean })[];
+  /** The public ones first, each in order of preference. */
+  servers: VaultAddress[];
+  /**
+   * Whether saving a list cannot replace a newer one: the newest relay list was looked for, and the
+   * vault reached a relay once.
+   */
+  editable: boolean;
 }
 
 /** The port a popup holds open for the vaults to sync, where the core tells what changed. */
@@ -155,6 +180,18 @@ export interface CoreMethods {
   syncNow: { args: { vault?: string }; result: null };
   /** Of the vaults syncing, while a popup holds {@link syncPort} open. */
   syncStates: { args: Record<string, never>; result: SyncState[] };
+  /**
+   * Reads the whole vault on each relay, then gives every relay what it lacks. Its {@link SyncState}
+   * tells the relays it left out.
+   */
+  reconcileVault: { args: { vault: string }; result: null };
+  vaultLists: { args: { vault: string }; result: VaultLists };
+  /** Publishes the relay list of a vault. The relays it adds get a copy of the vault. */
+  setRelays: { args: { vault: string; public: string[]; private: string[] }; result: null };
+  /** Publishes the server list of a vault, each list in order of preference. */
+  setServers: { args: { vault: string; public: string[]; private: string[] }; result: null };
+  /** An address as typed, normalized as the app does, or null if it is not one of `list`. */
+  parseAddress: { args: { list: VaultListName; text: string }; result: string | null };
   /**
    * Of one vault, or of all without one, those `filter` keeps, every item but the trash by default,
    * by name, as the app's search finds them. Only the logins for the page at `url` with one, as

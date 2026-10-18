@@ -693,6 +693,79 @@ void main() {
     expect([for (final item in await again.items()) item['name']], ['Wifi']);
   });
 
+  group('the lists of a vault', () {
+    setUp(() async {
+      await addVault();
+      await sync.start();
+      await _until(() async => (await sync.lists(pubkey))['editable'] == true);
+    });
+
+    test('tells its relays, those connected, and its servers', () async {
+      final lists = await sync.lists(pubkey);
+      expect(lists['relays'], [
+        {'url': relay.url, 'private': false, 'connected': true},
+      ]);
+      expect(lists['servers'], [
+        for (final url in defaultVaultBlossomServers)
+          {'url': url, 'private': false},
+      ]);
+    });
+
+    test('saves its relays, a private one too, and syncs on both', () async {
+      final other = MockRelay(name: 'other relay');
+      await other.startServer();
+      addTearDown(other.stopServer);
+      await publish('Wifi');
+      await _until(() async => await opened() == 1);
+
+      await sync.setRelays(
+        pubkey: pubkey,
+        public: [relay.url],
+        private: [other.url],
+      );
+
+      expect(
+        [
+          for (final relay in (await sync.lists(pubkey))['relays'] as List)
+            (relay as Map)['private'],
+        ],
+        [false, true],
+      );
+      await _until(
+        () async => other.receivedEvents.any(
+          (event) => event.kind == GiftWrap.kGiftWrapEventkind,
+        ),
+      );
+    });
+
+    test('saves its servers, in order', () async {
+      await sync.setServers(
+        pubkey: pubkey,
+        public: ['https://b.example.com', 'https://a.example.com'],
+        private: ['https://c.example.com'],
+      );
+
+      expect((await sync.lists(pubkey))['servers'], [
+        {'url': 'https://b.example.com', 'private': false},
+        {'url': 'https://a.example.com', 'private': false},
+        {'url': 'https://c.example.com', 'private': true},
+      ]);
+    });
+  });
+
+  test('runs a full sync awake, and tells the relays it left out', () async {
+    await addVault();
+    await sync.start();
+    await _until(() async => sync.states().single['lastSync'] != null);
+
+    await sync.reconcile(pubkey);
+
+    expect(sync.states().single, containsPair('reconciling', false));
+    expect(sync.states().single, containsPair('leftOut', isEmpty));
+    expect(sending, contains(true));
+    expect(sending.last, isFalse);
+  });
+
   test('syncs nothing before it starts', () async {
     await addVault();
 

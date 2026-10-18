@@ -25,7 +25,7 @@ import { SyncButton } from "@/components/SyncButton";
 import { SyncStatus } from "@/components/SyncStatus";
 import { AllVaultsAvatar, OpenVaultMark, VaultAvatar } from "@/components/VaultAvatar";
 import type { Cipher } from "@/lib/cipher";
-import type { Item, ItemFilter, Vault } from "@/lib/core";
+import type { Item, ItemFilter, Vault, VaultListName } from "@/lib/core";
 import { fillLogin } from "@/lib/fill";
 import { type ItemDraft, readItemDraft } from "@/lib/item-draft";
 import { filterOptions } from "@/lib/item-filters";
@@ -42,6 +42,7 @@ import { ItemForm } from "./ItemForm";
 import { ItemList } from "./ItemList";
 import { ItemMenu, type ItemMenuRequest } from "./ItemMenu";
 import { Settings } from "./Settings";
+import { VaultListPage } from "./VaultList";
 import { VaultSettings } from "./VaultSettings";
 
 const allVaults = "all";
@@ -57,6 +58,8 @@ type Opened =
    */
   | { page: "form"; vault: Vault; type: number; item?: Item; draft?: ItemDraft }
   | { page: "vaultSettings"; pubkey: string }
+  /** A list of the vault, opened from its settings, which it goes back to. */
+  | { page: "vaultList"; pubkey: string; list: VaultListName }
   | { page: "generator" }
   | { page: "settings" };
 
@@ -138,11 +141,13 @@ export function Home({
     else void forgetOpenedItem();
   }, [opened, restored]);
   const settingsVault =
-    opened?.page === "vaultSettings"
+    opened?.page === "vaultSettings" || opened?.page === "vaultList"
       ? vaults.find((vault) => vault.pubkey === opened.pubkey)
       : undefined;
   // Gone with its vault, once removed.
-  const paged = opened !== undefined && (opened.page !== "vaultSettings" || !!settingsVault);
+  const paged =
+    opened !== undefined &&
+    ((opened.page !== "vaultSettings" && opened.page !== "vaultList") || !!settingsVault);
   // What the page opened from, which gets the focus back.
   const openedFrom = useRef<HTMLElement>(null);
   const vaultsButton = useRef<HTMLButtonElement>(null);
@@ -409,10 +414,22 @@ export function Home({
       {settingsVault && (
         <VaultSettings
           vault={settingsVault}
-          unsent={sync.states.find((state) => state.pubkey === settingsVault.pubkey)?.unsent ?? 0}
+          sync={sync}
+          covered={opened?.page === "vaultList"}
           onChanged={onVaultChanged}
           onRemoved={onVaultRemoved}
+          onOpenList={(list) =>
+            setOpened({ page: "vaultList", pubkey: settingsVault.pubkey, list })
+          }
           onBack={back}
+        />
+      )}
+      {settingsVault && opened?.page === "vaultList" && (
+        <VaultListPage
+          vault={settingsVault}
+          list={opened.list}
+          sync={sync}
+          onBack={() => setOpened({ page: "vaultSettings", pubkey: settingsVault.pubkey })}
         />
       )}
       {opened?.page === "generator" && <GeneratorPage onBack={back} />}

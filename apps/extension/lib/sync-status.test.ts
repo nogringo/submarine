@@ -10,7 +10,7 @@ function state(
   lastSync: string | null,
   unsent = 0,
 ): SyncState {
-  return { pubkey, phase, lastSync, unsent };
+  return { pubkey, phase, lastSync, unsent, reconciling: false, leftOut: null };
 }
 
 describe("syncStatus", () => {

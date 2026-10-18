@@ -1,4 +1,7 @@
-import type { ReactNode } from "react";
+import chevronRight from "@material-design-icons/svg/round/chevron_right.svg";
+import type { ReactNode, Ref } from "react";
+import { Button } from "react-aria-components";
+import { Icon } from "./Icon";
 import "./SettingsSection.css";
 
 /** A group of settings in a card, under its title and description when it has them. */
@@ -52,5 +55,28 @@ export function SettingsTile({
       </div>
       {children && <div className="settings-tile-end">{children}</div>}
     </div>
+  );
+}
+
+/** A row of a settings card that opens a page of its own, as its chevron tells. */
+export function SettingsLinkTile({
+  title,
+  description,
+  onPress,
+  ref,
+}: {
+  title: string;
+  description?: string;
+  onPress: () => void;
+  ref?: Ref<HTMLButtonElement>;
+}) {
+  return (
+    <Button ref={ref} className="settings-tile settings-link-tile" onPress={onPress}>
+      <span className="settings-tile-text">
+        <span className="settings-tile-title">{title}</span>
+        {description && <span className="settings-tile-description">{description}</span>}
+      </span>
+      <Icon src={chevronRight} />
+    </Button>
   );
 }

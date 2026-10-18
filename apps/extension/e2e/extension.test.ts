@@ -7,7 +7,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { fillPage } from "../lib/fill-page";
 import { violations } from "./axe";
 import { type BrowserName, type Extension, launch, openPopupOver } from "./extension";
-import { startRelay } from "./relay";
+import { relayUrl, startRelay } from "./relay";
 import { publishItems } from "./vault-items";
 
 const english = JSON.parse(await readFile(appArb("en"), "utf8"));
@@ -25,6 +25,8 @@ afterAll(async () => {
 describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
   const secretKey = generateSecretKey();
   let extension: Extension;
+  // Where the vault settings scrolled to before a list opened over them.
+  let settingsScroll = 0;
   let lockPassword = "";
 
   beforeAll(async () => {
@@ -801,6 +803,85 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     expect(await violations(popup)).toEqual([]);
     await extension.click("[role=dialog] button::-p-text(Done)");
     await popup.waitForSelector("[role=dialog]", { hidden: true });
+  });
+
+  it("syncs the vault in full from its settings", async () => {
+    const { popup } = extension;
+    await extension.click(".vault-settings button::-p-text(Start)");
+    await popup.waitForSelector(`.vault-settings ::-p-text(${english.fullSyncDone})`, {
+      timeout: 20_000,
+    });
+    expect(await violations(popup)).toEqual([]);
+  });
+
+  it("lists the relays of the vault, connected", async () => {
+    const { popup } = extension;
+    await popup.$eval(".vault-settings button::-p-text(Relays)", (row) => row.scrollIntoView());
+    settingsScroll = await popup.$eval(".vault-settings .page-content", (page) => page.scrollTop);
+    expect(settingsScroll).toBeGreaterThan(0);
+    await extension.click(".vault-settings button::-p-text(Relays)");
+    const row = await popup.waitForSelector(".vault-list .address-tile");
+    expect(await row?.$eval(".address-tile-url", (url) => url.textContent)).toBe(relayUrl);
+    await row?.waitForSelector(`[aria-label=${english.relayConnected}]`);
+    expect(await violations(popup)).toEqual([]);
+  });
+
+  it("refuses what is not a relay, and drops a relay added on Cancel", async () => {
+    const { popup } = extension;
+    await extension.click(".vault-list-add:not([data-disabled])");
+    await extension.fill("input[name=address]", "not a relay");
+    await extension.click("[role=dialog] button[type=submit]");
+    await popup.waitForSelector(`::-p-text(${english.relayAddressInvalid})`);
+    expect(await violations(popup)).toEqual([]);
+    await extension.fill("input[name=address]", "relay.example.com");
+    await extension.click("[role=dialog] button[type=submit]");
+    await popup.waitForSelector("[role=dialog]", { hidden: true });
+    await popup.waitForSelector(".address-tile-url::-p-text(relay.example.com)");
+    await extension.click(".vault-list-footer button::-p-text(Cancel)");
+    await popup.waitForSelector(".address-tile-url::-p-text(relay.example.com)", { hidden: true });
+  });
+
+  it("goes back to the vault settings with Escape, where it scrolled, onto the relays", async () => {
+    const { popup } = extension;
+    await extension.press("Escape");
+    await popup.waitForFunction(
+      () =>
+        document.activeElement?.closest(".vault-settings .settings-link-tile")?.textContent ===
+        document.querySelector(".vault-settings .settings-link-tile")?.textContent,
+    );
+    expect(await popup.$(".vault-list")).toBeNull();
+    expect(await popup.$eval(".vault-settings .page-content", (page) => page.scrollTop)).toBe(
+      settingsScroll,
+    );
+  });
+
+  it("saves a private file server", async () => {
+    const { popup } = extension;
+    await extension.click(".vault-settings button::-p-text(File servers)");
+    await extension.click(".vault-list-add:not([data-disabled])");
+    await extension.fill("input[name=address]", "blossom.example.com");
+    // On its input: in Firefox, the script click the harness sends to the row leaves it off.
+    await popup.$eval("[role=dialog] [role=switch]", (input) => (input as HTMLElement).click());
+    await popup.waitForSelector("[role=dialog] .toggle-tile[data-selected]");
+    await extension.click("[role=dialog] button[type=submit]");
+    await popup.waitForSelector("[role=dialog]", { hidden: true });
+    await popup.waitForSelector(".address-tile-url::-p-text(blossom.example.com)");
+    await extension.click(".vault-list-footer button::-p-text(Save)");
+    // Saved once the draft is gone and the list read again holds it.
+    await expect
+      .poll(() =>
+        popup.$$eval(
+          ".address-tile",
+          (tiles, added) =>
+            tiles.map((tile) =>
+              tile.querySelector(`[aria-label="${added}"]`) ? null : tile.textContent,
+            ),
+          english.serverAdded,
+        ),
+      )
+      .toContain(`blossom.example.com${english.serverPrivate}`);
+    await extension.press("Escape");
+    await popup.waitForSelector(".vault-settings");
   });
 
   it("goes back to the list with Escape, onto the vaults button", async () => {

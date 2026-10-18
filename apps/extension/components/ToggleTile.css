@@ -17,6 +17,14 @@
   overflow-wrap: anywhere;
 }
 
+.toggle-tile-description {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
 .switch-track {
   display: flex;
   flex: none;

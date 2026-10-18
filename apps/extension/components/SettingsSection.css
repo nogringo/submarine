@@ -65,3 +65,22 @@
   flex: none;
   max-width: 50%;
 }
+
+.settings-link-tile {
+  width: 100%;
+  border: none;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.settings-link-tile > .icon {
+  flex: none;
+  color: var(--muted);
+}
+
+.settings-link-tile[data-hovered] {
+  background: color-mix(in srgb, currentColor 6%, transparent);
+}

@@ -8,9 +8,12 @@ import "./Page.css";
  * A page over the list, its back button and its `actions` above `children`, until `onBack` or
  * Escape. A form's page, as the app's, has a `cancel` button in place of the back one, and its
  * `title` between the two, which a screen reader reads first unless something else takes the focus.
+ * Once `covered` by another page, it leaves that page Escape, the focus and screen readers, and
+ * keeps where it scrolled.
  */
 export function Page({
   className,
+  covered,
   onBack,
   backRef,
   cancel,
@@ -19,6 +22,7 @@ export function Page({
   children,
 }: {
   className: string;
+  covered?: boolean;
   onBack: () => void;
   backRef?: Ref<HTMLButtonElement>;
   cancel?: string;
@@ -28,6 +32,7 @@ export function Page({
 }) {
   const { formatMessage: t } = useIntl();
   useEffect(() => {
+    if (covered) return;
     const goBack = (event: KeyboardEvent) => {
       if (event.key !== "Escape" || event.defaultPrevented) return;
       // Rather than the browser closing the popup.
@@ -36,9 +41,9 @@ export function Page({
     };
     document.addEventListener("keydown", goBack);
     return () => document.removeEventListener("keydown", goBack);
-  }, [onBack]);
+  }, [onBack, covered]);
   return (
-    <section className={`page ${className}`}>
+    <section className={`page ${className}`} inert={covered}>
       <div className="page-bar">
         {cancel ? (
           <TextButton ref={backRef} onPress={onBack}>

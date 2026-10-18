@@ -10,7 +10,9 @@ import 'package:nostr_passwords/nostr_passwords.dart'
         generateBirthDate,
         generateFirstName,
         generateLastName,
-        generatePassphrase;
+        generatePassphrase,
+        parseRelayUrl,
+        parseServerUrl;
 import 'package:submarine_extension_core/auto_lock.dart';
 import 'package:submarine_extension_core/core.dart';
 import 'package:submarine_extension_core/device_key.dart';
@@ -168,6 +170,33 @@ void main() {
       'syncNow': (args) async =>
           (await sync()).syncNow(pubkey: args['vault'] as String?),
       'syncStates': (_) async => (await sync()).states(),
+      'reconcileVault': (args) async {
+        await (await sync()).reconcile(args['vault'] as String);
+        return null;
+      },
+      'vaultLists': (args) async =>
+          (await sync()).lists(args['vault'] as String),
+      'setRelays': (args) async {
+        await (await sync()).setRelays(
+          pubkey: args['vault'] as String,
+          public: (args['public'] as List).cast(),
+          private: (args['private'] as List).cast(),
+        );
+        return null;
+      },
+      'setServers': (args) async {
+        await (await sync()).setServers(
+          pubkey: args['vault'] as String,
+          public: (args['public'] as List).cast(),
+          private: (args['private'] as List).cast(),
+        );
+        return null;
+      },
+      'parseAddress': (args) async => switch (args['list']) {
+        'relays' => parseRelayUrl(args['text'] as String),
+        'servers' => parseServerUrl(args['text'] as String),
+        final list => throw CoreException('unknownList', '$list'),
+      },
       'items': (args) async => (await sync()).items(
         pubkey: args['vault'] as String?,
         query: args['query'] as String? ?? '',

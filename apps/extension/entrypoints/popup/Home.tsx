@@ -24,7 +24,7 @@ import { SyncButton } from "@/components/SyncButton";
 import { SyncStatus } from "@/components/SyncStatus";
 import { AddVaultMark, AllVaultsAvatar, VaultAvatar } from "@/components/VaultAvatar";
 import type { Cipher } from "@/lib/cipher";
-import type { Item, ItemFilter, Vault, VaultListName } from "@/lib/core";
+import type { Item, ItemFilter, MailListName, Vault, VaultListName } from "@/lib/core";
 import { fillLogin } from "@/lib/fill";
 import { type ItemDraft, readItemDraft } from "@/lib/item-draft";
 import { filterOptions } from "@/lib/item-filters";
@@ -41,6 +41,7 @@ import { ItemDetail } from "./ItemDetail";
 import { ItemForm } from "./ItemForm";
 import { ItemList } from "./ItemList";
 import { ItemMenu, type ItemMenuRequest } from "./ItemMenu";
+import { MailListPage } from "./MailList";
 import { Settings } from "./Settings";
 import { VaultListPage } from "./VaultList";
 import { VaultSettings } from "./VaultSettings";
@@ -62,7 +63,9 @@ type Opened =
   /** A list of the vault, opened from its settings, which it goes back to. */
   | { page: "vaultList"; pubkey: string; list: VaultListName; fromSettings?: boolean }
   | { page: "generator" }
-  | { page: "settings" };
+  | { page: "settings" }
+  /** A list of the email settings, opened from the settings, which it goes back to. */
+  | { page: "mailList"; list: MailListName };
 
 /** The vaults of this device, the `selected` one or all of them shown. */
 export function Home({
@@ -430,12 +433,13 @@ export function Home({
           }
         />
       )}
-      {(opened?.page === "settings" || fromSettings) && (
+      {(opened?.page === "settings" || opened?.page === "mailList" || fromSettings) && (
         <Settings
           hasLockPassword={hasLockPassword}
           vaults={vaults}
-          covered={!!settingsVault}
+          covered={!!settingsVault || opened?.page === "mailList"}
           onOpenVault={(pubkey) => setOpened({ page: "vaultSettings", pubkey, fromSettings: true })}
+          onOpenMailList={(list) => setOpened({ page: "mailList", list })}
           onAddVault={() => setChoosingVault(true)}
           onBack={back}
         />
@@ -462,6 +466,9 @@ export function Home({
             setOpened({ page: "vaultSettings", pubkey: settingsVault.pubkey, fromSettings })
           }
         />
+      )}
+      {opened?.page === "mailList" && (
+        <MailListPage list={opened.list} onBack={() => setOpened({ page: "settings" })} />
       )}
       {opened?.page === "generator" && <GeneratorPage onBack={back} />}
       {/* Kept in the page, empty, for a screen reader to read what it says once it does. */}

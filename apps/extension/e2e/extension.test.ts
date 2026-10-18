@@ -828,7 +828,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
 
   it("refuses what is not a relay, and drops a relay added on Cancel", async () => {
     const { popup } = extension;
-    await extension.click(".vault-list-add:not([data-disabled])");
+    await extension.click(".address-list-add:not([data-disabled])");
     await extension.fill("input[name=address]", "not a relay");
     await extension.click("[role=dialog] button[type=submit]");
     await popup.waitForSelector(`::-p-text(${english.relayAddressInvalid})`);
@@ -837,7 +837,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     await extension.click("[role=dialog] button[type=submit]");
     await popup.waitForSelector("[role=dialog]", { hidden: true });
     await popup.waitForSelector(".address-tile-url::-p-text(relay.example.com)");
-    await extension.click(".vault-list-footer button::-p-text(Cancel)");
+    await extension.click(".address-list-footer button::-p-text(Cancel)");
     await popup.waitForSelector(".address-tile-url::-p-text(relay.example.com)", { hidden: true });
   });
 
@@ -858,7 +858,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
   it("saves a private file server", async () => {
     const { popup } = extension;
     await extension.click(".vault-settings button::-p-text(File servers)");
-    await extension.click(".vault-list-add:not([data-disabled])");
+    await extension.click(".address-list-add:not([data-disabled])");
     await extension.fill("input[name=address]", "blossom.example.com");
     // On its input: in Firefox, the script click the harness sends to the row leaves it off.
     await popup.$eval("[role=dialog] [role=switch]", (input) => (input as HTMLElement).click());
@@ -866,7 +866,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     await extension.click("[role=dialog] button[type=submit]");
     await popup.waitForSelector("[role=dialog]", { hidden: true });
     await popup.waitForSelector(".address-tile-url::-p-text(blossom.example.com)");
-    await extension.click(".vault-list-footer button::-p-text(Save)");
+    await extension.click(".address-list-footer button::-p-text(Save)");
     // Saved once the draft is gone and the list read again holds it.
     await expect
       .poll(() =>
@@ -1023,6 +1023,78 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     );
     await extension.click(segment(english.themeSystem));
     await popup.waitForFunction(() => !document.documentElement.dataset.theme);
+  });
+
+  it("changes the bridge of new email addresses, never to what is not a domain", async () => {
+    const { popup } = extension;
+    const change = `::-p-xpath(//div[contains(@class, "settings-tile")][.//span[.="${english.mailBridge}"]]//button)`;
+    const description = (domain: string) =>
+      popup.waitForSelector(
+        `.settings ::-p-text(${english.mailBridgeDescription.replace("{domain}", domain)})`,
+      );
+    await description("uid.ovh");
+    await extension.click(change);
+    await extension.fill("input[name=domain]", "not a domain");
+    await extension.click("[role=dialog] button[type=submit]");
+    await popup.waitForSelector(`[role=dialog] ::-p-text(${english.mailBridgeInvalid})`);
+    expect(await violations(popup)).toEqual([]);
+    await extension.fill("input[name=domain]", "mail.example.com");
+    await extension.click("[role=dialog] button[type=submit]");
+    await popup.waitForSelector("[role=dialog]", { hidden: true });
+    await description("mail.example.com");
+    // Left empty for the default bridge.
+    await extension.click(change);
+    await extension.fill("input[name=domain]", "");
+    await extension.click("[role=dialog] button[type=submit]");
+    await description("uid.ovh");
+  });
+
+  it("changes the inbox relays of new email addresses on their page, then puts the defaults back", async () => {
+    const { popup } = extension;
+    const row = `.settings .settings-link-tile::-p-text(${english.mailInboxRelays})`;
+    const description = (hosts: string) =>
+      popup.waitForSelector(`.settings .settings-tile-description::-p-text("${hosts}")`);
+    const backOnRow = async () => {
+      await extension.press("Escape");
+      await popup.waitForSelector(".mail-list", { hidden: true });
+      await popup.waitForFunction(
+        (title) =>
+          document.activeElement?.matches(".settings .settings-link-tile") &&
+          document.activeElement.querySelector(".settings-tile-title")?.textContent === title,
+        {},
+        english.mailInboxRelays,
+      );
+    };
+    await description("relay.nmail.li, auth.nostr1.com");
+    await extension.click(row);
+    await popup.waitForFunction(
+      (title) =>
+        document.activeElement?.matches(".mail-list h1") &&
+        document.activeElement.textContent === title,
+      {},
+      english.mailInboxRelays,
+    );
+    await extension.click(".mail-list .address-tile:nth-child(2) button");
+    await popup.waitForSelector(".mail-list .address-tile[data-removed]");
+    await extension.click(".mail-list .address-list-add");
+    await extension.fill("input[name=address]", "not a relay");
+    await extension.click("[role=dialog] button[type=submit]");
+    await popup.waitForSelector(`[role=dialog] ::-p-text(${english.relayAddressInvalid})`);
+    await extension.fill("input[name=address]", "relay.example.com");
+    await extension.click("[role=dialog] button[type=submit]");
+    await popup.waitForSelector("[role=dialog]", { hidden: true });
+    await popup.waitForSelector(".mail-list .address-tile-url::-p-text(relay.example.com)");
+    expect(await violations(popup)).toEqual([]);
+    await extension.click(".address-list-footer button::-p-text(Save)");
+    await popup.waitForSelector(".mail-list .address-tile[data-removed]", { hidden: true });
+    await backOnRow();
+    await description("relay.nmail.li, relay.example.com");
+    await extension.click(row);
+    await extension.click(`.address-list-footer button::-p-text(${english.resetMailRelays})`);
+    await extension.click(".address-list-footer button::-p-text(Save)");
+    await popup.waitForSelector(".mail-list .address-tile[data-removed]", { hidden: true });
+    await backOnRow();
+    await description("relay.nmail.li, auth.nostr1.com");
   });
 
   /** Exports the vault from the settings, `password` protecting the file, and reads the file. */

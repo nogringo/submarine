@@ -15,22 +15,30 @@ import {
   readClipboardTimeout,
   saveClipboardTimeout,
 } from "@/lib/clipboard";
-import { callCore, type LockTimeout, lockTimeouts, type Vault } from "@/lib/core";
+import {
+  callCore,
+  type LockTimeout,
+  lockTimeouts,
+  type MailListName,
+  type Vault,
+} from "@/lib/core";
 import { languageNames } from "@/lib/i18n";
 import { readTheme, saveTheme, showTheme, type Theme, themes } from "@/lib/theme";
 import { useChosenLocale } from "@/lib/use-locale";
 import { ImportExportSection } from "./ImportExport";
+import { MailSettingsSection } from "./MailSettings";
 import "./Settings.css";
 
 /**
  * The settings of the extension on this device, as in the app. Stays under the settings of a vault
- * it opens, `covered`, and gives the focus back to that vault's row once back.
+ * or the email list it opens, `covered`, and gives the focus back to that row once back.
  */
 export function Settings({
   hasLockPassword,
   vaults,
   covered,
   onOpenVault,
+  onOpenMailList,
   onAddVault,
   onBack,
 }: {
@@ -38,6 +46,7 @@ export function Settings({
   vaults: Vault[];
   covered: boolean;
   onOpenVault: (pubkey: string) => void;
+  onOpenMailList: (list: MailListName) => void;
   onAddVault: () => void;
   onBack: () => void;
 }) {
@@ -149,6 +158,7 @@ export function Settings({
             />
           )}
         </SettingsSection>
+        <MailSettingsSection covered={covered} onOpenList={onOpenMailList} />
         <SettingsSection title={t({ id: "appearance" })}>
           <LanguageTile />
           <ThemeTile />

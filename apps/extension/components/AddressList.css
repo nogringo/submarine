@@ -1,0 +1,80 @@
+.address-tile {
+  gap: 8px;
+  padding-right: 4px;
+}
+
+.address-tile > .icon,
+.address-tile-status {
+  flex: none;
+  color: var(--muted);
+}
+
+.address-tile-status {
+  display: flex;
+}
+
+.address-tile-url {
+  font-size: 15px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.address-tile[data-removed] .address-tile-url {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.address-list-add {
+  width: 100%;
+  border: none;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.address-list-add > .icon {
+  color: var(--signal);
+}
+
+.address-list-add[data-hovered] {
+  background: color-mix(in srgb, currentColor 6%, transparent);
+}
+
+.address-list-add[data-disabled] {
+  color: var(--muted);
+  cursor: default;
+}
+
+.address-list-add[data-disabled] > .icon {
+  color: var(--muted);
+}
+
+.address-list-footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--line);
+}
+
+.address-list-message {
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.address-list-message.error {
+  color: var(--danger);
+}
+
+.address-list-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.address-list-description {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}

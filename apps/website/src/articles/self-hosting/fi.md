@@ -1,10 +1,18 @@
 ---
-description: "Pidä kopio holveistasi palvelimilla, joita ylläpidät itse: Nostr-rele holveillesi ja tiedostopalvelin niiden liitetiedostoille."
+description: "Pidä kopio holveistasi ja läheistesi holveista palvelimilla, joita ylläpidät: Nostr-rele holveille ja tiedostopalvelin niiden liitetiedostoille."
 ---
 
-# Ylläpidä omia palvelimiasi
+# Ylläpidä palvelimia itsellesi ja läheisillesi
 
-Submarinella ei ole omaa palvelinta: oletuksena holvisi kopioidaan julkisille Nostr-releille, joita ylläpitävät riippumattomat tahot. Lisää palvelimia, joita ylläpidät itse, niin kopio holvistasi säilyy niillä niin kauan kuin itse päätät.
+Submarinella ei ole omaa palvelinta: oletuksena holvisi kopioidaan julkisille Nostr-releille, joita ylläpitävät riippumattomat tahot. Voit lisätä palvelimia, joita ylläpidät itse tai joita ylläpitää joku, johon luotat: silloin kopio holvistasi on tuttujen ihmisten luona.
+
+## Sinulle ja läheisillesi
+
+Yksi palvelin voi säilyttää koko lähipiirisi holvit: anna heille sen osoite, niin he lisäävät sen holveihinsa kuten vaiheessa 3.
+
+- Jos lopetat palvelimesi, he eivät menetä mitään: heidän holvinsa ovat yhä heidän muilla releillään ja jokaisella heidän laitteellaan.
+- Palvelimesi näkee vain salattua tietoa: se ei voi lukea eikä muuttaa heidän salasanojaan. Kuten mikä tahansa rele, se näkee heidän IP-osoitteensa.
+- Jos ystävälläsikin on palvelin, lisätkää toistenne palvelimet: kumpikin säilyttää kopion toiselle.
 
 ## Mitä tarvitset
 
@@ -22,9 +30,16 @@ Sen osoite alkaa `wss://`, esimerkiksi `wss://relay.example.com`.
 
 ## 2. Asenna tiedostopalvelin
 
-Kohteisiisi liitetyt tiedostot säilytetään tiedostopalvelimilla, ei releillä. Jos haluat niistäkin oman kopion, asenna [blossom-server](https://github.com/hzrd149/blossom-server) sen ohjeiden mukaan.
+Kohteisiisi liitetyt tiedostot säilytetään tiedostopalvelimilla, ei releillä. Jos haluat niistäkin kopion, asenna [blossom-server](https://github.com/hzrd149/blossom-server) sen ohjeiden mukaan.
 
-Aseta sen asetustiedostossa `storage`-kohdan alle `rules: []`. Esimerkkiasetukset poistavat jokaisen tiedoston, jota kukaan ei ole avannut viikkoon, ja niiden mukana liitetiedostosi.
+Lisää sen asetustiedostossa tämä sääntö `storage`-kohdan sääntöjen alkuun:
+
+```yaml
+- type: application/octet-stream
+  expiration: 100 years
+```
+
+Submarinen salatut tiedostot säilyvät silloin. Ilman tätä sääntöä esimerkkiasetukset poistavat jokaisen tiedoston, jota kukaan ei ole avannut viikkoon.
 
 Sen osoite alkaa `https://`, esimerkiksi `https://blossom.example.com`.
 

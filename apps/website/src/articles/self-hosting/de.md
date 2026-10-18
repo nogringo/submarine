@@ -1,10 +1,18 @@
 ---
-description: "Bewahre eine Kopie deiner Tresore auf Servern auf, die du selbst betreibst: ein Nostr-Relay für deine Tresore und einen Dateiserver für ihre Anhänge."
+description: "Bewahre eine Kopie deiner Tresore und der Tresore deines Umfelds auf Servern auf, die du betreibst: ein Nostr-Relay für die Tresore und einen Dateiserver für ihre Anhänge."
 ---
 
-# Eigene Server betreiben
+# Server für dich und dein Umfeld betreiben
 
-Submarine hat keinen eigenen Server: Standardmäßig werden deine Tresore auf öffentliche Nostr-Relays unabhängiger Betreiber kopiert. Füge Server hinzu, die du selbst betreibst, dann bleibt dort eine Kopie deines Tresors, so lange du willst.
+Submarine hat keinen eigenen Server: Standardmäßig werden deine Tresore auf öffentliche Nostr-Relays unabhängiger Betreiber kopiert. Du kannst Server hinzufügen, die du selbst oder jemand betreibt, dem du vertraust: Dann bleibt eine Kopie deines Tresors bei Menschen, die du kennst.
+
+## Für dich und dein Umfeld
+
+Ein einziger Server kann die Tresore deines ganzen Umfelds aufbewahren: Gib ihnen seine Adresse, und sie fügen ihn wie in Schritt 3 ihren Tresoren hinzu.
+
+- Schaltest du deinen Server ab, verlieren sie nichts: Ihre Tresore liegen weiter auf ihren anderen Relays und auf jedem ihrer Geräte.
+- Dein Server sieht nur verschlüsselte Daten: Er kann ihre Passwörter weder lesen noch ändern. Wie jedes Relay sieht er ihre IP-Adresse.
+- Betreibt ein Freund auch einen Server, fügt jeder den Server des anderen hinzu: So bewahrt ihr gegenseitig eine Kopie füreinander auf.
 
 ## Was du brauchst
 
@@ -22,9 +30,16 @@ Seine Adresse beginnt mit `wss://`, zum Beispiel `wss://relay.example.com`.
 
 ## 2. Installiere einen Dateiserver
 
-Die an deine Einträge angehängten Dateien liegen auf Dateiservern, nicht auf Relays. Um auch von ihnen eine eigene Kopie zu behalten, installiere [blossom-server](https://github.com/hzrd149/blossom-server) nach seiner Anleitung.
+Die an deine Einträge angehängten Dateien liegen auf Dateiservern, nicht auf Relays. Um auch von ihnen eine Kopie zu behalten, installiere [blossom-server](https://github.com/hzrd149/blossom-server) nach seiner Anleitung.
 
-Setze in seiner Konfigurationsdatei `rules: []` unter `storage`. Die Beispielkonfiguration löscht jede Datei, die eine Woche lang niemand geöffnet hat, und damit auch deine Anhänge.
+Füge in seiner Konfigurationsdatei diese Regel ganz oben bei den Regeln unter `storage` ein:
+
+```yaml
+- type: application/octet-stream
+  expiration: 100 years
+```
+
+Die verschlüsselten Dateien von Submarine bleiben dann erhalten. Ohne diese Regel löscht die Beispielkonfiguration jede Datei, die eine Woche lang niemand geöffnet hat.
 
 Seine Adresse beginnt mit `https://`, zum Beispiel `https://blossom.example.com`.
 

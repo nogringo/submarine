@@ -1,10 +1,18 @@
 ---
-description: "Tieni una copia delle tue casseforti su server che gestisci tu: un relay Nostr per le tue casseforti e un server di file per i loro allegati."
+description: "Tieni una copia delle tue casseforti, e di quelle dei tuoi cari, su server che gestisci tu: un relay Nostr per le casseforti e un server di file per i loro allegati."
 ---
 
-# Gestisci i tuoi server
+# Gestisci server per te e per i tuoi cari
 
-Submarine non ha un server suo: per impostazione predefinita, le tue casseforti sono copiate su relay Nostr pubblici gestiti da operatori indipendenti. Aggiungi server che gestisci tu, e una copia della tua cassaforte resterà lì per tutto il tempo che decidi.
+Submarine non ha un server suo: per impostazione predefinita, le tue casseforti sono copiate su relay Nostr pubblici gestiti da operatori indipendenti. Puoi aggiungere server gestiti da te, o da qualcuno di cui ti fidi: una copia della tua cassaforte resta così presso persone che conosci.
+
+## Per te e per i tuoi cari
+
+Un solo server può conservare le casseforti di tutte le persone intorno a te: dai loro il suo indirizzo, e lo aggiungono alle loro casseforti come al passaggio 3.
+
+- Se spegni il tuo server, non perdono nulla: le loro casseforti sono ancora sui loro altri relay e su ciascuno dei loro dispositivi.
+- Il tuo server vede solo dati cifrati: non può né leggere le loro password né modificarle. Come qualsiasi relay, vede il loro indirizzo IP.
+- Se anche un amico gestisce un server, aggiungete ciascuno quello dell'altro: così ognuno conserva una copia per l'altro.
 
 ## Cosa ti serve
 
@@ -22,9 +30,16 @@ Il suo indirizzo inizia con `wss://`, per esempio `wss://relay.example.com`.
 
 ## 2. Installa un server di file
 
-I file allegati ai tuoi elementi sono conservati su server di file, non sui relay. Per avere anche una tua copia di questi file, installa [blossom-server](https://github.com/hzrd149/blossom-server) seguendo le sue istruzioni.
+I file allegati ai tuoi elementi sono conservati su server di file, non sui relay. Per averne anche una copia, installa [blossom-server](https://github.com/hzrd149/blossom-server) seguendo le sue istruzioni.
 
-Nel suo file di configurazione, imposta `rules: []` sotto `storage`. La configurazione di esempio elimina ogni file che nessuno ha aperto da una settimana, e quindi anche i tuoi allegati.
+Nel suo file di configurazione, aggiungi questa regola in cima alle regole sotto `storage`:
+
+```yaml
+- type: application/octet-stream
+  expiration: 100 years
+```
+
+I file cifrati di Submarine vengono così conservati. Senza questa regola, la configurazione di esempio elimina ogni file che nessuno ha aperto da una settimana.
 
 Il suo indirizzo inizia con `https://`, per esempio `https://blossom.example.com`.
 

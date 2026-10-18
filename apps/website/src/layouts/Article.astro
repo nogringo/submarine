@@ -56,4 +56,23 @@ if (!heading) throw new Error(`No title in ${entry.collection} ${entry.id}`);
     font-size: 0.9em;
     box-decoration-break: clone;
   }
+
+  article :global(pre) {
+    padding: 0.75rem 0.875rem;
+    border: 1px solid var(--line);
+    border-radius: 0.5rem;
+    background: var(--raised);
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    /* Fits the longest line at 320px, so the block never scrolls. */
+    font-size: min(0.8em, 3.8vw);
+    line-height: 1.5;
+    overflow-x: auto;
+  }
+
+  article :global(pre code) {
+    padding: 0;
+    border: 0;
+    background: none;
+    font-size: inherit;
+  }
 </style>

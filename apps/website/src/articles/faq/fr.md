@@ -14,7 +14,7 @@ Chaque coffre est copié sur plusieurs relais, et chacun de vos appareils en gar
 
 ## Qui gère les serveurs ?
 
-Les relais Nostr sont gérés par des opérateurs indépendants, pour toutes les applications qui utilisent Nostr, pas seulement Submarine. Ils ne voient que des données chiffrées. Vous pouvez aussi faire tourner votre propre relais et l'ajouter à votre coffre. [Héberger vos propres serveurs](/fr/self-hosting).
+Les relais Nostr sont gérés par des opérateurs indépendants, pour toutes les applications qui utilisent Nostr, pas seulement Submarine. Ils ne voient que des données chiffrées. Vous pouvez aussi ajouter un relais tenu par vous, ou par une personne de confiance. [Héberger des serveurs pour vous et vos proches](/fr/self-hosting).
 
 ## Submarine fonctionne-t-il hors ligne ?
 

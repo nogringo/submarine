@@ -1,10 +1,18 @@
 ---
-description: "Guarde uma cópia dos seus cofres em servidores que você mesmo mantém: um relay Nostr para seus cofres e um servidor de arquivos para os anexos deles."
+description: "Guarde uma cópia dos seus cofres, e dos cofres das pessoas próximas, em servidores que você mantém: um relay Nostr para os cofres e um servidor de arquivos para os anexos deles."
 ---
 
-# Mantenha seus próprios servidores
+# Mantenha servidores para você e as pessoas próximas
 
-O Submarine não tem servidor próprio: por padrão, seus cofres são copiados em relays Nostr públicos, mantidos por operadores independentes. Adicione servidores que você mesmo mantém, e uma cópia do seu cofre fica neles pelo tempo que você decidir.
+O Submarine não tem servidor próprio: por padrão, seus cofres são copiados em relays Nostr públicos, mantidos por operadores independentes. Você pode adicionar servidores mantidos por você, ou por alguém de confiança: assim uma cópia do seu cofre fica com pessoas que você conhece.
+
+## Para você e as pessoas próximas
+
+Um só servidor pode guardar os cofres de todo mundo ao seu redor: passe o endereço dele para essas pessoas, e elas o adicionam aos cofres delas como no passo 3.
+
+- Se você desligar seu servidor, elas não perdem nada: os cofres delas continuam nos outros relays e em cada um dos dispositivos delas.
+- Seu servidor só vê dados criptografados: ele não consegue ler nem alterar as senhas delas. Como qualquer relay, ele vê o endereço IP delas.
+- Se um amigo também mantiver um servidor, adicionem o servidor um do outro: cada um guarda uma cópia para o outro.
 
 ## Do que você precisa
 
@@ -22,9 +30,16 @@ O endereço dele começa com `wss://`, por exemplo `wss://relay.example.com`.
 
 ## 2. Instale um servidor de arquivos
 
-Os arquivos anexados aos seus itens ficam em servidores de arquivos, não nos relays. Para ter também sua própria cópia deles, instale o [blossom-server](https://github.com/hzrd149/blossom-server) seguindo as instruções dele.
+Os arquivos anexados aos seus itens ficam em servidores de arquivos, não nos relays. Para ter também uma cópia deles, instale o [blossom-server](https://github.com/hzrd149/blossom-server) seguindo as instruções dele.
 
-No arquivo de configuração, defina `rules: []` dentro de `storage`. A configuração de exemplo exclui qualquer arquivo que ninguém tenha aberto em uma semana, o que excluiria seus anexos.
+No arquivo de configuração, adicione esta regra no início das regras de `storage`:
+
+```yaml
+- type: application/octet-stream
+  expiration: 100 years
+```
+
+Assim, os arquivos criptografados do Submarine ficam guardados. Sem essa regra, a configuração de exemplo exclui qualquer arquivo que ninguém tenha aberto em uma semana.
 
 O endereço dele começa com `https://`, por exemplo `https://blossom.example.com`.
 

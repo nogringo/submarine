@@ -14,7 +14,7 @@ Cada cofre é copiado em vários relays, e cada um dos seus dispositivos guarda 
 
 ## Quem mantém os servidores?
 
-Os relays Nostr são mantidos por operadores independentes, para todos os apps que usam Nostr, não só para o Submarine. Eles só veem dados criptografados. Você também pode manter seu próprio relay e adicioná-lo ao seu cofre. [Mantenha seus próprios servidores](/pt-br/self-hosting).
+Os relays Nostr são mantidos por operadores independentes, para todos os apps que usam Nostr, não só para o Submarine. Eles só veem dados criptografados. Você também pode adicionar um relay mantido por você, ou por alguém de confiança. [Mantenha servidores para você e as pessoas próximas](/pt-br/self-hosting).
 
 ## O Submarine funciona offline?
 

@@ -1,10 +1,18 @@
 ---
-description: "Keep a copy of your vaults on servers you run yourself: a Nostr relay for your vaults, and a file server for their attachments."
+description: "Keep a copy of your vaults, and those of the people close to you, on servers you run: a Nostr relay for the vaults, and a file server for their attachments."
 ---
 
-# Run your own servers
+# Run servers for yourself and the people close to you
 
-Submarine has no server of its own: by default, your vaults are copied to public Nostr relays run by independent operators. Add servers you run yourself, and a copy of your vault stays on them for as long as you decide.
+Submarine has no server of its own: by default, your vaults are copied to public Nostr relays run by independent operators. You can add servers run by you, or by someone you trust: a copy of your vault then stays with people you know.
+
+## For you and the people close to you
+
+One server can keep the vaults of everyone around you: give them its address, and they add it to their vaults as in step 3.
+
+- If you stop your server, they lose nothing: their vaults are still on their other relays, and on each of their devices.
+- Your server only sees encrypted data: it can neither read their passwords nor change them. Like any relay, it sees their IP address.
+- If a friend runs a server too, add each other's: each of you keeps a copy for the other.
 
 ## What you need
 
@@ -22,9 +30,16 @@ Its address starts with `wss://`, for example `wss://relay.example.com`.
 
 ## 2. Install a file server
 
-The files attached to your items are kept on file servers, not on relays. To keep your own copy of them too, install [blossom-server](https://github.com/hzrd149/blossom-server) by following its instructions.
+The files attached to your items are kept on file servers, not on relays. To keep a copy of them too, install [blossom-server](https://github.com/hzrd149/blossom-server) by following its instructions.
 
-In its configuration file, set `rules: []` under `storage`. The example configuration deletes any file nobody has opened for a week, which would delete your attachments.
+In its configuration file, add this rule at the top of the rules under `storage`:
+
+```yaml
+- type: application/octet-stream
+  expiration: 100 years
+```
+
+Submarine's encrypted files are then kept. Without this rule, the example configuration deletes any file nobody has opened for a week.
 
 Its address starts with `https://`, for example `https://blossom.example.com`.
 

@@ -1,10 +1,18 @@
 ---
-description: "Gardez une copie de vos coffres sur des serveurs que vous faites tourner vous-même : un relais Nostr pour vos coffres, et un serveur de fichiers pour leurs pièces jointes."
+description: "Gardez une copie de vos coffres, et de ceux de vos proches, sur des serveurs que vous faites tourner : un relais Nostr pour les coffres, et un serveur de fichiers pour leurs pièces jointes."
 ---
 
-# Héberger vos propres serveurs
+# Héberger des serveurs pour vous et vos proches
 
-Submarine n'a pas de serveur à lui : par défaut, vos coffres sont copiés sur des relais Nostr publics, gérés par des opérateurs indépendants. Ajoutez des serveurs que vous faites tourner vous-même, et une copie de votre coffre y reste aussi longtemps que vous le décidez.
+Submarine n'a pas de serveur à lui : par défaut, vos coffres sont copiés sur des relais Nostr publics, gérés par des opérateurs indépendants. Vous pouvez ajouter des serveurs tenus par vous, ou par une personne de confiance : une copie de votre coffre reste alors chez des gens que vous connaissez.
+
+## Pour vous et vos proches
+
+Un seul serveur peut garder les coffres de tout votre entourage : donnez-leur son adresse, et ils l'ajoutent à leurs coffres comme à l'étape 3.
+
+- Si vous arrêtez votre serveur, ils ne perdent rien : leurs coffres sont toujours sur leurs autres relais, et sur chacun de leurs appareils.
+- Votre serveur ne voit que des données chiffrées : il ne peut ni lire leurs mots de passe ni les modifier. Comme tout relais, il voit leur adresse IP.
+- Si un ami fait aussi tourner un serveur, ajoutez chacun celui de l'autre : vous gardez ainsi une copie l'un pour l'autre.
 
 ## Ce qu'il vous faut
 
@@ -22,9 +30,16 @@ Son adresse commence par `wss://`, par exemple `wss://relay.example.com`.
 
 ## 2. Installez un serveur de fichiers
 
-Les fichiers joints à vos éléments sont gardés sur des serveurs de fichiers, pas sur les relais. Pour en garder aussi votre propre copie, installez [blossom-server](https://github.com/hzrd149/blossom-server) en suivant ses instructions.
+Les fichiers joints à vos éléments sont gardés sur des serveurs de fichiers, pas sur les relais. Pour en garder aussi une copie, installez [blossom-server](https://github.com/hzrd149/blossom-server) en suivant ses instructions.
 
-Dans son fichier de configuration, mettez `rules: []` sous `storage`. La configuration d'exemple supprime tout fichier que personne n'a ouvert depuis une semaine, ce qui supprimerait vos pièces jointes.
+Dans son fichier de configuration, ajoutez cette règle en tête des règles sous `storage` :
+
+```yaml
+- type: application/octet-stream
+  expiration: 100 years
+```
+
+Les fichiers chiffrés de Submarine sont alors gardés. Sans cette règle, la configuration d'exemple supprime tout fichier que personne n'a ouvert depuis une semaine.
 
 Son adresse commence par `https://`, par exemple `https://blossom.example.com`.
 

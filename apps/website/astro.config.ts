@@ -19,6 +19,8 @@ export default defineConfig({
   markdown: {
     // Keeps the straight quotes of the sources.
     processor: satteri({ features: { smartPunctuation: false } }),
+    // Shiki's theme ignores the site's light and dark colors.
+    syntaxHighlight: false,
   },
   integrations: [sitemap({ i18n: { defaultLocale: "en", locales } })],
 });

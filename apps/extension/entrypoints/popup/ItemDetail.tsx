@@ -16,11 +16,12 @@ import { Page, PageHeader } from "@/components/Page";
 import { PasswordHistoryCard } from "@/components/PasswordHistoryCard";
 import { VaultBadge } from "@/components/VaultAvatar";
 import type { Cipher } from "@/lib/cipher";
-import { callCore, type Item, type Vault } from "@/lib/core";
+import { callCore, type Item, type Mailbox, type Vault } from "@/lib/core";
 import { dayFormat } from "@/lib/i18n";
 import { customFields, historyRows, typeFields } from "@/lib/item-fields";
 import { formTypes } from "@/lib/item-form";
 import { useItem } from "@/lib/use-item";
+import { Inbox } from "./Inbox";
 import "./ItemDetail.css";
 
 /**
@@ -33,6 +34,7 @@ export function ItemDetail({
   vault,
   id,
   revision,
+  inboxRevision,
   onBack,
   onLeft,
   onEdit,
@@ -42,6 +44,8 @@ export function ItemDetail({
   vault: Vault;
   id: string;
   revision: number;
+  /** Goes up each time the messages of a mailbox synced changed. */
+  inboxRevision: number;
   onBack: () => void;
   onLeft: () => void;
   onEdit: (item: Item) => void;
@@ -64,7 +68,15 @@ export function ItemDetail({
       {item === null ? (
         <p className="item-detail-missing">{t({ id: "itemNotFound" })}</p>
       ) : (
-        item && <Content cipher={item.cipher} vault={vault} onFill={onFill} />
+        item && (
+          <Content
+            cipher={item.cipher}
+            vault={vault}
+            mailboxes={item.mailboxes}
+            inboxRevision={inboxRevision}
+            onFill={onFill}
+          />
+        )
       )}
     </Page>
   );
@@ -163,7 +175,19 @@ function Actions({
   );
 }
 
-function Content({ cipher, vault, onFill }: { cipher: Cipher; vault: Vault; onFill?: () => void }) {
+function Content({
+  cipher,
+  vault,
+  mailboxes,
+  inboxRevision,
+  onFill,
+}: {
+  cipher: Cipher;
+  vault: Vault;
+  mailboxes: Mailbox[];
+  inboxRevision: number;
+  onFill?: () => void;
+}) {
   const intl = useIntl();
   const { formatMessage: t, formatDate } = intl;
   const fields = typeFields(cipher, intl);
@@ -195,6 +219,15 @@ function Content({ cipher, vault, onFill }: { cipher: Cipher; vault: Vault; onFi
         </section>
       )}
       {history.length > 0 && <PasswordHistoryCard rows={history} />}
+      {mailboxes.map(({ key, address }) => (
+        // Keyed, for the next item shown in its place not to take over its sync.
+        <Inbox
+          key={address}
+          mailboxKey={key}
+          title={mailboxes.length === 1 ? t({ id: "inbox" }) : `${t({ id: "inbox" })}: ${address}`}
+          revision={inboxRevision}
+        />
+      ))}
       {creationDate && revisionDate && (
         <p className="item-detail-dates">
           {t(

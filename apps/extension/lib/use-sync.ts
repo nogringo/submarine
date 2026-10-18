@@ -5,6 +5,8 @@ export interface Sync {
   states: SyncState[];
   /** Goes up each time the core tells the vaults changed, for their items to be read again. */
   revision: number;
+  /** Goes up each time the core tells the messages of a mailbox synced changed. */
+  inboxRevision: number;
 }
 
 /**
@@ -14,6 +16,7 @@ export interface Sync {
 export function useSync(): Sync {
   const [states, setStates] = useState<SyncState[]>([]);
   const [revision, setRevision] = useState(0);
+  const [inboxRevision, setInboxRevision] = useState(0);
   useEffect(() => {
     let open = true;
     const read = () =>
@@ -22,7 +25,10 @@ export function useSync(): Sync {
       });
     const port = browser.runtime.connect({ name: syncPort });
     port.onMessage.addListener((event: CoreEvent) => {
-      if (event !== "vaultsChanged") return;
+      if (event === "inboxChanged") {
+        setInboxRevision((revision) => revision + 1);
+        return;
+      }
       setRevision((revision) => revision + 1);
       void read();
     });
@@ -32,5 +38,5 @@ export function useSync(): Sync {
       port.disconnect();
     };
   }, []);
-  return { states, revision };
+  return { states, revision, inboxRevision };
 }

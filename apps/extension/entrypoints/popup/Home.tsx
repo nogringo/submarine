@@ -400,6 +400,7 @@ export function Home({
           vault={opened.vault}
           id={opened.id}
           revision={sync.revision}
+          inboxRevision={sync.inboxRevision}
           onBack={back}
           onLeft={() => {
             // Its row is gone from the list.

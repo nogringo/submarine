@@ -81,10 +81,12 @@ export const dayFormat: Intl.DateTimeFormatOptions = {
   day: "numeric",
 };
 
-/** A date and time as the app writes them, `yMMMd` then `Hm`: "Oct 11, 2026, 14:05". */
-export const dayTimeFormat: Intl.DateTimeFormatOptions = {
-  ...dayFormat,
+/** A time as the app writes it, `Hm`: "14:05". */
+export const timeFormat: Intl.DateTimeFormatOptions = {
   hour: "numeric",
   minute: "2-digit",
   hourCycle: "h23",
 };
+
+/** A date and time as the app writes them, `yMMMd` then `Hm`: "Oct 11, 2026, 14:05". */
+export const dayTimeFormat: Intl.DateTimeFormatOptions = { ...dayFormat, ...timeFormat };

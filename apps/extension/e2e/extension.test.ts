@@ -1,13 +1,15 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { generateSecretKey, getPublicKey, nip19 } from "nostr-tools";
+import * as nip17 from "nostr-tools/nip17";
 import * as nip49 from "nostr-tools/nip49";
+import * as nip59 from "nostr-tools/nip59";
 import type { Page } from "puppeteer";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { fillPage } from "../lib/fill-page";
 import { violations } from "./axe";
 import { type BrowserName, type Extension, launch, openPopupOver } from "./extension";
-import { relayUrl, startRelay } from "./relay";
+import { publish, relayUrl, startRelay } from "./relay";
 import { publishItems } from "./vault-items";
 
 const english = JSON.parse(await readFile(appArb("en"), "utf8"));
@@ -521,6 +523,25 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     );
   const save = ".item-form .page-bar button[type=submit]";
 
+  /** Points the relays of new email addresses at the local relay, or back to their defaults. */
+  const localMailRelays = (local: boolean) =>
+    extension.popup.evaluate(
+      async (local, relay) => {
+        type Api = { runtime: { sendMessage(message: unknown): Promise<string> } };
+        const globals = globalThis as unknown as { browser?: Api; chrome: Api };
+        const { runtime } = globals.browser ?? globals.chrome;
+        const { result: settings } = JSON.parse(
+          await runtime.sendMessage({ method: "mailSettings" }),
+        );
+        for (const list of ["address", "inbox"]) {
+          const urls = local ? [relay] : settings[list].defaults;
+          await runtime.sendMessage({ method: "setMailList", args: { list, urls } });
+        }
+      },
+      local,
+      relayUrl,
+    );
+
   it("creates a login from the New item menu, and shows it once saved", async () => {
     const { popup } = extension;
     await extension.click("button[aria-label='New item']");
@@ -555,6 +576,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
       "Move First name",
     );
     expect(await violations(popup)).toEqual([]);
+    await localMailRelays(true);
     await extension.click("button::-p-text(Add a field)");
     await extension.click(`[role=menuitem]::-p-text(${english.emailAddressField})`);
     await popup.waitForFunction(() => document.querySelectorAll(".custom-field").length === 4);
@@ -574,8 +596,51 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
       english.email,
       english.mailboxKey,
     ]);
+    await localMailRelays(false);
     await extension.press("Escape");
     await rowNames("Forum,GitHub,Visa,wifi");
+  });
+
+  it("shows the messages the mailbox of a login receives, as they arrive", async () => {
+    const { popup } = extension;
+    await extension.click(".item-row[aria-label=Forum]");
+    await popup.waitForSelector(`.inbox ::-p-text(${english.inboxEmpty})`);
+    const address = await popup.$$eval(".item-detail .field-value", (values) =>
+      values.map((value) => value.textContent).find((text) => text?.includes("@")),
+    );
+    const mailbox = nip19.decode(address?.split("@")[0] ?? "").data as string;
+    const bridge = generateSecretKey();
+    const email = nip59.wrapEvent(
+      {
+        kind: 1301,
+        created_at: Math.floor(Date.now() / 1000) - 60,
+        content: [
+          "From: Shop <noreply@shop.example>",
+          `To: ${address}`,
+          "Subject: Confirm your address",
+          "Content-Type: text/plain; charset=utf-8",
+          "",
+          "Your code is 123456",
+        ].join("\r\n"),
+      },
+      bridge,
+      mailbox,
+    );
+    await publish(email);
+    await popup.waitForSelector(".inbox-message ::-p-text(Confirm your address)");
+    await publish(
+      nip17.wrapEvent(generateSecretKey(), { publicKey: mailbox }, "See you at 8\nBob"),
+    );
+    await popup.waitForFunction(
+      () =>
+        [...document.querySelectorAll(".inbox-summary")]
+          .map((summary) => summary.textContent)
+          .join() === "See you at 8,Confirm your address",
+    );
+    expect(await popup.$$eval(".inbox-sender", (senders) => senders[1]?.textContent)).toBe("Shop");
+    expect(await violations(popup)).toEqual([]);
+    await extension.press("Escape");
+    await popup.waitForSelector(".item-detail", { hidden: true });
   });
 
   it("edits a login, what the form leaves out kept", async () => {

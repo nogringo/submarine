@@ -11,6 +11,10 @@
   animation: sync-button-turn 1s linear infinite;
 }
 
+.sync-button-arrows[data-refresh] {
+  animation-direction: reverse;
+}
+
 @keyframes sync-button-turn {
   to {
     rotate: -360deg;

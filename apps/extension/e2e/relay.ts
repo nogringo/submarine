@@ -1,4 +1,4 @@
-import { type Event, type Filter, matchFilter } from "nostr-tools";
+import { type Event, type Filter, matchFilter, SimplePool } from "nostr-tools";
 import { type WebSocket, WebSocketServer } from "ws";
 
 /** The relay the e2e build of the core uses for every vault: `TEST_RELAY` of `pnpm core:e2e`. */
@@ -60,4 +60,14 @@ export async function startRelay(): Promise<{ close(): Promise<void> }> {
         server.close(() => closed());
       }),
   };
+}
+
+/** Publishes `event` on the local relay, as another client would. */
+export async function publish(event: Event) {
+  const pool = new SimplePool();
+  try {
+    await Promise.all(pool.publish([relayUrl], event));
+  } finally {
+    pool.close([relayUrl]);
+  }
 }

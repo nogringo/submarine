@@ -1,3 +1,4 @@
+import refreshIcon from "@material-design-icons/svg/round/refresh.svg";
 import syncIcon from "@material-design-icons/svg/round/sync.svg";
 import { useEffect, useState } from "react";
 import { Button } from "react-aria-components";
@@ -40,8 +41,19 @@ export function SyncButton({
   );
 }
 
-/** Arrows that turn while `turning`, and end their turn rather than stop askew, as in the app. */
-export function SyncArrows({ turning, size }: { turning: boolean; size?: number }) {
+/**
+ * Arrows that turn while `turning`, and end their turn rather than stop askew, as in the app. The
+ * sync arrows by default, or the `refresh` arrow, which turns the other way.
+ */
+export function SyncArrows({
+  turning,
+  size,
+  refresh,
+}: {
+  turning: boolean;
+  size?: number;
+  refresh?: boolean;
+}) {
   const [shown, setShown] = useState(turning);
   useEffect(() => {
     if (turning) setShown(true);
@@ -50,11 +62,12 @@ export function SyncArrows({ turning, size }: { turning: boolean; size?: number 
     <span
       className="sync-button-arrows"
       data-turning={shown || undefined}
+      data-refresh={refresh || undefined}
       onAnimationIteration={() => {
         if (!turning) setShown(false);
       }}
     >
-      <Icon src={syncIcon} size={size} />
+      <Icon src={refresh ? refreshIcon : syncIcon} size={size} />
     </span>
   );
 }

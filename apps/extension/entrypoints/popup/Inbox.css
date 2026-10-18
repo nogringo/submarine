@@ -1,0 +1,74 @@
+.inbox-header {
+  display: flex;
+  align-items: center;
+}
+
+.inbox-header > .item-detail-section-title {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.inbox-empty {
+  padding: 16px;
+  color: var(--muted);
+}
+
+.inbox-messages {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.inbox-message {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  color: var(--muted);
+}
+
+.inbox-message + .inbox-message {
+  border-top: 1px solid var(--line);
+}
+
+.inbox-message-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.inbox-message-top {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.inbox-sender {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inbox-sender.mono {
+  font-family: var(--mono-font);
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.inbox-date,
+.inbox-summary {
+  font-size: 13px;
+}
+
+.inbox-summary {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

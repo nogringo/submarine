@@ -29,6 +29,15 @@
   --wordmark-font: "Saira Stencil One", var(--text-font);
 }
 
+/* Chosen in the settings over the system's. */
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
 * {
   box-sizing: border-box;
 }

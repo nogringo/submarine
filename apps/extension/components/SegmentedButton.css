@@ -1,0 +1,40 @@
+.segmented-button {
+  display: flex;
+  height: 40px;
+  overflow: hidden;
+  border: 1px solid var(--outline);
+  border-radius: 20px;
+}
+
+.segment {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0 12px;
+  overflow: hidden;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.segment + .segment {
+  border-inline-start: 1px solid var(--outline);
+}
+
+.segment[data-hovered]:not([data-selected]) {
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+}
+
+.segment[data-selected] {
+  background: var(--raised);
+  color: var(--text);
+}
+
+/* Inside, as the outline around clips what goes past it. */
+.segment[data-focus-visible] {
+  outline-offset: -3px;
+}

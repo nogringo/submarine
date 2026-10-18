@@ -5,6 +5,7 @@ import { type IntlShape, useIntl } from "react-intl";
 import { TextButton } from "@/components/Button";
 import { type LockPasswordChange, LockPasswordDialog } from "@/components/LockPasswordDialog";
 import { Page, PageHeader } from "@/components/Page";
+import { SegmentedButton } from "@/components/SegmentedButton";
 import { SelectTile } from "@/components/SelectTile";
 import { SettingsLinkTile, SettingsSection, SettingsTile } from "@/components/SettingsSection";
 import { AddVaultMark, VaultAvatar } from "@/components/VaultAvatar";
@@ -16,6 +17,7 @@ import {
 } from "@/lib/clipboard";
 import { callCore, type LockTimeout, lockTimeouts, type Vault } from "@/lib/core";
 import { languageNames } from "@/lib/i18n";
+import { readTheme, saveTheme, showTheme, type Theme, themes } from "@/lib/theme";
 import { useChosenLocale } from "@/lib/use-locale";
 import { ImportExportSection } from "./ImportExport";
 import "./Settings.css";
@@ -149,6 +151,7 @@ export function Settings({
         </SettingsSection>
         <SettingsSection title={t({ id: "appearance" })}>
           <LanguageTile />
+          <ThemeTile />
         </SettingsSection>
         <ImportExportSection vaults={vaults} />
       </div>
@@ -179,6 +182,39 @@ function LanguageTile() {
           .toSorted((a, b) => (a.label < b.label ? -1 : 1)),
       ]}
       onChange={(locale) => choose(locale === browserLanguage ? undefined : locale)}
+    />
+  );
+}
+
+const themeLabels = {
+  system: "themeSystem",
+  light: "themeLight",
+  dark: "themeDark",
+} as const;
+
+function ThemeTile() {
+  const { formatMessage: t } = useIntl();
+  const [theme, setTheme] = useState<Theme>();
+  useEffect(() => {
+    void readTheme().then(setTheme);
+  }, []);
+  if (!theme) return null;
+  return (
+    <SettingsTile
+      title={t({ id: "theme" })}
+      below={
+        <SegmentedButton
+          className="settings-themes"
+          label={t({ id: "theme" })}
+          options={themes.map((id) => ({ id, label: t({ id: themeLabels[id] }) }))}
+          selected={theme}
+          onChange={(chosen) => {
+            setTheme(chosen);
+            showTheme(chosen);
+            void saveTheme(chosen);
+          }}
+        />
+      }
     />
   );
 }

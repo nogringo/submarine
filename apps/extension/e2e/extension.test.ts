@@ -999,6 +999,32 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     expect(await popup.evaluate(() => document.documentElement.lang)).toBe("en");
   });
 
+  it("shows the theme chosen in the settings over the system's, and again as the popup opens", async () => {
+    const { popup } = extension;
+    const background = (color: string) =>
+      popup.waitForFunction(
+        (color) => getComputedStyle(document.body).backgroundColor === color,
+        {},
+        color,
+      );
+    const segment = (theme: string) => `.settings-themes .segment::-p-text(${theme})`;
+    await extension.click(segment(english.themeDark));
+    await background("rgb(11, 30, 45)");
+    await extension.click(segment(english.themeLight));
+    await background("rgb(228, 235, 239)");
+    expect(await violations(popup)).toEqual([]);
+    await extension.reload();
+    await popup.waitForSelector(".home-title");
+    await background("rgb(228, 235, 239)");
+    await extension.click("button[aria-label=Vaults]");
+    await extension.click(".drawer button::-p-text(Settings)");
+    await popup.waitForSelector(
+      `.settings-themes .segment[aria-checked=true]::-p-text(${english.themeLight})`,
+    );
+    await extension.click(segment(english.themeSystem));
+    await popup.waitForFunction(() => !document.documentElement.dataset.theme);
+  });
+
   /** Exports the vault from the settings, `password` protecting the file, and reads the file. */
   async function exportVault(password?: string): Promise<{ name: string; content: string }> {
     const { popup } = extension;

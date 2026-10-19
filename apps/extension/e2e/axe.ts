@@ -9,6 +9,15 @@ import { setTheme } from "./theme";
 export async function violations(popup: Page): Promise<string[]> {
   // Evaluated by the browser's driver, which the extension's CSP does not hold back, unlike eval.
   if (!(await popup.evaluate(() => "axe" in globalThis))) await popup.evaluate(axe.source);
+  // Measured once still: rows sliding into place overlap, which fails target-size.
+  await popup.evaluate(() =>
+    Promise.all(
+      document
+        .getAnimations()
+        .filter((animation) => animation.effect?.getComputedTiming().endTime !== Infinity)
+        .map((animation) => animation.finished.catch(() => {})),
+    ),
+  );
   const found: string[] = [];
   try {
     for (const theme of ["light", "dark"] as const) {

@@ -138,11 +138,12 @@ void main() {
       ],
     ).toJson();
 
-    /// The lists the mailbox sent to its address relay so far.
-    List<Nip01Event> listsSent() => [
+    /// The lists the mailbox sent to its address relay so far, once each: ndk
+    /// can send one again, same signature, as the relay connects.
+    List<Nip01Event> listsSent() => {
       for (final event in addressRelay.receivedEvents)
-        if (event.pubKey == mailboxSigner.getPublicKey()) event,
-    ];
+        if (event.pubKey == mailboxSigner.getPublicKey()) event.sig: event,
+    }.values.toList();
 
     test('tells the mailboxes of an item', () async {
       final id = await sync.createItem(

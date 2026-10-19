@@ -1171,9 +1171,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     const { popup } = extension;
     const change = `::-p-xpath(//div[contains(@class, "settings-tile")][.//span[.="${english.mailBridge}"]]//button)`;
     const description = (domain: string) =>
-      popup.waitForSelector(
-        `.settings ::-p-text(${english.mailBridgeDescription.replace("{domain}", domain)})`,
-      );
+      settingDescription(popup, english.mailBridgeDescription.replace("{domain}", domain));
     await description("uid.ovh");
     await extension.click(change);
     await extension.fill("input[name=domain]", "not a domain");
@@ -1194,8 +1192,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
   it("changes the inbox relays of new email addresses on their page, then puts the defaults back", async () => {
     const { popup } = extension;
     const row = `.settings .settings-link-tile::-p-text(${english.mailInboxRelays})`;
-    const description = (hosts: string) =>
-      popup.waitForSelector(`.settings .settings-tile-description::-p-text("${hosts}")`);
+    const description = (hosts: string) => settingDescription(popup, hosts);
     const backOnRow = async () => {
       await extension.press("Escape");
       await popup.waitForSelector(".mail-list", { hidden: true });
@@ -1242,8 +1239,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
   it("moves a server of new email addresses with the arrow keys, in the order saved", async () => {
     const { popup } = extension;
     const row = `.settings .settings-link-tile::-p-text(${english.mailServers})`;
-    const description = (hosts: string) =>
-      popup.waitForSelector(`.settings .settings-tile-description::-p-text("${hosts}")`);
+    const description = (hosts: string) => settingDescription(popup, hosts);
     const back = async () => {
       await extension.press("Escape");
       await popup.waitForSelector(".mail-list", { hidden: true });
@@ -1719,6 +1715,16 @@ function fieldValues(page: Page): Promise<Record<string, string>> {
   return page.$$eval("input", (inputs) =>
     Object.fromEntries(inputs.map((input) => [input.name, input.value])),
   );
+}
+
+/**
+ * A description of the settings reading `text`, checked each frame: React changes a lone text in
+ * place, which the default polling, on element and attribute changes only, can miss.
+ */
+function settingDescription(page: Page, text: string) {
+  return page.waitForSelector(`.settings .settings-tile-description::-p-text("${text}")`, {
+    visible: true,
+  });
 }
 
 function appArb(locale: string) {

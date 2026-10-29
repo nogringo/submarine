@@ -23,7 +23,6 @@
   "featureCodes": "Kaksivaiheisen tunnistautumisen koodit kirjautumistietojesi vieressä.",
   "featureGenerator": "Vahvojen salasanojen, salalauseiden ja käyttäjätunnusten generaattori.",
   "featureItems": "Kirjautumistiedot, kortit ja salatut muistiot, joihin voit lisätä omia lisäkenttiä.",
-  "featureLanguages": "11 kielellä.",
   "featureLock": "Lukitussalasana, jonka oikotienä toimii sormenjälki, kasvot tai näytön lukitus.",
   "featureOffline": "Muutokset tallentuvat ensin laitteellesi ja synkronoituvat, kun olet verkossa.",
   "featureScreenshots": "Androidilla kuvakaappaukset on estetty, ellet salli niitä.",

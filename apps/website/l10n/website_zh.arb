@@ -23,7 +23,6 @@
   "featureCodes": "双重验证的验证码就显示在登录旁边。",
   "featureGenerator": "生成器可生成高强度的密码、密码短语和用户名。",
   "featureItems": "保存登录、支付卡和安全笔记，并可添加自定义字段。",
-  "featureLanguages": "支持 11 种语言。",
   "featureLock": "锁定密码，也可用指纹、面容或锁屏快速解锁。",
   "featureOffline": "更改先保存在您的设备上，联网后再同步。",
   "featureScreenshots": "在 Android 上默认禁止截屏，除非您允许。",

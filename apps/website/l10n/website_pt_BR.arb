@@ -23,7 +23,6 @@
   "featureCodes": "Códigos de autenticação de dois fatores junto das suas credenciais.",
   "featureGenerator": "Um gerador de senhas fortes, frases secretas e nomes de usuário.",
   "featureItems": "Credenciais, cartões e anotações seguras, com seus próprios campos personalizados.",
-  "featureLanguages": "Em 11 idiomas.",
   "featureLock": "Uma senha de bloqueio, com sua digital, seu rosto ou o bloqueio de tela como atalho.",
   "featureOffline": "Alterações salvas primeiro no seu dispositivo e sincronizadas assim que você estiver online.",
   "featureScreenshots": "Capturas de tela bloqueadas no Android, a menos que você as permita.",

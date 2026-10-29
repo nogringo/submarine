@@ -21,7 +21,6 @@ Submarine keeps your passwords, cards and notes safe and in sync across your dev
 - Copy a username, a password or a two-factor code in one click. Copied passwords are cleared from the clipboard after a delay.
 - Open it from the keyboard with Ctrl+Shift+Y (Command+Shift+Y on a Mac, Ctrl+Shift+U on Linux).
 - Lock the extension with a password, by itself after the delay you choose.
-- In 11 languages: English, Chinese, Finnish, French, German, Italian, Japanese, Portuguese (Brazil and Portugal), Russian and Spanish.
 
 Everything is encrypted before it is synced, so nobody but you can read it, not even us. Your vaults live on Nostr relays: open servers that anyone can run, and that only see encrypted data.
 

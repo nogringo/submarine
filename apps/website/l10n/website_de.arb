@@ -23,7 +23,6 @@
   "featureCodes": "Codes für die Zwei-Faktor-Authentifizierung direkt bei deinen Zugangsdaten.",
   "featureGenerator": "Ein Generator für starke Passwörter, Passphrasen und Benutzernamen.",
   "featureItems": "Zugangsdaten, Karten und sichere Notizen, mit deinen eigenen benutzerdefinierten Feldern.",
-  "featureLanguages": "In 11 Sprachen.",
   "featureLock": "Ein Sperrpasswort, mit Fingerabdruck, Gesicht oder Bildschirmsperre als Abkürzung.",
   "featureOffline": "Änderungen werden zuerst auf deinem Gerät gespeichert und synchronisiert, sobald du online bist.",
   "featureScreenshots": "Screenshots sind unter Android blockiert, außer du erlaubst sie.",

@@ -88,10 +88,6 @@
   "@featureItems": {
     "description": "Feature list entry."
   },
-  "featureLanguages": "In 11 languages.",
-  "@featureLanguages": {
-    "description": "Feature list entry."
-  },
   "featureLock": "A lock password, with your fingerprint, face or screen lock as a shortcut.",
   "@featureLock": {
     "description": "Feature list entry."

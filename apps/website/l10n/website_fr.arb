@@ -23,7 +23,6 @@
   "featureCodes": "Les codes d'authentification à deux facteurs à côté de vos identifiants.",
   "featureGenerator": "Un générateur de mots de passe robustes, de phrases de passe et de noms d'utilisateur.",
   "featureItems": "Identifiants, cartes et notes sécurisées, avec vos propres champs personnalisés.",
-  "featureLanguages": "En 11 langues.",
   "featureLock": "Un mot de passe de verrouillage, avec votre empreinte, votre visage ou le verrouillage de l'écran comme raccourci.",
   "featureOffline": "Les modifications sont d'abord enregistrées sur votre appareil, puis synchronisées dès que vous êtes en ligne.",
   "featureScreenshots": "Les captures d'écran sont bloquées sur Android, sauf si vous les autorisez.",

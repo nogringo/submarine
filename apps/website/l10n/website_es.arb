@@ -23,7 +23,6 @@
   "featureCodes": "Códigos de autenticación en dos pasos junto a tus inicios de sesión.",
   "featureGenerator": "Un generador de contraseñas robustas, frases de contraseña y nombres de usuario.",
   "featureItems": "Inicios de sesión, tarjetas y notas seguras, con tus propios campos personalizados.",
-  "featureLanguages": "En 11 idiomas.",
   "featureLock": "Una contraseña de bloqueo, con tu huella, tu rostro o el bloqueo de pantalla como atajo.",
   "featureOffline": "Los cambios se guardan primero en tu dispositivo y se sincronizan en cuanto tienes conexión.",
   "featureScreenshots": "Capturas de pantalla bloqueadas en Android, salvo que las permitas.",

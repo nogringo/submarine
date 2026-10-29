@@ -15,7 +15,8 @@
     "format": "biome check --write .",
     "test": "vitest run",
     "test:a11y": "astro build && node a11y/check.ts",
-    "a11y:browser": "puppeteer browsers install chrome"
+    "a11y:browser": "puppeteer browsers install chrome",
+    "youtube": "node youtube/banner.ts"
   },
   "dependencies": {
     "@astrojs/markdown-satteri": "0.4.3",

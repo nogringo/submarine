@@ -24,6 +24,14 @@ pnpm test:a11y   # axe on every page, light and dark, wide and at 320 pixels
 
 The download page links the files of the latest GitHub release, read at build time. Without GitHub, its links lead to the release page.
 
+## YouTube
+
+The channel's banner and profile picture are in [`youtube`](youtube), drawn by `banner.ts` from the app's fonts, its English tagline and its small sonar. Draw them again after a change to one of these:
+
+```sh
+pnpm youtube
+```
+
 ## Deployment
 
 [Firebase Hosting](https://firebase.google.com/docs/hosting) serves the site from the Firebase project `submarine-15385`, its Hosting site of the same name being the `website` target of the repository's [`firebase.json`](../../firebase.json) and [`.firebaserc`](../../.firebaserc). The domain `submarine.li` is connected to that site in the Firebase console, under Hosting.

@@ -38,7 +38,7 @@ Sì. Non c'è niente da pagare, nessuna versione premium e nessuna pubblicità. 
 
 ## In cosa è diverso dagli altri gestori di password?
 
-Con la maggior parte dei gestori di password, la tua cassaforte si trova sui server dell'azienda che li produce, dietro un account. Submarine non ha un account né un server proprio: la tua cassaforte è copiata su server aperti che scegli tu, e solo la tua chiave la apre. Il rovescio della medaglia è che nessuno può recuperare una chiave persa. Submarine è anche più giovane, e non è ancora stato sottoposto ad audit.
+Con la maggior parte dei gestori di password, la tua cassaforte si trova sui server dell'azienda che li produce, dietro un account. Submarine non ha un account né un server proprio: la tua cassaforte è copiata su server aperti che scegli tu, e solo la tua chiave la apre. Il rovescio della medaglia è che nessuno può recuperare una chiave persa. Inoltre, Submarine non è ancora stato sottoposto ad audit.
 
 ## Posso importare le mie password?
 

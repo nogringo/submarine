@@ -38,7 +38,7 @@ Ja. Es gibt nichts zu bezahlen, keine Premium-Version und keine Werbung. Submari
 
 ## Was unterscheidet es von anderen Passwortmanagern?
 
-Bei den meisten Passwortmanagern liegt dein Tresor hinter einem Konto auf den Servern des Unternehmens, das sie entwickelt. Submarine hat kein Konto und keinen eigenen Server: Dein Tresor wird auf offene Server kopiert, die du wählst, und nur dein Schlüssel öffnet ihn. Die Kehrseite: Einen verlorenen Schlüssel kann niemand wiederherstellen. Submarine ist außerdem jünger und hatte noch kein Audit.
+Bei den meisten Passwortmanagern liegt dein Tresor hinter einem Konto auf den Servern des Unternehmens, das sie entwickelt. Submarine hat kein Konto und keinen eigenen Server: Dein Tresor wird auf offene Server kopiert, die du wählst, und nur dein Schlüssel öffnet ihn. Die Kehrseite: Einen verlorenen Schlüssel kann niemand wiederherstellen. Submarine hatte außerdem noch kein Audit.
 
 ## Kann ich meine Passwörter importieren?
 

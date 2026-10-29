@@ -66,7 +66,7 @@ The protocol is specified in [`docs/nostr-passwords.md`](docs/nostr-passwords.md
 
 ## Status
 
-Submarine is young but ready to use. For your most important passwords, we still recommend a proven password manager such as [KeePassXC](https://keepassxc.org/).
+Submarine is ready to use, but no independent firm has audited its security yet. Until one does, keep your most important passwords in a proven password manager such as [KeePassXC](https://keepassxc.org/).
 
 ## Development
 

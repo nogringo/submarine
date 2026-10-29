@@ -38,7 +38,7 @@ Sim. Não há nada a pagar, nenhuma versão premium nem anúncios. O Submarine �
 
 ## Em que é diferente de outros gestores de palavras-passe?
 
-Na maioria dos gestores de palavras-passe, o seu cofre fica nos servidores da empresa que os desenvolve, por trás de uma conta. O Submarine não tem conta nem servidor próprio: o seu cofre é copiado para servidores abertos que é você que escolhe, e só a sua chave o abre. A contrapartida é que ninguém consegue recuperar uma chave perdida. O Submarine é também mais recente e ainda não foi auditado.
+Na maioria dos gestores de palavras-passe, o seu cofre fica nos servidores da empresa que os desenvolve, por trás de uma conta. O Submarine não tem conta nem servidor próprio: o seu cofre é copiado para servidores abertos que é você que escolhe, e só a sua chave o abre. A contrapartida é que ninguém consegue recuperar uma chave perdida. O Submarine também ainda não foi auditado.
 
 ## Posso importar as minhas palavras-passe?
 

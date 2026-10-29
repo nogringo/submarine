@@ -38,7 +38,7 @@ Sim. Não há nada para pagar, nenhuma versão premium e nenhum anúncio. O Subm
 
 ## Qual a diferença para outros gerenciadores de senhas?
 
-Na maioria dos gerenciadores de senhas, seu cofre fica nos servidores da empresa que os desenvolve, protegido por uma conta. O Submarine não tem conta nem servidor próprio: seu cofre é copiado em servidores abertos que você escolhe, e só a sua chave o abre. O outro lado disso é que ninguém consegue recuperar uma chave perdida. O Submarine também é mais novo e ainda não foi auditado.
+Na maioria dos gerenciadores de senhas, seu cofre fica nos servidores da empresa que os desenvolve, protegido por uma conta. O Submarine não tem conta nem servidor próprio: seu cofre é copiado em servidores abertos que você escolhe, e só a sua chave o abre. O outro lado disso é que ninguém consegue recuperar uma chave perdida. O Submarine também ainda não foi auditado.
 
 ## Posso importar minhas senhas?
 

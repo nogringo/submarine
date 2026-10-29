@@ -23,7 +23,7 @@ description: |
 
   Already using Nostr? A signer app such as Amber can hold your vault keys.
 
-  Submarine is still young. For your most important passwords, we still recommend a proven password manager.
+  No independent firm has audited Submarine's security yet. Until one does, keep your most important passwords in a proven password manager.
 tags:
   - password-manager
   - nostr

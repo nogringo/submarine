@@ -7,7 +7,7 @@ Flutter app for Submarine, a password manager built on [Nostr](https://nostr.how
   <img alt="Submarine on a desktop: three vaults, the items of all of them, and a login with its verification code" src="screenshots/desktop-light.png">
 </picture>
 
-> **Status:** young but ready to use. For your most important passwords, we still recommend a proven password manager such as [KeePassXC](https://keepassxc.org/).
+> **Status:** ready to use, but no independent firm has audited its security yet. Until one does, keep your most important passwords in a proven password manager such as [KeePassXC](https://keepassxc.org/).
 
 ## Features
 

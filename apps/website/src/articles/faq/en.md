@@ -38,7 +38,7 @@ Yes. There is nothing to pay, no premium version and no ads. Submarine is open s
 
 ## How is it different from other password managers?
 
-With most password managers, your vault lives on the servers of the company that makes them, behind an account. Submarine has no account and no server of its own: your vault is copied to open servers that you choose, and only your key opens it. The other side of this is that nobody can recover a lost key. Submarine is also younger, and not audited yet.
+With most password managers, your vault lives on the servers of the company that makes them, behind an account. Submarine has no account and no server of its own: your vault is copied to open servers that you choose, and only your key opens it. The other side of this is that nobody can recover a lost key. Submarine has also not been audited yet.
 
 ## Can I import my passwords?
 

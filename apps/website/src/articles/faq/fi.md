@@ -38,7 +38,7 @@ Kyllä. Mitään ei tarvitse maksaa, eikä ole premium-versiota tai mainoksia. S
 
 ## Miten se eroaa muista salasanojen hallintaohjelmista?
 
-Useimmissa salasanojen hallintaohjelmissa holvisi sijaitsee ohjelman tekevän yrityksen palvelimilla tilin takana. Submarinella ei ole tiliä eikä omaa palvelinta: holvisi kopioidaan valitsemillesi avoimille palvelimille, ja vain avaimesi avaa sen. Kääntöpuolena kukaan ei voi palauttaa kadonnutta avainta. Submarine on myös nuorempi, eikä sitä ole vielä auditoitu.
+Useimmissa salasanojen hallintaohjelmissa holvisi sijaitsee ohjelman tekevän yrityksen palvelimilla tilin takana. Submarinella ei ole tiliä eikä omaa palvelinta: holvisi kopioidaan valitsemillesi avoimille palvelimille, ja vain avaimesi avaa sen. Kääntöpuolena kukaan ei voi palauttaa kadonnutta avainta. Submarinea ei myöskään ole vielä auditoitu.
 
 ## Voinko tuoda salasanani?
 

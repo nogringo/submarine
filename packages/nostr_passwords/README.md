@@ -2,7 +2,7 @@
 
 Reference Dart implementation of a password manager protocol built on [Nostr](https://nostr.how/). It powers [Submarine](../..), but carries no Submarine branding so that any client can use it.
 
-> **Status:** young. The protocol may still change before 1.0.0.
+> **Status:** not audited yet.
 
 The protocol is specified in [`docs`](../../docs).
 

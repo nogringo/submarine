@@ -38,7 +38,7 @@ Oui. Il n'y a rien à payer, ni version premium, ni publicité. Submarine est op
 
 ## En quoi est-il différent des autres gestionnaires de mots de passe ?
 
-Avec la plupart des gestionnaires de mots de passe, votre coffre vit sur les serveurs de l'entreprise qui les fait, derrière un compte. Submarine n'a ni compte ni serveur à lui : votre coffre est copié sur des serveurs ouverts que vous choisissez, et seule votre clé l'ouvre. La contrepartie, c'est que personne ne peut récupérer une clé perdue. Submarine est aussi plus jeune, et pas encore audité.
+Avec la plupart des gestionnaires de mots de passe, votre coffre vit sur les serveurs de l'entreprise qui les fait, derrière un compte. Submarine n'a ni compte ni serveur à lui : votre coffre est copié sur des serveurs ouverts que vous choisissez, et seule votre clé l'ouvre. La contrepartie, c'est que personne ne peut récupérer une clé perdue. Submarine n'a pas non plus encore été audité.
 
 ## Puis-je importer mes mots de passe ?
 

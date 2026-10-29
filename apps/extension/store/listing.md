@@ -29,7 +29,7 @@ Get the Submarine app for your other devices at https://github.com/nogringo/subm
 
 Free and open source. No ads, no tracking.
 
-Submarine is still young. For your most important passwords, we still recommend a proven password manager.
+No independent firm has audited Submarine's security yet. Until one does, keep your most important passwords in a proven password manager.
 ```
 
 ## Category and links

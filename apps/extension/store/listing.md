@@ -24,7 +24,7 @@ Submarine keeps your passwords, cards and notes safe and in sync across your dev
 
 Everything is encrypted before it is synced, so nobody but you can read it, not even us. Your vaults live on Nostr relays: open servers that anyone can run, and that only see encrypted data.
 
-Get the Submarine app for your other devices at https://github.com/nogringo/submarine.
+Get the Submarine app for your other devices at https://submarine.li/download.
 
 Free and open source. No ads, no tracking.
 
@@ -34,8 +34,9 @@ No independent firm has audited Submarine's security yet. Until one does, keep y
 ## Category and links
 
 - Category: Privacy & Security, in both stores.
-- Homepage and support: https://github.com/nogringo/submarine and its issues, until submarine.li serves a site.
-- Privacy policy: https://github.com/nogringo/submarine/blob/main/apps/extension/PRIVACY.md
+- Homepage: https://submarine.li
+- Support: https://github.com/nogringo/submarine/issues
+- Privacy policy: https://submarine.li/privacy
 
 ## Images
 

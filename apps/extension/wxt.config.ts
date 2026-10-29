@@ -6,6 +6,7 @@ export default defineConfig({
   manifestVersion: 3,
   manifest: ({ browser }) => ({
     name: "Submarine Password Manager",
+    homepage_url: "https://submarine.li",
     // Chrome empties the clipboard from an offscreen document, Firefox from its background page.
     permissions: [
       "storage",

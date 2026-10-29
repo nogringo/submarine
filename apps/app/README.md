@@ -69,6 +69,8 @@ The screenshots of the READMEs, in [`screenshots`](screenshots), are rendered by
 flutter test tool/screenshots_test.dart
 ```
 
+`tool/video_test.dart` films the same vaults, frame by frame, for the channel's video in [`apps/video`](../video).
+
 ### Translations
 
 The strings live in [`lib/l10n`](lib/l10n): `app_en.arb` is the template, with a description of each string, and the other `app_<code>.arb` files its translations. To add a language, add an `app_<code>.arb` file next to them. After any change, regenerate the Dart files, which are committed:

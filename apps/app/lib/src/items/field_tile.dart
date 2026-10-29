@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:clock/clock.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -203,7 +204,7 @@ class _TotpTile extends StatefulWidget {
 
 class _TotpTileState extends State<_TotpTile>
     with SingleTickerProviderStateMixin {
-  final _clock = ValueNotifier(DateTime.now());
+  final _clock = ValueNotifier(clock.now());
   late final Ticker _ticker;
 
   @override
@@ -211,7 +212,7 @@ class _TotpTileState extends State<_TotpTile>
     super.initState();
     _ticker = createTicker((_) {
       final second = _clock.value.millisecondsSinceEpoch ~/ 1000;
-      _clock.value = DateTime.now();
+      _clock.value = clock.now();
       if (_clock.value.millisecondsSinceEpoch ~/ 1000 != second) {
         setState(() {});
       }

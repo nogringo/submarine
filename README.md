@@ -96,6 +96,8 @@ The [browser extension](apps/extension) is built with [WXT](https://wxt.dev) and
 
 The [website](apps/website), served at [submarine.li](https://submarine.li), is built with [Astro](https://astro.build), with Node.js 24 and pnpm too: `(cd apps/website && pnpm install && pnpm dev)`.
 
+The [video](apps/video) of the YouTube channel is made with [Remotion](https://www.remotion.dev), from footage of the app that a Flutter test films.
+
 Run the tests from a package directory: `dart test` for Dart packages, `flutter test` for the Flutter app, `pnpm test` for the extension. `pnpm test:e2e` runs the extension in Chrome and Firefox, once `pnpm e2e:browsers` has downloaded them.
 
 Commit messages follow [Conventional Commits](https://www.conventionalcommits.org). Use the package as scope when a change targets one: `feat(cli): ...`, `fix(app): ...`, `docs(nostr_passwords): ...`.

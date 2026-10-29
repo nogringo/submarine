@@ -1,0 +1,3 @@
+allowBuilds:
+  # Its binary comes with its platform package, which its script only checks.
+  esbuild: false

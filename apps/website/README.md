@@ -32,6 +32,8 @@ The channel's banner and profile picture are in [`youtube`](youtube), drawn by `
 pnpm youtube
 ```
 
+The channel's video is made in [`apps/video`](../video).
+
 ## Deployment
 
 [Firebase Hosting](https://firebase.google.com/docs/hosting) serves the site from the Firebase project `submarine-15385`, its Hosting site of the same name being the `website` target of the repository's [`firebase.json`](../../firebase.json) and [`.firebaserc`](../../.firebaserc). The domain `submarine.li` is connected to that site in the Firebase console, under Hosting.

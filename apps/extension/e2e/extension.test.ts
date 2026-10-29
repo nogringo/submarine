@@ -8,7 +8,13 @@ import type { Page } from "puppeteer";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { fillPage } from "../lib/fill-page";
 import { violations } from "./axe";
-import { type BrowserName, type Extension, launch, openPopupOver } from "./extension";
+import {
+  type BrowserName,
+  type Extension,
+  launch,
+  localMailRelays,
+  openPopupOver,
+} from "./extension";
 import { publish, relayUrl, startRelay } from "./relay";
 import { publishItems } from "./vault-items";
 
@@ -523,25 +529,6 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     );
   const save = ".item-form .page-bar button[type=submit]";
 
-  /** Points the relays of new email addresses at the local relay, or back to their defaults. */
-  const localMailRelays = (local: boolean) =>
-    extension.popup.evaluate(
-      async (local, relay) => {
-        type Api = { runtime: { sendMessage(message: unknown): Promise<string> } };
-        const globals = globalThis as unknown as { browser?: Api; chrome: Api };
-        const { runtime } = globals.browser ?? globals.chrome;
-        const { result: settings } = JSON.parse(
-          await runtime.sendMessage({ method: "mailSettings" }),
-        );
-        for (const list of ["address", "inbox"]) {
-          const urls = local ? [relay] : settings[list].defaults;
-          await runtime.sendMessage({ method: "setMailList", args: { list, urls } });
-        }
-      },
-      local,
-      relayUrl,
-    );
-
   it("creates a login from the New item menu, and shows it once saved", async () => {
     const { popup } = extension;
     await extension.click("button[aria-label='New item']");
@@ -576,7 +563,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
       "Move First name",
     );
     expect(await violations(popup)).toEqual([]);
-    await localMailRelays(true);
+    await localMailRelays(popup, true);
     await extension.click("button::-p-text(Add a field)");
     await extension.click(`[role=menuitem]::-p-text(${english.emailAddressField})`);
     await popup.waitForFunction(() => document.querySelectorAll(".custom-field").length === 4);
@@ -596,7 +583,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
       english.email,
       english.mailboxKey,
     ]);
-    await localMailRelays(false);
+    await localMailRelays(popup, false);
     await extension.press("Escape");
     await rowNames("Forum,GitHub,Visa,wifi");
   });

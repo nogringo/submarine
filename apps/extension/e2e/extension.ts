@@ -1,6 +1,7 @@
 import { createServer } from "node:http";
 import { resolve } from "node:path";
 import puppeteer, { type Browser, type ElementHandle, type KeyInput, type Page } from "puppeteer";
+import { relayUrl } from "./relay.ts";
 
 export type BrowserName = "chrome" | "firefox";
 
@@ -174,6 +175,26 @@ export async function openPopupOver(
   const popup = await (await opened).asPage();
   await popup.waitForSelector("#root > *");
   return { page, popup };
+}
+
+/** Points the relays of new email addresses at the local relay, or back to their defaults. */
+export function localMailRelays(popup: Page, local: boolean): Promise<void> {
+  return popup.evaluate(
+    async (local, relay) => {
+      type Api = { runtime: { sendMessage(message: unknown): Promise<string> } };
+      const globals = globalThis as unknown as { browser?: Api; chrome: Api };
+      const { runtime } = globals.browser ?? globals.chrome;
+      const { result: settings } = JSON.parse(
+        await runtime.sendMessage({ method: "mailSettings" }),
+      );
+      for (const list of ["address", "inbox"]) {
+        const urls = local ? [relay] : settings[list].defaults;
+        await runtime.sendMessage({ method: "setMailList", args: { list, urls } });
+      }
+    },
+    local,
+    relayUrl,
+  );
 }
 
 /**

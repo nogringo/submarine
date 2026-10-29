@@ -5,9 +5,10 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { generateSecretKey, nip19 } from "nostr-tools";
+import * as nip59 from "nostr-tools/nip59";
 import type { Browser } from "puppeteer";
-import { type Extension, launch } from "./extension.ts";
-import { startRelay } from "./relay.ts";
+import { type Extension, launch, localMailRelays } from "./extension.ts";
+import { publish, startRelay } from "./relay.ts";
 import { setTheme } from "./theme.ts";
 import { publishItems } from "./vault-items.ts";
 
@@ -49,7 +50,6 @@ await publishItems(personal, [
       code: "123",
     },
   },
-  { type: 2, name: "Home Wi-Fi", notes: "Network: Lighthouse", secureNote: { type: 0 } },
   {
     type: 4,
     name: "Alex Martin",
@@ -79,7 +79,10 @@ try {
   await extension.click("button[aria-label=Vaults]");
   await extension.click(".drawer button::-p-text(Add a vault)");
   await openVault(extension, work, "Work");
-  await popup.waitForFunction(() => document.querySelectorAll(".item-row").length === 7, {
+  await extension.click("button[aria-label=Vaults]");
+  await extension.click(".drawer [role=row]::-p-text(All vaults)");
+  await popup.waitForSelector("[role=dialog]", { hidden: true });
+  await popup.waitForFunction(() => document.querySelectorAll(".item-row").length === 6, {
     timeout: 30_000,
   });
   await mkdir(out, { recursive: true });
@@ -102,9 +105,57 @@ try {
   ]);
   await extension.press("Escape");
 
-  await extension.click(".item-row[aria-label='Debit card']");
-  await shoot(extension, "light", 3, "Every item, in detail", [
-    "Cards, notes, identities and SSH keys, as you saved them in the Submarine app.",
+  await localMailRelays(popup, true);
+  await extension.click("button[aria-label='New item']");
+  await extension.click("[role=menuitem]::-p-text(Login)");
+  await extension.fill(".item-form input[name=name]", "Shop");
+  await extension.fill(".item-form input[name=username]", "alex.martin");
+  await extension.click("button[aria-label='Generate a password']");
+  await popup.waitForSelector(".sheet .generator-preview .field-value");
+  await shoot(extension, "light", 3, "Strong passwords, made for you", [
+    "Generate passwords, passphrases and usernames as you fill in a login.",
+  ]);
+  await extension.click(".sheet button::-p-text(Use this password)");
+  await popup.waitForSelector(".sheet", { hidden: true });
+  await extension.click("button::-p-text(Add a field)");
+  await extension.click("[role=menuitem]::-p-text(Email address)");
+  await popup.waitForSelector(".custom-field");
+  await extension.click(".item-form .page-bar button[type=submit]");
+  await popup.waitForSelector(".item-form", { hidden: true });
+  await popup.waitForSelector(".inbox ::-p-text(No messages yet)");
+  const address = await popup.$$eval(".item-detail .field-value", (values) =>
+    values.map((value) => value.textContent).find((text) => text?.includes("@")),
+  );
+  const mailbox = nip19.decode(address?.split("@")[0] ?? "").data as string;
+  const bridge = generateSecretKey();
+  const emails = [
+    [3 * 24 * 60, "Welcome to Shop", "Your account is ready."],
+    [5, "Confirm your address", "Confirm at https://shop.example/confirm?code=482913."],
+    [1, "Your sign-in code", "Your code is 482913."],
+  ] as const;
+  for (const [minutesAgo, subject, text] of emails) {
+    const rumor = {
+      kind: 1301,
+      created_at: Math.floor(Date.now() / 1000) - minutesAgo * 60,
+      content: [
+        "From: Shop <noreply@shop.example>",
+        `To: ${address}`,
+        `Subject: ${subject}`,
+        "Content-Type: text/plain; charset=utf-8",
+        "",
+        text,
+      ].join("\r\n"),
+    };
+    await publish(nip59.wrapEvent(rumor, bridge, mailbox));
+  }
+  await popup.waitForFunction(
+    (count) => document.querySelectorAll(".inbox-message").length === count,
+    { timeout: 30_000 },
+    emails.length,
+  );
+  await popup.$eval(".inbox", (inbox) => inbox.scrollIntoView({ block: "end" }));
+  await shoot(extension, "dark", 4, "An email address for each login", [
+    "Read the sign-up codes and confirmation links it receives, right in the login.",
   ]);
   await extension.press("Escape");
 
@@ -118,7 +169,7 @@ try {
   await extension.press("Escape");
   await extension.click("button[aria-label=Lock]");
   await popup.waitForSelector("input[name=password]");
-  await shoot(extension, "dark", 4, "Locked while you are away", [
+  await shoot(extension, "light", 5, "Locked while you are away", [
     "Behind your password, after the delay you choose.",
   ]);
 } finally {

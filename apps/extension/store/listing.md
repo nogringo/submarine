@@ -40,7 +40,7 @@ No independent firm has audited Submarine's security yet. Until one does, keep y
 
 ## Images
 
-- `screenshot-1.png` to `screenshot-4.png`, 1280 by 800, in both stores.
+- `screenshot-1.png` to `screenshot-5.png`, 1280 by 800, in both stores.
 - `promo-tile.png`, 440 by 280: the small promo tile the Chrome Web Store requires.
 
 ## Chrome Web Store privacy

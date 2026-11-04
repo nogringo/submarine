@@ -2073,6 +2073,56 @@ void main() {
     await close(tester);
   });
 
+  testWidgets('gives a login a Nostr key of its own', (tester) async {
+    setScreen(tester, const Size(1280, 1600));
+    await open(tester, items: [github]);
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+        mail: mail,
+      ),
+    );
+    await settle(tester);
+    String textOf(String label) => tester
+        .widget<TextField>(find.widgetWithText(TextField, label))
+        .controller!
+        .text;
+
+    await tester.tap(find.byTooltip('New item'));
+    await settle(tester);
+    await tester.tap(find.text('Login'));
+    await settle(tester);
+    await tester.enterText(find.widgetWithText(TextField, 'Name'), 'Relay');
+    await tester.tap(find.text('Add a field'));
+    await settle(tester);
+    await tester.tap(find.text('Nostr key'));
+    await settle(tester);
+    final npub = textOf('npub');
+    final nsec = textOf('nsec');
+    expect(
+      Nip19.encodePubKey(
+        const Bip340EventSignerFactory().derivePublicKey(Nip19.decode(nsec)),
+      ),
+      npub,
+    );
+    await write(tester, find.text('Save'));
+
+    final items = (await tester.runAsync(vaults.all.single.vault.items))!;
+    final relay = items.singleWhere((item) => item.cipher.name == 'Relay');
+    expect(
+      [
+        for (final field in relay.cipher.fields)
+          (field.name, field.value, field.type),
+      ],
+      [('npub', npub, FieldType.text), ('nsec', nsec, FieldType.hidden)],
+    );
+    await close(tester);
+  });
+
   testWidgets('publishes the lists of a new email address with its item', (
     tester,
   ) async {

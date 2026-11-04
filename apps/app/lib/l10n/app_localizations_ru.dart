@@ -1565,6 +1565,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get mailboxKey => 'Ключ почтового ящика';
 
   @override
+  String get nostrKeyField => 'Ключ Nostr';
+
+  @override
   String get inbox => 'Входящие';
 
   @override

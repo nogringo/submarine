@@ -15,6 +15,7 @@ import 'cipher/field.dart';
 import 'defaults.dart';
 import 'html_text.dart';
 import 'mail_bridge.dart';
+import 'nostr_key.dart';
 import 'relay_list.dart';
 import 'server_list.dart';
 
@@ -25,11 +26,8 @@ import 'server_list.dart';
   String bridge, {
   required LocalEventSignerFactory signerFactory,
 }) {
-  final (privateKey, publicKey) = signerFactory.generateKeyPair();
-  return (
-    key: Nip19.encodePrivateKey(privateKey),
-    address: '${Nip19.encodePubKey(publicKey)}@$bridge',
-  );
+  final (:nsec, :npub) = generateNostrKey(signerFactory: signerFactory);
+  return (key: nsec, address: '$npub@$bridge');
 }
 
 /// The mailboxes [cipher] holds: each nsec of a hidden field whose address,

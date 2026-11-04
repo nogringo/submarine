@@ -423,6 +423,7 @@
   "mailBridgeInvalid": "Ce n'est pas un domaine.",
   "emailAddressField": "Adresse e-mail",
   "mailboxKey": "Clé de la boîte mail",
+  "nostrKeyField": "Clé Nostr",
   "inbox": "Boîte de réception",
   "inboxFetching": "Récupération des messages",
   "inboxEmpty": "Aucun message pour l'instant",

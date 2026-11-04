@@ -1537,6 +1537,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get mailboxKey => 'Clave del buzón';
 
   @override
+  String get nostrKeyField => 'Clave Nostr';
+
+  @override
   String get inbox => 'Bandeja de entrada';
 
   @override

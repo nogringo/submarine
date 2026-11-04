@@ -194,6 +194,8 @@ export interface CoreMethods {
   };
   /** A made-up value for a login's custom field, as the app offers them. */
   generateValue: { args: { kind: MadeUpValue }; result: string };
+  /** A new Nostr key, for a site that asks for an nsec. */
+  generateNostrKey: { args: Record<string, never>; result: { nsec: string; npub: string } };
   /** A use of the popup, which pushes the lock back. */
   used: { args: Record<string, never>; result: null };
   lockTimeout: { args: Record<string, never>; result: LockTimeout };

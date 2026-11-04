@@ -1532,6 +1532,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get mailboxKey => 'Postfachschlüssel';
 
   @override
+  String get nostrKeyField => 'Nostr-Schlüssel';
+
+  @override
   String get inbox => 'Posteingang';
 
   @override

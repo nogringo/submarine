@@ -423,6 +423,7 @@
   "mailBridgeInvalid": "这不是一个域名。",
   "emailAddressField": "邮箱地址",
   "mailboxKey": "邮箱密钥",
+  "nostrKeyField": "Nostr 密钥",
   "inbox": "收件箱",
   "inboxFetching": "正在获取消息",
   "inboxEmpty": "还没有消息",

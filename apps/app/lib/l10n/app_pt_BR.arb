@@ -423,6 +423,7 @@
   "mailBridgeInvalid": "Isso não é um domínio.",
   "emailAddressField": "Endereço de e-mail",
   "mailboxKey": "Chave da caixa de e-mail",
+  "nostrKeyField": "Chave Nostr",
   "inbox": "Caixa de entrada",
   "inboxFetching": "Buscando mensagens",
   "inboxEmpty": "Nenhuma mensagem ainda",

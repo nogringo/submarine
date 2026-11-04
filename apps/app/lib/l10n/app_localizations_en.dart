@@ -1523,6 +1523,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mailboxKey => 'Mailbox key';
 
   @override
+  String get nostrKeyField => 'Nostr key';
+
+  @override
   String get inbox => 'Inbox';
 
   @override

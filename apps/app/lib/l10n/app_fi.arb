@@ -423,6 +423,7 @@
   "mailBridgeInvalid": "Tämä ei ole verkkotunnus.",
   "emailAddressField": "Sähköpostiosoite",
   "mailboxKey": "Postilaatikon avain",
+  "nostrKeyField": "Nostr-avain",
   "inbox": "Saapuneet",
   "inboxFetching": "Haetaan viestejä",
   "inboxEmpty": "Ei vielä viestejä",

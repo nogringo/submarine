@@ -1488,6 +1488,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mailboxKey => '邮箱密钥';
 
   @override
+  String get nostrKeyField => 'Nostr 密钥';
+
+  @override
   String get inbox => '收件箱';
 
   @override

@@ -21,6 +21,7 @@ export 'src/generator.dart';
 export 'src/item.dart';
 export 'src/mail_bridge.dart';
 export 'src/mailbox.dart';
+export 'src/nostr_key.dart';
 export 'src/relay_list.dart';
 export 'src/search.dart';
 export 'src/sembast_version_store.dart';

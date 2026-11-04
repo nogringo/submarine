@@ -423,6 +423,7 @@
   "mailBridgeInvalid": "Das ist keine Domain.",
   "emailAddressField": "E-Mail-Adresse",
   "mailboxKey": "Postfachschlüssel",
+  "nostrKeyField": "Nostr-Schlüssel",
   "inbox": "Posteingang",
   "inboxFetching": "Nachrichten werden abgerufen",
   "inboxEmpty": "Noch keine Nachrichten",

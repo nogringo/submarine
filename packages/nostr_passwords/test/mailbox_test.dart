@@ -90,6 +90,7 @@ void main() {
       for (final fields in [
         // The user's own Nostr key.
         [keyField],
+        [Field(name: 'npub', value: mailbox.address.split('@')[0]), keyField],
         [Field(name: 'Email', value: mailbox.address)],
         [
           Field(name: 'Mailbox key', value: mailbox.key),

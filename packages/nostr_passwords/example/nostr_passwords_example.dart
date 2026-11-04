@@ -178,6 +178,21 @@ Future<void> main() async {
     'Sign up as ${generateFirstName()} ${generateLastName()}, '
     'born ${generateBirthDate()}, on ${generatePhoneNumber(locale: 'fr-FR')}',
   );
+  // A Nostr account of its own for a site that asks for an nsec.
+  final nostrKey = generateNostrKey(
+    signerFactory: ndk.config.eventSignerFactory,
+  );
+  print('The site sees ${nostrKey.npub}');
+  await vault.createItem(
+    Cipher(
+      type: CipherType.login,
+      name: 'Nostr site',
+      fields: [
+        Field(name: 'npub', value: nostrKey.npub),
+        Field(name: 'nsec', value: nostrKey.nsec, type: FieldType.hidden),
+      ],
+    ),
+  );
   // The bridge a user picked, as they typed it, or the default one.
   final bridge = parseMailBridge(' @Mail.Example.com ') ?? defaultMailBridge;
   // A key for this address alone, kept in a hidden field next to it.

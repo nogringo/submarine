@@ -1526,6 +1526,9 @@ class AppLocalizationsFi extends AppLocalizations {
   String get mailboxKey => 'Postilaatikon avain';
 
   @override
+  String get nostrKeyField => 'Nostr-avain';
+
+  @override
   String get inbox => 'Saapuneet';
 
   @override

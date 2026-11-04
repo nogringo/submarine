@@ -1537,6 +1537,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get mailboxKey => 'Chave da caixa de correio';
 
   @override
+  String get nostrKeyField => 'Chave Nostr';
+
+  @override
   String get inbox => 'Caixa de entrada';
 
   @override
@@ -3154,6 +3157,9 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get mailboxKey => 'Chave da caixa de e-mail';
+
+  @override
+  String get nostrKeyField => 'Chave Nostr';
 
   @override
   String get inbox => 'Caixa de entrada';

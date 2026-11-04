@@ -572,6 +572,17 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
     );
     expect(address).toEqual([expect.stringMatching(/^npub1[a-z0-9]{58}@uid\.ovh$/), "text"]);
     expect(key).toEqual([expect.stringMatching(/^nsec1[a-z0-9]{58}$/), "password"]);
+    await extension.click("button::-p-text(Add a field)");
+    await extension.click(`[role=menuitem]::-p-text(${english.nostrKeyField})`);
+    await popup.waitForFunction(() => document.querySelectorAll(".custom-field").length === 6);
+    const [npub, nsec] = await popup.$$eval(".custom-field:nth-child(n+5) input", (inputs) =>
+      inputs.map((input) => [(input as HTMLInputElement).value, (input as HTMLInputElement).type]),
+    );
+    expect(npub).toEqual([
+      nip19.npubEncode(getPublicKey(nip19.decode(nsec?.[0] ?? "").data as Uint8Array)),
+      "text",
+    ]);
+    expect(nsec?.[1]).toBe("password");
     await extension.click(save);
     await popup.waitForSelector(".item-form", { hidden: true });
     await popup.waitForFunction(() => document.activeElement?.textContent === "Forum");
@@ -582,6 +593,8 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
       "PIN",
       english.email,
       english.mailboxKey,
+      "npub",
+      "nsec",
     ]);
     await localMailRelays(popup, false);
     await extension.press("Escape");

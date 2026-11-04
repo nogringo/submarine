@@ -11,6 +11,7 @@ import 'package:nostr_passwords/nostr_passwords.dart'
         generateFirstName,
         generateLastName,
         generateMailbox,
+        generateNostrKey,
         generatePassphrase,
         generatePhoneNumber,
         parseRelayUrl,
@@ -139,6 +140,12 @@ void main() {
                   as String?,
         ),
         final kind => throw CoreException('unknownKind', '$kind'),
+      },
+      'generateNostrKey': (_) async {
+        final key = generateNostrKey(
+          signerFactory: const JsEventSignerFactory(),
+        );
+        return {'nsec': key.nsec, 'npub': key.npub};
       },
       'vaults': (_) => vaults.list(),
       'addVault': (args) async {

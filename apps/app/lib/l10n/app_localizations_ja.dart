@@ -1503,6 +1503,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get mailboxKey => 'メールボックスの鍵';
 
   @override
+  String get nostrKeyField => 'Nostr の鍵';
+
+  @override
   String get inbox => '受信トレイ';
 
   @override

@@ -1,3 +1,7 @@
+## Unreleased
+
+- `generateNostrKey()` makes a new Nostr key, for a site that asks for an nsec to get one of its own.
+
 ## 0.2.0
 
 - File attachments in `Cipher.attachments`, as Bitwarden stores them with the SHA-256 of the encrypted file in place of a URL. `encryptAttachment()` encrypts a file with AES-256-GCM under a key of its own, and `decryptAttachment()` opens it.

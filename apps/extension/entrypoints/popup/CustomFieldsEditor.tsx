@@ -4,6 +4,7 @@ import alternateEmail from "@material-design-icons/svg/round/alternate_email.svg
 import casino from "@material-design-icons/svg/round/casino.svg";
 import deleteOutline from "@material-design-icons/svg/round/delete_outline.svg";
 import dragIndicator from "@material-design-icons/svg/round/drag_indicator.svg";
+import key from "@material-design-icons/svg/round/key.svg";
 import refresh from "@material-design-icons/svg/round/refresh.svg";
 import textFields from "@material-design-icons/svg/round/text_fields.svg";
 import { type FormEvent, useId, useState } from "react";
@@ -42,8 +43,8 @@ const madeUpValues: [kind: MadeUpValue, label: MessageId][] = [
 /**
  * The custom fields of an item of `type`, as Bitwarden's form edits them: added with a type and a
  * label, renamed, deleted and moved. A login can also get a made-up first name, last name, birth
- * date or phone number, or an email address of its own whose mailbox key goes in a hidden field,
- * as in the app.
+ * date or phone number, an email address of its own whose mailbox key goes in a hidden field, or a
+ * Nostr key of its own, as in the app.
  */
 export function CustomFieldsEditor({
   type,
@@ -94,6 +95,15 @@ export function CustomFieldsEditor({
       ...fields,
       editedField({ name: t({ id: "email" }), value: address, type: 0, linkedId: null }),
       editedField({ name: t({ id: "mailboxKey" }), value: key, type: 1, linkedId: null }),
+    ]);
+  };
+
+  const addNostrKey = async () => {
+    const { nsec, npub } = await callCore("generateNostrKey", {});
+    onChange([
+      ...fields,
+      editedField({ name: "npub", value: npub, type: 0, linkedId: null }),
+      editedField({ name: "nsec", value: nsec, type: 1, linkedId: null }),
     ]);
   };
 
@@ -155,10 +165,12 @@ export function CustomFieldsEditor({
               separated: index === 0,
             })),
             { id: "email", label: t({ id: "emailAddressField" }), icon: alternateEmail },
+            { id: "nostrKey", label: t({ id: "nostrKeyField" }), icon: key },
           ]}
           onAction={(id) => {
             if (id === "custom") setDialog({});
             else if (id === "email") void addMailbox();
+            else if (id === "nostrKey") void addNostrKey();
             else {
               const [kind, label] = madeUpValues.find(([kind]) => kind === id) ?? [];
               if (kind && label) void addMadeUp(kind, label);

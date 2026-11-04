@@ -423,6 +423,7 @@
   "mailBridgeInvalid": "Это не домен.",
   "emailAddressField": "Адрес почты",
   "mailboxKey": "Ключ почтового ящика",
+  "nostrKeyField": "Ключ Nostr",
   "inbox": "Входящие",
   "inboxFetching": "Получение сообщений",
   "inboxEmpty": "Сообщений пока нет",

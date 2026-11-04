@@ -1540,6 +1540,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get mailboxKey => 'Chiave della casella';
 
   @override
+  String get nostrKeyField => 'Chiave Nostr';
+
+  @override
   String get inbox => 'Posta in arrivo';
 
   @override

@@ -1542,6 +1542,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get mailboxKey => 'Clé de la boîte mail';
 
   @override
+  String get nostrKeyField => 'Clé Nostr';
+
+  @override
   String get inbox => 'Boîte de réception';
 
   @override

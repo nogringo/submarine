@@ -55,7 +55,7 @@ class EditedField {
 /// The custom fields of an item of [type], as Bitwarden's form edits them:
 /// added with a type and a label, renamed, deleted and reordered. A login can
 /// also get a made-up first name, last name or birth date, and an email
-/// address of its own.
+/// address or a Nostr key of its own.
 class CustomFieldsEditor extends StatelessWidget {
   const CustomFieldsEditor({
     super.key,
@@ -117,11 +117,13 @@ class CustomFieldsEditor extends StatelessWidget {
         for (final (index, (label, _)) in madeUp.indexed)
           item(index, Icons.casino_outlined, label),
         item(-2, Icons.alternate_email_rounded, l10n.emailAddressField),
+        item(-3, Icons.key_rounded, l10n.nostrKeyField),
       ],
     );
     if (choice == null || !button.mounted) return;
     if (choice == -1) return _addCustom(button);
     if (choice == -2) return _addMailbox(button);
+    if (choice == -3) return _addNostrKey(button);
     final (name, generate) = madeUp[choice];
     fields.add(
       EditedField(
@@ -149,6 +151,19 @@ class CustomFieldsEditor extends StatelessWidget {
           type: FieldType.hidden,
         ),
       ),
+    ]);
+    onChanged();
+  }
+
+  /// Adds a new Nostr key, its npub and its nsec in a hidden field, for a site
+  /// that asks for an nsec.
+  void _addNostrKey(BuildContext context) {
+    final key = generateNostrKey(
+      signerFactory: Vaults.of(context).ndk.config.eventSignerFactory,
+    );
+    fields.addAll([
+      EditedField(Field(name: 'npub', value: key.npub)),
+      EditedField(Field(name: 'nsec', value: key.nsec, type: FieldType.hidden)),
     ]);
     onChanged();
   }

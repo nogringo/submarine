@@ -423,6 +423,7 @@
   "mailBridgeInvalid": "ドメインではありません。",
   "emailAddressField": "メールアドレス",
   "mailboxKey": "メールボックスの鍵",
+  "nostrKeyField": "Nostr の鍵",
   "inbox": "受信トレイ",
   "inboxFetching": "メッセージを取得中",
   "inboxEmpty": "まだメッセージはありません",

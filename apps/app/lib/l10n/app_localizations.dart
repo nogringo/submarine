@@ -2653,6 +2653,12 @@ abstract class AppLocalizations {
   /// **'Mailbox key'**
   String get mailboxKey;
 
+  /// Choice of the menu adding a field to a login: a new Nostr key for this site alone, its npub in a text field and its nsec in a hidden field. Nostr is a name, kept as is.
+  ///
+  /// In en, this message translates to:
+  /// **'Nostr key'**
+  String get nostrKeyField;
+
   /// Title of the section of an item listing the emails and private messages its email address received.
   ///
   /// In en, this message translates to:

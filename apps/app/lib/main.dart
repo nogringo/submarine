@@ -13,6 +13,7 @@ import 'src/clipboard.dart';
 import 'src/lock/app_lock.dart';
 import 'src/mail/mail_settings.dart';
 import 'src/screen_capture.dart';
+import 'src/secure_storage.dart';
 import 'src/storage_error_app.dart';
 import 'src/theme/appearance.dart';
 import 'src/sync/sync_database.dart';
@@ -53,6 +54,7 @@ Future<void> _start(Ndk ndk, SyncEngine engine, Database database) async {
     StorageErrorApp(error: error, onRetry: () => _start(ndk, engine, database)),
   );
   try {
+    await keepSecureStorageOnDevice();
     final vaults = await Vaults.load(
       ndk: ndk,
       engine: engine,

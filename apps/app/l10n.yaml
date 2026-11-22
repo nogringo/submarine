@@ -4,3 +4,6 @@ output-localization-file: app_localizations.dart
 nullable-getter: false
 # First, so that a device in a language the app does not have falls back to it.
 preferred-supported-locales: [en]
+# gen-l10n still lists the SDK's Material delegates, which the app replaces in
+# lib/src/context.dart.
+header: "// ignore_for_file: deprecated_member_use"

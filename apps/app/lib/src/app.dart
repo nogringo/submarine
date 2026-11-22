@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'clipboard.dart';
 import 'context.dart';
@@ -90,8 +90,7 @@ class _SubmarineAppState extends State<SubmarineApp> {
                   darkTheme: buildTheme(Palette.dark, Brightness.dark),
                   themeMode: widget.appearance.themeMode,
                   locale: widget.appearance.locale,
-                  localizationsDelegates:
-                      AppLocalizations.localizationsDelegates,
+                  localizationsDelegates: localizationsDelegates,
                   supportedLocales: AppLocalizations.supportedLocales,
                   routerConfig: _router,
                   // Above the navigator, so that dialogs and menus hide too.

@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:ndk/ndk.dart' show Ndk, Nip19, NostrConnect;
 import 'package:nostr_passwords/nostr_passwords.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';

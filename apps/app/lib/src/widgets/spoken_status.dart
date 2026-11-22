@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Tells screen readers [message] whenever it changes, as a status they would
 /// not hear otherwise (WCAG 4.1.3). An announcement where the platform makes

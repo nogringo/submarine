@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:ndk/ndk.dart' show PendingSignerRequest, SignerMethod;
 import 'package:ndk/shared/nips/nip09/deletion.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';

@@ -7,12 +7,12 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart'
     show debugDefaultTargetPlatformOverride;
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart' show SemanticsNode;
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart'
     show FlutterSecureStorage;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:ndk/ndk.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
 import 'package:sembast/sembast.dart' show Database;
@@ -260,6 +260,12 @@ void main() {
   /// [text] in the open dialog, not on the screen behind it.
   Finder inDialog(String text) =>
       find.descendant(of: find.byType(Dialog), matching: find.text(text));
+
+  /// A tooltip kept out of semantics, which [CommonFinders.byTooltip] only
+  /// finds on the SDK's own Tooltip, not on material_ui's.
+  Finder silentTooltip(String message) => find.byWidgetPredicate(
+    (widget) => widget is Tooltip && widget.message == message,
+  );
 
   /// Drags [handle] by [dy], slowly enough for a reorderable list to follow.
   Future<void> dragBy(WidgetTester tester, Finder handle, double dy) async {
@@ -856,7 +862,7 @@ void main() {
     );
     await settle(tester);
 
-    await tester.tap(find.byTooltip('New item'));
+    await tester.tap(silentTooltip('New item'));
     await settle(tester);
     await tester.tap(find.text('Login'));
     await settle(tester);
@@ -1111,7 +1117,7 @@ void main() {
       await settle(tester);
     }
 
-    await tester.tap(find.byTooltip('New item'));
+    await tester.tap(silentTooltip('New item'));
     await settle(tester);
     expect(find.text('Secure note'), findsOneWidget);
     await tester.tap(find.text('Card'));
@@ -1818,7 +1824,7 @@ void main() {
       await settle(tester);
     }
 
-    await tester.tap(find.byTooltip('New item'));
+    await tester.tap(silentTooltip('New item'));
     await settle(tester);
     await tester.tap(find.text('Login'));
     await settle(tester);
@@ -1885,7 +1891,7 @@ void main() {
         .text;
     final isoDate = matches(RegExp(r'^\d{4}-\d{2}-\d{2}$'));
 
-    await tester.tap(find.byTooltip('New item'));
+    await tester.tap(silentTooltip('New item'));
     await settle(tester);
     await tester.tap(find.text('Login'));
     await settle(tester);
@@ -1965,7 +1971,7 @@ void main() {
       ],
     );
 
-    await tester.tap(find.byTooltip('New item'));
+    await tester.tap(silentTooltip('New item'));
     await settle(tester);
     await tester.tap(find.text('Card'));
     await settle(tester);
@@ -2035,7 +2041,7 @@ void main() {
       return '${Nip19.encodePubKey(signer.getPublicKey())}@mail.example';
     }
 
-    await tester.tap(find.byTooltip('New item'));
+    await tester.tap(silentTooltip('New item'));
     await settle(tester);
     await tester.tap(find.text('Login'));
     await settle(tester);
@@ -2092,7 +2098,7 @@ void main() {
         .controller!
         .text;
 
-    await tester.tap(find.byTooltip('New item'));
+    await tester.tap(silentTooltip('New item'));
     await settle(tester);
     await tester.tap(find.text('Login'));
     await settle(tester);
@@ -2146,7 +2152,7 @@ void main() {
     );
     await settle(tester);
 
-    await tester.tap(find.byTooltip('New item'));
+    await tester.tap(silentTooltip('New item'));
     await settle(tester);
     await tester.tap(find.text('Login'));
     await settle(tester);
@@ -2226,7 +2232,7 @@ void main() {
     );
     await settle(tester);
 
-    await tester.tap(find.byTooltip('New item'));
+    await tester.tap(silentTooltip('New item'));
     await settle(tester);
     await tester.tap(find.text('Login'));
     await settle(tester);
@@ -3450,7 +3456,7 @@ void main() {
       ),
     );
     await settle(tester);
-    await tester.tap(find.byTooltip('Settings'));
+    await tester.tap(silentTooltip('Settings'));
     await settle(tester);
     await tester.ensureVisible(find.text('Import'));
     await settle(tester);
@@ -3562,7 +3568,7 @@ void main() {
       ),
     );
     await settle(tester);
-    await tester.tap(find.byTooltip('Settings'));
+    await tester.tap(silentTooltip('Settings'));
     await settle(tester);
     await tester.ensureVisible(find.text('Export'));
     await settle(tester);
@@ -3628,7 +3634,7 @@ void main() {
       ),
     );
     await settle(tester);
-    await tester.tap(find.byTooltip('Settings'));
+    await tester.tap(silentTooltip('Settings'));
     await settle(tester);
     await tester.ensureVisible(find.text('Export'));
     await settle(tester);
@@ -3718,7 +3724,7 @@ void main() {
     await settle(tester);
     expect(find.byTooltip('Lock (Ctrl+L)'), findsNothing);
 
-    await tester.tap(find.byTooltip('Settings'));
+    await tester.tap(silentTooltip('Settings'));
     await settle(tester);
     expect(find.text('Lock after'), findsNothing);
     await tester.tap(settingsSwitch('Unlock with biometrics'));
@@ -3793,7 +3799,7 @@ void main() {
     );
     await settle(tester);
 
-    await tester.tap(find.byTooltip('Settings'));
+    await tester.tap(silentTooltip('Settings'));
     await settle(tester);
     expect(
       tester.widget<Switch>(settingsSwitch('Unlock with biometrics')).onChanged,
@@ -4004,7 +4010,7 @@ void main() {
       ),
     );
     await settle(tester);
-    await tester.tap(find.byTooltip('Settings'));
+    await tester.tap(silentTooltip('Settings'));
     await settle(tester);
     expect(find.text('Lock after'), findsNothing);
 
@@ -4097,7 +4103,7 @@ void main() {
       ),
     );
     await settle(tester);
-    await tester.tap(find.byTooltip('Settings'));
+    await tester.tap(silentTooltip('Settings'));
     await settle(tester);
     await setLockPassword(tester, 'correct horse battery');
     const storage = FlutterSecureStorage();
@@ -4140,7 +4146,7 @@ void main() {
       ),
     );
     await settle(tester);
-    await tester.tap(find.byTooltip('Settings'));
+    await tester.tap(silentTooltip('Settings'));
     await settle(tester);
     await setLockPassword(tester, 'correct horse battery');
     final current = find.widgetWithText(TextField, 'Current password');
@@ -4209,7 +4215,7 @@ void main() {
       ),
     );
     await settle(tester);
-    await tester.tap(find.byTooltip('Settings'));
+    await tester.tap(silentTooltip('Settings'));
     await settle(tester);
     await setLockPassword(tester, 'correct horse battery');
     await tester.tap(find.byTooltip('Lock (Ctrl+L)'));
@@ -4251,7 +4257,7 @@ void main() {
       ),
     );
     await settle(tester);
-    await tester.tap(find.byTooltip('Settings'));
+    await tester.tap(silentTooltip('Settings'));
     await settle(tester);
 
     expect(find.text('Lock password'), findsOneWidget);
@@ -4315,7 +4321,7 @@ void main() {
     Brightness brightness() =>
         Theme.of(tester.element(find.text('Theme'))).brightness;
 
-    await tester.tap(find.byTooltip('Settings'));
+    await tester.tap(silentTooltip('Settings'));
     await settle(tester);
     await tester.ensureVisible(find.text('Theme'));
     await settle(tester);
@@ -4356,7 +4362,7 @@ void main() {
     );
     await settle(tester);
 
-    await tester.tap(find.byTooltip('Settings'));
+    await tester.tap(silentTooltip('Settings'));
     await settle(tester);
     await tester.ensureVisible(find.byTooltip('Language'));
     await settle(tester);
@@ -4402,7 +4408,7 @@ void main() {
     );
     await settle(tester);
 
-    await tester.tap(find.byTooltip('Settings'));
+    await tester.tap(silentTooltip('Settings'));
     await settle(tester);
     await tester.ensureVisible(find.text('Email bridge'));
     await settle(tester);
@@ -4465,7 +4471,7 @@ void main() {
       await settle(tester);
     }
 
-    await tester.tap(find.byTooltip('Settings'));
+    await tester.tap(silentTooltip('Settings'));
     await settle(tester);
     await tester.ensureVisible(find.text('Inbox relays'));
     await settle(tester);
@@ -4563,7 +4569,7 @@ void main() {
     );
     await settle(tester);
 
-    await tester.tap(find.byTooltip('Settings'));
+    await tester.tap(silentTooltip('Settings'));
     await settle(tester);
     await tester.ensureVisible(find.text('Servers for large emails'));
     await settle(tester);
@@ -4670,7 +4676,7 @@ void main() {
     await settle(tester);
     expect(allowed, isEmpty);
 
-    await tester.tap(find.byTooltip('Settings'));
+    await tester.tap(silentTooltip('Settings'));
     await settle(tester);
     final toggle = settingsSwitch('Allow screen capture');
     expect(tester.widget<Switch>(toggle).value, isFalse);
@@ -4724,7 +4730,7 @@ void main() {
         matching: find.byTooltip('Copy'),
       );
 
-      await tester.tap(find.byTooltip('Settings'));
+      await tester.tap(silentTooltip('Settings'));
       await settle(tester);
       await tester.tap(find.text('30 seconds'));
       await settle(tester);
@@ -4858,7 +4864,7 @@ void main() {
 
     await tester.tap(find.text('Vault'));
     await settle(tester);
-    await tester.tap(find.byTooltip('New item'));
+    await tester.tap(silentTooltip('New item'));
     await settle(tester);
     await tester.tap(find.text('Login'));
     await settle(tester);
@@ -5015,7 +5021,7 @@ void main() {
         await tapAndCheck(find.text('File servers'));
 
         await tapAndCheck(find.byTooltip('Generator'));
-        await tapAndCheck(find.byTooltip('Settings'));
+        await tapAndCheck(silentTooltip('Settings'));
         await tester.ensureVisible(find.text('Export'));
         await settle(tester);
         await tapAndCheck(find.text('Export'));
@@ -5108,7 +5114,7 @@ void main() {
 
       tester.platformDispatcher.textScaleFactorTestValue = 1;
       await unlockWith(tester, find.text('Unlock'));
-      await tester.tap(find.byTooltip('Settings'));
+      await tester.tap(silentTooltip('Settings'));
       await settle(tester);
       await setLockPassword(tester, 'correct horse battery');
       await tester.tap(find.byTooltip('Lock (Ctrl+L)'));

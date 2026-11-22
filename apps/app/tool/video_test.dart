@@ -5,9 +5,9 @@ import 'dart:io' show Directory, File;
 
 import 'package:clock/clock.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show MethodChannel;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'demo_app.dart';
 

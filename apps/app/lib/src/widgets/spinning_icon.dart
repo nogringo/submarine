@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// [icon], turning while [spinning], as a refresh or sync button shows its
 /// work. It ends its turn rather than stop askew, and stays still when the

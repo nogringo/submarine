@@ -5,13 +5,13 @@ import 'dart:io'
     show File, HttpOverrides, HttpServer, InternetAddress, WebSocketTransformer;
 import 'dart:ui' show ImageByteFormat;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart'
     show RenderRepaintBoundary, debugDisableShadows;
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart'
     show FlutterSecureStorage;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:ndk/ndk.dart';
 import 'package:nostr_passwords/nostr_passwords.dart';
 import 'package:sembast/sembast_memory.dart' show newDatabaseFactoryMemory;

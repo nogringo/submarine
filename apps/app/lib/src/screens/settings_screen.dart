@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:ndk/ndk.dart' show Nip19;
 import 'package:nostr_passwords/nostr_passwords.dart'
     show defaultMailBridge, parseMailBridge, parseRelayUrl, parseServerUrl;

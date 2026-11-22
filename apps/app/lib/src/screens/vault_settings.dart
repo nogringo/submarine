@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:ndk/entities.dart' show RelayConnectivity;
 import 'package:ndk/ndk.dart' show Nip19, SignerRequestCancelledException;
 import 'package:ndk/shared/helpers/relay_helper.dart';

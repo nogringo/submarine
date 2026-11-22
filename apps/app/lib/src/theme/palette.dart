@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Submarine's color tokens. [accent] is a fill, for the main action and the
 /// selection. [signal] is the accent as readable text, for digits and the TOTP

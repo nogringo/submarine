@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'context.dart';
 import 'theme/theme.dart';
@@ -27,7 +27,7 @@ class StorageErrorApp extends StatelessWidget {
     debugShowCheckedModeBanner: false,
     theme: buildTheme(Palette.light, Brightness.light),
     darkTheme: buildTheme(Palette.dark, Brightness.dark),
-    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    localizationsDelegates: localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
     home: StorageErrorScreen(error: error, onRetry: onRetry),
   );

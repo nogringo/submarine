@@ -14,7 +14,7 @@ export function Welcome({ onAddVault }: { onAddVault: (choice: AddVaultChoice) =
   const { formatMessage: t } = useIntl();
   return (
     <main className="welcome">
-      <Sonar size={220} />
+      <Sonar size={180} />
       <h1 className="wordmark">Submarine</h1>
       <p className="tagline">{t({ id: "welcomeTagline" })}</p>
       <FilledButton icon={add} onPress={() => onAddVault("create")}>

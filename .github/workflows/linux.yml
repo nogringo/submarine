@@ -12,18 +12,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install Linux dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libstdc++-12-dev libsecret-1-dev libfuse2
-          wget -O appimagetool https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
-          chmod +x appimagetool
-          sudo mv appimagetool /usr/local/bin/
+
+      # Fastforge runs appimagetool without --runtime-file, which would then download the latest runtime it puts in the AppImage.
+      - name: Install appimagetool
+        run: |
+          wget -q -O appimagetool https://github.com/AppImage/appimagetool/releases/download/1.9.1/appimagetool-x86_64.AppImage
+          wget -q -O runtime https://github.com/AppImage/type2-runtime/releases/download/20251108/runtime-x86_64
+          sha256sum --check <<EOF
+          ed4ce84f0d9caff66f50bcca6ff6f35aae54ce8135408b3fa33abfc3cb384eb0  appimagetool
+          2fca8b443c92510f1483a883f60061ad09b46b978b2631c807cd873a47ec260d  runtime
+          EOF
+          sudo install -m 755 appimagetool /usr/local/lib/appimagetool.AppImage
+          sudo install -m 644 runtime /usr/local/lib/appimage-runtime-x86_64
+          printf '#!/bin/sh\nexec /usr/local/lib/appimagetool.AppImage --runtime-file /usr/local/lib/appimage-runtime-x86_64 "$@"\n' | sudo tee /usr/local/bin/appimagetool > /dev/null
+          sudo chmod 755 /usr/local/bin/appimagetool
 
       - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
           flutter-version: 3.50.1
           channel: stable
@@ -33,7 +44,7 @@ jobs:
         run: flutter pub get
 
       - name: Install Fastforge
-        run: dart pub global activate fastforge
+        run: dart pub global activate fastforge 0.6.14
 
       - name: Build Linux packages
         working-directory: apps/app
@@ -44,7 +55,7 @@ jobs:
           --artifact-name '{{name}}-{{build_name}}-{{platform}}.{{ext}}'
 
       - name: Upload packages
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: submarine-linux
           path: apps/app/dist/*/*

@@ -54,6 +54,17 @@ export default defineConfig({
       },
     }),
   }),
+  vite: ({ browser }) =>
+    browser === "firefox"
+      ? {
+          build: {
+            // Firefox Add-ons took the minified 0.2.0 for obfuscated code and disabled it.
+            minify: false,
+            // Unminified, Rolldown's comments name the build folder, and the reviewers' rebuild would differ.
+            rolldownOptions: { experimental: { attachDebugInfo: "none" } },
+          },
+        }
+      : {},
   zip: {
     // Firefox Add-ons rebuilds the extension from its sources, the Dart core and the app's texts too.
     sourcesRoot: resolve(import.meta.dirname, "../.."),

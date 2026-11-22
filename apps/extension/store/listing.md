@@ -58,7 +58,7 @@ No independent firm has audited Submarine's security yet. Until one does, keep y
 ## Firefox Add-ons review notes
 
 ```text
-The background runs a core written in Dart, compiled to JavaScript (core.js). The sources archive holds it, and SOURCE_CODE_REVIEW.md at its root explains how to rebuild the extension identically.
+The background runs a core written in Dart (apps/extension/core and packages/nostr_passwords), compiled to JavaScript by the Dart compiler into core.js. It is compiler output, not obfuscated code: the Firefox build is not minified, so core.js keeps the names of the Dart sources (GiftWrap, JsEventSigner...), next to the helpers of the Dart runtime. The sources archive holds everything, and SOURCE_CODE_REVIEW.md at its root explains how to rebuild the extension identically.
 
 To try the extension, create a vault from its welcome screen.
 ```

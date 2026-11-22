@@ -76,10 +76,17 @@ String? _host(String uri) {
   return parsed!.hasPort ? '$host:${parsed.port}' : host;
 }
 
-/// http:// when [uri] has no scheme, as Bitwarden reads it.
+/// http:// when [uri] has no scheme, as Bitwarden reads it. Null for any other
+/// scheme: androidapp://com.example.shopping names an app, not a site of
+/// example.shopping.
 Uri? _parse(String uri) {
   final trimmed = uri.trim();
-  return Uri.tryParse(trimmed.contains('://') ? trimmed : 'http://$trimmed');
+  final parsed = Uri.tryParse(
+    trimmed.contains('://') ? trimmed : 'http://$trimmed',
+  );
+  return parsed != null && (parsed.isScheme('http') || parsed.isScheme('https'))
+      ? parsed
+      : null;
 }
 
 /// In lowercase ASCII, as browsers give it: Dart percent-encodes a hostname

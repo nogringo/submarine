@@ -79,6 +79,25 @@ void main() {
       );
     });
 
+    test('reads the address of a site, not of an app', () {
+      expect(
+        matches(
+          'androidapp://com.amazon.mShop.android.shopping',
+          'https://android.shopping/',
+        ),
+        false,
+      );
+      expect(matches('iosapp://com.example.app', 'https://example.app'), false);
+      expect(
+        matches(
+          'androidapp://com.example.app',
+          'https://com.example.app/',
+          UriMatchStrategy.host,
+        ),
+        false,
+      );
+    });
+
     test('matches nothing without a host', () {
       expect(matches('', 'https://github.com'), false);
       expect(matches('https://github.com', ''), false);

@@ -38,4 +38,4 @@ The release holds three zips of the extension: `submarine-extension-<version>-ch
 - Chrome Web Store: upload the Chrome zip on the Package page of the item, in the [developer dashboard](https://chrome.google.com/webstore/devconsole).
 - Firefox Add-ons: upload the Firefox zip in the [developer hub](https://addons.mozilla.org/developers/), then the sources zip once it asks whether the code is generated or minified. [SOURCE_CODE_REVIEW.md](SOURCE_CODE_REVIEW.md) tells the reviewers how to rebuild the extension from it.
 
-The [extension workflow](.github/workflows/extension.yml) builds with the Flutter version given in SOURCE_CODE_REVIEW.md, for the reviewers' build to come out identical: change both together.
+Every workflow pins the same Flutter version, the one SOURCE_CODE_REVIEW.md gives, for the reviewers' build of the extension to come out identical: change them all together.

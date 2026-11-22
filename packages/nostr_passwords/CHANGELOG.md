@@ -1,3 +1,7 @@
+## 0.2.2
+
+- No change of its own: released with the app, the CLI and the browser extension 0.2.2.
+
 ## 0.2.1
 
 - `generateNostrKey()` makes a new Nostr key, for a site that asks for an nsec to get one of its own.

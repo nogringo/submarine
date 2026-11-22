@@ -1,3 +1,7 @@
+## 0.2.2
+
+- No change in the app. This version fixes the browser extension for Firefox.
+
 ## 0.2.1
 
 - Your logins can get a Nostr key of their own, or a made-up phone number, from the add field menu.

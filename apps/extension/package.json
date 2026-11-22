@@ -1,6 +1,6 @@
 {
   "name": "submarine-extension",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.18.0",
@@ -9,7 +9,7 @@
   },
   "scripts": {
     "core": "dart compile js -O2 -o public/core.js core/web/core.dart && rm -f public/core.js.deps",
-    "core:firefox": "dart compile js -O2 --no-minify -o public/core.js core/web/core.dart && rm -f public/core.js.deps",
+    "core:firefox": "dart compile js -O2 --no-minify -o public/core.js core/web/core.dart && rm -f public/core.js.deps && node scripts/strip-whitespace.ts public/core.js",
     "core:e2e": "dart compile js -O2 -DTEST_RELAY=ws://127.0.0.1:4869 -o public/core.js core/web/core.dart && rm -f public/core.js.deps",
     "dev": "pnpm core && wxt",
     "dev:firefox": "pnpm core:firefox && wxt -b firefox",
@@ -48,6 +48,7 @@
     "@wxt-dev/module-react": "1.2.2",
     "axe-core": "4.14.0",
     "puppeteer": "25.13.0",
+    "rolldown": "1.2.13",
     "typescript": "7.0.2",
     "vite": "8.3.4",
     "vitest": "5.0.3",

@@ -1,3 +1,8 @@
+## 0.2.2
+
+- No change of its own: released with the app, the extension and
+  `nostr_passwords` 0.2.2.
+
 ## 0.2.1
 
 - No change of its own: released with the app, the extension and

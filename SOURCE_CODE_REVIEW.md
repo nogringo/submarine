@@ -21,6 +21,6 @@ pnpm install --frozen-lockfile
 pnpm zip:firefox
 ```
 
-`pnpm zip:firefox` compiles the Dart core into `public/core.js`, builds the extension into `.output/firefox-mv3`, then zips it into `.output/submarine-extension-<version>-firefox.zip`. Nothing in the Firefox build is minified: `core.js` keeps the names of the Dart classes and functions, and the TypeScript keeps its own.
+`pnpm zip:firefox` compiles the Dart core into `public/core.js`, builds the extension into `.output/firefox-mv3`, then zips it into `.output/submarine-extension-<version>-firefox.zip`. Nothing in the Firefox build is renamed: `core.js` keeps the names of the Dart classes and functions, and the TypeScript keeps its own. Only the whitespace of `core.js` is removed, by `apps/extension/scripts/strip-whitespace.ts`, because the add-ons linter does not parse a file of 5 MB or more; a code formatter restores its layout.
 
 `dart compile js` also writes a source map, `core.js.map`, left out of the zip: it names the Dart sources by their path from the pub cache, which differs from one machine to another.

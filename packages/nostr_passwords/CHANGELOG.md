@@ -1,6 +1,7 @@
-## Unreleased
+## 0.2.1
 
 - `generateNostrKey()` makes a new Nostr key, for a site that asks for an nsec to get one of its own.
+- `generatePhoneNumber()` makes up a mobile number of the country of a locale, as that country writes it, for a site that asks for one.
 
 ## 0.2.0
 

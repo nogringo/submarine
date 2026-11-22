@@ -1,3 +1,9 @@
+## 0.2.1
+
+- Your logins can get a Nostr key of their own, or a made-up phone number, from the add field menu.
+- The file servers of a vault and of new email addresses, in the order you choose.
+- The relays and file servers of new email addresses on a page of their own, as the vault's.
+
 ## 0.2.0
 
 - New app ID: install this version, remove the old one, then open your vaults again with their key. Nothing changes on the web.

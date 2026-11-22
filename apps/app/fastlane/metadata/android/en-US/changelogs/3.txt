@@ -1,0 +1,3 @@
+- Your logins can get a Nostr key of their own, or a made-up phone number, from the add field menu.
+- The file servers of a vault and of new email addresses, in the order you choose.
+- The relays and file servers of new email addresses on a page of their own, as the vault's.

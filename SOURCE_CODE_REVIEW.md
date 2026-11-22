@@ -6,7 +6,7 @@ The extension, in `apps/extension`, is written in TypeScript with [WXT](https://
 
 ## Requirements
 
-- Flutter 3.47.6, which includes Dart 3.13.5, from the [Flutter SDK archive](https://docs.flutter.dev/install/archive). The workspace holds the Flutter app, so pub needs Flutter, even though the extension only uses Dart.
+- Flutter 3.50.0, which includes Dart 3.14.0, from the [Flutter SDK archive](https://docs.flutter.dev/install/archive). The workspace holds the Flutter app, so pub needs Flutter, even though the extension only uses Dart.
 - Node.js 24.
 - pnpm 11.18.0: `npm install -g pnpm@11.18.0`.
 

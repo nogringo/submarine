@@ -21,10 +21,15 @@ List<Item> itemsForUrl(Iterable<Item> items, String url) => [
 /// Whether the login URI [uri] matches the page at [url] by its match
 /// detection, as Bitwarden's does. Without one, by base domain: the domain
 /// registered under a public suffix, so that `https://github.com` matches
-/// `https://gist.github.com/alice`.
+/// `https://gist.github.com/alice`. Unlike Bitwarden, never a login saved for
+/// https:// on an http:// page, where anyone on the network can serve the form.
 bool uriMatches(LoginUri uri, String url) {
   final saved = uri.uri;
   if (saved == null || saved.isEmpty || url.isEmpty) return false;
+  if (_parse(saved)?.isScheme('https') == true &&
+      _parse(url)?.isScheme('http') == true) {
+    return false;
+  }
   switch (uri.match ?? UriMatchStrategy.domain) {
     case UriMatchStrategy.domain:
       final domain = _baseDomain(saved);

@@ -139,6 +139,20 @@ void main() {
     expect(matches('localhost', 'http://localhost/', host), false);
   });
 
+  test('never gives a login saved for https to an http page', () {
+    expect(matches('https://github.com', 'http://github.com/login'), false);
+    expect(
+      matches(
+        'https://a.example.com',
+        'http://a.example.com/',
+        UriMatchStrategy.host,
+      ),
+      false,
+    );
+    expect(matches('http://github.com', 'https://github.com/login'), true);
+    expect(matches('github.com', 'http://github.com/login'), true);
+  });
+
   test('by start, compares the text as it is', () {
     const startsWith = UriMatchStrategy.startsWith;
     expect(

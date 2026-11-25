@@ -63,7 +63,7 @@ Building on Linux needs the libsecret headers: `libsecret-1-dev` on Debian and U
 
 ### Screenshots
 
-The screenshots of the READMEs, in [`screenshots`](screenshots), are rendered by a test from made-up vaults, in the light and dark themes. Render them again after a change to the screens they show:
+The screenshots of the READMEs, in [`screenshots`](screenshots), are rendered by a test from made-up vaults, in the light and dark themes. The same test renders those of the stores into [`fastlane`](fastlane): Android, and the 6.9-inch iPhone and 13-inch iPad sizes the App Store asks for. Render them again after a change to the screens they show:
 
 ```sh
 flutter test tool/screenshots_test.dart

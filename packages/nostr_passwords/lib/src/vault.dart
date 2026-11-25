@@ -18,6 +18,7 @@ import 'envelope.dart';
 import 'item.dart';
 import 'relay_list.dart';
 import 'server_list.dart';
+import 'vanish.dart';
 import 'version_cache.dart';
 import 'version_event.dart';
 
@@ -462,6 +463,21 @@ class Vault {
     }
     return unsent;
   }
+
+  /// Deletes the vault for good from its relays: asks every relay to delete
+  /// all it holds of the vault, every version of every item included (NIP-62,
+  /// NIP-59). The request goes to [currentRelays] and [relays], and the
+  /// [indexers] get an empty relay list.
+  ///
+  /// Returns once the relays answered. Then [forget] the vault on this device.
+  /// Other devices keep what their cache holds.
+  Future<void> delete() async => requestToVanish(
+    ndk,
+    signer,
+    relays: {...relays, ...await currentRelays()},
+    indexers: indexers,
+    auth: AuthPolicy.allow(_account),
+  );
 
   /// Removes the vault from this device: its events in the ndk cache, the
   /// changes [unsent] included, what [engine] synced, and [cache]. Its relays

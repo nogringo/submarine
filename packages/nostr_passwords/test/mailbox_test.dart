@@ -390,6 +390,32 @@ void main() {
 
         expect(await mailbox.messages(), isEmpty);
       });
+
+      test('deleteAll asks its relays to vanish, and empties its list on the '
+          'indexers', () async {
+        await send(rumor(14, 'Hello'));
+        final mailbox = mailboxOf(reader, indexers: [indexer.url]);
+        await mailbox.fetchRelays();
+        await mailbox.fetch();
+        expect(await mailbox.messages(), isNotEmpty);
+
+        await mailbox.deleteAll();
+
+        expect(await mailbox.messages(), isEmpty);
+        for (final to in [relay, inbox]) {
+          final [request] = to.matchingEvents(
+            Filter(kinds: [62], authors: [key.getPublicKey()]),
+          );
+          expect(request.tags, [
+            ['relay', 'ALL_RELAYS'],
+          ]);
+        }
+        final [list] = indexer.matchingEvents(
+          Filter(kinds: [10002], authors: [key.getPublicKey()]),
+        );
+        expect(list.tags, isEmpty);
+        expect(indexer.matchingEvents(Filter(kinds: [62])), isEmpty);
+      });
     });
 
     /// Saves the gift wrap of [_email] as too large for one, and returns its

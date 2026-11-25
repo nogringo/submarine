@@ -1509,6 +1509,51 @@ class AppLocalizationsPt extends AppLocalizations {
   String get removeVaultFailed => 'Não foi possível remover o cofre.';
 
   @override
+  String get deleteVault => 'Eliminar o cofre';
+
+  @override
+  String get deleteVaultDescription =>
+      'Apaga o cofre online e deste dispositivo.';
+
+  @override
+  String deleteVaultTitle(String name) {
+    return 'Eliminar \"$name\" permanentemente?';
+  }
+
+  @override
+  String get deleteVaultBody =>
+      'Os seus itens serão apagados online e deste dispositivo. Os outros dispositivos onde está aberto mantêm a sua cópia. Esta ação não pode ser anulada.';
+
+  @override
+  String deleteVaultMailboxes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Eliminar também os seus $count endereços de e-mail',
+      one: 'Eliminar também o seu endereço de e-mail',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deleteVaultMailboxesDescription(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'As suas mensagens serão apagadas.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deleteVaultNameLabel(String name) {
+    return 'Escreva \"$name\" para confirmar';
+  }
+
+  @override
+  String get deleteVaultFailed => 'Não foi possível eliminar o cofre.';
+
+  @override
   String get emailSettings => 'E-mail';
 
   @override
@@ -3129,6 +3174,52 @@ class AppLocalizationsPtBr extends AppLocalizationsPt {
 
   @override
   String get removeVaultFailed => 'Não foi possível remover o cofre.';
+
+  @override
+  String get deleteVault => 'Excluir o cofre';
+
+  @override
+  String get deleteVaultDescription =>
+      'Apaga o cofre online e deste dispositivo.';
+
+  @override
+  String deleteVaultTitle(String name) {
+    return 'Excluir \"$name\" permanentemente?';
+  }
+
+  @override
+  String get deleteVaultBody =>
+      'Os itens dele serão apagados online e deste dispositivo. Os outros dispositivos em que ele está aberto mantêm a cópia deles. Esta ação não pode ser desfeita.';
+
+  @override
+  String deleteVaultMailboxes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Excluir também os $count endereços de e-mail dele',
+      one: 'Excluir também o endereço de e-mail dele',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deleteVaultMailboxesDescription(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'As mensagens deles serão apagadas.',
+      one: 'As mensagens dele serão apagadas.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deleteVaultNameLabel(String name) {
+    return 'Digite \"$name\" para confirmar';
+  }
+
+  @override
+  String get deleteVaultFailed => 'Não foi possível excluir o cofre.';
 
   @override
   String get emailSettings => 'E-mail';

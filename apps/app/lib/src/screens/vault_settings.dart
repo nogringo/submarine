@@ -295,7 +295,12 @@ class _VaultSettingsState extends State<_VaultSettings> {
             ),
             Padding(
               padding: const EdgeInsets.only(top: 28),
-              child: FieldCard(children: [_RemoveTile(vault: vault)]),
+              child: FieldCard(
+                children: [
+                  _RemoveTile(vault: vault),
+                  _DeleteTile(vault: vault),
+                ],
+              ),
             ),
           ],
         ),
@@ -670,6 +675,165 @@ Future<bool> _confirmRemove(BuildContext context, VaultController vault) async {
     ),
   );
   return remove ?? false;
+}
+
+class _DeleteTile extends StatefulWidget {
+  const _DeleteTile({required this.vault});
+
+  final VaultController vault;
+
+  @override
+  State<_DeleteTile> createState() => _DeleteTileState();
+}
+
+class _DeleteTileState extends State<_DeleteTile> {
+  var _deleting = false;
+  String? _error;
+
+  Future<void> _delete() async {
+    final l10n = context.l10n;
+    final vaults = Vaults.of(context);
+    // These settings leave the tree with the vault, before the deletion ends.
+    final router = GoRouter.of(context);
+    final withMailboxes = await showDialog<bool>(
+      context: context,
+      builder: (context) => _DeleteVaultDialog(
+        vault: widget.vault,
+        mailboxes: vaults.mailboxKeysOf(widget.vault).length,
+      ),
+    );
+    if (withMailboxes == null || !mounted) return;
+    setState(() {
+      _deleting = true;
+      _error = null;
+    });
+    try {
+      await vaults.delete(widget.vault, withMailboxes: withMailboxes);
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _deleting = false;
+          _error = l10n.deleteVaultFailed;
+        });
+        return;
+      }
+    }
+    router.go(vaultPath(allVaultsId));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final palette = context.palette;
+    final error = _error;
+    return SettingsTile(
+      title: Text(l10n.deleteVault),
+      subtitle: error != null
+          ? Text(error, style: TextStyle(color: palette.danger))
+          : Text(l10n.deleteVaultDescription),
+      trailing: OutlinedButton(
+        onPressed: _deleting ? null : _delete,
+        style: OutlinedButton.styleFrom(foregroundColor: palette.danger)
+            .merge(settingsButtonStyle),
+        child: Text(l10n.delete),
+      ),
+    );
+  }
+}
+
+/// Asks to type the name of [vault] before it is deleted, and whether its
+/// [mailboxes] go with it. Pops whether they do, or null for a cancel.
+class _DeleteVaultDialog extends StatefulWidget {
+  const _DeleteVaultDialog({required this.vault, required this.mailboxes});
+
+  final VaultController vault;
+  final int mailboxes;
+
+  @override
+  State<_DeleteVaultDialog> createState() => _DeleteVaultDialogState();
+}
+
+class _DeleteVaultDialogState extends State<_DeleteVaultDialog> {
+  final _name = TextEditingController();
+  var _withMailboxes = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _name.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _name.dispose();
+    super.dispose();
+  }
+
+  bool get _confirmed => _name.text.trim() == widget.vault.name.trim();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colors = Theme.of(context).colorScheme;
+    final mailboxes = widget.mailboxes;
+    return AlertDialog(
+      // 440 inside, as the other dialogs.
+      constraints: const BoxConstraints(minWidth: 280, maxWidth: 488),
+      title: Text(l10n.deleteVaultTitle(widget.vault.name)),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 12,
+          children: [
+            Text(l10n.deleteVaultBody),
+            if (mailboxes > 0)
+              CheckboxListTile(
+                value: _withMailboxes,
+                onChanged: (value) =>
+                    setState(() => _withMailboxes = value ?? false),
+                title: Text(
+                  l10n.deleteVaultMailboxes(mailboxes),
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                subtitle: Text(l10n.deleteVaultMailboxesDescription(mailboxes)),
+                controlAffinity: ListTileControlAffinity.leading,
+                contentPadding: EdgeInsets.zero,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            TextField(
+              controller: _name,
+              autofocus: true,
+              decoration: InputDecoration(
+                labelText: l10n.deleteVaultNameLabel(widget.vault.name),
+              ),
+              onSubmitted: (_) {
+                if (_confirmed) Navigator.pop(context, _withMailboxes);
+              },
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(l10n.cancel),
+        ),
+        FilledButton(
+          onPressed: _confirmed
+              ? () => Navigator.pop(context, _withMailboxes)
+              : null,
+          style: FilledButton.styleFrom(
+            backgroundColor: colors.error,
+            foregroundColor: colors.onError,
+          ),
+          child: Text(l10n.delete),
+        ),
+      ],
+    );
+  }
 }
 
 /// Rebuilds with whether this device is connected to each relay of [vault].

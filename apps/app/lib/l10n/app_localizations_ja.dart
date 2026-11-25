@@ -1475,6 +1475,50 @@ class AppLocalizationsJa extends AppLocalizations {
   String get removeVaultFailed => '保管庫を削除できませんでした。';
 
   @override
+  String get deleteVault => '保管庫を完全に削除';
+
+  @override
+  String get deleteVaultDescription => '保管庫をオンラインとこのデバイスから消去します。';
+
+  @override
+  String deleteVaultTitle(String name) {
+    return '「$name」を完全に削除しますか？';
+  }
+
+  @override
+  String get deleteVaultBody =>
+      'アイテムはオンラインとこのデバイスから消去されます。保管庫を開いているほかのデバイスには、そのコピーが残ります。この操作は元に戻せません。';
+
+  @override
+  String deleteVaultMailboxes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 件のメールアドレスも削除',
+      one: 'メールアドレスも削除',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deleteVaultMailboxesDescription(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'メッセージは消去されます。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deleteVaultNameLabel(String name) {
+    return '確認のため「$name」と入力してください';
+  }
+
+  @override
+  String get deleteVaultFailed => '保管庫を完全に削除できませんでした。';
+
+  @override
   String get emailSettings => 'メール';
 
   @override

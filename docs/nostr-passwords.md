@@ -146,3 +146,22 @@ An item can have an email address, a [nostr-mail](https://github.com/nogringo/no
 ```
 
 An item has a mailbox when a hidden field holds an nsec and the item holds the address `<npub of that nsec>@<domain>`: as the username, in a field, or as the identity's `email`. The field's name does not matter.
+
+## Vault deletion
+
+Deleting the vault is a NIP-62 request to vanish from all relays, signed by the vault, sent to every relay of the vault:
+
+```jsonc
+{
+  "kind": 62,
+  "pubkey": "<pk_vault>",
+  "created_at": 1790762400,
+  "tags": [["relay", "ALL_RELAYS"]],
+  "content": "",
+  "sig": "..."
+}
+```
+
+Relays delete the events the vault signed and, as NIP-59 asks, the gift wraps whose `p` tag is the vault: every version of every item. `created_at` is the time of the request, as relays delete what is older. A relay that takes relay lists only, such as an indexer, gets an empty relay list of the vault instead.
+
+A client MAY delete the mailboxes of the vault's items the same way, each signed by its own key and sent to the relays of its lists.

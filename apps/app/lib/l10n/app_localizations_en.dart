@@ -1495,6 +1495,52 @@ class AppLocalizationsEn extends AppLocalizations {
   String get removeVaultFailed => 'The vault could not be removed.';
 
   @override
+  String get deleteVault => 'Delete the vault';
+
+  @override
+  String get deleteVaultDescription =>
+      'Erases the vault online and from this device.';
+
+  @override
+  String deleteVaultTitle(String name) {
+    return 'Delete \"$name\" for good?';
+  }
+
+  @override
+  String get deleteVaultBody =>
+      'Its items are erased online and from this device. Other devices where it is open keep their copy. This cannot be undone.';
+
+  @override
+  String deleteVaultMailboxes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Also delete its $count email addresses',
+      one: 'Also delete its email address',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deleteVaultMailboxesDescription(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Their messages are erased.',
+      one: 'Its messages are erased.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deleteVaultNameLabel(String name) {
+    return 'Type \"$name\" to confirm';
+  }
+
+  @override
+  String get deleteVaultFailed => 'The vault could not be deleted.';
+
+  @override
   String get emailSettings => 'Email';
 
   @override

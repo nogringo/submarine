@@ -360,6 +360,89 @@ void main() {
     });
   });
 
+  group('delete', () {
+    int seconds() => DateTime.now().millisecondsSinceEpoch ~/ 1000;
+
+    test('asks every relay of the vault to vanish', () async {
+      final private = await _startRelay('private relay');
+      vault = Vault(
+        ndk: ndk,
+        signer: signer,
+        relays: [relay.url],
+        indexers: const [],
+      );
+      await vault.setRelayList(
+        RelayList(private: {private.url: ReadWriteMarker.readWrite}),
+      );
+      await vault.createItem(boulanger);
+      await vault.push();
+
+      final before = seconds();
+      await vault.delete();
+      final after = seconds();
+
+      for (final to in [relay, private]) {
+        final [request] = [
+          for (final event in to.receivedEvents)
+            if (event.kind == 62) event,
+        ];
+        expect(request.pubKey, signer.getPublicKey());
+        expect(request.tags, [
+          ['relay', 'ALL_RELAYS'],
+        ]);
+        expect(request.content, isEmpty);
+        expect(request.createdAt, inInclusiveRange(before, after));
+        expect(await Bip340EventVerifier().verify(request), isTrue);
+      }
+    });
+
+    test('gives the indexers an empty relay list, and nothing else', () async {
+      final indexer = await _startRelay('indexer');
+      vault = Vault(
+        ndk: ndk,
+        signer: signer,
+        relays: [relay.url],
+        indexers: [indexer.url],
+      );
+      await vault.setRelayList(
+        RelayList(public: {relay.url: ReadWriteMarker.readWrite}),
+      );
+      await _until(() => indexer.receivedEvents.isNotEmpty);
+      final listed = indexer.receivedEvents.first;
+
+      await vault.delete();
+
+      expect(
+        indexer.receivedEvents.map((event) => event.kind),
+        everyElement(10002),
+      );
+      final emptied = indexer.receivedEvents.last;
+      expect(emptied.tags, isEmpty);
+      expect(emptied.content, isEmpty);
+      expect(emptied.createdAt, greaterThan(listed.createdAt));
+    });
+
+    test(
+      'keeps the request for ndk to send to the relays out of reach',
+      () async {
+        final offline = Vault(
+          ndk: ndk,
+          signer: signer,
+          relays: ['ws://127.0.0.1:1'],
+          indexers: const [],
+        );
+        await offline.createItem(boulanger);
+
+        await offline.delete();
+
+        expect([
+          for (final delivery in await ndk.broadcast.loadPendingDeliveries())
+            ?delivery.event?.kind,
+        ], containsAll([1059, 62]));
+      },
+    );
+  });
+
   group('relay list', () {
     test('relayList is null before setRelayList', () async {
       expect(await vault.relayList(), isNull);

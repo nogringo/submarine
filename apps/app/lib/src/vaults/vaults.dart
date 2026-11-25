@@ -208,6 +208,40 @@ class Vaults extends ChangeNotifier {
     await vault.vault.signer.dispose();
   }
 
+  /// The keys of the mailboxes the items of [vault] hold, the trash included.
+  Set<String> mailboxKeysOf(VaultController vault) => {
+    for (final item in vault.items)
+      for (final (:key, address: _) in mailboxesOf(
+        item.cipher,
+        signerFactory: ndk.config.eventSignerFactory,
+      ))
+        key,
+  };
+
+  /// Deletes [vault] for good on its relays, then removes it from this device.
+  /// Other devices keep their copy. [withMailboxes] deletes the mailboxes of
+  /// its items too, see [mailboxKeysOf].
+  Future<void> delete(
+    VaultController vault, {
+    bool withMailboxes = false,
+  }) async {
+    final keys = withMailboxes ? mailboxKeysOf(vault) : const <String>{};
+    await vault.vault.delete();
+    await Future.wait(keys.map(_deleteMailbox));
+    await remove(vault);
+  }
+
+  Future<void> _deleteMailbox(String key) async {
+    final signer = ndk.config.eventSignerFactory.create(
+      privateKey: Nip19.decode(key),
+    );
+    try {
+      await Mailbox(ndk: ndk, signer: signer, indexers: indexers).deleteAll();
+    } finally {
+      await signer.dispose();
+    }
+  }
+
   /// Whether the key of [vault]'s cache is sealed for its signer, which then
   /// opens it at each start, rather than kept on this device. Asks the signer.
   Future<void> setCacheKeySealed(VaultController vault, bool sealed) async {

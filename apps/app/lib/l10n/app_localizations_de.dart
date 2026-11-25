@@ -1504,6 +1504,51 @@ class AppLocalizationsDe extends AppLocalizations {
   String get removeVaultFailed => 'Der Tresor konnte nicht entfernt werden.';
 
   @override
+  String get deleteVault => 'Tresor löschen';
+
+  @override
+  String get deleteVaultDescription =>
+      'Löscht den Tresor online und von diesem Gerät.';
+
+  @override
+  String deleteVaultTitle(String name) {
+    return '\"$name\" dauerhaft löschen?';
+  }
+
+  @override
+  String get deleteVaultBody =>
+      'Seine Einträge werden online und auf diesem Gerät gelöscht. Andere Geräte, auf denen er geöffnet ist, behalten ihre Kopie. Das lässt sich nicht rückgängig machen.';
+
+  @override
+  String deleteVaultMailboxes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Auch seine $count E-Mail-Adressen löschen',
+      one: 'Auch seine E-Mail-Adresse löschen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deleteVaultMailboxesDescription(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Ihre Nachrichten werden gelöscht.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deleteVaultNameLabel(String name) {
+    return 'Gib zum Bestätigen \"$name\" ein';
+  }
+
+  @override
+  String get deleteVaultFailed => 'Der Tresor konnte nicht gelöscht werden.';
+
+  @override
   String get emailSettings => 'E-Mail';
 
   @override

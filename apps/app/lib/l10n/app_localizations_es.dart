@@ -1509,6 +1509,51 @@ class AppLocalizationsEs extends AppLocalizations {
   String get removeVaultFailed => 'No se pudo quitar la caja fuerte.';
 
   @override
+  String get deleteVault => 'Eliminar la caja fuerte';
+
+  @override
+  String get deleteVaultDescription =>
+      'Borra la caja fuerte en línea y de este dispositivo.';
+
+  @override
+  String deleteVaultTitle(String name) {
+    return '¿Eliminar \"$name\" permanentemente?';
+  }
+
+  @override
+  String get deleteVaultBody =>
+      'Sus elementos se borrarán en línea y de este dispositivo. Los demás dispositivos donde está abierta conservan su copia. Esta acción no se puede deshacer.';
+
+  @override
+  String deleteVaultMailboxes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Eliminar también sus $count direcciones de correo',
+      one: 'Eliminar también su dirección de correo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deleteVaultMailboxesDescription(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Sus mensajes se borrarán.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deleteVaultNameLabel(String name) {
+    return 'Escribe \"$name\" para confirmar';
+  }
+
+  @override
+  String get deleteVaultFailed => 'No se pudo eliminar la caja fuerte.';
+
+  @override
   String get emailSettings => 'Correo electrónico';
 
   @override

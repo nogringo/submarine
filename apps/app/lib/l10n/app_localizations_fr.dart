@@ -1514,6 +1514,52 @@ class AppLocalizationsFr extends AppLocalizations {
   String get removeVaultFailed => 'Le coffre n\'a pas pu être retiré.';
 
   @override
+  String get deleteVault => 'Supprimer le coffre';
+
+  @override
+  String get deleteVaultDescription =>
+      'Efface le coffre en ligne et de cet appareil.';
+
+  @override
+  String deleteVaultTitle(String name) {
+    return 'Supprimer \"$name\" définitivement ?';
+  }
+
+  @override
+  String get deleteVaultBody =>
+      'Ses éléments seront effacés en ligne et de cet appareil. Les autres appareils où il est ouvert gardent leur copie. Vous ne pourrez pas revenir en arrière.';
+
+  @override
+  String deleteVaultMailboxes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Supprimer aussi ses $count adresses e-mail',
+      one: 'Supprimer aussi son adresse e-mail',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deleteVaultMailboxesDescription(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Leurs messages seront effacés.',
+      one: 'Ses messages seront effacés.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deleteVaultNameLabel(String name) {
+    return 'Tapez \"$name\" pour confirmer';
+  }
+
+  @override
+  String get deleteVaultFailed => 'Le coffre n\'a pas pu être supprimé.';
+
+  @override
   String get emailSettings => 'E-mail';
 
   @override

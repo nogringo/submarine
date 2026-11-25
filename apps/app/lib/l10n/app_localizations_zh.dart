@@ -1461,6 +1461,49 @@ class AppLocalizationsZh extends AppLocalizations {
   String get removeVaultFailed => '无法移除密码库。';
 
   @override
+  String get deleteVault => '删除密码库';
+
+  @override
+  String get deleteVaultDescription => '从线上和此设备清除此密码库。';
+
+  @override
+  String deleteVaultTitle(String name) {
+    return '要永久删除\"$name\"吗？';
+  }
+
+  @override
+  String get deleteVaultBody => '其中的项目将从线上和此设备清除。打开了此密码库的其他设备会保留各自的副本。此操作无法撤销。';
+
+  @override
+  String deleteVaultMailboxes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '同时删除其 $count 个邮箱地址',
+      one: '同时删除其邮箱地址',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deleteVaultMailboxesDescription(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '其中的消息将被清除。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deleteVaultNameLabel(String name) {
+    return '输入\"$name\"以确认';
+  }
+
+  @override
+  String get deleteVaultFailed => '无法永久删除密码库。';
+
+  @override
   String get emailSettings => '邮件';
 
   @override

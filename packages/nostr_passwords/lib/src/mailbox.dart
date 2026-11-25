@@ -18,6 +18,7 @@ import 'mail_bridge.dart';
 import 'nostr_key.dart';
 import 'relay_list.dart';
 import 'server_list.dart';
+import 'vanish.dart';
 
 /// A new mailbox at [bridge]: the nsec of a key made for it alone, for a
 /// hidden field of the item, and its address, that key's npub at [bridge].
@@ -340,6 +341,33 @@ class Mailbox {
           auth: AuthPolicy.allow(_account),
         )
         .broadcastDoneFuture;
+  }
+
+  /// Deletes the mailbox for good: asks every relay to delete its messages
+  /// and its lists (NIP-62, NIP-59), from the relays [fetchRelays] finds, and
+  /// gives [indexers] an empty NIP-65 list.
+  ///
+  /// Drops its messages from the ndk cache, and returns once the relays
+  /// answered.
+  Future<void> deleteAll() async {
+    await requestToVanish(
+      ndk,
+      signer,
+      relays: await fetchRelays(),
+      indexers: indexers,
+      auth: AuthPolicy.allow(_account),
+    );
+    await ndk.config.cache.removeEvents(
+      kinds: [GiftWrap.kGiftWrapEventkind],
+      tags: {
+        'p': [signer.getPublicKey()],
+      },
+    );
+    await ndk.config.cache.removeEvents(
+      pubKeys: [signer.getPublicKey()],
+      kinds: [Deletion.kKind],
+    );
+    _opened.clear();
   }
 
   Filter get _wraps => Filter(

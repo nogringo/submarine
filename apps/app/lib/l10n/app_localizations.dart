@@ -2600,6 +2600,54 @@ abstract class AppLocalizations {
   /// **'The vault could not be removed.'**
   String get removeVaultFailed;
 
+  /// Row of the vault settings under the one removing it from this device, opening the dialog that deletes the vault for good, on its relays.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the vault'**
+  String get deleteVault;
+
+  /// Under that row.
+  ///
+  /// In en, this message translates to:
+  /// **'Erases the vault online and from this device.'**
+  String get deleteVaultDescription;
+
+  /// Title of the dialog confirming that a vault is deleted for good.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{name}\" for good?'**
+  String deleteVaultTitle(String name);
+
+  /// Body of that dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Its items are erased online and from this device. Other devices where it is open keep their copy. This cannot be undone.'**
+  String get deleteVaultBody;
+
+  /// Checkbox of that dialog, shown when items of the vault have email addresses, that deletes those addresses too.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Also delete its email address} other{Also delete its {count} email addresses}}'**
+  String deleteVaultMailboxes(int count);
+
+  /// Under that checkbox.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Its messages are erased.} other{Their messages are erased.}}'**
+  String deleteVaultMailboxesDescription(int count);
+
+  /// Label of the field of that dialog where the user types the vault's name to enable its Delete button.
+  ///
+  /// In en, this message translates to:
+  /// **'Type \"{name}\" to confirm'**
+  String deleteVaultNameLabel(String name);
+
+  /// Error under the row deleting the vault, when the signer refused or this device could not save its vaults.
+  ///
+  /// In en, this message translates to:
+  /// **'The vault could not be deleted.'**
+  String get deleteVaultFailed;
+
   /// Section of the settings about the email addresses the app gives items.
   ///
   /// In en, this message translates to:

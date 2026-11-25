@@ -1512,6 +1512,52 @@ class AppLocalizationsIt extends AppLocalizations {
   String get removeVaultFailed => 'Impossibile rimuovere la cassaforte.';
 
   @override
+  String get deleteVault => 'Elimina la cassaforte';
+
+  @override
+  String get deleteVaultDescription =>
+      'Cancella la cassaforte online e da questo dispositivo.';
+
+  @override
+  String deleteVaultTitle(String name) {
+    return 'Eliminare definitivamente \"$name\"?';
+  }
+
+  @override
+  String get deleteVaultBody =>
+      'I suoi elementi verranno cancellati online e da questo dispositivo. Gli altri dispositivi su cui è aperta ne conservano una copia. Questa azione non può essere annullata.';
+
+  @override
+  String deleteVaultMailboxes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Elimina anche i suoi $count indirizzi email',
+      one: 'Elimina anche il suo indirizzo email',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deleteVaultMailboxesDescription(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'I loro messaggi verranno cancellati.',
+      one: 'I suoi messaggi verranno cancellati.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deleteVaultNameLabel(String name) {
+    return 'Digita \"$name\" per confermare';
+  }
+
+  @override
+  String get deleteVaultFailed => 'Impossibile eliminare la cassaforte.';
+
+  @override
   String get emailSettings => 'Email';
 
   @override

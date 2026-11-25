@@ -1866,6 +1866,58 @@
   "@removeVaultFailed": {
     "description": "Error under the row removing the vault, when this device could not save its vaults."
   },
+  "deleteVault": "Delete the vault",
+  "@deleteVault": {
+    "description": "Row of the vault settings under the one removing it from this device, opening the dialog that deletes the vault for good, on its relays."
+  },
+  "deleteVaultDescription": "Erases the vault online and from this device.",
+  "@deleteVaultDescription": {
+    "description": "Under that row."
+  },
+  "deleteVaultTitle": "Delete \"{name}\" for good?",
+  "@deleteVaultTitle": {
+    "description": "Title of the dialog confirming that a vault is deleted for good.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteVaultBody": "Its items are erased online and from this device. Other devices where it is open keep their copy. This cannot be undone.",
+  "@deleteVaultBody": {
+    "description": "Body of that dialog."
+  },
+  "deleteVaultMailboxes": "{count, plural, =1{Also delete its email address} other{Also delete its {count} email addresses}}",
+  "@deleteVaultMailboxes": {
+    "description": "Checkbox of that dialog, shown when items of the vault have email addresses, that deletes those addresses too.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteVaultMailboxesDescription": "{count, plural, =1{Its messages are erased.} other{Their messages are erased.}}",
+  "@deleteVaultMailboxesDescription": {
+    "description": "Under that checkbox.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteVaultNameLabel": "Type \"{name}\" to confirm",
+  "@deleteVaultNameLabel": {
+    "description": "Label of the field of that dialog where the user types the vault's name to enable its Delete button.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteVaultFailed": "The vault could not be deleted.",
+  "@deleteVaultFailed": {
+    "description": "Error under the row deleting the vault, when the signer refused or this device could not save its vaults."
+  },
   "emailSettings": "Email",
   "@emailSettings": {
     "description": "Section of the settings about the email addresses the app gives items."

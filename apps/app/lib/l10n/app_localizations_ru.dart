@@ -1537,6 +1537,54 @@ class AppLocalizationsRu extends AppLocalizations {
   String get removeVaultFailed => 'Не удалось удалить хранилище.';
 
   @override
+  String get deleteVault => 'Удалить хранилище';
+
+  @override
+  String get deleteVaultDescription =>
+      'Стирает хранилище в сети и с этого устройства.';
+
+  @override
+  String deleteVaultTitle(String name) {
+    return 'Окончательно удалить хранилище \"$name\"?';
+  }
+
+  @override
+  String get deleteVaultBody =>
+      'Его элементы будут стёрты в сети и с этого устройства. Другие устройства, где оно открыто, сохранят свою копию. Это действие нельзя отменить.';
+
+  @override
+  String deleteVaultMailboxes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Удалить и его $count адреса почты',
+      many: 'Удалить и его $count адресов почты',
+      few: 'Удалить и его $count адреса почты',
+      one: 'Удалить и его $count адрес почты',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deleteVaultMailboxesDescription(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Их сообщения будут стёрты.',
+      one: 'Его сообщения будут стёрты.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deleteVaultNameLabel(String name) {
+    return 'Введите \"$name\" для подтверждения';
+  }
+
+  @override
+  String get deleteVaultFailed => 'Не удалось окончательно удалить хранилище.';
+
+  @override
   String get emailSettings => 'Почта';
 
   @override

@@ -1498,6 +1498,52 @@ class AppLocalizationsFi extends AppLocalizations {
   String get removeVaultFailed => 'Holvia ei voitu poistaa.';
 
   @override
+  String get deleteVault => 'Poista holvi';
+
+  @override
+  String get deleteVaultDescription =>
+      'Poistaa holvin verkosta ja tältä laitteelta.';
+
+  @override
+  String deleteVaultTitle(String name) {
+    return 'Poistetaanko holvi \"$name\" pysyvästi?';
+  }
+
+  @override
+  String get deleteVaultBody =>
+      'Sen kohteet poistetaan verkosta ja tältä laitteelta. Muut laitteet, joilla se on auki, säilyttävät oman kopionsa. Toimintoa ei voi kumota.';
+
+  @override
+  String deleteVaultMailboxes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Poista myös sen $count sähköpostiosoitetta',
+      one: 'Poista myös sen sähköpostiosoite',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deleteVaultMailboxesDescription(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Niiden viestit poistetaan.',
+      one: 'Sen viestit poistetaan.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deleteVaultNameLabel(String name) {
+    return 'Vahvista kirjoittamalla \"$name\"';
+  }
+
+  @override
+  String get deleteVaultFailed => 'Holvia ei voitu poistaa pysyvästi.';
+
+  @override
   String get emailSettings => 'Sähköposti';
 
   @override

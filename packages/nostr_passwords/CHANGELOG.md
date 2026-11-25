@@ -1,3 +1,7 @@
+## Unreleased
+
+- `Vault.delete()` deletes a vault for good from its relays: a request to vanish for all relays (NIP-62), which drops the gift wraps sent to the vault too (NIP-59), and an empty relay list on the indexers. `Mailbox.deleteAll()` does the same for a mailbox, with its key.
+
 ## 0.2.2
 
 - No change of its own: released with the app, the CLI and the browser extension 0.2.2.

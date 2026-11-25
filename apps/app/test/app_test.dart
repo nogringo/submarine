@@ -2964,6 +2964,101 @@ void main() {
     await close(tester);
   });
 
+  testWidgets('deletes a vault for good in its settings, its addresses too', (
+    tester,
+  ) async {
+    setScreen(tester, const Size(1280, 800));
+    final relay = _EmptyRelay();
+    await startRelays(tester, [relay]);
+    const factory = Bip340EventSignerFactory();
+    final mailbox = generateMailbox('uid.ovh', signerFactory: factory);
+    final shop = Cipher(
+      type: CipherType.login,
+      name: 'Shop',
+      login: Login(username: mailbox.address),
+      fields: [
+        Field(name: 'Mailbox key', value: mailbox.key, type: FieldType.hidden),
+      ],
+    );
+    await open(
+      tester,
+      items: [github, shop],
+      withFamily: true,
+      relays: [relay.url],
+    );
+    await tester.runAsync(
+      () => publishMailboxLists(
+        ndk,
+        mailbox.key,
+        relays: [relay.url],
+        inboxRelays: [relay.url],
+        blossomServers: const [],
+        indexers: const [],
+      ),
+    );
+    await tester.pumpWidget(
+      SubmarineApp(
+        vaults: vaults,
+        lock: lock,
+        appearance: appearance,
+        clipboard: clipboard,
+        screenCapture: screenCapture,
+        mail: mail,
+      ),
+    );
+    await settle(tester);
+    final personal = vaults.all.first.pubkey;
+    final mailboxPubkey = factory
+        .create(privateKey: Nip19.decode(mailbox.key))
+        .getPublicKey();
+
+    await tester.tap(find.byTooltip('Personal'));
+    await settle(tester);
+    await tester.tap(find.byTooltip('Vault settings'));
+    await settle(tester);
+    final delete = find.widgetWithText(OutlinedButton, 'Delete');
+    await tester.ensureVisible(delete);
+    await settle(tester);
+    await tester.tap(delete);
+    await settle(tester);
+    expect(find.text('Delete "Personal" for good?'), findsOneWidget);
+    final confirm = find.widgetWithText(FilledButton, 'Delete');
+    expect(tester.widget<FilledButton>(confirm).onPressed, isNull);
+    final name = find.descendant(
+      of: find.byType(Dialog),
+      matching: find.byType(TextField),
+    );
+    await tester.enterText(name, 'Persona');
+    await settle(tester);
+    expect(tester.widget<FilledButton>(confirm).onPressed, isNull);
+    await tester.enterText(name, 'Personal');
+    await tester.tap(inDialog('Also delete its email address'));
+    await settle(tester);
+
+    await tapUntil(
+      tester,
+      confirm,
+      () => find.text('All vaults').evaluate().isNotEmpty,
+    );
+    expect(find.byTooltip('Personal'), findsNothing);
+    expect([for (final vault in vaults.all) vault.name], ['Family']);
+    expect(
+      {
+        for (final event in relay.received)
+          if (event['kind'] == 62) event['pubkey']: event['tags'],
+      },
+      {
+        personal: [
+          ['relay', 'ALL_RELAYS'],
+        ],
+        mailboxPubkey: [
+          ['relay', 'ALL_RELAYS'],
+        ],
+      },
+    );
+    await close(tester);
+  });
+
   testWidgets('changes the relays of a vault in its settings on a desktop', (
     tester,
   ) async {

@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:ndk/domain_layer/entities/broadcast_state.dart'
+    show RelayBroadcastResponse;
 import 'package:ndk/domain_layer/entities/nip_65.dart';
 import 'package:ndk/ndk.dart';
 
@@ -13,9 +15,9 @@ const vanishKind = 62;
 /// [indexers], which take a NIP-65 list only, get an empty one in place of the
 /// one they hold.
 ///
-/// Both are saved in the ndk cache first. Returns once the relays answered, and
-/// ndk keeps sending to those that did not.
-Future<void> requestToVanish(
+/// Both are saved in the ndk cache first. Returns once the relays answered,
+/// with those that did not accept and why, which ndk keeps sending to.
+Future<Map<String, String>> requestToVanish(
   Ndk ndk,
   EventSigner signer, {
   required Iterable<String> relays,
@@ -45,11 +47,14 @@ Future<void> requestToVanish(
     signer,
     createdAt: max(now, (previous?.createdAt ?? 0) + 1),
   );
-  Future<void> send(Nip01Event event, Iterable<String> to) async {
+  Future<List<RelayBroadcastResponse>> send(
+    Nip01Event event,
+    Iterable<String> to,
+  ) async {
     // Without explicit relays, ndk would send to its bootstrap relays.
-    if (to.isEmpty) return;
+    if (to.isEmpty) return const [];
     await ndk.config.cache.saveEvent(event);
-    await ndk.broadcast
+    return ndk.broadcast
         .broadcast(
           nostrEvent: event,
           specificRelays: to,
@@ -59,5 +64,13 @@ Future<void> requestToVanish(
         .broadcastDoneFuture;
   }
 
-  await Future.wait([send(request, relays), send(emptyList, indexers)]);
+  final responses = await Future.wait([
+    send(request, relays),
+    send(emptyList, indexers),
+  ]);
+  return {
+    for (final response in responses.expand((responses) => responses))
+      if (!response.broadcastSuccessful)
+        response.relayUrl: response.msg.isEmpty ? 'no answer' : response.msg,
+  };
 }

@@ -378,8 +378,10 @@ void main() {
       await vault.push();
 
       final before = seconds();
-      await vault.delete();
+      final leftOut = await vault.delete();
       final after = seconds();
+
+      expect(leftOut, isEmpty);
 
       for (final to in [relay, private]) {
         final [request] = [
@@ -433,8 +435,9 @@ void main() {
         );
         await offline.createItem(boulanger);
 
-        await offline.delete();
+        final leftOut = await offline.delete();
 
+        expect(leftOut.keys, ['ws://127.0.0.1:1']);
         expect([
           for (final delivery in await ndk.broadcast.loadPendingDeliveries())
             ?delivery.event?.kind,

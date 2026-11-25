@@ -123,6 +123,14 @@ read.
 version of the item, and other devices drop them at their next sync. Unlike
 Bitwarden, the trash is never emptied on its own.
 
+`delete vault <id>` deletes the vault for good, where `<id>` is its public key,
+the `userId` of `status`, in hex or as an npub. It asks every relay of the
+vault to delete all it holds of it (NIP-62), gives the indexers an empty relay
+list, then removes the vault from the cache. `--mailboxes` deletes the email
+addresses of its items too, with their messages. Other devices keep their copy.
+Unlike the other changes, it waits for the relays, and fails with those that
+did not accept.
+
 `import` adds the items of a Bitwarden JSON export to the vault, and `export`
 writes the vault as one, which Bitwarden imports. The trash is left out, and
 an export restricted to a Bitwarden account cannot be imported. A password
@@ -173,8 +181,8 @@ piped. Searching ignores case and accents and looks in the name, username,
 hostnames and notes. Other `bw` commands and objects fail with an error.
 
 Submarine is local first: its cache is a local relay. `add`, `create`, `edit`,
-`delete`, `restore` and `import` save their change in it and never wait for the
-network.
+`delete item`, `restore` and `import` save their change in it and never wait
+for the network.
 `sync` fetches the vault's relay list, sends to its relays the changes none
 accepted yet, then fetches what changed since the last sync. `list`, `get` and `export` read the cache only.
 Until the first sync, they refuse to run, except `get template`.

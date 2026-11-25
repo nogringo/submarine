@@ -47,4 +47,17 @@ void main() {
       ),
     );
   });
+
+  test('delete refuses a vault never synced', () async {
+    await expectLater(
+      session.delete(withMailboxes: false),
+      throwsA(
+        isA<CliException>().having(
+          (error) => error.message,
+          'message',
+          contains('submarine sync'),
+        ),
+      ),
+    );
+  });
 }

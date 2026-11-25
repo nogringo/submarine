@@ -14,6 +14,7 @@ import 'cipher/cipher.dart';
 import 'cipher/field.dart';
 import 'defaults.dart';
 import 'html_text.dart';
+import 'item.dart';
 import 'mail_bridge.dart';
 import 'nostr_key.dart';
 import 'relay_list.dart';
@@ -58,6 +59,19 @@ List<({String key, String address})> mailboxesOf(
   }
   return mailboxes;
 }
+
+/// The keys of the mailboxes [items] hold, see [mailboxesOf].
+Set<String> mailboxKeysOf(
+  Iterable<Item> items, {
+  required LocalEventSignerFactory signerFactory,
+}) => {
+  for (final item in items)
+    for (final (:key, address: _) in mailboxesOf(
+      item.cipher,
+      signerFactory: signerFactory,
+    ))
+      key,
+};
 
 String? _npubOf(String key, LocalEventSignerFactory signerFactory) {
   if (!key.startsWith('nsec1')) return null;
@@ -128,6 +142,26 @@ Future<void> publishMailboxLists(
           auth: AuthPolicy.allow(account),
         )
         .broadcastDoneFuture;
+  }
+}
+
+/// Deletes the mailbox of [key], an nsec, for good, see [Mailbox.deleteAll].
+Future<Map<String, String>> deleteMailbox(
+  Ndk ndk,
+  String key, {
+  List<String> indexers = defaultIndexerRelays,
+}) async {
+  final signer = ndk.config.eventSignerFactory.create(
+    privateKey: Nip19.decode(key),
+  );
+  try {
+    return await Mailbox(
+      ndk: ndk,
+      signer: signer,
+      indexers: indexers,
+    ).deleteAll();
+  } finally {
+    await signer.dispose();
   }
 }
 
@@ -348,9 +382,9 @@ class Mailbox {
   /// gives [indexers] an empty NIP-65 list.
   ///
   /// Drops its messages from the ndk cache, and returns once the relays
-  /// answered.
-  Future<void> deleteAll() async {
-    await requestToVanish(
+  /// answered, with those that did not accept and why.
+  Future<Map<String, String>> deleteAll() async {
+    final leftOut = await requestToVanish(
       ndk,
       signer,
       relays: await fetchRelays(),
@@ -368,6 +402,7 @@ class Mailbox {
       kinds: [Deletion.kKind],
     );
     _opened.clear();
+    return leftOut;
   }
 
   Filter get _wraps => Filter(

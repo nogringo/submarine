@@ -306,20 +306,14 @@ Future<void> main() async {
   // Deletes the vault for good, on every relay, and the mailboxes of its
   // items if wanted, each with its own key. Without it, forget removes the
   // vault from this device only, and its relays keep it.
-  for (final item in await vault.items()) {
-    for (final (:key, address: _) in mailboxesOf(
-      item.cipher,
-      signerFactory: ndk.config.eventSignerFactory,
-    )) {
-      await Mailbox(
-        ndk: ndk,
-        signer: ndk.config.eventSignerFactory.create(
-          privateKey: Nip19.decode(key),
-        ),
-      ).deleteAll();
-    }
+  for (final key in mailboxKeysOf(
+    await vault.items(),
+    signerFactory: ndk.config.eventSignerFactory,
+  )) {
+    await deleteMailbox(ndk, key);
   }
-  await vault.delete();
+  final leftOut = await vault.delete();
+  print('Relays that did not accept: ${leftOut.keys.join(', ')}');
   await vault.forget(engine);
   await engine.dispose();
   await ndk.destroy();

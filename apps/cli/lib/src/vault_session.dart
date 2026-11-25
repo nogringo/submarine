@@ -57,7 +57,9 @@ class VaultSession {
   Future<void> reconcile() async {
     final leftOut = await vault.reconcile();
     await _fetch();
-    if (leftOut.isNotEmpty) throw CliException(_leftOutMessage(leftOut));
+    if (leftOut.isNotEmpty) {
+      throw CliException(_leftOutMessage('Syncing incomplete,', leftOut));
+    }
   }
 
   Future<void> _fetch() async {
@@ -83,6 +85,29 @@ class VaultSession {
   }
 
   Future<DateTime?> lastSync() => vault.lastSync(_engine);
+
+  /// Deletes the vault for good on its relays as of the last [sync], with the
+  /// mailboxes of its items when [withMailboxes], then removes it from the
+  /// cache. Throws with the relays that did not accept, which keep it.
+  Future<void> delete({required bool withMailboxes}) async {
+    await _ensureSynced();
+    final mailboxes = withMailboxes
+        ? mailboxKeysOf(
+            await vault.items(),
+            signerFactory: ndk.config.eventSignerFactory,
+          )
+        : const <String>{};
+    final results = await Future.wait([
+      vault.delete(),
+      for (final key in mailboxes)
+        deleteMailbox(ndk, key, indexers: vault.indexers),
+    ]);
+    await vault.forget(_engine);
+    final leftOut = {for (final result in results) ...result};
+    if (leftOut.isNotEmpty) {
+      throw CliException(_leftOutMessage('Vault deleted,', leftOut));
+    }
+  }
 
   /// Items as of the last [sync], trash included. Never goes to the relays.
   Future<List<Item>> items() async {
@@ -140,10 +165,10 @@ String _unsentMessage(List<EventDeliverySnapshot> unsent) {
   ].join('\n');
 }
 
-String _leftOutMessage(Map<String, String> leftOut) {
+String _leftOutMessage(String lead, Map<String, String> leftOut) {
   final relays = leftOut.length == 1 ? '1 relay' : '${leftOut.length} relays';
   return [
-    'Syncing incomplete, $relays left out:',
+    '$lead $relays left out:',
     for (final MapEntry(:key, :value) in leftOut.entries) '  $key: $value',
   ].join('\n');
 }

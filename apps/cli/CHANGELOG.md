@@ -1,3 +1,9 @@
+## Unreleased
+
+- `delete vault <id>` deletes the vault for good, on every relay (NIP-62), then
+  removes it from the cache. `--mailboxes` deletes the email addresses of its
+  items too.
+
 ## 0.2.2
 
 - No change of its own: released with the app, the extension and

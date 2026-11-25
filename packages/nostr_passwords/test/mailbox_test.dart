@@ -110,6 +110,49 @@ void main() {
         );
       }
     });
+
+    test('mailboxKeysOf gives the key of each mailbox of the items', () {
+      final other = generateMailbox('uid.ovh', signerFactory: signerFactory);
+      Item itemWith(({String key, String address}) mailbox) => Item([
+        Envelope(
+          id: mailbox.address,
+          type: 'item',
+          rev: 'rev',
+          parents: const [],
+          modifiedAt: DateTime.utc(2026),
+          data: Cipher(
+            type: CipherType.login,
+            name: 'Shop',
+            login: Login(username: mailbox.address),
+            fields: [
+              Field(
+                name: 'Mailbox key',
+                value: mailbox.key,
+                type: FieldType.hidden,
+              ),
+            ],
+          ).toJson(),
+        ),
+      ]);
+
+      expect(
+        mailboxKeysOf([
+          itemWith(mailbox),
+          itemWith(other),
+          Item([
+            Envelope(
+              id: 'none',
+              type: 'item',
+              rev: 'rev',
+              parents: const [],
+              modifiedAt: DateTime.utc(2026),
+              data: Cipher(type: CipherType.secureNote, name: 'Note').toJson(),
+            ),
+          ]),
+        ], signerFactory: signerFactory),
+        {mailbox.key, other.key},
+      );
+    });
   });
 
   group('publishMailboxLists', () {
@@ -399,7 +442,7 @@ void main() {
         await mailbox.fetch();
         expect(await mailbox.messages(), isNotEmpty);
 
-        await mailbox.deleteAll();
+        expect(await mailbox.deleteAll(), isEmpty);
 
         expect(await mailbox.messages(), isEmpty);
         for (final to in [relay, inbox]) {
@@ -415,6 +458,22 @@ void main() {
         );
         expect(list.tags, isEmpty);
         expect(indexer.matchingEvents(Filter(kinds: [62])), isEmpty);
+      });
+
+      test('deleteMailbox deletes it from its key', () async {
+        expect(
+          await deleteMailbox(reader, nsec, indexers: [indexer.url]),
+          isEmpty,
+        );
+
+        for (final to in [relay, inbox]) {
+          expect(
+            to.matchingEvents(
+              Filter(kinds: [62], authors: [key.getPublicKey()]),
+            ),
+            hasLength(1),
+          );
+        }
       });
     });
 

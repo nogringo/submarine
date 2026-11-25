@@ -469,9 +469,10 @@ class Vault {
   /// NIP-59). The request goes to [currentRelays] and [relays], and the
   /// [indexers] get an empty relay list.
   ///
-  /// Returns once the relays answered. Then [forget] the vault on this device.
-  /// Other devices keep what their cache holds.
-  Future<void> delete() async => requestToVanish(
+  /// Returns once the relays answered, with those that did not accept and why.
+  /// Then [forget] the vault on this device. Other devices keep what their
+  /// cache holds.
+  Future<Map<String, String>> delete() async => requestToVanish(
     ndk,
     signer,
     relays: {...relays, ...await currentRelays()},

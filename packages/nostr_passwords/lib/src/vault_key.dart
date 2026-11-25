@@ -3,7 +3,7 @@ import 'package:ndk/domain_layer/usecases/nip42/auth_event.dart';
 import 'package:ndk/ndk.dart';
 import 'package:ndk/shared/nips/nip01/helpers.dart';
 import 'package:ndk/shared/nips/nip09/deletion.dart';
-import 'package:nip49/nip49.dart';
+import 'package:nip49/nip49.dart' as nip49;
 
 import 'version_event.dart';
 
@@ -34,10 +34,12 @@ String? parseVaultKey(String text) {
 /// ncryptsec for [decryptVaultKey].
 bool isEncryptedVaultKey(String text) {
   final value = text.trim().toLowerCase();
-  if (!value.startsWith('${Nip49.hrp}1')) return false;
+  if (!value.startsWith('${nip49.Nip49.hrp}1')) return false;
   final [data, hrp] = Helpers.decodeBech32(value);
   // Version 2, then log_n, salt, nonce, key security byte, key and tag.
-  return hrp == Nip49.hrp && data.length == 91 * 2 && data.startsWith('02');
+  return hrp == nip49.Nip49.hrp &&
+      data.length == 91 * 2 &&
+      data.startsWith('02');
 }
 
 /// The shortest password to give [encryptVaultKey]: whoever holds the
@@ -49,7 +51,7 @@ const minVaultKeyPasswordLength = 12;
 ///
 /// Slow on purpose, like [decryptVaultKey].
 Future<String> encryptVaultKey(String privateKey, String password) =>
-    Nip49.encrypt(privateKey, password);
+    nip49.Nip49.encrypt(privateKey, password);
 
 /// The private key, in hex, of [ncryptsec], a vault key encrypted with
 /// [password] (NIP-49). Returns null when the password is wrong.
@@ -57,7 +59,7 @@ Future<String> encryptVaultKey(String privateKey, String password) =>
 /// Slow on purpose: scrypt makes each guess of the password costly.
 Future<String?> decryptVaultKey(String ncryptsec, String password) async {
   try {
-    return await Nip49.decrypt(ncryptsec.trim().toLowerCase(), password);
+    return await nip49.Nip49.decrypt(ncryptsec.trim().toLowerCase(), password);
   } on ArgumentError {
     return null;
   }

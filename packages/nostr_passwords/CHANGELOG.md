@@ -2,6 +2,7 @@
 
 - `Vault.delete()` deletes a vault for good from its relays: a request to vanish for all relays (NIP-62), which drops the gift wraps sent to the vault too (NIP-59), and an empty relay list on the indexers. `Mailbox.deleteAll()` does the same for a mailbox, with its key. Both return the relays that did not accept, with why.
 - `mailboxKeysOf()` gives the keys of the mailboxes of items, and `deleteMailbox()` deletes a mailbox from its key.
+- Works with ndk 0.11 as well as 0.10.
 
 ## 0.2.2
 

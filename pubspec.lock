@@ -253,10 +253,10 @@ packages:
     dependency: transitive
     description:
       name: elliptic
-      sha256: "67931d408faa353bdebac9f7a1df0c3f6f828f4e8439cdf084573cd1601a2f4b"
+      sha256: "03a7c29e3b7c952cf4612fec0496188e9ae686bd00195f784568aefc24894d99"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.12"
+    version: "0.4.0"
   encrypter_plus:
     dependency: transitive
     description:
@@ -285,10 +285,10 @@ packages:
     dependency: transitive
     description:
       name: equatable
-      sha256: "3bce007a596ff8b3119c45d68aaef631272537c03d30e5d4534dd24bf4c5eaa2"
+      sha256: ea36e500cbf0ec18361deabca755434f73e42fe53c5130021c7e2d6b5ebe1702
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.0"
+    version: "3.0.0"
   fake_async:
     dependency: transitive
     description:
@@ -361,14 +361,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.0"
-  fixnum:
-    dependency: transitive
-    description:
-      name: fixnum
-      sha256: b6dc7065e46c974bc7c5f143080a6764ec7a4be6da1285ececdc37be96de53be
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.1"
   flutter:
     dependency: transitive
     description: flutter
@@ -737,35 +729,34 @@ packages:
     dependency: transitive
     description:
       name: ndk
-      sha256: "446c29cfe0e5e8ac66cc047c4b2977b08bfa692c2f1018bafbe4b77d5973dfaa"
+      sha256: "256fc2f64048341444662ab6a810959f78b39553bf1e1543e9700f6dc0aad84e"
       url: "https://pub.dev"
     source: hosted
-    version: "0.10.1"
+    version: "0.11.0-dev.2"
   ndk_drift:
     dependency: transitive
     description:
       name: ndk_drift
-      sha256: "6d37e526e09f44818421b65a490cf4552cecd39eb541027166f8316bffe092c4"
+      sha256: "4dcf0259be2f31f4e36ce33b09282eb9471fb465f42fb8b4bad27f61ae434f3d"
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.0"
+    version: "0.2.1-dev.1"
   ndk_flutter:
     dependency: transitive
     description:
       name: ndk_flutter
-      sha256: "5c93e8daf8b11946cb6e2cf5f2e4c48fef334cdcaacee85f53da786bc5a4ffa4"
+      sha256: f33d46e7c8f8b135394103371e65bf96ee6321cfefa28327404b788e7be7512d
       url: "https://pub.dev"
     source: hosted
-    version: "0.10.1"
+    version: "0.10.3-dev.2"
   ndk_sqlite3:
     dependency: transitive
     description:
-      path: "packages/sqlite3"
-      ref: f15fc17a8cc1a71fe5aa50159641a7444ae53902
-      resolved-ref: f15fc17a8cc1a71fe5aa50159641a7444ae53902
-      url: "https://github.com/relaystr/ndk.git"
-    source: git
-    version: "0.1.0"
+      name: ndk_sqlite3
+      sha256: "360065a5c75ac45f1715dcca83d0b3fe92d45effff3e80a5d3744724edc02d55"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.1-dev.0"
   nip49:
     dependency: transitive
     description:
@@ -862,14 +853,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.0"
-  pausable_timer:
-    dependency: transitive
-    description:
-      name: pausable_timer
-      sha256: "6ef1a95441ec3439de6fb63f39a011b67e693198e7dae14e20675c3c00e86074"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.1.0+3"
   petitparser:
     dependency: transitive
     description:
@@ -1167,10 +1150,10 @@ packages:
     dependency: transitive
     description:
       name: sync_engine_shim_for_ndk
-      sha256: fdb93f8b8f493824c7332bd992ef6ce1ab60f4b081170c714cd42ba9d4d08692
+      sha256: d44796eca31da71d665d05ee943df174d42f01aa618402fb7152ee26d2463706
       url: "https://pub.dev"
     source: hosted
-    version: "0.8.0"
+    version: "0.8.1"
   synchronized:
     dependency: transitive
     description:
@@ -1211,14 +1194,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.20"
-  toastification:
-    dependency: transitive
-    description:
-      name: toastification
-      sha256: "66c96678e3dece8ba24de3ea31634bd65a80aaecb8105f9bafe946e5f0d7590a"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.2.0"
   toml:
     dependency: transitive
     description:
@@ -1307,14 +1282,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.6"
-  uuid:
-    dependency: transitive
-    description:
-      name: uuid
-      sha256: "9b129329f58692f6e6578329498a8fe9fbe98f090beb764ffbb8ee2eadd01dcd"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.6.0"
   vector_graphics:
     dependency: transitive
     description:

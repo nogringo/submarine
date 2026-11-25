@@ -14,13 +14,8 @@ executables:
 # Add regular dependencies here.
 dependencies:
   args: ^2.7.0
-  ndk: ^0.10.1
-  # Not on pub.dev yet: https://github.com/relaystr/ndk/pull/882
-  ndk_sqlite3:
-    git:
-      url: https://github.com/relaystr/ndk.git
-      path: packages/sqlite3
-      ref: f15fc17a8cc1a71fe5aa50159641a7444ae53902
+  ndk: ^0.11.0-dev.2
+  ndk_sqlite3: ^0.1.1-dev.0
   nostr_passwords: ^0.2.2
   path: ^1.9.1
   sqlite3: ^3.7.0

@@ -12,7 +12,8 @@ export interface Extension {
   click(selector: string): Promise<void>;
   rightClick(selector: string): Promise<void>;
   fill(selector: string, text: string): Promise<void>;
-  press(key: string): Promise<void>;
+  /** Presses `key`, once the focus is in `within` if given. */
+  press(key: string, within?: string): Promise<void>;
   /** Opens the popup again, as when the user clicks the extension's icon once more. */
   reload(): Promise<void>;
   readClipboard(): Promise<string>;
@@ -55,7 +56,16 @@ export async function launch(name: BrowserName, language = "en"): Promise<Extens
         await input?.evaluate((input) => (input as HTMLInputElement).select());
         await popup.keyboard.sendCharacter(text);
       },
-      press: (key) => popup.keyboard.press(key as KeyInput),
+      press: async (key, within) => {
+        if (within) {
+          await popup.waitForFunction(
+            (within) => document.querySelector(within)?.contains(document.activeElement),
+            {},
+            within,
+          );
+        }
+        await popup.keyboard.press(key as KeyInput);
+      },
       reload: async () => {
         await popup.reload();
       },
@@ -102,13 +112,23 @@ export async function launch(name: BrowserName, language = "en"): Promise<Extens
         text,
       );
     },
-    press: (key) =>
-      popup.evaluate((key) => {
-        const target = document.activeElement ?? document.body;
-        for (const type of ["keydown", "keyup"]) {
-          target.dispatchEvent(new KeyboardEvent(type, { key, bubbles: true, cancelable: true }));
-        }
-      }, key),
+    press: async (key, within) => {
+      // Checked and pressed in one step: React Aria blurs a dialog 500 ms after focusing it, and
+      // focuses it again a frame later.
+      await popup.waitForFunction(
+        (key, within) => {
+          const target = document.activeElement ?? document.body;
+          if (within && !document.querySelector(within)?.contains(target)) return false;
+          for (const type of ["keydown", "keyup"]) {
+            target.dispatchEvent(new KeyboardEvent(type, { key, bubbles: true, cancelable: true }));
+          }
+          return true;
+        },
+        {},
+        key,
+        within,
+      );
+    },
     reload: async () => {
       // Reloads once the script returned, as a page going away under it can leave it unanswered, and
       // marks the page, which matches the selector until it is gone.

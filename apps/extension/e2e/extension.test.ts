@@ -1611,11 +1611,7 @@ describe.each<BrowserName>(["chrome", "firefox"])("%s", (name) => {
       english.removeVaultTitle.replace("{name}", "Family"),
     );
     expect(await violations(popup)).toEqual([]);
-    // Waited for after axe: in Firefox under load, the focus can leave the dialog during the check.
-    await popup.waitForFunction(() =>
-      document.querySelector("[role=alertdialog]")?.contains(document.activeElement),
-    );
-    await extension.press("Escape");
+    await extension.press("Escape", "[role=alertdialog]");
     await popup.waitForSelector("[role=alertdialog]", { hidden: true });
     expect(await popup.$(".vault-settings")).not.toBeNull();
   });

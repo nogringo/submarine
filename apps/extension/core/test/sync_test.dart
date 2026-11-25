@@ -65,17 +65,29 @@ void main() {
     await relay.stopServer();
   });
 
-  /// Another device of the vault of [key], which publishes to the relay at
-  /// once. Returns the id of the item.
-  Future<String> publish(String name, {Cipher? cipher, String? key}) async {
+  /// Another device of the vault of [key].
+  Vault otherDevice({String? key}) {
     final other = Ndk.emptyBootstrapRelaysConfig();
     addTearDown(other.destroy);
-    final device = Vault(
+    final signer = signers.create(privateKey: key ?? privateKey);
+    // As the clients do: ndk retries a pending delivery as the account it names.
+    other.accounts.addAccount(
+      pubkey: signer.getPublicKey(),
+      type: AccountType.privateKey,
+      signer: signer,
+    );
+    return Vault(
       ndk: other,
-      signer: signers.create(privateKey: key ?? privateKey),
+      signer: signer,
       relays: [relay.url],
       indexers: const [],
     );
+  }
+
+  /// Another device of the vault of [key], which publishes to the relay at
+  /// once. Returns the id of the item.
+  Future<String> publish(String name, {Cipher? cipher, String? key}) async {
+    final device = otherDevice(key: key);
     final version = await device.createItem(
       cipher ?? Cipher(type: CipherType.secureNote, name: name),
     );
@@ -679,14 +691,7 @@ void main() {
   });
 
   test('shows the newest version of an item edited on two devices', () async {
-    final other = Ndk.emptyBootstrapRelaysConfig();
-    addTearDown(other.destroy);
-    final device = Vault(
-      ndk: other,
-      signer: signers.create(privateKey: privateKey),
-      relays: [relay.url],
-      indexers: const [],
-    );
+    final device = otherDevice();
     final first = Item([
       await device.createItem(
         Cipher(type: CipherType.secureNote, name: 'Wifi'),

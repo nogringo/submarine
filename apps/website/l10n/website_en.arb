@@ -28,7 +28,7 @@
   "@desktopScreenshot": {
     "description": "Text alternative of the computer screenshot."
   },
-  "devicesBody": "Android, Windows, macOS and Linux, and the web for every other device. The same key opens your vault on each of them.",
+  "devicesBody": "Android, Windows, macOS and Linux, an extension for Chrome, and the web for every other device. The same key opens your vault on each of them.",
   "@devicesBody": {
     "description": "Body of the platforms section of the home page."
   },
@@ -44,7 +44,7 @@
   "@downloadApp": {
     "description": "Main button of the home page, to the download page."
   },
-  "downloadDescription": "Submarine for Android, Windows, macOS, Linux and the web, free.",
+  "downloadDescription": "Submarine for Android, Windows, macOS, Linux, Chrome and the web, free.",
   "@downloadDescription": {
     "description": "Description of the download page for search engines and link previews."
   },
@@ -63,6 +63,10 @@
   "downloadTitle": "Download Submarine",
   "@downloadTitle": {
     "description": "Title and heading of the download page."
+  },
+  "extensionPlatform": "Browser extension",
+  "@extensionPlatform": {
+    "description": "Name of the platform, heading on the download page."
   },
   "featureAccessibility": "Usable with a screen reader, and with text twice as large.",
   "@featureAccessibility": {
@@ -131,6 +135,10 @@
   "footerSourceCode": "Source code",
   "@footerSourceCode": {
     "description": "Footer link to the GitHub repository."
+  },
+  "getOnChromeWebStore": "Get it on the Chrome Web Store",
+  "@getOnChromeWebStore": {
+    "description": "Link to the Submarine extension on the Chrome Web Store. Chrome Web Store is a product name: write it as Google does in this language."
   },
   "getOnZapstore": "Get it on Zapstore",
   "@getOnZapstore": {

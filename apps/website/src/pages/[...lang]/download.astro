@@ -1,7 +1,7 @@
 ---
 import { localePaths, message } from "../../i18n";
 import Page from "../../layouts/Page.astro";
-import { latestReleasePage, webApp, zapstore } from "../../links";
+import { chromeWebStore, latestReleasePage, webApp, zapstore } from "../../links";
 import { latestRelease } from "../../release";
 
 export const getStaticPaths = localePaths;
@@ -38,6 +38,10 @@ const platforms: Platform[] = [
     ],
   },
   { name: t("web"), links: [{ label: t("openWebApp"), href: webApp }] },
+  {
+    name: t("extensionPlatform"),
+    links: [{ label: t("getOnChromeWebStore"), href: chromeWebStore }],
+  },
   { name: t("iphone"), links: [], hint: t("iphoneHint") },
   {
     name: t("commandLine"),
